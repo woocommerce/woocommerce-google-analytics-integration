@@ -68,7 +68,7 @@ class WC_Google_Analytics extends WC_Integration {
 			),
 			'ga_standard_tracking_enabled' => array(
 				'title' 			=> __( 'Tracking code', 'woocommerce' ),
-				'label' 			=> __( 'Add tracking code to your site\'s footer. You don\'t need to enable this if using a 3rd party analytics plugin.', 'woocommerce' ),
+				'label' 			=> __( 'Add tracking code to your site. You don\'t need to enable this if using a 3rd party analytics plugin.', 'woocommerce' ),
 				'type' 				=> 'checkbox',
 				'checkboxgroup'		=> 'start',
 				'default' 			=> get_option('woocommerce_ga_standard_tracking_enabled') ? get_option('woocommerce_ga_standard_tracking_enabled') : 'no'  // Backwards compat

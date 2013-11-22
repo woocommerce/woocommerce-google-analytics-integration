@@ -12,13 +12,11 @@ Version: 1.0
 function wc_google_analytics_add_integration( $integrations ) {
 	global $woocommerce;
 
-	if ( ! is_object( $woocommerce ) || version_compare( $woocommerce->version, '2.1', '<' ) ) {
-		return $integrations;
+	if ( is_object( $woocommerce ) && version_compare( $woocommerce->version, '2.1', '>=' ) ) {
+		include_once( 'includes/class-wc-google-analytics-integration.php' );
+		$integrations[] = 'WC_Google_Analytics';
 	}
 
-	include_once( 'includes/class-wc-google-analytics-integration.php' );
-
-	$integrations[] = 'WC_Google_Analytics';
 	return $integrations;
 }
 

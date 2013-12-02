@@ -5,7 +5,7 @@ Plugin Name: WooCommerce Google Analytics Integration
 Description: Allows Google Analytics tracking code to be inserted into WooCommerce store pages.
 Author: WooThemes 
 Author URI: http://www.woothemes.com
-Version: 1.0 
+Version: 1.1.0-bleeding
 */
 
 // Add the integration to WooCommerce

@@ -12,7 +12,7 @@ Version: 1.1.0-bleeding
 function wc_google_analytics_add_integration( $integrations ) {
 	global $woocommerce;
 
-	if ( is_object( $woocommerce ) && version_compare( $woocommerce->version, '2.1', '>=' ) ) {
+	if ( is_object( $woocommerce ) && version_compare( $woocommerce->version, '2.1-beta-1', '>=' ) ) {
 		include_once( 'includes/class-wc-google-analytics-integration.php' );
 		$integrations[] = 'WC_Google_Analytics';
 	}

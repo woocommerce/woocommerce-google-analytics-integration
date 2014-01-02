@@ -41,5 +41,8 @@ You can leave this plugin activated and it will seamlessly take over the integra
 
 == Changelog ==
 
+= 1.1 - xx/xx/xxxx =
+ * Added compatibility support for WooCommerce 2.1 beta releases
+
 = 1.0 - 22/11/2013 =
  * Initial release

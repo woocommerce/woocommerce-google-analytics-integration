@@ -29,6 +29,7 @@ class WC_Google_Analytics extends WC_Integration {
 		$this->ga_id 							= $this->get_option( 'ga_id' );
 		$this->ga_set_domain_name               = $this->get_option( 'ga_set_domain_name' );
 		$this->ga_standard_tracking_enabled 	= $this->get_option( 'ga_standard_tracking_enabled' );
+		$this->ga_support_display_advertising 	= $this->get_option( 'ga_support_display_advertising' );
 		$this->ga_ecommerce_tracking_enabled 	= $this->get_option( 'ga_ecommerce_tracking_enabled' );
 		$this->ga_event_tracking_enabled		= $this->get_option( 'ga_event_tracking_enabled' );
 
@@ -73,6 +74,12 @@ class WC_Google_Analytics extends WC_Integration {
 				'checkboxgroup'		=> 'start',
 				'default' 			=> get_option('woocommerce_ga_standard_tracking_enabled') ? get_option('woocommerce_ga_standard_tracking_enabled') : 'no'  // Backwards compat
 			),
+			'ga_support_display_advertising' => array(
+				'label' 			=> __( 'Set the Google analytics code to support Display Advertising. <a href="https://support.google.com/analytics/answer/2700409" target="_blank">Read More About Display Advertising</a>', 'woocommerce' ),
+				'type' 				=> 'checkbox',
+				'checkboxgroup'		=> '',
+				'default' 			=> get_option('woocommerce_ga_support_display_advertising') ? get_option('woocommerce_ga_support_display_advertising') : 'no'  // Backwards compat
+			),
 			'ga_ecommerce_tracking_enabled' => array(
 				'label' 			=> __( 'Add eCommerce tracking code to the thankyou page', 'woocommerce' ),
 				'type' 				=> 'checkbox',
@@ -115,6 +122,12 @@ class WC_Google_Analytics extends WC_Integration {
 			$username 		= __( 'Guest', 'woocommerce' );
 		}
 
+		if ( $this->ga_support_display_advertising == 'yes' )
+			$ga_url = "('https:' == document.location.protocol ? 'https://' : 'http://') + 'stats.g.doubleclick.net/dc.js'";
+		else
+			$ga_url = "('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js'";
+
+
 		if ( ! empty( $this->ga_set_domain_name ) )
 			$set_domain_name = "['_setDomainName', '" . esc_js( $this->ga_set_domain_name ) . "'],\n";
 		else
@@ -131,7 +144,7 @@ class WC_Google_Analytics extends WC_Integration {
 
 			(function() {
 				var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-				ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+				ga.src = ".$ga_url.";
 				var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
 			})();
 
@@ -172,6 +185,11 @@ class WC_Google_Analytics extends WC_Integration {
 			$user_id 		= '';
 			$username 		= __( 'Guest', 'woocommerce' );
 		}
+
+		if ( $this->ga_support_display_advertising == 'yes' )
+			$ga_url = "('https:' == document.location.protocol ? 'https://' : 'http://') + 'stats.g.doubleclick.net/dc.js'";
+		else
+			$ga_url = "('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js'";
 
 		if ( ! empty( $this->ga_set_domain_name ) )
 			$set_domain_name = "['_setDomainName', '" . esc_js( $this->ga_set_domain_name ) . "'],";
@@ -235,7 +253,7 @@ class WC_Google_Analytics extends WC_Integration {
 
 			(function() {
 				var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-				ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+				ga.src = ".$ga_url.";
 				var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
 			})();
 		";

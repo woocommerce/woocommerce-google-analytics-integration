@@ -30,6 +30,7 @@ class WC_Google_Analytics extends WC_Integration {
 		$this->ga_set_domain_name               = $this->get_option( 'ga_set_domain_name' );
 		$this->ga_standard_tracking_enabled 	= $this->get_option( 'ga_standard_tracking_enabled' );
 		$this->ga_support_display_advertising 	= $this->get_option( 'ga_support_display_advertising' );
+		$this->ga_use_universal_analytics 	= $this->get_option( 'ga_use_universal_analytics' );
 		$this->ga_ecommerce_tracking_enabled 	= $this->get_option( 'ga_ecommerce_tracking_enabled' );
 		$this->ga_event_tracking_enabled		= $this->get_option( 'ga_event_tracking_enabled' );
 
@@ -80,6 +81,13 @@ class WC_Google_Analytics extends WC_Integration {
 				'checkboxgroup'		=> '',
 				'default' 			=> get_option('woocommerce_ga_support_display_advertising') ? get_option('woocommerce_ga_support_display_advertising') : 'no'  // Backwards compat
 			),
+			'ga_use_universal_analytics' => array(
+				'label' 			=> __( 'Use Universal Analytics instead of Standard Google Analytics', 'woocommerce' ),
+				'description' 		=> __( 'Using this disables Display Advertising', 'woocommerce' ),
+				'type' 				=> 'checkbox',
+				'checkboxgroup'		=> '',
+				'default' 			=> get_option('woocommerce_ga_use_universal_analytics') ? get_option('woocommerce_ga_use_universal_analytics') : 'no'  // Backwards compat
+			),
 			'ga_ecommerce_tracking_enabled' => array(
 				'label' 			=> __( 'Add eCommerce tracking code to the thankyou page', 'woocommerce' ),
 				'type' 				=> 'checkbox',
@@ -122,33 +130,55 @@ class WC_Google_Analytics extends WC_Integration {
 			$username 		= __( 'Guest', 'woocommerce' );
 		}
 
-		if ( $this->ga_support_display_advertising == 'yes' )
-			$ga_url = "('https:' == document.location.protocol ? 'https://' : 'http://') + 'stats.g.doubleclick.net/dc.js'";
-		else
-			$ga_url = "('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js'";
+		if ( $this->ga_use_universal_analytics == 'yes' ) {
+			if ( ! empty( $this->ga_set_domain_name ) )
+				$set_domain_name = esc_js( $this->ga_set_domain_name );
+			else
+				$set_domain_name = 'auto';
 
 
-		if ( ! empty( $this->ga_set_domain_name ) )
-			$set_domain_name = "['_setDomainName', '" . esc_js( $this->ga_set_domain_name ) . "'],\n";
-		else
-			$set_domain_name = '';
+			echo "<script>
+			(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+			(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+			m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+			})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
 
-		echo "<script type='text/javascript'>
+			ga('create', '" . esc_js( $tracking_id ) . "', '" . $set_domain_name . "');
+			ga('set', 'dimension1', '" . $loggedin . "');
+			ga('send', 'pageview');
 
-			var _gaq = _gaq || [];
-			_gaq.push(
-				['_setAccount', '" . esc_js( $tracking_id ) . "'], " . $set_domain_name . "
-				['_setCustomVar', 1, 'logged-in', '" . $loggedin . "', 1],
-				['_trackPageview']
-			);
+			</script>";
 
-			(function() {
-				var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-				ga.src = ".$ga_url.";
-				var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-			})();
+		}
+		else {
+			if ( $this->ga_support_display_advertising == 'yes' )
+				$ga_url = "('https:' == document.location.protocol ? 'https://' : 'http://') + 'stats.g.doubleclick.net/dc.js'";
+			else
+				$ga_url = "('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js'";
 
-		</script>";
+
+			if ( ! empty( $this->ga_set_domain_name ) )
+				$set_domain_name = "['_setDomainName', '" . esc_js( $this->ga_set_domain_name ) . "'],\n";
+			else
+				$set_domain_name = '';
+
+			echo "<script type='text/javascript'>
+
+				var _gaq = _gaq || [];
+				_gaq.push(
+					['_setAccount', '" . esc_js( $tracking_id ) . "'], " . $set_domain_name . "
+					['_setCustomVar', 1, 'logged-in', '" . $loggedin . "', 1],
+					['_trackPageview']
+				);
+
+				(function() {
+					var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+					ga.src = ".$ga_url.";
+					var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+				})();
+
+			</script>";
+		}
 	}
 
 
@@ -186,77 +216,137 @@ class WC_Google_Analytics extends WC_Integration {
 			$username 		= __( 'Guest', 'woocommerce' );
 		}
 
-		if ( $this->ga_support_display_advertising == 'yes' )
-			$ga_url = "('https:' == document.location.protocol ? 'https://' : 'http://') + 'stats.g.doubleclick.net/dc.js'";
-		else
-			$ga_url = "('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js'";
+		if ( $this->ga_use_universal_analytics == 'yes' ) {
+			if ( ! empty( $this->ga_set_domain_name ) )
+				$set_domain_name = esc_js( $this->ga_set_domain_name );
+			else
+				$set_domain_name = 'auto';
 
-		if ( ! empty( $this->ga_set_domain_name ) )
-			$set_domain_name = "['_setDomainName', '" . esc_js( $this->ga_set_domain_name ) . "'],";
-		else
-			$set_domain_name = '';
+			$code = "
+			(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+			(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+			m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+			})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
 
-		$code = "
-			var _gaq = _gaq || [];
+			ga('create', '" . esc_js( $tracking_id ) . "', '" . $set_domain_name . "');
+			ga('set', 'dimension1', '" . $loggedin . "');
+			ga('send', 'pageview');
 
-			_gaq.push(
-				['_setAccount', '" . esc_js( $tracking_id ) . "'], " . $set_domain_name . "
-				['_setCustomVar', 1, 'logged-in', '" . esc_js( $loggedin ) . "', 1],
-				['_trackPageview']
-			);
-
-			_gaq.push(['_addTrans',
-				'" . esc_js( $order->get_order_number() ) . "', // order ID - required
-				'" . esc_js( get_bloginfo( 'name' ) ) . "',  	// affiliation or store name
-				'" . esc_js( $order->get_total() ) . "',   	    // total - required
-				'" . esc_js( $order->get_total_tax() ) . "',    // tax
-				'" . esc_js( $order->get_shipping() ) . "',	    // shipping
-				'" . esc_js( $order->billing_city ) . "',       // city
-				'" . esc_js( $order->billing_state ) . "',      // state or province
-				'" . esc_js( $order->billing_country ) . "'     // country
+			ga('ecommerce:addTransaction', {
+				'id': '" . esc_js( $order->get_order_number() ) . "',      // Transaction ID. Required
+				'affiliation': '" . esc_js( get_bloginfo( 'name' ) ) . "', // Affiliation or store name
+				'revenue': '" . esc_js( $order->get_total() ) . "',        // Grand Total
+				'shipping': '" . esc_js( $order->get_shipping() ) . "',    // Shipping
+				'tax': '" . esc_js( $order->get_total_tax() ) . "'         // Tax
 			]);
-		";
+			";
 
-		// Order items
-		if ( $order->get_items() ) {
-			foreach ( $order->get_items() as $item ) {
-				$_product = $order->get_product_from_item( $item );
+			// Order items
+			if ( $order->get_items() ) {
+				foreach ( $order->get_items() as $item ) {
+					$_product = $order->get_product_from_item( $item );
 
-				$code .= "_gaq.push(['_addItem',";
-				$code .= "'" . esc_js( $order->get_order_number() ) . "',";
-				$code .= "'" . esc_js( $_product->get_sku() ? __( 'SKU:', 'woocommerce' ) . ' ' . $_product->get_sku() : $_product->id ) . "',";
-				$code .= "'" . esc_js( $item['name'] ) . "',";
+					$code .= "ga('ecommerce:addItem', {";
+					$code .= "'id': '" . esc_js( $order->get_order_number() ) . "',";
+					$code .= "'name': '" . esc_js( $item['name'] ) . "',";
+					$code .= "'sku': '" . esc_js( $_product->get_sku() ? __( 'SKU:', 'woocommerce' ) . ' ' . $_product->get_sku() : $_product->id ) . "',";
 
-				if ( isset( $_product->variation_data ) ) {
+					if ( isset( $_product->variation_data ) ) {
 
-					$code .= "'" . esc_js( woocommerce_get_formatted_variation( $_product->variation_data, true ) ) . "',";
+						$code .= "'category': '" . esc_js( woocommerce_get_formatted_variation( $_product->variation_data, true ) ) . "',";
 
-				} else {
-					$out = array();
-					$categories = get_the_terms($_product->id, 'product_cat');
-					if ( $categories ) {
-						foreach ( $categories as $category ){
-							$out[] = $category->name;
+					} else {
+						$out = array();
+						$categories = get_the_terms($_product->id, 'product_cat');
+						if ( $categories ) {
+							foreach ( $categories as $category ){
+								$out[] = $category->name;
+							}
 						}
+						$code .= "'category': '" . esc_js( join( "/", $out) ) . "',";
 					}
-					$code .= "'" . esc_js( join( "/", $out) ) . "',";
+
+					$code .= "'price': '" . esc_js( $order->get_item_total( $item ) ) . "',";
+					$code .= "'quantity': '" . esc_js( $item['qty'] ) . "'";
+					$code .= "});";
 				}
-
-				$code .= "'" . esc_js( $order->get_item_total( $item ) ) . "',";
-				$code .= "'" . esc_js( $item['qty'] ) . "'";
-				$code .= "]);";
 			}
+
+			$code .= "ga('ecommerce:send');      // Send transaction and item data to Google Analytics.";
 		}
+		else {
+			if ( $this->ga_support_display_advertising == 'yes' )
+				$ga_url = "('https:' == document.location.protocol ? 'https://' : 'http://') + 'stats.g.doubleclick.net/dc.js'";
+			else
+				$ga_url = "('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js'";
 
-		$code .= "
-			_gaq.push(['_trackTrans']); 					// submits transaction to the Analytics servers
+			if ( ! empty( $this->ga_set_domain_name ) )
+				$set_domain_name = "['_setDomainName', '" . esc_js( $this->ga_set_domain_name ) . "'],";
+			else
+				$set_domain_name = '';
 
-			(function() {
-				var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-				ga.src = ".$ga_url.";
-				var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-			})();
-		";
+			$code = "
+				var _gaq = _gaq || [];
+
+				_gaq.push(
+					['_setAccount', '" . esc_js( $tracking_id ) . "'], " . $set_domain_name . "
+					['_setCustomVar', 1, 'logged-in', '" . esc_js( $loggedin ) . "', 1],
+					['_trackPageview']
+				);
+
+				_gaq.push(['_addTrans',
+					'" . esc_js( $order->get_order_number() ) . "', // order ID - required
+					'" . esc_js( get_bloginfo( 'name' ) ) . "',  	// affiliation or store name
+					'" . esc_js( $order->get_total() ) . "',   	    // total - required
+					'" . esc_js( $order->get_total_tax() ) . "',    // tax
+					'" . esc_js( $order->get_shipping() ) . "',	    // shipping
+					'" . esc_js( $order->billing_city ) . "',       // city
+					'" . esc_js( $order->billing_state ) . "',      // state or province
+					'" . esc_js( $order->billing_country ) . "'     // country
+				]);
+			";
+
+			// Order items
+			if ( $order->get_items() ) {
+				foreach ( $order->get_items() as $item ) {
+					$_product = $order->get_product_from_item( $item );
+
+					$code .= "_gaq.push(['_addItem',";
+					$code .= "'" . esc_js( $order->get_order_number() ) . "',";
+					$code .= "'" . esc_js( $_product->get_sku() ? __( 'SKU:', 'woocommerce' ) . ' ' . $_product->get_sku() : $_product->id ) . "',";
+					$code .= "'" . esc_js( $item['name'] ) . "',";
+
+					if ( isset( $_product->variation_data ) ) {
+
+						$code .= "'" . esc_js( woocommerce_get_formatted_variation( $_product->variation_data, true ) ) . "',";
+
+					} else {
+						$out = array();
+						$categories = get_the_terms($_product->id, 'product_cat');
+						if ( $categories ) {
+							foreach ( $categories as $category ){
+								$out[] = $category->name;
+							}
+						}
+						$code .= "'" . esc_js( join( "/", $out) ) . "',";
+					}
+
+					$code .= "'" . esc_js( $order->get_item_total( $item ) ) . "',";
+					$code .= "'" . esc_js( $item['qty'] ) . "'";
+					$code .= "]);";
+				}
+			}
+
+			$code .= "
+				_gaq.push(['_trackTrans']); 					// submits transaction to the Analytics servers
+
+				(function() {
+					var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+					ga.src = ".$ga_url.";
+					var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+				})();
+			";
+		}
 
 		echo '<script type="text/javascript">' . $code . '</script>';
 
@@ -320,9 +410,16 @@ class WC_Google_Analytics extends WC_Integration {
 
 		$parameters = apply_filters( 'woocommerce_ga_event_tracking_parameters', $parameters );
 
+		if ( $this->ga_use_universal_analytics == 'yes' ) {
+			$track_event = "ga('send', 'event', %s, %s, %s);";
+		}
+		else {
+			$track_event = "_gaq.push(['_trackEvent', %s, %s, %s]);";
+		}
+
 		$woocommerce->add_inline_js("
 			$('" . $selector . "').click(function() {
-				" . sprintf( "_gaq.push(['_trackEvent', %s, %s, %s]);", $parameters['category'], $parameters['action'], $parameters['label'] ) . "
+				" . sprintf( $track_event, $parameters['category'], $parameters['action'], $parameters['label'] ) . "
 			});
 		");
 	}

@@ -232,6 +232,8 @@ class WC_Google_Analytics extends WC_Integration {
 			ga('set', 'dimension1', '" . $loggedin . "');
 			ga('send', 'pageview');
 
+			ga('require', 'ecommerce', 'ecommerce.js');
+
 			ga('ecommerce:addTransaction', {
 				'id': '" . esc_js( $order->get_order_number() ) . "',      // Transaction ID. Required
 				'affiliation': '" . esc_js( get_bloginfo( 'name' ) ) . "', // Affiliation or store name

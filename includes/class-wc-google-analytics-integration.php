@@ -240,7 +240,7 @@ class WC_Google_Analytics extends WC_Integration {
 				'revenue': '" . esc_js( $order->get_total() ) . "',        // Grand Total
 				'shipping': '" . esc_js( $order->get_shipping() ) . "',    // Shipping
 				'tax': '" . esc_js( $order->get_total_tax() ) . "'         // Tax
-			]);
+			});
 			";
 
 			// Order items

@@ -11,7 +11,7 @@ Provides integration between Google Analytics and WooCommerce.
 
 == Description ==
 
-This plugin provides the integration between Google Analytics and the WooCommerce plugin.
+This plugin provides the integration between Google Analytics and the WooCommerce plugin. You can link a referral to a purchase and add transaction information to your Google Analytics data. It also supports the new Universal Analytics, eCommerce and event tracking.
 
 Starting WooCommerce 2.1, this integration will no longer be part of WooCommerce and will only be available by using this plugin.
 

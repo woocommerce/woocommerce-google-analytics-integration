@@ -41,6 +41,8 @@ You can leave this plugin activated and it will seamlessly take over the integra
 
 == Changelog ==
 
+= 1.2 - xx/xx/xxxx =
+
 = 1.1 - 29/05/2014 =
  * Added option to enable Display Advertising
  * Added compatibility support for WooCommerce 2.1 beta releases

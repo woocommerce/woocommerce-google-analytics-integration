@@ -3,7 +3,7 @@ Contributors: woothemes, CoenJacobs
 Tags: woocommerce, google analytics
 Requires at least: 3.8
 Tested up to: 3.8
-Stable tag: 1.0
+Stable tag: 1.1
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -41,7 +41,7 @@ You can leave this plugin activated and it will seamlessly take over the integra
 
 == Changelog ==
 
-= 1.1 - xx/xx/xxxx =
+= 1.1 - 29/05/2014 =
  * Added option to enable Display Advertising
  * Added compatibility support for WooCommerce 2.1 beta releases
 

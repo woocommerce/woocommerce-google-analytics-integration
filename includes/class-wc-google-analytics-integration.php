@@ -419,7 +419,7 @@ class WC_Google_Analytics extends WC_Integration {
 			$track_event = "_gaq.push(['_trackEvent', %s, %s, %s]);";
 		}
 
-		$woocommerce->add_inline_js("
+		wc_enqueue_js("
 			$('" . $selector . "').click(function() {
 				" . sprintf( $track_event, $parameters['category'], $parameters['action'], $parameters['label'] ) . "
 			});

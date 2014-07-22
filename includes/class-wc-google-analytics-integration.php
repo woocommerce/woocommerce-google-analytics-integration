@@ -222,16 +222,22 @@ class WC_Google_Analytics extends WC_Integration {
 			else
 				$set_domain_name = 'auto';
 
-			$code = "
-			(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-			(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-			m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-			})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+			$code = '';
 
-			ga('create', '" . esc_js( $tracking_id ) . "', '" . $set_domain_name . "');
-			ga('set', 'dimension1', '" . $loggedin . "');
-			ga('send', 'pageview');
+			if($this->ga_standard_tracking_enabled != 'no') {
+				$code .= "
+				(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+				(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+				m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+				})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
 
+				ga('create', '" . esc_js( $tracking_id ) . "', '" . $set_domain_name . "');
+				ga('set', 'dimension1', '" . $loggedin . "');
+				ga('send', 'pageview');
+				";
+			}
+
+			$code .= "
 			ga('require', 'ecommerce', 'ecommerce.js');
 
 			ga('ecommerce:addTransaction', {
@@ -289,13 +295,19 @@ class WC_Google_Analytics extends WC_Integration {
 
 			$code = "
 				var _gaq = _gaq || [];
+			";
 
-				_gaq.push(
-					['_setAccount', '" . esc_js( $tracking_id ) . "'], " . $set_domain_name . "
-					['_setCustomVar', 1, 'logged-in', '" . esc_js( $loggedin ) . "', 1],
-					['_trackPageview']
-				);
+			if($this->ga_standard_tracking_enabled != 'no') {
+				$code .= "
+					_gaq.push(
+						['_setAccount', '" . esc_js( $tracking_id ) . "'], " . $set_domain_name . "
+						['_setCustomVar', 1, 'logged-in', '" . esc_js( $loggedin ) . "', 1],
+						['_trackPageview']
+					);
+				";
+			}
 
+			$code .= "
 				_gaq.push(['_addTrans',
 					'" . esc_js( $order->get_order_number() ) . "', // order ID - required
 					'" . esc_js( get_bloginfo( 'name' ) ) . "',  	// affiliation or store name
@@ -341,13 +353,17 @@ class WC_Google_Analytics extends WC_Integration {
 
 			$code .= "
 				_gaq.push(['_trackTrans']); 					// submits transaction to the Analytics servers
-
-				(function() {
-					var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-					ga.src = ".$ga_url.";
-					var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-				})();
 			";
+
+			if($this->ga_standard_tracking_enabled != 'no') {
+				$code .= "
+					(function() {
+						var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+						ga.src = ".$ga_url.";
+						var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+					})();
+				";
+			}
 		}
 
 		echo '<script type="text/javascript">' . $code . '</script>';

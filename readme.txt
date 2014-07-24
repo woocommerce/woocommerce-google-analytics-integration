@@ -22,6 +22,7 @@ Contributions are welcome via the [GitHub repository](https://github.com/woothem
 1. Download the plugin file to your computer and unzip it
 2. Using an FTP program, or your hosting control panel, upload the unzipped plugin folder to your WordPress installation’s wp-content/plugins/ directory.
 3. Activate the plugin from the Plugins menu within the WordPress admin.
+4. Don't forget to enable e-commerce tracking in your Google Analytics account: https://support.google.com/analytics/answer/1009612?hl=en
 
 Or use the automatic installation wizard through your admin panel, just search for this plugins name.
 
@@ -30,6 +31,12 @@ Or use the automatic installation wizard through your admin panel, just search f
 = Where can I find the setting for this plugin? =
 
 This plugin will add the settings to the Integration tab, to be found in the WooCommerce > Settings menu.
+
+= I don't see the code on my site. Where is it? =
+
+We purposefully don't track admin visits to the site. Log out of the site (or open a Google Chrome Incognito window) and check if the site is there for non-admins.
+
+Also please make sure your Google Analytics ID under WooCommerce->Settings->Integrations.
 
 = Can I install it already? =
 

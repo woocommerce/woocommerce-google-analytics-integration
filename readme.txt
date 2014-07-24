@@ -3,7 +3,7 @@ Contributors: woothemes
 Tags: woocommerce, google analytics
 Requires at least: 3.8
 Tested up to: 3.8
-Stable tag: 1.1.1
+Stable tag: 1.2.0
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -48,9 +48,11 @@ You can leave this plugin activated and it will seamlessly take over the integra
 
 == Changelog ==
 
-= 1.1.1 - 24/07/2014 =
- * Fix - Using get_total_shipping() instead of get_shipping
- * Fix - Using wc_enqueue_js() instead of $woocommerce->add_inline_js(
+= 1.2.0 - 28/07/2014 =
+ * Feature - Adding display advertising to Universal Analytics
+ * Fix     - Using get_total_shipping() instead of get_shipping
+ * Fix     - Using wc_enqueue_js() instead of $woocommerce->add_inline_js(
+ * Tweak   - Updating plugin FAQ
 
 = 1.1 - 29/05/2014 =
  * Added option to enable Display Advertising

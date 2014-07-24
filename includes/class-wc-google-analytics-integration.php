@@ -238,7 +238,7 @@ class WC_Google_Analytics extends WC_Integration {
 				'id': '" . esc_js( $order->get_order_number() ) . "',      // Transaction ID. Required
 				'affiliation': '" . esc_js( get_bloginfo( 'name' ) ) . "', // Affiliation or store name
 				'revenue': '" . esc_js( $order->get_total() ) . "',        // Grand Total
-				'shipping': '" . esc_js( $order->get_shipping() ) . "',    // Shipping
+				'shipping': '" . esc_js( $order->get_total_shipping() ) . "',    // Shipping
 				'tax': '" . esc_js( $order->get_total_tax() ) . "'         // Tax
 			});
 			";
@@ -297,14 +297,14 @@ class WC_Google_Analytics extends WC_Integration {
 				);
 
 				_gaq.push(['_addTrans',
-					'" . esc_js( $order->get_order_number() ) . "', // order ID - required
-					'" . esc_js( get_bloginfo( 'name' ) ) . "',  	// affiliation or store name
-					'" . esc_js( $order->get_total() ) . "',   	    // total - required
-					'" . esc_js( $order->get_total_tax() ) . "',    // tax
-					'" . esc_js( $order->get_shipping() ) . "',	    // shipping
-					'" . esc_js( $order->billing_city ) . "',       // city
-					'" . esc_js( $order->billing_state ) . "',      // state or province
-					'" . esc_js( $order->billing_country ) . "'     // country
+					'" . esc_js( $order->get_order_number() ) . "', 	// order ID - required
+					'" . esc_js( get_bloginfo( 'name' ) ) . "',  		// affiliation or store name
+					'" . esc_js( $order->get_total() ) . "',   	    	// total - required
+					'" . esc_js( $order->get_total_tax() ) . "',    	// tax
+					'" . esc_js( $order->get_total_shipping() ) . "',	// shipping
+					'" . esc_js( $order->billing_city ) . "',       	// city
+					'" . esc_js( $order->billing_state ) . "',      	// state or province
+					'" . esc_js( $order->billing_country ) . "'     	// country
 				]);
 			";
 
@@ -419,7 +419,7 @@ class WC_Google_Analytics extends WC_Integration {
 			$track_event = "_gaq.push(['_trackEvent', %s, %s, %s]);";
 		}
 
-		$woocommerce->add_inline_js("
+		wc_enqueue_js("
 			$('" . $selector . "').click(function() {
 				" . sprintf( $track_event, $parameters['category'], $parameters['action'], $parameters['label'] ) . "
 			});

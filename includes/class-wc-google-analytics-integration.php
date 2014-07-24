@@ -17,9 +17,9 @@ class WC_Google_Analytics extends WC_Integration {
 	 * @return void
 	 */
 	public function __construct() {
-        $this->id					= 'google_analytics';
-        $this->method_title     	= __( 'Google Analytics', 'woocommerce' );
-        $this->method_description	= __( 'Google Analytics is a free service offered by Google that generates detailed statistics about the visitors to a website.', 'woocommerce' );
+		$this->id					= 'google_analytics';
+		$this->method_title     	= __( 'Google Analytics', 'woocommerce' );
+		$this->method_description	= __( 'Google Analytics is a free service offered by Google that generates detailed statistics about the visitors to a website.', 'woocommerce' );
 
 		// Load the settings.
 		$this->init_form_fields();
@@ -44,18 +44,18 @@ class WC_Google_Analytics extends WC_Integration {
 		// Event tracking code
 		add_action( 'woocommerce_after_add_to_cart_button', array( $this, 'add_to_cart' ) );
 		add_action( 'wp_footer', array( $this, 'loop_add_to_cart' ) );
-    }
+	}
 
 
-    /**
-     * Initialise Settings Form Fields
-     *
-     * @access public
-     * @return void
-     */
-    function init_form_fields() {
+	/**
+	 * Initialise Settings Form Fields
+	 *
+	 * @access public
+	 * @return void
+	 */
+	function init_form_fields() {
 
-    	$this->form_fields = array(
+		$this->form_fields = array(
 			'ga_id' => array(
 				'title' 			=> __( 'Google Analytics ID', 'woocommerce' ),
 				'description' 		=> __( 'Log into your google analytics account to find your ID. e.g. <code>UA-XXXXX-X</code>', 'woocommerce' ),

@@ -76,14 +76,13 @@ class WC_Google_Analytics extends WC_Integration {
 				'default' 			=> get_option('woocommerce_ga_standard_tracking_enabled') ? get_option('woocommerce_ga_standard_tracking_enabled') : 'no'  // Backwards compat
 			),
 			'ga_support_display_advertising' => array(
-				'label' 			=> __( 'Set the Google analytics code to support Display Advertising. <a href="https://support.google.com/analytics/answer/2700409" target="_blank">Read More About Display Advertising</a>', 'woocommerce' ),
+				'label' 			=> __( 'Set the Google Analytics code to support Display Advertising. <a href="https://support.google.com/analytics/answer/2700409" target="_blank">Read More About Display Advertising</a>', 'woocommerce' ),
 				'type' 				=> 'checkbox',
 				'checkboxgroup'		=> '',
 				'default' 			=> get_option('woocommerce_ga_support_display_advertising') ? get_option('woocommerce_ga_support_display_advertising') : 'no'  // Backwards compat
 			),
 			'ga_use_universal_analytics' => array(
-				'label' 			=> __( 'Use Universal Analytics instead of Standard Google Analytics', 'woocommerce' ),
-				'description' 		=> __( 'Using this disables Display Advertising', 'woocommerce' ),
+				'label' 			=> __( 'Use Universal Analytics instead of Classic Google Analytics', 'woocommerce' ),
 				'type' 				=> 'checkbox',
 				'checkboxgroup'		=> '',
 				'default' 			=> get_option('woocommerce_ga_use_universal_analytics') ? get_option('woocommerce_ga_use_universal_analytics') : 'no'  // Backwards compat
@@ -144,6 +143,11 @@ class WC_Google_Analytics extends WC_Integration {
 			})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
 
 			ga('create', '" . esc_js( $tracking_id ) . "', '" . $set_domain_name . "');
+			";
+			if ( $this->ga_support_display_advertising == 'yes' ) {
+				echo "ga('require', 'displayfeatures');";
+			}
+			echo "
 			ga('set', 'dimension1', '" . $loggedin . "');
 			ga('send', 'pageview');
 
@@ -229,6 +233,11 @@ class WC_Google_Analytics extends WC_Integration {
 			})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
 
 			ga('create', '" . esc_js( $tracking_id ) . "', '" . $set_domain_name . "');
+			";
+			if ( $this->ga_support_display_advertising == 'yes' ) {
+				$code .= "ga('require', 'displayfeatures');";
+			}
+			$code .= "
 			ga('set', 'dimension1', '" . $loggedin . "');
 			ga('send', 'pageview');
 

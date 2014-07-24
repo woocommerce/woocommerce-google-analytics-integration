@@ -144,7 +144,7 @@ class WC_Google_Analytics extends WC_Integration {
 
 			ga('create', '" . esc_js( $tracking_id ) . "', '" . $set_domain_name . "');
 			";
-			if ( $this->ga_support_display_advertising == 'yes' ) {
+			if ( 'yes' == $this->ga_support_display_advertising ) {
 				echo "ga('require', 'displayfeatures');";
 			}
 			echo "
@@ -155,7 +155,7 @@ class WC_Google_Analytics extends WC_Integration {
 
 		}
 		else {
-			if ( $this->ga_support_display_advertising == 'yes' )
+			if ( 'yes' == $this->ga_support_display_advertising )
 				$ga_url = "('https:' == document.location.protocol ? 'https://' : 'http://') + 'stats.g.doubleclick.net/dc.js'";
 			else
 				$ga_url = "('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js'";
@@ -234,7 +234,7 @@ class WC_Google_Analytics extends WC_Integration {
 
 			ga('create', '" . esc_js( $tracking_id ) . "', '" . $set_domain_name . "');
 			";
-			if ( $this->ga_support_display_advertising == 'yes' ) {
+			if ( 'yes' == $this->ga_support_display_advertising ) {
 				$code .= "ga('require', 'displayfeatures');";
 			}
 			$code .= "

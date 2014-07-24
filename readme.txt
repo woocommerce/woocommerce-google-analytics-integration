@@ -49,10 +49,11 @@ You can leave this plugin activated and it will seamlessly take over the integra
 == Changelog ==
 
 = 1.2.0 - 28/07/2014 =
- * Feature - Adding display advertising to Universal Analytics
+ * Feature - Adding display advertising parameter to Universal Analytics
  * Fix     - Using get_total_shipping() instead of get_shipping
  * Fix     - Using wc_enqueue_js() instead of $woocommerce->add_inline_js(
  * Tweak   - Updating plugin FAQ
+ * Tweak   - Adding parenthesis for clarity
 
 = 1.1 - 29/05/2014 =
  * Added option to enable Display Advertising

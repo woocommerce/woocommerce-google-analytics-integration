@@ -138,6 +138,11 @@ class WC_Google_Analytics extends WC_Integration {
 				$set_domain_name = 'auto';
 			}
 
+			$support_display_advertising = '';
+			if ( 'yes' == $this->ga_support_display_advertising ) {
+				$support_display_advertising = "ga('require', 'displayfeatures');";
+			}
+
 			echo "<script>
 			(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
 			(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -145,11 +150,7 @@ class WC_Google_Analytics extends WC_Integration {
 			})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
 
 			ga('create', '" . esc_js( $tracking_id ) . "', '" . $set_domain_name . "');
-			";
-			if ( 'yes' == $this->ga_support_display_advertising ) {
-				echo "ga('require', 'displayfeatures');";
-			}
-			echo "
+			" . $support_display_advertising . "
 			ga('set', 'dimension1', '" . $loggedin . "');
 			ga('send', 'pageview');
 
@@ -234,6 +235,11 @@ class WC_Google_Analytics extends WC_Integration {
 				$set_domain_name = 'auto';
 			}
 
+			$support_display_advertising = '';
+			if ( 'yes' == $this->ga_support_display_advertising ) {
+				$support_display_advertising = "ga('require', 'displayfeatures');";
+			}
+
 			$code = "
 			(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
 			(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -241,11 +247,7 @@ class WC_Google_Analytics extends WC_Integration {
 			})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
 
 			ga('create', '" . esc_js( $tracking_id ) . "', '" . $set_domain_name . "');
-			";
-			if ( 'yes' == $this->ga_support_display_advertising ) {
-				$code .= "ga('require', 'displayfeatures');";
-			}
-			$code .= "
+			" . $support_display_advertising . "
 			ga('set', 'dimension1', '" . $loggedin . "');
 			ga('send', 'pageview');
 

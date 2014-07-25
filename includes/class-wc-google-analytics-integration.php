@@ -17,9 +17,9 @@ class WC_Google_Analytics extends WC_Integration {
 	 * @return void
 	 */
 	public function __construct() {
-        $this->id					= 'google_analytics';
-        $this->method_title     	= __( 'Google Analytics', 'woocommerce' );
-        $this->method_description	= __( 'Google Analytics is a free service offered by Google that generates detailed statistics about the visitors to a website.', 'woocommerce' );
+		$this->id					= 'google_analytics';
+		$this->method_title     	= __( 'Google Analytics', 'woocommerce' );
+		$this->method_description	= __( 'Google Analytics is a free service offered by Google that generates detailed statistics about the visitors to a website.', 'woocommerce' );
 
 		// Load the settings.
 		$this->init_form_fields();
@@ -44,18 +44,18 @@ class WC_Google_Analytics extends WC_Integration {
 		// Event tracking code
 		add_action( 'woocommerce_after_add_to_cart_button', array( $this, 'add_to_cart' ) );
 		add_action( 'wp_footer', array( $this, 'loop_add_to_cart' ) );
-    }
+	}
 
 
-    /**
-     * Initialise Settings Form Fields
-     *
-     * @access public
-     * @return void
-     */
-    function init_form_fields() {
+	/**
+	 * Initialise Settings Form Fields
+	 *
+	 * @access public
+	 * @return void
+	 */
+	function init_form_fields() {
 
-    	$this->form_fields = array(
+		$this->form_fields = array(
 			'ga_id' => array(
 				'title' 			=> __( 'Google Analytics ID', 'woocommerce' ),
 				'description' 		=> __( 'Log into your google analytics account to find your ID. e.g. <code>UA-XXXXX-X</code>', 'woocommerce' ),
@@ -76,14 +76,13 @@ class WC_Google_Analytics extends WC_Integration {
 				'default' 			=> get_option('woocommerce_ga_standard_tracking_enabled') ? get_option('woocommerce_ga_standard_tracking_enabled') : 'no'  // Backwards compat
 			),
 			'ga_support_display_advertising' => array(
-				'label' 			=> __( 'Set the Google analytics code to support Display Advertising. <a href="https://support.google.com/analytics/answer/2700409" target="_blank">Read More About Display Advertising</a>', 'woocommerce' ),
+				'label' 			=> __( 'Set the Google Analytics code to support Display Advertising. <a href="https://support.google.com/analytics/answer/2700409" target="_blank">Read More About Display Advertising</a>', 'woocommerce' ),
 				'type' 				=> 'checkbox',
 				'checkboxgroup'		=> '',
 				'default' 			=> get_option('woocommerce_ga_support_display_advertising') ? get_option('woocommerce_ga_support_display_advertising') : 'no'  // Backwards compat
 			),
 			'ga_use_universal_analytics' => array(
-				'label' 			=> __( 'Use Universal Analytics instead of Standard Google Analytics', 'woocommerce' ),
-				'description' 		=> __( 'Using this disables Display Advertising', 'woocommerce' ),
+				'label' 			=> __( 'Use Universal Analytics instead of Classic Google Analytics', 'woocommerce' ),
 				'type' 				=> 'checkbox',
 				'checkboxgroup'		=> '',
 				'default' 			=> get_option('woocommerce_ga_use_universal_analytics') ? get_option('woocommerce_ga_use_universal_analytics') : 'no'  // Backwards compat
@@ -114,7 +113,9 @@ class WC_Google_Analytics extends WC_Integration {
 	function google_tracking_code() {
 		global $woocommerce;
 
-		if ( is_admin() || current_user_can('manage_options') || $this->ga_standard_tracking_enabled == "no" ) return;
+		if ( is_admin() || current_user_can('manage_options') || $this->ga_standard_tracking_enabled == "no" ) {
+			return;
+		}
 
 		$tracking_id = $this->ga_id;
 
@@ -131,11 +132,11 @@ class WC_Google_Analytics extends WC_Integration {
 		}
 
 		if ( $this->ga_use_universal_analytics == 'yes' ) {
-			if ( ! empty( $this->ga_set_domain_name ) )
+			if ( ! empty( $this->ga_set_domain_name ) ) {
 				$set_domain_name = esc_js( $this->ga_set_domain_name );
-			else
+			} else {
 				$set_domain_name = 'auto';
-
+			}
 
 			echo "<script>
 			(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
@@ -144,6 +145,11 @@ class WC_Google_Analytics extends WC_Integration {
 			})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
 
 			ga('create', '" . esc_js( $tracking_id ) . "', '" . $set_domain_name . "');
+			";
+			if ( 'yes' == $this->ga_support_display_advertising ) {
+				echo "ga('require', 'displayfeatures');";
+			}
+			echo "
 			ga('set', 'dimension1', '" . $loggedin . "');
 			ga('send', 'pageview');
 
@@ -151,16 +157,18 @@ class WC_Google_Analytics extends WC_Integration {
 
 		}
 		else {
-			if ( $this->ga_support_display_advertising == 'yes' )
+			if ( 'yes' == $this->ga_support_display_advertising ) {
 				$ga_url = "('https:' == document.location.protocol ? 'https://' : 'http://') + 'stats.g.doubleclick.net/dc.js'";
-			else
+			} else {
 				$ga_url = "('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js'";
+			}
 
 
-			if ( ! empty( $this->ga_set_domain_name ) )
+			if ( ! empty( $this->ga_set_domain_name ) ) {
 				$set_domain_name = "['_setDomainName', '" . esc_js( $this->ga_set_domain_name ) . "'],\n";
-			else
+			} else {
 				$set_domain_name = '';
+			}
 
 			echo "<script type='text/javascript'>
 
@@ -192,12 +200,15 @@ class WC_Google_Analytics extends WC_Integration {
 	function ecommerce_tracking_code( $order_id ) {
 		global $woocommerce;
 
-		if ( $this->ga_ecommerce_tracking_enabled == "no" || current_user_can('manage_options') || get_post_meta( $order_id, '_ga_tracked', true ) == 1 )
+		if ( $this->ga_ecommerce_tracking_enabled == "no" || current_user_can('manage_options') || get_post_meta( $order_id, '_ga_tracked', true ) == 1 ) {
 			return;
+		}
 
 		$tracking_id = $this->ga_id;
 
-		if ( ! $tracking_id ) return;
+		if ( ! $tracking_id ) {
+			return;
+		};
 
 		// Doing eCommerce tracking so unhook standard tracking from the footer
 		remove_action( 'wp_footer', array( $this, 'google_tracking_code' ) );
@@ -217,21 +228,27 @@ class WC_Google_Analytics extends WC_Integration {
 		}
 
 		if ( $this->ga_use_universal_analytics == 'yes' ) {
-			if ( ! empty( $this->ga_set_domain_name ) )
+			if ( ! empty( $this->ga_set_domain_name ) ) {
 				$set_domain_name = esc_js( $this->ga_set_domain_name );
-			else
+			} else {
 				$set_domain_name = 'auto';
+			}
 
 			$code = '';
 
-			if($this->ga_standard_tracking_enabled != 'no') {
+			if( 'no' != $this->ga_standard_tracking_enabled ) {
 				$code .= "
 				(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
 				(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
 				m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
 				})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
-
+				
 				ga('create', '" . esc_js( $tracking_id ) . "', '" . $set_domain_name . "');
+				";
+				if ( 'yes' == $this->ga_support_display_advertising ) {
+					$code .= "ga('require', 'displayfeatures');";
+				}
+				$code .= "
 				ga('set', 'dimension1', '" . $loggedin . "');
 				ga('send', 'pageview');
 				";
@@ -244,7 +261,7 @@ class WC_Google_Analytics extends WC_Integration {
 				'id': '" . esc_js( $order->get_order_number() ) . "',      // Transaction ID. Required
 				'affiliation': '" . esc_js( get_bloginfo( 'name' ) ) . "', // Affiliation or store name
 				'revenue': '" . esc_js( $order->get_total() ) . "',        // Grand Total
-				'shipping': '" . esc_js( $order->get_shipping() ) . "',    // Shipping
+				'shipping': '" . esc_js( $order->get_total_shipping() ) . "',    // Shipping
 				'tax': '" . esc_js( $order->get_total_tax() ) . "'         // Tax
 			});
 			";
@@ -267,7 +284,7 @@ class WC_Google_Analytics extends WC_Integration {
 						$out = array();
 						$categories = get_the_terms($_product->id, 'product_cat');
 						if ( $categories ) {
-							foreach ( $categories as $category ){
+							foreach ( $categories as $category ) {
 								$out[] = $category->name;
 							}
 						}
@@ -283,21 +300,23 @@ class WC_Google_Analytics extends WC_Integration {
 			$code .= "ga('ecommerce:send');      // Send transaction and item data to Google Analytics.";
 		}
 		else {
-			if ( $this->ga_support_display_advertising == 'yes' )
+			if ( 'yes' == $this->ga_support_display_advertising ) {
 				$ga_url = "('https:' == document.location.protocol ? 'https://' : 'http://') + 'stats.g.doubleclick.net/dc.js'";
-			else
+			} else {
 				$ga_url = "('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js'";
+			}
 
-			if ( ! empty( $this->ga_set_domain_name ) )
+			if ( ! empty( $this->ga_set_domain_name ) ) {
 				$set_domain_name = "['_setDomainName', '" . esc_js( $this->ga_set_domain_name ) . "'],";
-			else
+			} else {
 				$set_domain_name = '';
+			}
 
 			$code = "
 				var _gaq = _gaq || [];
 			";
 
-			if($this->ga_standard_tracking_enabled != 'no') {
+			if( 'no' != $this->ga_standard_tracking_enabled ) {
 				$code .= "
 					_gaq.push(
 						['_setAccount', '" . esc_js( $tracking_id ) . "'], " . $set_domain_name . "
@@ -309,14 +328,14 @@ class WC_Google_Analytics extends WC_Integration {
 
 			$code .= "
 				_gaq.push(['_addTrans',
-					'" . esc_js( $order->get_order_number() ) . "', // order ID - required
-					'" . esc_js( get_bloginfo( 'name' ) ) . "',  	// affiliation or store name
-					'" . esc_js( $order->get_total() ) . "',   	    // total - required
-					'" . esc_js( $order->get_total_tax() ) . "',    // tax
-					'" . esc_js( $order->get_shipping() ) . "',	    // shipping
-					'" . esc_js( $order->billing_city ) . "',       // city
-					'" . esc_js( $order->billing_state ) . "',      // state or province
-					'" . esc_js( $order->billing_country ) . "'     // country
+					'" . esc_js( $order->get_order_number() ) . "', 	// order ID - required
+					'" . esc_js( get_bloginfo( 'name' ) ) . "',  		// affiliation or store name
+					'" . esc_js( $order->get_total() ) . "',   	    	// total - required
+					'" . esc_js( $order->get_total_tax() ) . "',    	// tax
+					'" . esc_js( $order->get_total_shipping() ) . "',	// shipping
+					'" . esc_js( $order->billing_city ) . "',       	// city
+					'" . esc_js( $order->billing_state ) . "',      	// state or province
+					'" . esc_js( $order->billing_country ) . "'     	// country
 				]);
 			";
 
@@ -355,7 +374,7 @@ class WC_Google_Analytics extends WC_Integration {
 				_gaq.push(['_trackTrans']); 					// submits transaction to the Analytics servers
 			";
 
-			if($this->ga_standard_tracking_enabled != 'no') {
+			if( 'no' != $this->ga_standard_tracking_enabled ) {
 				$code .= "
 					(function() {
 						var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
@@ -380,8 +399,12 @@ class WC_Google_Analytics extends WC_Integration {
 	 */
 	function add_to_cart() {
 
-		if ( $this->disable_tracking( $this->ga_event_tracking_enabled ) ) return;
-		if ( ! is_single() ) return;
+		if ( $this->disable_tracking( $this->ga_event_tracking_enabled ) ) {
+			return;
+		}
+		if ( ! is_single() ) {
+			return;
+		}
 
 		global $product;
 
@@ -403,7 +426,9 @@ class WC_Google_Analytics extends WC_Integration {
 	 */
 	function loop_add_to_cart() {
 
-		if ( $this->disable_tracking( $this->ga_event_tracking_enabled ) ) return;
+		if ( $this->disable_tracking( $this->ga_event_tracking_enabled ) ) {
+			return;
+		}
 
 		$parameters = array();
 		// Add single quotes to allow jQuery to be substituted into _trackEvent parameters
@@ -430,12 +455,11 @@ class WC_Google_Analytics extends WC_Integration {
 
 		if ( $this->ga_use_universal_analytics == 'yes' ) {
 			$track_event = "ga('send', 'event', %s, %s, %s);";
-		}
-		else {
+		} else {
 			$track_event = "_gaq.push(['_trackEvent', %s, %s, %s]);";
 		}
 
-		$woocommerce->add_inline_js("
+		wc_enqueue_js("
 			$('" . $selector . "').click(function() {
 				" . sprintf( $track_event, $parameters['category'], $parameters['action'], $parameters['label'] ) . "
 			});
@@ -452,7 +476,9 @@ class WC_Google_Analytics extends WC_Integration {
 	 */
 	private function disable_tracking( $type ) {
 
-		if ( is_admin() || current_user_can( 'manage_options' ) || ( ! $this->ga_id ) || 'no' == $type ) return true;
+		if ( is_admin() || current_user_can( 'manage_options' ) || ( ! $this->ga_id ) || 'no' == $type ) {
+			return true;
+		}
 
 	}
 

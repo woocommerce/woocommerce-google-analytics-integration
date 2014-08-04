@@ -38,12 +38,12 @@ class WC_Google_Analytics extends WC_Integration {
 		add_action( 'woocommerce_update_options_integration_google_analytics', array( $this, 'process_admin_options') );
 
 		// Tracking code
-		add_action( 'wp_footer', array( $this, 'google_tracking_code' ) );
+		add_action( 'wp_head', array( $this, 'google_tracking_code' ) );
 		add_action( 'woocommerce_thankyou', array( $this, 'ecommerce_tracking_code' ) );
 
 		// Event tracking code
 		add_action( 'woocommerce_after_add_to_cart_button', array( $this, 'add_to_cart' ) );
-		add_action( 'wp_footer', array( $this, 'loop_add_to_cart' ) );
+		add_action( 'wp_head', array( $this, 'loop_add_to_cart' ) );
 	}
 
 
@@ -211,8 +211,8 @@ class WC_Google_Analytics extends WC_Integration {
 			return;
 		}
 
-		// Doing eCommerce tracking so unhook standard tracking from the footer
-		remove_action( 'wp_footer', array( $this, 'google_tracking_code' ) );
+		// Doing eCommerce tracking so unhook standard tracking from the Head
+		remove_action( 'wp_head', array( $this, 'google_tracking_code' ) );
 
 		// Get the order and output tracking code
 		$order = new WC_Order( $order_id );

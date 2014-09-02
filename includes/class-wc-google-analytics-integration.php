@@ -44,6 +44,9 @@ class WC_Google_Analytics extends WC_Integration {
 		// Event tracking code
 		add_action( 'woocommerce_after_add_to_cart_button', array( $this, 'add_to_cart' ) );
 		add_action( 'wp_footer', array( $this, 'loop_add_to_cart' ) );
+
+		// utm_nooverride parameter for Google AdWords
+		add_filter( 'woocommerce_get_return_url', array( $this, 'utm_nooverride' ) );
 	}
 
 
@@ -466,6 +469,25 @@ class WC_Google_Analytics extends WC_Integration {
 			return true;
 		}
 
+	}
+
+
+	/**
+	 * Add the utm_nooverride parameter to any return urls. This makes sure Google Adwords doesn't mistake the offsite gateway as the referrer.
+	 *
+	 * @access public
+	 * @param  string $type
+	 * @return string
+	 */
+	public function utm_nooverride( $return_url ) {
+
+		// we don't know if the URL already has the parameter so we should remove it just in case
+		$return_url = remove_query_arg( 'utm_nooverride', $return_url );
+
+		// now add the utm_nooverride query arg to the URL
+		$return_url = add_query_arg( 'utm_nooverride', '1', $return_url );
+
+		return $return_url;
 	}
 
 }

@@ -2,8 +2,8 @@
 Contributors: woothemes
 Tags: woocommerce, google analytics
 Requires at least: 3.8
-Tested up to: 3.8
-Stable tag: 1.2.0
+Tested up to: 4.0
+Stable tag: 1.2.1
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -47,6 +47,9 @@ Until you've updated to WooCommerce 2.1, this plugin puts itself in some sort of
 You can leave this plugin activated and it will seamlessly take over the integration that once was in the WooCommerce plugin, once you update to the next version.
 
 == Changelog ==
+
+= 1.2.1 - 17/09/2014 =
+ * Tweak   - Adding utmnooverride to return url for Google Adwords
 
 = 1.2.0 - 28/07/2014 =
  * Feature - Adding display advertising parameter to Universal Analytics

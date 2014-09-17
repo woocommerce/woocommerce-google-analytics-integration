@@ -477,6 +477,7 @@ class WC_Google_Analytics extends WC_Integration {
 	 *
 	 * @access public
 	 * @param  string $type
+	 * @since  1.2.1
 	 * @return string
 	 */
 	public function utm_nooverride( $return_url ) {

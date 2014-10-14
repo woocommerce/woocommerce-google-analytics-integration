@@ -31,6 +31,7 @@ class WC_Google_Analytics extends WC_Integration {
 		$this->ga_standard_tracking_enabled 	= $this->get_option( 'ga_standard_tracking_enabled' );
 		$this->ga_support_display_advertising 	= $this->get_option( 'ga_support_display_advertising' );
 		$this->ga_use_universal_analytics 	= $this->get_option( 'ga_use_universal_analytics' );
+		$this->ga_anonymize_enabled				= $this->get_option( 'ga_anonymize_enabled' );
 		$this->ga_ecommerce_tracking_enabled 	= $this->get_option( 'ga_ecommerce_tracking_enabled' );
 		$this->ga_event_tracking_enabled		= $this->get_option( 'ga_event_tracking_enabled' );
 
@@ -79,7 +80,7 @@ class WC_Google_Analytics extends WC_Integration {
 				'default' 			=> get_option('woocommerce_ga_standard_tracking_enabled') ? get_option('woocommerce_ga_standard_tracking_enabled') : 'no'  // Backwards compat
 			),
 			'ga_support_display_advertising' => array(
-				'label' 			=> __( 'Set the Google Analytics code to support Display Advertising. <a href="https://support.google.com/analytics/answer/2700409" target="_blank">Read More About Display Advertising</a>', 'woocommerce' ),
+				'label' 			=> __( 'Set the Google Analytics code to support Display Advertising. <a href="https://support.google.com/analytics/answer/2700409" target="_blank">Read more about Display Advertising</a>.', 'woocommerce' ),
 				'type' 				=> 'checkbox',
 				'checkboxgroup'		=> '',
 				'default' 			=> get_option('woocommerce_ga_support_display_advertising') ? get_option('woocommerce_ga_support_display_advertising') : 'no'  // Backwards compat
@@ -89,6 +90,12 @@ class WC_Google_Analytics extends WC_Integration {
 				'type' 				=> 'checkbox',
 				'checkboxgroup'		=> '',
 				'default' 			=> get_option('woocommerce_ga_use_universal_analytics') ? get_option('woocommerce_ga_use_universal_analytics') : 'no'  // Backwards compat
+			),
+			'ga_anonymize_enabled' => array(
+				'label' 			=> __( 'Anonymize IP addresses. Setting this option is mandatory in certain countries due to national privacy laws. <a href="https://support.google.com/analytics/answer/2763052" target="_blank">Read more about IP Anonymization</a>.', 'woocommerce' ),
+				'type' 				=> 'checkbox',
+				'checkboxgroup'		=> '',
+				'default' 			=> 'no'
 			),
 			'ga_ecommerce_tracking_enabled' => array(
 				'label' 			=> __( 'Add eCommerce tracking code to the thankyou page', 'woocommerce' ),
@@ -146,27 +153,36 @@ class WC_Google_Analytics extends WC_Integration {
 				$support_display_advertising = "ga('require', 'displayfeatures');";
 			}
 
+			$anonymize_enabled = '';
+			if ( 'yes' == $this->ga_anonymize_enabled ) {
+				$anonymize_enabled = "ga('set', 'anonymizeIp', true);";
+			}
+
 			echo "<script>
 			(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
 			(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
 			m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
 			})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
 
-			ga('create', '" . esc_js( $tracking_id ) . "', '" . $set_domain_name . "');
-			" . $support_display_advertising . "
+			ga('create', '" . esc_js( $tracking_id ) . "', '" . $set_domain_name . "');" . 
+			$support_display_advertising . 
+			$anonymize_enabled . "
 			ga('set', 'dimension1', '" . $loggedin . "');
 			ga('send', 'pageview');
 
 			</script>";
 
-		}
-		else {
+		} else {
 			if ( 'yes' == $this->ga_support_display_advertising ) {
 				$ga_url = "('https:' == document.location.protocol ? 'https://' : 'http://') + 'stats.g.doubleclick.net/dc.js'";
 			} else {
 				$ga_url = "('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js'";
 			}
 
+			$anonymize_enabled = '';
+			if ( 'yes' == $this->ga_anonymize_enabled ) {
+				$anonymize_enabled = "['_gat._anonymizeIp'],";
+			}
 
 			if ( ! empty( $this->ga_set_domain_name ) ) {
 				$set_domain_name = "['_setDomainName', '" . esc_js( $this->ga_set_domain_name ) . "'],\n";
@@ -178,7 +194,8 @@ class WC_Google_Analytics extends WC_Integration {
 
 				var _gaq = _gaq || [];
 				_gaq.push(
-					['_setAccount', '" . esc_js( $tracking_id ) . "'], " . $set_domain_name . "
+					['_setAccount', '" . esc_js( $tracking_id ) . "'], " . $set_domain_name . 
+					$anonymize_enabled . "
 					['_setCustomVar', 1, 'logged-in', '" . $loggedin . "', 1],
 					['_trackPageview']
 				);
@@ -243,14 +260,20 @@ class WC_Google_Analytics extends WC_Integration {
 				$support_display_advertising = "ga('require', 'displayfeatures');";
 			}
 
+			$anonymize_enabled = '';
+			if ( 'yes' == $this->ga_anonymize_enabled ) {
+				$anonymize_enabled = "ga('set', 'anonymizeIp', true);";
+			}
+
 			$code = "
 			(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
 			(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
 			m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
 			})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
 
-			ga('create', '" . esc_js( $tracking_id ) . "', '" . $set_domain_name . "');
-			" . $support_display_advertising . "
+			ga('create', '" . esc_js( $tracking_id ) . "', '" . $set_domain_name . "');" . 
+			$support_display_advertising . 
+			$anonymize_enabled . "
 			ga('set', 'dimension1', '" . $loggedin . "');
 			ga('send', 'pageview');
 
@@ -305,6 +328,11 @@ class WC_Google_Analytics extends WC_Integration {
 				$ga_url = "('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js'";
 			}
 
+			$anonymize_enabled = '';
+			if ( 'yes' == $this->ga_anonymize_enabled ) {
+				$anonymize_enabled = "['_gat._anonymizeIp'],";
+			}
+
 			if ( ! empty( $this->ga_set_domain_name ) ) {
 				$set_domain_name = "['_setDomainName', '" . esc_js( $this->ga_set_domain_name ) . "'],";
 			} else {
@@ -315,7 +343,8 @@ class WC_Google_Analytics extends WC_Integration {
 				var _gaq = _gaq || [];
 
 				_gaq.push(
-					['_setAccount', '" . esc_js( $tracking_id ) . "'], " . $set_domain_name . "
+					['_setAccount', '" . esc_js( $tracking_id ) . "'], " . $set_domain_name .
+					$anonymize_enabled . "
 					['_setCustomVar', 1, 'logged-in', '" . esc_js( $loggedin ) . "', 1],
 					['_trackPageview']
 				);

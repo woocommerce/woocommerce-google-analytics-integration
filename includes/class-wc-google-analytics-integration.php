@@ -273,7 +273,7 @@ class WC_Google_Analytics extends WC_Integration {
 					$code .= "ga('ecommerce:addItem', {";
 					$code .= "'id': '" . esc_js( $order->get_order_number() ) . "',";
 					$code .= "'name': '" . esc_js( $item['name'] ) . "',";
-					$code .= "'sku': '" . esc_js( $_product->get_sku() ? __( 'SKU:', 'woocommerce' ) . ' ' . $_product->get_sku() : $_product->id ) . "',";
+					$code .= "'sku': '" . esc_js( $_product->get_sku() ? $_product->get_sku() : $_product->id ) . "',";
 
 					if ( isset( $_product->variation_data ) ) {
 
@@ -339,7 +339,7 @@ class WC_Google_Analytics extends WC_Integration {
 
 					$code .= "_gaq.push(['_addItem',";
 					$code .= "'" . esc_js( $order->get_order_number() ) . "',";
-					$code .= "'" . esc_js( $_product->get_sku() ? __( 'SKU:', 'woocommerce' ) . ' ' . $_product->get_sku() : $_product->id ) . "',";
+					$code .= "'" . esc_js( $_product->get_sku() ? $_product->get_sku() : $_product->id ) . "',";
 					$code .= "'" . esc_js( $item['name'] ) . "',";
 
 					if ( isset( $_product->variation_data ) ) {

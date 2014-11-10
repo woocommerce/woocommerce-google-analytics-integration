@@ -38,7 +38,7 @@ class WC_Google_Analytics extends WC_Integration {
 		add_action( 'woocommerce_update_options_integration_google_analytics', array( $this, 'process_admin_options') );
 
 		// Tracking code
-		add_action( 'wp_footer', array( $this, 'google_tracking_code' ) );
+		add_action( 'wp_head', array( $this, 'google_tracking_code' ), 100);
 		add_action( 'woocommerce_thankyou', array( $this, 'ecommerce_tracking_code' ) );
 
 		// Event tracking code

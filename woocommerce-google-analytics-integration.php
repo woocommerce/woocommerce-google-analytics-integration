@@ -5,7 +5,7 @@
  * Description: Allows Google Analytics tracking code to be inserted into WooCommerce store pages.
  * Author: WooThemes
  * Author URI: http://woothemes.com
- * Version: 1.2.2
+ * Version: 1.3.0
  * License: GPLv2 or later
  * Text Domain: woocommerce-google-analytics-integration
  * Domain Path: languages/
@@ -27,7 +27,7 @@ class WC_Google_Analytics_Integration {
 	 *
 	 * @var string
 	 */
-	const VERSION = '1.2.2';
+	const VERSION = '1.3.0';
 
 	/**
 	 * Instance of this class.

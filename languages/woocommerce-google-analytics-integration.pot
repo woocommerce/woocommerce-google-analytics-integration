@@ -1,0 +1,132 @@
+# Copyright (C) 2014 WooThemes
+# This file is distributed under the GPLv2 or later.
+msgid ""
+msgstr ""
+"Project-Id-Version: WooCommerce Google Analytics Integration 1.3.0\n"
+"Report-Msgid-Bugs-To: "
+"https://wordpress.org/support/plugin/woocommerce-google-analytics-"
+"integration\n"
+"POT-Creation-Date: 2014-11-11 21:09:47+00:00\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"PO-Revision-Date: 2014-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"
+"X-Generator: grunt-wp-i18n 0.4.9\n"
+
+#: includes/class-wc-google-analytics.php:23
+msgid "Google Analytics"
+msgstr ""
+
+#: includes/class-wc-google-analytics.php:24
+msgid ""
+"Google Analytics is a free service offered by Google that generates "
+"detailed statistics about the visitors to a website."
+msgstr ""
+
+#: includes/class-wc-google-analytics.php:63
+msgid "Google Analytics ID"
+msgstr ""
+
+#: includes/class-wc-google-analytics.php:64
+msgid ""
+"Log into your google analytics account to find your ID. e.g. "
+"<code>UA-XXXXX-X</code>"
+msgstr ""
+
+#: includes/class-wc-google-analytics.php:69
+msgid "Set Domain Name"
+msgstr ""
+
+#: includes/class-wc-google-analytics.php:70
+msgid ""
+"(Optional) Sets the <code>_setDomainName</code> variable. <a "
+"href=\"%s\">See here for more information</a>."
+msgstr ""
+
+#: includes/class-wc-google-analytics.php:75
+msgid "Tracking code"
+msgstr ""
+
+#: includes/class-wc-google-analytics.php:76
+msgid ""
+"Add tracking code to your site. You don't need to enable this if using a "
+"3rd party analytics plugin."
+msgstr ""
+
+#: includes/class-wc-google-analytics.php:82
+msgid ""
+"Set the Google Analytics code to support Display Advertising. <a "
+"href=\"https://support.google.com/analytics/answer/2700409\" "
+"target=\"_blank\">Read more about Display Advertising</a>."
+msgstr ""
+
+#: includes/class-wc-google-analytics.php:88
+msgid "Use Universal Analytics instead of Classic Google Analytics"
+msgstr ""
+
+#: includes/class-wc-google-analytics.php:94
+msgid ""
+"Anonymize IP addresses. Setting this option is mandatory in certain "
+"countries due to national privacy laws. <a "
+"href=\"https://support.google.com/analytics/answer/2763052\" "
+"target=\"_blank\">Read more about IP Anonymization</a>."
+msgstr ""
+
+#: includes/class-wc-google-analytics.php:100
+msgid "Add eCommerce tracking code to the thankyou page"
+msgstr ""
+
+#: includes/class-wc-google-analytics.php:106
+msgid "Add event tracking code for add to cart actions"
+msgstr ""
+
+#: includes/class-wc-google-analytics.php:178
+#: includes/class-wc-google-analytics.php:276
+msgid "Guest"
+msgstr ""
+
+#: includes/class-wc-google-analytics.php:478
+#: includes/class-wc-google-analytics.php:499
+msgid "Products"
+msgstr ""
+
+#: includes/class-wc-google-analytics.php:479
+#: includes/class-wc-google-analytics.php:500
+msgid "Add to Cart"
+msgstr ""
+
+#: includes/class-wc-google-analytics.php:480
+msgid "SKU:"
+msgstr ""
+
+#: woocommerce-google-analytics-integration.php:89
+msgid "WooCommerce Google Analytics depends on the last version of %s to work!"
+msgstr ""
+
+#: woocommerce-google-analytics-integration.php:89
+msgid "WooCommerce"
+msgstr ""
+
+#. Plugin Name of the plugin/theme
+msgid "WooCommerce Google Analytics Integration"
+msgstr ""
+
+#. Plugin URI of the plugin/theme
+msgid "http://wordpress.org/plugins/woocommerce-google-analytics-integration/"
+msgstr ""
+
+#. Description of the plugin/theme
+msgid ""
+"Allows Google Analytics tracking code to be inserted into WooCommerce store "
+"pages."
+msgstr ""
+
+#. Author of the plugin/theme
+msgid "WooThemes"
+msgstr ""
+
+#. Author URI of the plugin/theme
+msgid "http://woothemes.com"
+msgstr ""

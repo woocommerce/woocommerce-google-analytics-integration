@@ -514,17 +514,17 @@ class WC_Google_Analytics extends WC_Integration {
 	private function event_tracking_code( $parameters, $selector ) {
 		$parameters = apply_filters( 'woocommerce_ga_event_tracking_parameters', $parameters );
 
-		if ( $this->ga_use_universal_analytics == 'yes' ) {
+		if ( 'yes' == $this->ga_use_universal_analytics ) {
 			$track_event = "ga('send', 'event', %s, %s, %s);";
 		} else {
 			$track_event = "_gaq.push(['_trackEvent', %s, %s, %s]);";
 		}
 
 		wc_enqueue_js( "
-			$('" . $selector . "').click(function() {
-				" . sprintf( $track_event, $parameters['category'], $parameters['action'], $parameters['label'] ) . "
-			});
-		" );
+	$( '" . $selector . "' ).click( function() {
+		" . sprintf( $track_event, $parameters['category'], $parameters['action'], $parameters['label'] ) . "
+	});
+" );
 	}
 
 	/**

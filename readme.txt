@@ -3,7 +3,7 @@ Contributors: woothemes
 Tags: woocommerce, google analytics
 Requires at least: 3.8
 Tested up to: 4.0
-Stable tag: 1.2.2
+Stable tag: 1.3.0
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -50,32 +50,42 @@ You can leave this plugin activated and it will seamlessly take over the integra
 
 Include the following html code snippet within the page where you want to have the opt-out, e.g. the your Imprint our Data Privacy page:
 
-```html
-You can prevent Google Analytics from tracking you by clicking the following link. An opt-out cookie will be set, which will prevent you being tracked when visiting this website in the future:
-<a href=”javascript:gaOptout()”>Deactivate Google Analytics</a>.
-```
-Exact wording depends on the national data privacy laws and should be adjusted.
+https://gist.github.com/claudiosmweb/b12d15b245be21c92ebc
 
+Exact wording depends on the national data privacy laws and should be adjusted.
 
 == Changelog ==
 
+= 1.3.0 - xx/11/2014 =
+
+* Feature  - Added the transaction currency in the tracking code
+* Feature  - Add data privacy option that are mandatory in some countries
+* Tweak    - Moved the tracking code to the head of the page
+* Tweak    - Remove the "SKU" prefix to the sku for addItem
+* Refactor - Integration class reformulated
+
 = 1.2.2 - 15/10/2014 =
- * Feature - Adding option to anonymize IP addresses
- * Feature - Adding gaOptOut function to be called from any page for OptOut
+
+* Feature - Adding option to anonymize IP addresses
+* Feature - Adding gaOptOut function to be called from any page for OptOut
 
 = 1.2.1 - 17/09/2014 =
- * Tweak   - Adding utmnooverride to return url for Google Adwords
+
+* Tweak   - Adding utmnooverride to return url for Google Adwords
 
 = 1.2.0 - 28/07/2014 =
- * Feature - Adding display advertising parameter to Universal Analytics
- * Fix     - Using get_total_shipping() instead of get_shipping
- * Fix     - Using wc_enqueue_js() instead of $woocommerce->add_inline_js(
- * Tweak   - Updating plugin FAQ
- * Tweak   - Adding parenthesis for clarity
+
+* Feature - Adding display advertising parameter to Universal Analytics
+* Fix     - Using get_total_shipping() instead of get_shipping
+* Fix     - Using wc_enqueue_js() instead of $woocommerce->add_inline_js(
+* Tweak   - Updating plugin FAQ
+* Tweak   - Adding parenthesis for clarity
 
 = 1.1 - 29/05/2014 =
- * Added option to enable Display Advertising
- * Added compatibility support for WooCommerce 2.1 beta releases
+
+* Added option to enable Display Advertising
+* Added compatibility support for WooCommerce 2.1 beta releases
 
 = 1.0 - 22/11/2013 =
- * Initial release
+
+* Initial release

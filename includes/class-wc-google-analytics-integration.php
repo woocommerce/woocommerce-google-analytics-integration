@@ -176,8 +176,8 @@ class WC_Google_Analytics extends WC_Integration {
 			m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
 			})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
 
-			ga('create', '" . esc_js( $tracking_id ) . "', '" . $set_domain_name . "');" . 
-			$support_display_advertising . 
+			ga('create', '" . esc_js( $tracking_id ) . "', '" . $set_domain_name . "');" .
+			$support_display_advertising .
 			$anonymize_enabled . "
 			ga('set', 'dimension1', '" . $loggedin . "');
 			ga('send', 'pageview');
@@ -218,7 +218,7 @@ class WC_Google_Analytics extends WC_Integration {
 
 				var _gaq = _gaq || [];
 				_gaq.push(
-					['_setAccount', '" . esc_js( $tracking_id ) . "'], " . $set_domain_name . 
+					['_setAccount', '" . esc_js( $tracking_id ) . "'], " . $set_domain_name .
 					$anonymize_enabled . "
 					['_setCustomVar', 1, 'logged-in', '" . $loggedin . "', 1],
 					['_trackPageview']
@@ -294,13 +294,19 @@ class WC_Google_Analytics extends WC_Integration {
 			(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
 			m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
 			})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+			";
 
-			ga('create', '" . esc_js( $tracking_id ) . "', '" . $set_domain_name . "');" . 
-			$support_display_advertising . 
-			$anonymize_enabled . "
-			ga('set', 'dimension1', '" . $loggedin . "');
-			ga('send', 'pageview');
+			if( 'no' != $this->ga_standard_tracking_enabled ) {
+				$code .= "
+				ga('create', '" . esc_js( $tracking_id ) . "', '" . $set_domain_name . "');" .
+				$support_display_advertising .
+				$anonymize_enabled . "
+				ga('set', 'dimension1', '" . $loggedin . "');
+				ga('send', 'pageview');
+				";
+			}
 
+			$code .= "
 			ga('require', 'ecommerce', 'ecommerce.js');
 
 			ga('ecommerce:addTransaction', {
@@ -345,7 +351,6 @@ class WC_Google_Analytics extends WC_Integration {
 			}
 
 			$code .= "ga('ecommerce:send');      // Send transaction and item data to Google Analytics.";
-
 		} else {
 			if ( $this->ga_support_display_advertising == 'yes' ) {
 				$ga_url = "('https:' == document.location.protocol ? 'https://' : 'http://') + 'stats.g.doubleclick.net/dc.js'";
@@ -366,15 +371,21 @@ class WC_Google_Analytics extends WC_Integration {
 
 			$code = "
 				var _gaq = _gaq || [];
+			";
 
-				_gaq.push(
-					['_setAccount', '" . esc_js( $tracking_id ) . "'], " . $set_domain_name .
-					$anonymize_enabled . "
-					['_setCustomVar', 1, 'logged-in', '" . esc_js( $loggedin ) . "', 1],
-					['_trackPageview'],
-					['_set', 'currencyCode', '" . esc_js( $order->get_order_currency() ) . "']
-				);
+			if( 'no' != $this->ga_standard_tracking_enabled ) {
+				$code .= "
+					_gaq.push(
+						['_setAccount', '" . esc_js( $tracking_id ) . "'], " . $set_domain_name .
+						$anonymize_enabled . "
+						['_setCustomVar', 1, 'logged-in', '" . esc_js( $loggedin ) . "', 1],
+						['_trackPageview'],
+						['_set', 'currencyCode', '" . esc_js( $order->get_order_currency() ) . "']
+					);
+				";
+			}
 
+			$code .= "
 				_gaq.push(['_addTrans',
 					'" . esc_js( $order->get_order_number() ) . "', 	// order ID - required
 					'" . esc_js( get_bloginfo( 'name' ) ) . "',  		// affiliation or store name
@@ -420,13 +431,17 @@ class WC_Google_Analytics extends WC_Integration {
 
 			$code .= "
 				_gaq.push(['_trackTrans']); 					// submits transaction to the Analytics servers
-
-				(function() {
-					var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-					ga.src = ".$ga_url.";
-					var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-				})();
 			";
+
+			if( 'no' != $this->ga_standard_tracking_enabled ) {
+				$code .= "
+					(function() {
+						var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+						ga.src = ".$ga_url.";
+						var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+					})();
+				";
+			}
 		}
 
 		echo "<script>

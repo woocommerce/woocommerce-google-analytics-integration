@@ -158,31 +158,36 @@ class WC_Google_Analytics extends WC_Integration {
 				$anonymize_enabled = "ga('set', 'anonymizeIp', true);";
 			}
 
-			echo "<script>
-			var gaProperty = '" . esc_js( $tracking_id ) . "';
-			var disableStr = 'ga-disable-' + gaProperty;
-			if (document.cookie.indexOf(disableStr + '=true') > -1) {
-				window[disableStr] = true;
-			}
-			function gaOptout() {
-				document.cookie = disableStr + '=true; expires=Thu, 31 Dec 2099 23:59:59 UTC; path=/';
-				window[disableStr] = true;
-			}
-			</script>";
+			echo "
+<!-- WooCommerce Google Analytics Integration -->
+<script>
+	var gaProperty = '" . esc_js( $tracking_id ) . "';
+	var disableStr = 'ga-disable-' + gaProperty;
+	if (document.cookie.indexOf(disableStr + '=true') > -1) {
+		window[disableStr] = true;
+	}
+	function gaOptout() {
+		document.cookie = disableStr + '=true; expires=Thu, 31 Dec 2099 23:59:59 UTC; path=/';
+		window[disableStr] = true;
+	}
+</script>";
 
-			echo "<script>
-			(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-			(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-			m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-			})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+			echo "
+<script>
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
 
-			ga('create', '" . esc_js( $tracking_id ) . "', '" . $set_domain_name . "');" .
-			$support_display_advertising .
-			$anonymize_enabled . "
-			ga('set', 'dimension1', '" . $loggedin . "');
-			ga('send', 'pageview');
+ga('create', '" . esc_js( $tracking_id ) . "', '" . $set_domain_name . "');" .
+$support_display_advertising .
+$anonymize_enabled . "
+ga('set', 'dimension1', '" . $loggedin . "');
+ga('send', 'pageview');
 
-			</script>";
+</script>
+<!-- /WooCommerce Google Analytics Integration -->
+";
 
 		} else {
 			if ( 'yes' == $this->ga_support_display_advertising ) {
@@ -202,35 +207,37 @@ class WC_Google_Analytics extends WC_Integration {
 				$set_domain_name = '';
 			}
 
-			echo "<script>
-			var gaProperty = '" . esc_js( $tracking_id ) . "';
-			var disableStr = 'ga-disable-' + gaProperty;
-			if (document.cookie.indexOf(disableStr + '=true') > -1) {
-				window[disableStr] = true;
-			}
-			function gaOptout() {
-				document.cookie = disableStr + '=true; expires=Thu, 31 Dec 2099 23:59:59 UTC; path=/';
-				window[disableStr] = true;
-			}
-			</script>";
+			echo "
+<!-- WooCommerce Google Analytics Integration -->
+<script>
+	var gaProperty = '" . esc_js( $tracking_id ) . "';
+	var disableStr = 'ga-disable-' + gaProperty;
+	if (document.cookie.indexOf(disableStr + '=true') > -1) {
+		window[disableStr] = true;
+	}
+	function gaOptout() {
+		document.cookie = disableStr + '=true; expires=Thu, 31 Dec 2099 23:59:59 UTC; path=/';
+		window[disableStr] = true;
+	}
+</script>
+<script type='text/javascript'>
+	var _gaq = _gaq || [];
+	_gaq.push(
+		['_setAccount', '" . esc_js( $tracking_id ) . "'], " . $set_domain_name .
+		$anonymize_enabled . "
+		['_setCustomVar', 1, 'logged-in', '" . $loggedin . "', 1],
+		['_trackPageview']
+	);
 
-			echo "<script type='text/javascript'>
+	(function() {
+		var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+		ga.src = " . $ga_url . ";
+		var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+	})();
 
-				var _gaq = _gaq || [];
-				_gaq.push(
-					['_setAccount', '" . esc_js( $tracking_id ) . "'], " . $set_domain_name .
-					$anonymize_enabled . "
-					['_setCustomVar', 1, 'logged-in', '" . $loggedin . "', 1],
-					['_trackPageview']
-				);
-
-				(function() {
-					var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-					ga.src = ".$ga_url.";
-					var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-				})();
-
-			</script>";
+</script>
+<!-- /WooCommerce Google Analytics Integration -->
+";
 		}
 	}
 
@@ -289,28 +296,28 @@ class WC_Google_Analytics extends WC_Integration {
 			}
 
 			$code = "
-			(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-			(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-			m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-			})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
 
-			ga('create', '" . esc_js( $tracking_id ) . "', '" . $set_domain_name . "');" .
-			$support_display_advertising .
-			$anonymize_enabled . "
-			ga('set', 'dimension1', '" . $loggedin . "');
-			ga('send', 'pageview');
+	ga('create', '" . esc_js( $tracking_id ) . "', '" . $set_domain_name . "');" .
+	$support_display_advertising .
+	$anonymize_enabled . "
+	ga('set', 'dimension1', '" . $loggedin . "');
+	ga('send', 'pageview');
 
-			ga('require', 'ecommerce', 'ecommerce.js');
+	ga('require', 'ecommerce', 'ecommerce.js');
 
-			ga('ecommerce:addTransaction', {
-				'id': '" . esc_js( $order->get_order_number() ) . "',         // Transaction ID. Required
-				'affiliation': '" . esc_js( get_bloginfo( 'name' ) ) . "',    // Affiliation or store name
-				'revenue': '" . esc_js( $order->get_total() ) . "',           // Grand Total
-				'shipping': '" . esc_js( $order->get_total_shipping() ) . "', // Shipping
-				'tax': '" . esc_js( $order->get_total_tax() ) . "',           // Tax
-				'currency': '" . esc_js( $order->get_order_currency() ) . "'  // Currency
-			});
-			";
+	ga('ecommerce:addTransaction', {
+		'id': '" . esc_js( $order->get_order_number() ) . "',         // Transaction ID. Required
+		'affiliation': '" . esc_js( get_bloginfo( 'name' ) ) . "',    // Affiliation or store name
+		'revenue': '" . esc_js( $order->get_total() ) . "',           // Grand Total
+		'shipping': '" . esc_js( $order->get_total_shipping() ) . "', // Shipping
+		'tax': '" . esc_js( $order->get_total_tax() ) . "',           // Tax
+		'currency': '" . esc_js( $order->get_order_currency() ) . "'  // Currency
+	});
+";
 
 			// Order items
 			if ( $order->get_items() ) {
@@ -364,27 +371,27 @@ class WC_Google_Analytics extends WC_Integration {
 			}
 
 			$code = "
-				var _gaq = _gaq || [];
+	var _gaq = _gaq || [];
 
-				_gaq.push(
-					['_setAccount', '" . esc_js( $tracking_id ) . "'], " . $set_domain_name .
-					$anonymize_enabled . "
-					['_setCustomVar', 1, 'logged-in', '" . esc_js( $loggedin ) . "', 1],
-					['_trackPageview'],
-					['_set', 'currencyCode', '" . esc_js( $order->get_order_currency() ) . "']
-				);
+	_gaq.push(
+		['_setAccount', '" . esc_js( $tracking_id ) . "'], " . $set_domain_name .
+		$anonymize_enabled . "
+		['_setCustomVar', 1, 'logged-in', '" . esc_js( $loggedin ) . "', 1],
+		['_trackPageview'],
+		['_set', 'currencyCode', '" . esc_js( $order->get_order_currency() ) . "']
+	);
 
-				_gaq.push(['_addTrans',
-					'" . esc_js( $order->get_order_number() ) . "', 	// order ID - required
-					'" . esc_js( get_bloginfo( 'name' ) ) . "',  		// affiliation or store name
-					'" . esc_js( $order->get_total() ) . "',   	    	// total - required
-					'" . esc_js( $order->get_total_tax() ) . "',    	// tax
-					'" . esc_js( $order->get_total_shipping() ) . "',	// shipping
-					'" . esc_js( $order->billing_city ) . "',       	// city
-					'" . esc_js( $order->billing_state ) . "',      	// state or province
-					'" . esc_js( $order->billing_country ) . "'     	// country
-				]);
-			";
+	_gaq.push(['_addTrans',
+		'" . esc_js( $order->get_order_number() ) . "', 	// order ID - required
+		'" . esc_js( get_bloginfo( 'name' ) ) . "',  		// affiliation or store name
+		'" . esc_js( $order->get_total() ) . "',   	    	// total - required
+		'" . esc_js( $order->get_total_tax() ) . "',    	// tax
+		'" . esc_js( $order->get_total_shipping() ) . "',	// shipping
+		'" . esc_js( $order->billing_city ) . "',       	// city
+		'" . esc_js( $order->billing_state ) . "',      	// state or province
+		'" . esc_js( $order->billing_country ) . "'     	// country
+	]);
+";
 
 			// Order items
 			if ( $order->get_items() ) {
@@ -418,29 +425,32 @@ class WC_Google_Analytics extends WC_Integration {
 			}
 
 			$code .= "
-				_gaq.push(['_trackTrans']); 					// submits transaction to the Analytics servers
+	_gaq.push(['_trackTrans']); // submits transaction to the Analytics servers
 
-				(function() {
-					var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-					ga.src = " . $ga_url . ";
-					var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-				})();
-			";
+	(function() {
+		var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+		ga.src = " . $ga_url . ";
+		var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+	})();
+";
 		}
 
-		echo "<script>
-		var gaProperty = '" . esc_js( $tracking_id ) . "';
-		var disableStr = 'ga-disable-' + gaProperty;
-		if (document.cookie.indexOf(disableStr + '=true') > -1) {
-			window[disableStr] = true;
-		}
-		function gaOptout() {
-			document.cookie = disableStr + '=true; expires=Thu, 31 Dec 2099 23:59:59 UTC; path=/';
-			window[disableStr] = true;
-		}
-		</script>";
-
-		echo '<script type="text/javascript">' . $code . '</script>';
+		echo "
+<!-- WooCommerce Google Analytics Integration -->
+<script>
+	var gaProperty = '" . esc_js( $tracking_id ) . "';
+	var disableStr = 'ga-disable-' + gaProperty;
+	if (document.cookie.indexOf(disableStr + '=true') > -1) {
+		window[disableStr] = true;
+	}
+	function gaOptout() {
+		document.cookie = disableStr + '=true; expires=Thu, 31 Dec 2099 23:59:59 UTC; path=/';
+		window[disableStr] = true;
+	}
+</script>
+<script type='text/javascript'>$code</script>
+<!-- /WooCommerce Google Analytics Integration -->
+";
 
 		update_post_meta( $order_id, '_ga_tracked', 1 );
 	}

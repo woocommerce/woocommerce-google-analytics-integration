@@ -7,3 +7,4 @@ Thumbs.db
 .settings*
 sftp-config.json
 deploy.sh
+node_modules/

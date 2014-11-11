@@ -319,7 +319,7 @@ class WC_Google_Analytics extends WC_Integration {
 					['_setAccount', '" . esc_js( $tracking_id ) . "'], " . $set_domain_name . "
 					['_setCustomVar', 1, 'logged-in', '" . esc_js( $loggedin ) . "', 1],
 					['_trackPageview'],
-					['_set', 'currencyCode', '" . esc_js( $order->get_order_currency() ) . "'],
+					['_set', 'currencyCode', '" . esc_js( $order->get_order_currency() ) . "']
 				);
 
 				_gaq.push(['_addTrans',

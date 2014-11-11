@@ -119,8 +119,6 @@ class WC_Google_Analytics extends WC_Integration {
 	 * @return void
 	 */
 	public function google_tracking_code() {
-		global $woocommerce;
-
 		if ( is_admin() || current_user_can( 'manage_options' ) || 'no' == $this->ga_standard_tracking_enabled ) {
 			return;
 		}
@@ -249,8 +247,6 @@ ga('send', 'pageview');
 	 * @return void
 	 */
 	public function ecommerce_tracking_code( $order_id ) {
-		global $woocommerce;
-
 		if ( 'no' == $this->ga_ecommerce_tracking_enabled || current_user_can( 'manage_options' ) || get_post_meta( $order_id, '_ga_tracked', true ) == 1 ) {
 			return;
 		}
@@ -523,8 +519,6 @@ ga('send', 'pageview');
 	 * @return void
 	 */
 	private function event_tracking_code( $parameters, $selector ) {
-		global $woocommerce;
-
 		$parameters = apply_filters( 'woocommerce_ga_event_tracking_parameters', $parameters );
 
 		if ( $this->ga_use_universal_analytics == 'yes' ) {

@@ -304,11 +304,12 @@ class WC_Google_Analytics extends WC_Integration {
 			ga('require', 'ecommerce', 'ecommerce.js');
 
 			ga('ecommerce:addTransaction', {
-				'id': '" . esc_js( $order->get_order_number() ) . "',      // Transaction ID. Required
-				'affiliation': '" . esc_js( get_bloginfo( 'name' ) ) . "', // Affiliation or store name
-				'revenue': '" . esc_js( $order->get_total() ) . "',        // Grand Total
-				'shipping': '" . esc_js( $order->get_total_shipping() ) . "',    // Shipping
-				'tax': '" . esc_js( $order->get_total_tax() ) . "'         // Tax
+				'id': '" . esc_js( $order->get_order_number() ) . "',         // Transaction ID. Required
+				'affiliation': '" . esc_js( get_bloginfo( 'name' ) ) . "',    // Affiliation or store name
+				'revenue': '" . esc_js( $order->get_total() ) . "',           // Grand Total
+				'shipping': '" . esc_js( $order->get_total_shipping() ) . "', // Shipping
+				'tax': '" . esc_js( $order->get_total_tax() ) . "',           // Tax
+				'currency': '" . esc_js( $order->get_order_currency() ) . "'  // Currency
 			});
 			";
 
@@ -370,7 +371,8 @@ class WC_Google_Analytics extends WC_Integration {
 					['_setAccount', '" . esc_js( $tracking_id ) . "'], " . $set_domain_name .
 					$anonymize_enabled . "
 					['_setCustomVar', 1, 'logged-in', '" . esc_js( $loggedin ) . "', 1],
-					['_trackPageview']
+					['_trackPageview'],
+					['_set', 'currencyCode', '" . esc_js( $order->get_order_currency() ) . "']
 				);
 
 				_gaq.push(['_addTrans',

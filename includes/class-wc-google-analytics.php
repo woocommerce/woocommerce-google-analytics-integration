@@ -1,45 +1,47 @@
 <?php
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
 
 /**
  * Google Analytics Integration
  *
  * Allows tracking code to be inserted into store pages.
  *
- * @class 		WC_Google_Analytics
- * @extends		WC_Integration
+ * @class   WC_Google_Analytics
+ * @extends WC_Integration
  */
 class WC_Google_Analytics extends WC_Integration {
 
 	/**
 	 * Init and hook in the integration.
 	 *
-	 * @access public
 	 * @return void
 	 */
 	public function __construct() {
 		$this->id					= 'google_analytics';
-		$this->method_title     	= __( 'Google Analytics', 'woocommerce' );
-		$this->method_description	= __( 'Google Analytics is a free service offered by Google that generates detailed statistics about the visitors to a website.', 'woocommerce' );
+		$this->method_title     	= __( 'Google Analytics', 'woocommerce-google-analytics-integration' );
+		$this->method_description	= __( 'Google Analytics is a free service offered by Google that generates detailed statistics about the visitors to a website.', 'woocommerce-google-analytics-integration' );
 
 		// Load the settings.
 		$this->init_form_fields();
 		$this->init_settings();
 
 		// Define user set variables
-		$this->ga_id 							= $this->get_option( 'ga_id' );
-		$this->ga_set_domain_name               = $this->get_option( 'ga_set_domain_name' );
-		$this->ga_standard_tracking_enabled 	= $this->get_option( 'ga_standard_tracking_enabled' );
-		$this->ga_support_display_advertising 	= $this->get_option( 'ga_support_display_advertising' );
-		$this->ga_use_universal_analytics 	= $this->get_option( 'ga_use_universal_analytics' );
-		$this->ga_anonymize_enabled				= $this->get_option( 'ga_anonymize_enabled' );
-		$this->ga_ecommerce_tracking_enabled 	= $this->get_option( 'ga_ecommerce_tracking_enabled' );
-		$this->ga_event_tracking_enabled		= $this->get_option( 'ga_event_tracking_enabled' );
+		$this->ga_id                          = $this->get_option( 'ga_id' );
+		$this->ga_set_domain_name             = $this->get_option( 'ga_set_domain_name' );
+		$this->ga_standard_tracking_enabled   = $this->get_option( 'ga_standard_tracking_enabled' );
+		$this->ga_support_display_advertising = $this->get_option( 'ga_support_display_advertising' );
+		$this->ga_use_universal_analytics     = $this->get_option( 'ga_use_universal_analytics' );
+		$this->ga_anonymize_enabled           = $this->get_option( 'ga_anonymize_enabled' );
+		$this->ga_ecommerce_tracking_enabled  = $this->get_option( 'ga_ecommerce_tracking_enabled' );
+		$this->ga_event_tracking_enabled      = $this->get_option( 'ga_event_tracking_enabled' );
 
 		// Actions
 		add_action( 'woocommerce_update_options_integration_google_analytics', array( $this, 'process_admin_options') );
 
 		// Tracking code
-		add_action( 'wp_head', array( $this, 'google_tracking_code' ), 100);
+		add_action( 'wp_head', array( $this, 'google_tracking_code' ), 100 );
 		add_action( 'woocommerce_thankyou', array( $this, 'ecommerce_tracking_code' ) );
 
 		// Event tracking code
@@ -50,98 +52,96 @@ class WC_Google_Analytics extends WC_Integration {
 		add_filter( 'woocommerce_get_return_url', array( $this, 'utm_nooverride' ) );
 	}
 
-
 	/**
 	 * Initialise Settings Form Fields
 	 *
-	 * @access public
 	 * @return void
 	 */
-	function init_form_fields() {
+	public function init_form_fields() {
 
 		$this->form_fields = array(
 			'ga_id' => array(
-				'title' 			=> __( 'Google Analytics ID', 'woocommerce' ),
-				'description' 		=> __( 'Log into your google analytics account to find your ID. e.g. <code>UA-XXXXX-X</code>', 'woocommerce' ),
+				'title' 			=> __( 'Google Analytics ID', 'woocommerce-google-analytics-integration' ),
+				'description' 		=> __( 'Log into your google analytics account to find your ID. e.g. <code>UA-XXXXX-X</code>', 'woocommerce-google-analytics-integration' ),
 				'type' 				=> 'text',
-		    	'default' 			=> get_option('woocommerce_ga_id') // Backwards compat
+				'default' 			=> get_option( 'woocommerce_ga_id' ) // Backwards compat
 			),
 			'ga_set_domain_name' => array(
-				'title' 			=> __( 'Set Domain Name', 'woocommerce' ),
-				'description' 		=> sprintf( __( '(Optional) Sets the <code>_setDomainName</code> variable. <a href="%s">See here for more information</a>.', 'woocommerce' ), 'https://developers.google.com/analytics/devguides/collection/gajs/gaTrackingSite#multipleDomains' ),
+				'title' 			=> __( 'Set Domain Name', 'woocommerce-google-analytics-integration' ),
+				'description' 		=> sprintf( __( '(Optional) Sets the <code>_setDomainName</code> variable. <a href="%s">See here for more information</a>.', 'woocommerce-google-analytics-integration' ), 'https://developers.google.com/analytics/devguides/collection/gajs/gaTrackingSite#multipleDomains' ),
 				'type' 				=> 'text',
-		    	'default' 			=> ''
+				'default' 			=> ''
 			),
 			'ga_standard_tracking_enabled' => array(
-				'title' 			=> __( 'Tracking code', 'woocommerce' ),
-				'label' 			=> __( 'Add tracking code to your site. You don\'t need to enable this if using a 3rd party analytics plugin.', 'woocommerce' ),
+				'title' 			=> __( 'Tracking code', 'woocommerce-google-analytics-integration' ),
+				'label' 			=> __( 'Add tracking code to your site. You don\'t need to enable this if using a 3rd party analytics plugin.', 'woocommerce-google-analytics-integration' ),
 				'type' 				=> 'checkbox',
 				'checkboxgroup'		=> 'start',
-				'default' 			=> get_option('woocommerce_ga_standard_tracking_enabled') ? get_option('woocommerce_ga_standard_tracking_enabled') : 'no'  // Backwards compat
+				'default' 			=> get_option( 'woocommerce_ga_standard_tracking_enabled' ) ? get_option( 'woocommerce_ga_standard_tracking_enabled' ) : 'no'  // Backwards compat
 			),
 			'ga_support_display_advertising' => array(
-				'label' 			=> __( 'Set the Google Analytics code to support Display Advertising. <a href="https://support.google.com/analytics/answer/2700409" target="_blank">Read more about Display Advertising</a>.', 'woocommerce' ),
+				'label' 			=> __( 'Set the Google Analytics code to support Display Advertising. <a href="https://support.google.com/analytics/answer/2700409" target="_blank">Read more about Display Advertising</a>.', 'woocommerce-google-analytics-integration' ),
 				'type' 				=> 'checkbox',
 				'checkboxgroup'		=> '',
-				'default' 			=> get_option('woocommerce_ga_support_display_advertising') ? get_option('woocommerce_ga_support_display_advertising') : 'no'  // Backwards compat
+				'default' 			=> get_option( 'woocommerce_ga_support_display_advertising' ) ? get_option( 'woocommerce_ga_support_display_advertising' ) : 'no'  // Backwards compat
 			),
 			'ga_use_universal_analytics' => array(
-				'label' 			=> __( 'Use Universal Analytics instead of Classic Google Analytics', 'woocommerce' ),
+				'label' 			=> __( 'Use Universal Analytics instead of Classic Google Analytics', 'woocommerce-google-analytics-integration' ),
 				'type' 				=> 'checkbox',
 				'checkboxgroup'		=> '',
-				'default' 			=> get_option('woocommerce_ga_use_universal_analytics') ? get_option('woocommerce_ga_use_universal_analytics') : 'no'  // Backwards compat
+				'default' 			=> get_option( 'woocommerce_ga_use_universal_analytics' ) ? get_option( 'woocommerce_ga_use_universal_analytics' ) : 'no'  // Backwards compat
 			),
 			'ga_anonymize_enabled' => array(
-				'label' 			=> __( 'Anonymize IP addresses. Setting this option is mandatory in certain countries due to national privacy laws. <a href="https://support.google.com/analytics/answer/2763052" target="_blank">Read more about IP Anonymization</a>.', 'woocommerce' ),
+				'label' 			=> __( 'Anonymize IP addresses. Setting this option is mandatory in certain countries due to national privacy laws. <a href="https://support.google.com/analytics/answer/2763052" target="_blank">Read more about IP Anonymization</a>.', 'woocommerce-google-analytics-integration' ),
 				'type' 				=> 'checkbox',
 				'checkboxgroup'		=> '',
 				'default' 			=> 'no'
 			),
 			'ga_ecommerce_tracking_enabled' => array(
-				'label' 			=> __( 'Add eCommerce tracking code to the thankyou page', 'woocommerce' ),
+				'label' 			=> __( 'Add eCommerce tracking code to the thankyou page', 'woocommerce-google-analytics-integration' ),
 				'type' 				=> 'checkbox',
 				'checkboxgroup'		=> '',
-				'default' 			=> get_option('woocommerce_ga_ecommerce_tracking_enabled') ? get_option('woocommerce_ga_ecommerce_tracking_enabled') : 'no'  // Backwards compat
+				'default' 			=> get_option( 'woocommerce_ga_ecommerce_tracking_enabled' ) ? get_option( 'woocommerce_ga_ecommerce_tracking_enabled' ) : 'no'  // Backwards compat
 			),
 			'ga_event_tracking_enabled' => array(
-				'label' 			=> __( 'Add event tracking code for add to cart actions', 'woocommerce' ),
+				'label' 			=> __( 'Add event tracking code for add to cart actions', 'woocommerce-google-analytics-integration' ),
 				'type' 				=> 'checkbox',
 				'checkboxgroup'		=> 'end',
 				'default' 			=> 'no'
 			)
 		);
 
-    } // End init_form_fields()
-
+	}
 
 	/**
 	 * Google Analytics standard tracking
 	 *
-	 * @access public
 	 * @return void
 	 */
-	function google_tracking_code() {
+	public function google_tracking_code() {
 		global $woocommerce;
 
-		if ( is_admin() || current_user_can('manage_options') || $this->ga_standard_tracking_enabled == "no" ) {
+		if ( is_admin() || current_user_can( 'manage_options' ) || 'no' == $this->ga_standard_tracking_enabled ) {
 			return;
 		}
 
 		$tracking_id = $this->ga_id;
 
-		if ( ! $tracking_id ) return;
-
-		$loggedin 	= ( is_user_logged_in() ) ? 'yes' : 'no';
-		if ( is_user_logged_in() ) {
-			$user_id 		= get_current_user_id();
-			$current_user 	= get_user_by('id', $user_id);
-			$username 		= $current_user->user_login;
-		} else {
-			$user_id 		= '';
-			$username 		= __( 'Guest', 'woocommerce' );
+		if ( ! $tracking_id ) {
+			return;
 		}
 
-		if ( $this->ga_use_universal_analytics == 'yes' ) {
+		$loggedin = ( is_user_logged_in() ) ? 'yes' : 'no';
+		if ( is_user_logged_in() ) {
+			$user_id      = get_current_user_id();
+			$current_user = get_user_by('id', $user_id);
+			$username     = $current_user->user_login;
+		} else {
+			$user_id  = '';
+			$username = __( 'Guest', 'woocommerce-google-analytics-integration' );
+		}
+
+		if ( 'yes' == $this->ga_use_universal_analytics ) {
 			if ( ! empty( $this->ga_set_domain_name ) ) {
 				$set_domain_name = esc_js( $this->ga_set_domain_name );
 			} else {
@@ -176,8 +176,8 @@ class WC_Google_Analytics extends WC_Integration {
 			m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
 			})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
 
-			ga('create', '" . esc_js( $tracking_id ) . "', '" . $set_domain_name . "');" . 
-			$support_display_advertising . 
+			ga('create', '" . esc_js( $tracking_id ) . "', '" . $set_domain_name . "');" .
+			$support_display_advertising .
 			$anonymize_enabled . "
 			ga('set', 'dimension1', '" . $loggedin . "');
 			ga('send', 'pageview');
@@ -218,7 +218,7 @@ class WC_Google_Analytics extends WC_Integration {
 
 				var _gaq = _gaq || [];
 				_gaq.push(
-					['_setAccount', '" . esc_js( $tracking_id ) . "'], " . $set_domain_name . 
+					['_setAccount', '" . esc_js( $tracking_id ) . "'], " . $set_domain_name .
 					$anonymize_enabled . "
 					['_setCustomVar', 1, 'logged-in', '" . $loggedin . "', 1],
 					['_trackPageview']
@@ -234,18 +234,17 @@ class WC_Google_Analytics extends WC_Integration {
 		}
 	}
 
-
 	/**
 	 * Google Analytics eCommerce tracking
 	 *
-	 * @access public
-	 * @param mixed $order_id
+	 * @param int $order_id
+	 *
 	 * @return void
 	 */
-	function ecommerce_tracking_code( $order_id ) {
+	public function ecommerce_tracking_code( $order_id ) {
 		global $woocommerce;
 
-		if ( $this->ga_ecommerce_tracking_enabled == "no" || current_user_can('manage_options') || get_post_meta( $order_id, '_ga_tracked', true ) == 1 ) {
+		if ( 'no' == $this->ga_ecommerce_tracking_enabled || current_user_can( 'manage_options' ) || get_post_meta( $order_id, '_ga_tracked', true ) == 1 ) {
 			return;
 		}
 
@@ -264,15 +263,15 @@ class WC_Google_Analytics extends WC_Integration {
 		$loggedin = is_user_logged_in() ? 'yes' : 'no';
 
 		if ( is_user_logged_in() ) {
-			$user_id 		= get_current_user_id();
-			$current_user 	= get_user_by('id', $user_id);
-			$username 		= $current_user->user_login;
+			$user_id      = get_current_user_id();
+			$current_user = get_user_by('id', $user_id);
+			$username     = $current_user->user_login;
 		} else {
-			$user_id 		= '';
-			$username 		= __( 'Guest', 'woocommerce' );
+			$user_id      = '';
+			$username     = __( 'Guest', 'woocommerce-google-analytics-integration' );
 		}
 
-		if ( $this->ga_use_universal_analytics == 'yes' ) {
+		if ( 'yes' == $this->ga_use_universal_analytics ) {
 			if ( ! empty( $this->ga_set_domain_name ) ) {
 				$set_domain_name = esc_js( $this->ga_set_domain_name );
 			} else {
@@ -295,8 +294,8 @@ class WC_Google_Analytics extends WC_Integration {
 			m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
 			})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
 
-			ga('create', '" . esc_js( $tracking_id ) . "', '" . $set_domain_name . "');" . 
-			$support_display_advertising . 
+			ga('create', '" . esc_js( $tracking_id ) . "', '" . $set_domain_name . "');" .
+			$support_display_advertising .
 			$anonymize_enabled . "
 			ga('set', 'dimension1', '" . $loggedin . "');
 			ga('send', 'pageview');
@@ -423,7 +422,7 @@ class WC_Google_Analytics extends WC_Integration {
 
 				(function() {
 					var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-					ga.src = ".$ga_url.";
+					ga.src = " . $ga_url . ";
 					var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
 				})();
 			";
@@ -446,14 +445,25 @@ class WC_Google_Analytics extends WC_Integration {
 		update_post_meta( $order_id, '_ga_tracked', 1 );
 	}
 
+	/**
+	 * Check if tracking is disabled
+	 *
+	 * @param string $type
+	 *
+	 * @return bool
+	 */
+	private function disable_tracking( $type ) {
+		if ( is_admin() || current_user_can( 'manage_options' ) || ( ! $this->ga_id ) || 'no' == $type ) {
+			return true;
+		}
+	}
 
 	/**
 	 * Google Analytics event tracking for single product add to cart
 	 *
-	 * @access public
 	 * @return void
 	 */
-	function add_to_cart() {
+	public function add_to_cart() {
 
 		if ( $this->disable_tracking( $this->ga_event_tracking_enabled ) ) {
 			return;
@@ -466,9 +476,9 @@ class WC_Google_Analytics extends WC_Integration {
 
 		$parameters = array();
 		// Add single quotes to allow jQuery to be substituted into _trackEvent parameters
-		$parameters['category'] = "'" . __( 'Products', 'woocommerce' ) . "'";
-		$parameters['action'] = "'" . __( 'Add to Cart', 'woocommerce' ) . "'";
-		$parameters['label'] = "'" . esc_js( $product->get_sku() ? __('SKU:', 'woocommerce') . ' ' . $product->get_sku() : "#" . $product->id ) . "'";
+		$parameters['category'] = "'" . __( 'Products', 'woocommerce-google-analytics-integration' ) . "'";
+		$parameters['action']   = "'" . __( 'Add to Cart', 'woocommerce-google-analytics-integration' ) . "'";
+		$parameters['label']    = "'" . esc_js( $product->get_sku() ? __( 'SKU:', 'woocommerce-google-analytics-integration' ) . ' ' . $product->get_sku() : "#" . $product->id ) . "'";
 
 		$this->event_tracking_code( $parameters, '.single_add_to_cart_button' );
 	}
@@ -477,10 +487,9 @@ class WC_Google_Analytics extends WC_Integration {
 	/**
 	 * Google Analytics event tracking for loop add to cart
 	 *
-	 * @access public
 	 * @return void
 	 */
-	function loop_add_to_cart() {
+	public function loop_add_to_cart() {
 
 		if ( $this->disable_tracking( $this->ga_event_tracking_enabled ) ) {
 			return;
@@ -488,20 +497,19 @@ class WC_Google_Analytics extends WC_Integration {
 
 		$parameters = array();
 		// Add single quotes to allow jQuery to be substituted into _trackEvent parameters
-		$parameters['category'] = "'" . __( 'Products', 'woocommerce' ) . "'";
-		$parameters['action'] 	= "'" . __( 'Add to Cart', 'woocommerce' ) . "'";
-		$parameters['label'] 	= "($(this).data('product_sku')) ? ('SKU: ' + $(this).data('product_sku')) : ('#' + $(this).data('product_id'))"; // Product SKU or ID
+		$parameters['category'] = "'" . __( 'Products', 'woocommerce-google-analytics-integration' ) . "'";
+		$parameters['action']   = "'" . __( 'Add to Cart', 'woocommerce-google-analytics-integration' ) . "'";
+		$parameters['label']    = "($(this).data('product_sku')) ? ('SKU: ' + $(this).data('product_sku')) : ('#' + $(this).data('product_id'))"; // Product SKU or ID
 
 		$this->event_tracking_code( $parameters, '.add_to_cart_button:not(.product_type_variable, .product_type_grouped)' );
 	}
 
-
 	/**
 	 * Google Analytics event tracking for loop add to cart
 	 *
-	 * @access private
-	 * @param mixed $parameters associative array of _trackEvent parameters
-	 * @param mixed $selector jQuery selector for binding click event
+	 * @param array $parameters associative array of _trackEvent parameters
+	 * @param string $selector jQuery selector for binding click event
+	 *
 	 * @return void
 	 */
 	private function event_tracking_code( $parameters, $selector ) {
@@ -515,47 +523,28 @@ class WC_Google_Analytics extends WC_Integration {
 			$track_event = "_gaq.push(['_trackEvent', %s, %s, %s]);";
 		}
 
-		wc_enqueue_js("
+		wc_enqueue_js( "
 			$('" . $selector . "').click(function() {
 				" . sprintf( $track_event, $parameters['category'], $parameters['action'], $parameters['label'] ) . "
 			});
-		");
+		" );
 	}
-
-
-	/**
-	 * Check if tracking is disabled
-	 *
-	 * @access private
-	 * @param mixed $type
-	 * @return bool
-	 */
-	private function disable_tracking( $type ) {
-
-		if ( is_admin() || current_user_can( 'manage_options' ) || ( ! $this->ga_id ) || 'no' == $type ) {
-			return true;
-		}
-
-	}
-
 
 	/**
 	 * Add the utm_nooverride parameter to any return urls. This makes sure Google Adwords doesn't mistake the offsite gateway as the referrer.
 	 *
-	 * @access public
 	 * @param  string $type
-	 * @since  1.2.1
+	 *
 	 * @return string
 	 */
 	public function utm_nooverride( $return_url ) {
 
-		// we don't know if the URL already has the parameter so we should remove it just in case
+		// We don't know if the URL already has the parameter so we should remove it just in case
 		$return_url = remove_query_arg( 'utm_nooverride', $return_url );
 
-		// now add the utm_nooverride query arg to the URL
+		// Now add the utm_nooverride query arg to the URL
 		$return_url = add_query_arg( 'utm_nooverride', '1', $return_url );
 
 		return $return_url;
 	}
-
 }

@@ -19,9 +19,9 @@ class WC_Google_Analytics extends WC_Integration {
 	 * @return void
 	 */
 	public function __construct() {
-		$this->id					= 'google_analytics';
-		$this->method_title     	= __( 'Google Analytics', 'woocommerce-google-analytics-integration' );
-		$this->method_description	= __( 'Google Analytics is a free service offered by Google that generates detailed statistics about the visitors to a website.', 'woocommerce-google-analytics-integration' );
+		$this->id                 = 'google_analytics';
+		$this->method_title       = __( 'Google Analytics', 'woocommerce-google-analytics-integration' );
+		$this->method_description = __( 'Google Analytics is a free service offered by Google that generates detailed statistics about the visitors to a website.', 'woocommerce-google-analytics-integration' );
 
 		// Load the settings.
 		$this->init_form_fields();
@@ -41,8 +41,7 @@ class WC_Google_Analytics extends WC_Integration {
 		add_action( 'woocommerce_update_options_integration_google_analytics', array( $this, 'process_admin_options') );
 
 		// Tracking code
-		add_action( 'wp_head', array( $this, 'google_tracking_code' ), 999999 );
-		add_action( 'woocommerce_thankyou', array( $this, 'ecommerce_tracking_code' ) );
+		add_action( 'wp_head', array( $this, 'tracking_code_display' ), 999999 );
 
 		// Event tracking code
 		add_action( 'woocommerce_after_add_to_cart_button', array( $this, 'add_to_cart' ) );
@@ -110,27 +109,67 @@ class WC_Google_Analytics extends WC_Integration {
 				'default' 			=> 'no'
 			)
 		);
+	}
 
+	/**
+	 * Display the tracking codes
+	 *
+	 * @return string
+	 */
+	public function tracking_code_display() {
+		global $wp;
+		$display_ecommerce_tracking = false;
+
+		if ( is_admin() || current_user_can( 'manage_options' ) || ! $this->ga_id ) {
+			return;
+		}
+
+		// Check if is order received page and stop when the products and not tracked
+		if ( is_order_received_page() && 'yes' == $this->ga_ecommerce_tracking_enabled ) {
+			$order_id = isset( $wp->query_vars['order-received'] ) ? $wp->query_vars['order-received'] : 0;
+
+			if ( 0 < $order_id && 1 != get_post_meta( $order_id, '_ga_tracked', true ) ) {
+				$display_ecommerce_tracking = true;
+
+				echo $this->get_ecommerce_tracking_code( $order_id );
+			}
+		}
+
+		if ( ! $display_ecommerce_tracking && 'yes' == $this->ga_standard_tracking_enabled ) {
+			echo $this->get_google_tracking_code();
+		}
+	}
+
+	/**
+	 * Get the generic Google Analytics code snippet
+	 *
+	 * @return string
+	 */
+	protected function get_generic_ga_code() {
+		return "
+<script>
+	var gaProperty = '" . esc_js( $this->ga_id ) . "';
+	var disableStr = 'ga-disable-' + gaProperty;
+	if (document.cookie.indexOf(disableStr + '=true') > -1) {
+		window[disableStr] = true;
+	}
+	function gaOptout() {
+		document.cookie = disableStr + '=true; expires=Thu, 31 Dec 2099 23:59:59 UTC; path=/';
+		window[disableStr] = true;
+	}
+</script>
+";
 	}
 
 	/**
 	 * Google Analytics standard tracking
 	 *
-	 * @return void
+	 * @return string
 	 */
-	public function google_tracking_code() {
-		if ( is_admin() || current_user_can( 'manage_options' ) || 'no' == $this->ga_standard_tracking_enabled ) {
-			return;
-		}
+	protected function get_google_tracking_code() {
+		$logged_in = ( is_user_logged_in() ) ? 'yes' : 'no';
 
-		$tracking_id = $this->ga_id;
-
-		if ( ! $tracking_id ) {
-			return;
-		}
-
-		$loggedin = ( is_user_logged_in() ) ? 'yes' : 'no';
-		if ( is_user_logged_in() ) {
+		if ( 'yes' === $logged_in ) {
 			$user_id      = get_current_user_id();
 			$current_user = get_user_by('id', $user_id);
 			$username     = $current_user->user_login;
@@ -156,35 +195,17 @@ class WC_Google_Analytics extends WC_Integration {
 				$anonymize_enabled = "ga('set', 'anonymizeIp', true);";
 			}
 
-			echo "
-<!-- WooCommerce Google Analytics Integration -->
-<script>
-	var gaProperty = '" . esc_js( $tracking_id ) . "';
-	var disableStr = 'ga-disable-' + gaProperty;
-	if (document.cookie.indexOf(disableStr + '=true') > -1) {
-		window[disableStr] = true;
-	}
-	function gaOptout() {
-		document.cookie = disableStr + '=true; expires=Thu, 31 Dec 2099 23:59:59 UTC; path=/';
-		window[disableStr] = true;
-	}
-</script>";
+			$code = "
+	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
 
-			echo "
-<script>
-(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
-
-ga('create', '" . esc_js( $tracking_id ) . "', '" . $set_domain_name . "');" .
-$support_display_advertising .
-$anonymize_enabled . "
-ga('set', 'dimension1', '" . $loggedin . "');
-ga('send', 'pageview');
-
-</script>
-<!-- /WooCommerce Google Analytics Integration -->
+	ga('create', '" . esc_js( $this->ga_id ) . "', '" . $set_domain_name . "');" .
+	$support_display_advertising .
+	$anonymize_enabled . "
+	ga('set', 'dimension1', '" . $logged_in . "');
+	ga('send', 'pageview');
 ";
 
 		} else {
@@ -205,25 +226,12 @@ ga('send', 'pageview');
 				$set_domain_name = '';
 			}
 
-			echo "
-<!-- WooCommerce Google Analytics Integration -->
-<script>
-	var gaProperty = '" . esc_js( $tracking_id ) . "';
-	var disableStr = 'ga-disable-' + gaProperty;
-	if (document.cookie.indexOf(disableStr + '=true') > -1) {
-		window[disableStr] = true;
-	}
-	function gaOptout() {
-		document.cookie = disableStr + '=true; expires=Thu, 31 Dec 2099 23:59:59 UTC; path=/';
-		window[disableStr] = true;
-	}
-</script>
-<script type='text/javascript'>
+			$code = "
 	var _gaq = _gaq || [];
 	_gaq.push(
-		['_setAccount', '" . esc_js( $tracking_id ) . "'], " . $set_domain_name .
+		['_setAccount', '" . esc_js( $this->ga_id ) . "'], " . $set_domain_name .
 		$anonymize_enabled . "
-		['_setCustomVar', 1, 'logged-in', '" . $loggedin . "', 1],
+		['_setCustomVar', 1, 'logged-in', '" . $logged_in . "', 1],
 		['_trackPageview']
 	);
 
@@ -232,11 +240,18 @@ ga('send', 'pageview');
 		ga.src = " . $ga_url . ";
 		var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
 	})();
-
-</script>
-<!-- /WooCommerce Google Analytics Integration -->
 ";
 		}
+
+		return "
+<!-- WooCommerce Google Analytics Integration -->
+" . $this->get_generic_ga_code() . "
+<script type='text/javascript'>$code</script>
+
+<!-- /WooCommerce Google Analytics Integration -->
+
+";
+
 	}
 
 	/**
@@ -244,34 +259,21 @@ ga('send', 'pageview');
 	 *
 	 * @param int $order_id
 	 *
-	 * @return void
+	 * @return string
 	 */
-	public function ecommerce_tracking_code( $order_id ) {
-		if ( 'no' == $this->ga_ecommerce_tracking_enabled || current_user_can( 'manage_options' ) || get_post_meta( $order_id, '_ga_tracked', true ) == 1 ) {
-			return;
-		}
-
-		$tracking_id = $this->ga_id;
-
-		if ( ! $tracking_id ) {
-			return;
-		}
-
-		// Doing eCommerce tracking so unhook standard tracking
-		remove_action( 'wp_head', array( $this, 'google_tracking_code' ), 999999 );
-
+	protected function get_ecommerce_tracking_code( $order_id ) {
 		// Get the order and output tracking code
 		$order = new WC_Order( $order_id );
 
-		$loggedin = is_user_logged_in() ? 'yes' : 'no';
+		$logged_in = is_user_logged_in() ? 'yes' : 'no';
 
-		if ( is_user_logged_in() ) {
+		if ( 'yes' === $logged_in ) {
 			$user_id      = get_current_user_id();
-			$current_user = get_user_by('id', $user_id);
+			$current_user = get_user_by( 'id', $user_id );
 			$username     = $current_user->user_login;
 		} else {
-			$user_id      = '';
-			$username     = __( 'Guest', 'woocommerce-google-analytics-integration' );
+			$user_id  = '';
+			$username = __( 'Guest', 'woocommerce-google-analytics-integration' );
 		}
 
 		if ( 'yes' == $this->ga_use_universal_analytics ) {
@@ -297,10 +299,10 @@ ga('send', 'pageview');
 	m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
 	})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
 
-	ga('create', '" . esc_js( $tracking_id ) . "', '" . $set_domain_name . "');" .
+	ga('create', '" . esc_js( $this->ga_id ) . "', '" . $set_domain_name . "');" .
 	$support_display_advertising .
 	$anonymize_enabled . "
-	ga('set', 'dimension1', '" . $loggedin . "');
+	ga('set', 'dimension1', '" . $logged_in . "');
 	ga('send', 'pageview');
 
 	ga('require', 'ecommerce', 'ecommerce.js');
@@ -370,9 +372,9 @@ ga('send', 'pageview');
 	var _gaq = _gaq || [];
 
 	_gaq.push(
-		['_setAccount', '" . esc_js( $tracking_id ) . "'], " . $set_domain_name .
+		['_setAccount', '" . esc_js( $this->ga_id ) . "'], " . $set_domain_name .
 		$anonymize_enabled . "
-		['_setCustomVar', 1, 'logged-in', '" . esc_js( $loggedin ) . "', 1],
+		['_setCustomVar', 1, 'logged-in', '" . esc_js( $logged_in ) . "', 1],
 		['_trackPageview'],
 		['_set', 'currencyCode', '" . esc_js( $order->get_order_currency() ) . "']
 	);
@@ -431,24 +433,15 @@ ga('send', 'pageview');
 ";
 		}
 
-		echo "
+		// Mark the order as tracked
+		update_post_meta( $order_id, '_ga_tracked', 1 );
+
+		return "
 <!-- WooCommerce Google Analytics Integration -->
-<script>
-	var gaProperty = '" . esc_js( $tracking_id ) . "';
-	var disableStr = 'ga-disable-' + gaProperty;
-	if (document.cookie.indexOf(disableStr + '=true') > -1) {
-		window[disableStr] = true;
-	}
-	function gaOptout() {
-		document.cookie = disableStr + '=true; expires=Thu, 31 Dec 2099 23:59:59 UTC; path=/';
-		window[disableStr] = true;
-	}
-</script>
+" . $this->get_generic_ga_code() . "
 <script type='text/javascript'>$code</script>
 <!-- /WooCommerce Google Analytics Integration -->
 ";
-
-		update_post_meta( $order_id, '_ga_tracked', 1 );
 	}
 
 	/**

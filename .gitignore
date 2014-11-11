@@ -1,0 +1,9 @@
+project.xml
+project.properties
+.DS_Store
+Thumbs.db
+.buildpath
+.project
+.settings*
+sftp-config.json
+deploy.sh

@@ -31,6 +31,7 @@ class WC_Google_Analytics extends WC_Integration {
 		$this->ga_standard_tracking_enabled 	= $this->get_option( 'ga_standard_tracking_enabled' );
 		$this->ga_support_display_advertising 	= $this->get_option( 'ga_support_display_advertising' );
 		$this->ga_use_universal_analytics 	= $this->get_option( 'ga_use_universal_analytics' );
+		$this->ga_anonymize_enabled				= $this->get_option( 'ga_anonymize_enabled' );
 		$this->ga_ecommerce_tracking_enabled 	= $this->get_option( 'ga_ecommerce_tracking_enabled' );
 		$this->ga_event_tracking_enabled		= $this->get_option( 'ga_event_tracking_enabled' );
 
@@ -38,12 +39,15 @@ class WC_Google_Analytics extends WC_Integration {
 		add_action( 'woocommerce_update_options_integration_google_analytics', array( $this, 'process_admin_options') );
 
 		// Tracking code
-		add_action( 'wp_footer', array( $this, 'google_tracking_code' ) );
+		add_action( 'wp_head', array( $this, 'google_tracking_code' ), 100);
 		add_action( 'woocommerce_thankyou', array( $this, 'ecommerce_tracking_code' ) );
 
 		// Event tracking code
 		add_action( 'woocommerce_after_add_to_cart_button', array( $this, 'add_to_cart' ) );
 		add_action( 'wp_footer', array( $this, 'loop_add_to_cart' ) );
+
+		// utm_nooverride parameter for Google AdWords
+		add_filter( 'woocommerce_get_return_url', array( $this, 'utm_nooverride' ) );
 	}
 
 
@@ -76,7 +80,7 @@ class WC_Google_Analytics extends WC_Integration {
 				'default' 			=> get_option('woocommerce_ga_standard_tracking_enabled') ? get_option('woocommerce_ga_standard_tracking_enabled') : 'no'  // Backwards compat
 			),
 			'ga_support_display_advertising' => array(
-				'label' 			=> __( 'Set the Google Analytics code to support Display Advertising. <a href="https://support.google.com/analytics/answer/2700409" target="_blank">Read More About Display Advertising</a>', 'woocommerce' ),
+				'label' 			=> __( 'Set the Google Analytics code to support Display Advertising. <a href="https://support.google.com/analytics/answer/2700409" target="_blank">Read more about Display Advertising</a>.', 'woocommerce' ),
 				'type' 				=> 'checkbox',
 				'checkboxgroup'		=> '',
 				'default' 			=> get_option('woocommerce_ga_support_display_advertising') ? get_option('woocommerce_ga_support_display_advertising') : 'no'  // Backwards compat
@@ -86,6 +90,12 @@ class WC_Google_Analytics extends WC_Integration {
 				'type' 				=> 'checkbox',
 				'checkboxgroup'		=> '',
 				'default' 			=> get_option('woocommerce_ga_use_universal_analytics') ? get_option('woocommerce_ga_use_universal_analytics') : 'no'  // Backwards compat
+			),
+			'ga_anonymize_enabled' => array(
+				'label' 			=> __( 'Anonymize IP addresses. Setting this option is mandatory in certain countries due to national privacy laws. <a href="https://support.google.com/analytics/answer/2763052" target="_blank">Read more about IP Anonymization</a>.', 'woocommerce' ),
+				'type' 				=> 'checkbox',
+				'checkboxgroup'		=> '',
+				'default' 			=> 'no'
 			),
 			'ga_ecommerce_tracking_enabled' => array(
 				'label' 			=> __( 'Add eCommerce tracking code to the thankyou page', 'woocommerce' ),
@@ -143,27 +153,48 @@ class WC_Google_Analytics extends WC_Integration {
 				$support_display_advertising = "ga('require', 'displayfeatures');";
 			}
 
+			$anonymize_enabled = '';
+			if ( 'yes' == $this->ga_anonymize_enabled ) {
+				$anonymize_enabled = "ga('set', 'anonymizeIp', true);";
+			}
+
+			echo "<script>
+			var gaProperty = '" . esc_js( $tracking_id ) . "';
+			var disableStr = 'ga-disable-' + gaProperty;
+			if (document.cookie.indexOf(disableStr + '=true') > -1) {
+				window[disableStr] = true;
+			}
+			function gaOptout() {
+				document.cookie = disableStr + '=true; expires=Thu, 31 Dec 2099 23:59:59 UTC; path=/';
+				window[disableStr] = true;
+			}
+			</script>";
+
 			echo "<script>
 			(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
 			(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
 			m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
 			})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
 
-			ga('create', '" . esc_js( $tracking_id ) . "', '" . $set_domain_name . "');
-			" . $support_display_advertising . "
+			ga('create', '" . esc_js( $tracking_id ) . "', '" . $set_domain_name . "');" .
+			$support_display_advertising .
+			$anonymize_enabled . "
 			ga('set', 'dimension1', '" . $loggedin . "');
 			ga('send', 'pageview');
 
 			</script>";
 
-		}
-		else {
+		} else {
 			if ( 'yes' == $this->ga_support_display_advertising ) {
 				$ga_url = "('https:' == document.location.protocol ? 'https://' : 'http://') + 'stats.g.doubleclick.net/dc.js'";
 			} else {
 				$ga_url = "('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js'";
 			}
 
+			$anonymize_enabled = '';
+			if ( 'yes' == $this->ga_anonymize_enabled ) {
+				$anonymize_enabled = "['_gat._anonymizeIp'],";
+			}
 
 			if ( ! empty( $this->ga_set_domain_name ) ) {
 				$set_domain_name = "['_setDomainName', '" . esc_js( $this->ga_set_domain_name ) . "'],\n";
@@ -171,11 +202,24 @@ class WC_Google_Analytics extends WC_Integration {
 				$set_domain_name = '';
 			}
 
+			echo "<script>
+			var gaProperty = '" . esc_js( $tracking_id ) . "';
+			var disableStr = 'ga-disable-' + gaProperty;
+			if (document.cookie.indexOf(disableStr + '=true') > -1) {
+				window[disableStr] = true;
+			}
+			function gaOptout() {
+				document.cookie = disableStr + '=true; expires=Thu, 31 Dec 2099 23:59:59 UTC; path=/';
+				window[disableStr] = true;
+			}
+			</script>";
+
 			echo "<script type='text/javascript'>
 
 				var _gaq = _gaq || [];
 				_gaq.push(
-					['_setAccount', '" . esc_js( $tracking_id ) . "'], " . $set_domain_name . "
+					['_setAccount', '" . esc_js( $tracking_id ) . "'], " . $set_domain_name .
+					$anonymize_enabled . "
 					['_setCustomVar', 1, 'logged-in', '" . $loggedin . "', 1],
 					['_trackPageview']
 				);
@@ -240,6 +284,11 @@ class WC_Google_Analytics extends WC_Integration {
 				$support_display_advertising = "ga('require', 'displayfeatures');";
 			}
 
+			$anonymize_enabled = '';
+			if ( 'yes' == $this->ga_anonymize_enabled ) {
+				$anonymize_enabled = "ga('set', 'anonymizeIp', true);";
+			}
+
 			$code = "
 			(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
 			(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -249,12 +298,9 @@ class WC_Google_Analytics extends WC_Integration {
 
 			if( 'no' != $this->ga_standard_tracking_enabled ) {
 				$code .= "
-				ga('create', '" . esc_js( $tracking_id ) . "', '" . $set_domain_name . "');
-				";
-				if ( 'yes' == $this->ga_support_display_advertising ) {
-					$code .= "ga('require', 'displayfeatures');";
-				}
-				$code .= "
+				ga('create', '" . esc_js( $tracking_id ) . "', '" . $set_domain_name . "');" .
+				$support_display_advertising .
+				$anonymize_enabled . "
 				ga('set', 'dimension1', '" . $loggedin . "');
 				ga('send', 'pageview');
 				";
@@ -264,11 +310,12 @@ class WC_Google_Analytics extends WC_Integration {
 			ga('require', 'ecommerce', 'ecommerce.js');
 
 			ga('ecommerce:addTransaction', {
-				'id': '" . esc_js( $order->get_order_number() ) . "',      // Transaction ID. Required
-				'affiliation': '" . esc_js( get_bloginfo( 'name' ) ) . "', // Affiliation or store name
-				'revenue': '" . esc_js( $order->get_total() ) . "',        // Grand Total
-				'shipping': '" . esc_js( $order->get_total_shipping() ) . "',    // Shipping
-				'tax': '" . esc_js( $order->get_total_tax() ) . "'         // Tax
+				'id': '" . esc_js( $order->get_order_number() ) . "',         // Transaction ID. Required
+				'affiliation': '" . esc_js( get_bloginfo( 'name' ) ) . "',    // Affiliation or store name
+				'revenue': '" . esc_js( $order->get_total() ) . "',           // Grand Total
+				'shipping': '" . esc_js( $order->get_total_shipping() ) . "', // Shipping
+				'tax': '" . esc_js( $order->get_total_tax() ) . "',           // Tax
+				'currency': '" . esc_js( $order->get_order_currency() ) . "'  // Currency
 			});
 			";
 
@@ -280,7 +327,7 @@ class WC_Google_Analytics extends WC_Integration {
 					$code .= "ga('ecommerce:addItem', {";
 					$code .= "'id': '" . esc_js( $order->get_order_number() ) . "',";
 					$code .= "'name': '" . esc_js( $item['name'] ) . "',";
-					$code .= "'sku': '" . esc_js( $_product->get_sku() ? __( 'SKU:', 'woocommerce' ) . ' ' . $_product->get_sku() : $_product->id ) . "',";
+					$code .= "'sku': '" . esc_js( $_product->get_sku() ? $_product->get_sku() : $_product->id ) . "',";
 
 					if ( isset( $_product->variation_data ) ) {
 
@@ -304,12 +351,16 @@ class WC_Google_Analytics extends WC_Integration {
 			}
 
 			$code .= "ga('ecommerce:send');      // Send transaction and item data to Google Analytics.";
-		}
-		else {
-			if ( 'yes' == $this->ga_support_display_advertising ) {
+		} else {
+			if ( $this->ga_support_display_advertising == 'yes' ) {
 				$ga_url = "('https:' == document.location.protocol ? 'https://' : 'http://') + 'stats.g.doubleclick.net/dc.js'";
 			} else {
 				$ga_url = "('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js'";
+			}
+
+			$anonymize_enabled = '';
+			if ( 'yes' == $this->ga_anonymize_enabled ) {
+				$anonymize_enabled = "['_gat._anonymizeIp'],";
 			}
 
 			if ( ! empty( $this->ga_set_domain_name ) ) {
@@ -325,9 +376,11 @@ class WC_Google_Analytics extends WC_Integration {
 			if( 'no' != $this->ga_standard_tracking_enabled ) {
 				$code .= "
 					_gaq.push(
-						['_setAccount', '" . esc_js( $tracking_id ) . "'], " . $set_domain_name . "
+						['_setAccount', '" . esc_js( $tracking_id ) . "'], " . $set_domain_name .
+						$anonymize_enabled . "
 						['_setCustomVar', 1, 'logged-in', '" . esc_js( $loggedin ) . "', 1],
-						['_trackPageview']
+						['_trackPageview'],
+						['_set', 'currencyCode', '" . esc_js( $order->get_order_currency() ) . "']
 					);
 				";
 			}
@@ -352,7 +405,7 @@ class WC_Google_Analytics extends WC_Integration {
 
 					$code .= "_gaq.push(['_addItem',";
 					$code .= "'" . esc_js( $order->get_order_number() ) . "',";
-					$code .= "'" . esc_js( $_product->get_sku() ? __( 'SKU:', 'woocommerce' ) . ' ' . $_product->get_sku() : $_product->id ) . "',";
+					$code .= "'" . esc_js( $_product->get_sku() ? $_product->get_sku() : $_product->id ) . "',";
 					$code .= "'" . esc_js( $item['name'] ) . "',";
 
 					if ( isset( $_product->variation_data ) ) {
@@ -391,6 +444,18 @@ class WC_Google_Analytics extends WC_Integration {
 			}
 		}
 
+		echo "<script>
+		var gaProperty = '" . esc_js( $tracking_id ) . "';
+		var disableStr = 'ga-disable-' + gaProperty;
+		if (document.cookie.indexOf(disableStr + '=true') > -1) {
+			window[disableStr] = true;
+		}
+		function gaOptout() {
+			document.cookie = disableStr + '=true; expires=Thu, 31 Dec 2099 23:59:59 UTC; path=/';
+			window[disableStr] = true;
+		}
+		</script>";
+
 		echo '<script type="text/javascript">' . $code . '</script>';
 
 		update_post_meta( $order_id, '_ga_tracked', 1 );
@@ -417,7 +482,7 @@ class WC_Google_Analytics extends WC_Integration {
 		$parameters = array();
 		// Add single quotes to allow jQuery to be substituted into _trackEvent parameters
 		$parameters['category'] = "'" . __( 'Products', 'woocommerce' ) . "'";
-		$parameters['action'] = "'" . __( 'Add to cart', 'woocommerce' ) . "'";
+		$parameters['action'] = "'" . __( 'Add to Cart', 'woocommerce' ) . "'";
 		$parameters['label'] = "'" . esc_js( $product->get_sku() ? __('SKU:', 'woocommerce') . ' ' . $product->get_sku() : "#" . $product->id ) . "'";
 
 		$this->event_tracking_code( $parameters, '.single_add_to_cart_button' );
@@ -486,6 +551,26 @@ class WC_Google_Analytics extends WC_Integration {
 			return true;
 		}
 
+	}
+
+
+	/**
+	 * Add the utm_nooverride parameter to any return urls. This makes sure Google Adwords doesn't mistake the offsite gateway as the referrer.
+	 *
+	 * @access public
+	 * @param  string $type
+	 * @since  1.2.1
+	 * @return string
+	 */
+	public function utm_nooverride( $return_url ) {
+
+		// we don't know if the URL already has the parameter so we should remove it just in case
+		$return_url = remove_query_arg( 'utm_nooverride', $return_url );
+
+		// now add the utm_nooverride query arg to the URL
+		$return_url = add_query_arg( 'utm_nooverride', '1', $return_url );
+
+		return $return_url;
 	}
 
 }

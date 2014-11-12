@@ -54,6 +54,10 @@ https://gist.github.com/claudiosmweb/b12d15b245be21c92ebc
 
 Exact wording depends on the national data privacy laws and should be adjusted.
 
+== Screenshots ==
+
+1. Google Analytics Integration Settings.
+
 == Changelog ==
 
 = 1.3.0 - 12/11/2014 =

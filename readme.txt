@@ -1,5 +1,5 @@
 === WooCommerce Google Analytics Integration ===
-Contributors: woothemes
+Contributors: woothemes, claudiosanches
 Tags: woocommerce, google analytics
 Requires at least: 3.8
 Tested up to: 4.0
@@ -36,7 +36,7 @@ This plugin will add the settings to the Integration tab, to be found in the Woo
 
 We purposefully don't track admin visits to the site. Log out of the site (or open a Google Chrome Incognito window) and check if the site is there for non-admins.
 
-Also please make sure your Google Analytics ID under WooCommerce->Settings->Integrations.
+Also please make sure your Google Analytics ID under WooCommerce -> Settings -> Integrations.
 
 = Can I install it already? =
 
@@ -56,7 +56,7 @@ Exact wording depends on the national data privacy laws and should be adjusted.
 
 == Changelog ==
 
-= 1.3.0 - xx/11/2014 =
+= 1.3.0 - 12/11/2014 =
 
 * Feature  - Added the transaction currency in the tracking code
 * Feature  - Add data privacy option that are mandatory in some countries

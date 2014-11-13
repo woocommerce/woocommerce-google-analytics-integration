@@ -38,6 +38,10 @@ We purposefully don't track admin visits to the site. Log out of the site (or op
 
 Also please make sure your Google Analytics ID under WooCommerce -> Settings -> Integrations.
 
+= My code is there. Why is it still not tracking sales?  =
+
+Duplicate Google Analytics code causes a conflict in tracking. Remove any other Google Analytics plugin or code from your site to avoid duplication and conflicts in tracking.
+
 = Can I install it already? =
 
 Starting the WooCommerce 2.1 release, the Google Analytics integration for WooCommerce is no longer part of the WooCommerce plugin.

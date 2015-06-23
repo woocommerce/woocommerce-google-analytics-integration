@@ -327,7 +327,7 @@ class WC_Google_Analytics extends WC_Integration {
 					$code .= "'name': '" . esc_js( $item['name'] ) . "',";
 					$code .= "'sku': '" . esc_js( $_product->get_sku() ? $_product->get_sku() : $_product->id ) . "',";
 
-					if ( isset( $_product->variation_data ) ) {
+					if ( is_array( $_product->variation_data ) && !empty( $_product->variation_data ) ) {
 
 						$code .= "'category': '" . esc_js( woocommerce_get_formatted_variation( $_product->variation_data, true ) ) . "',";
 
@@ -401,7 +401,7 @@ class WC_Google_Analytics extends WC_Integration {
 					$code .= "'" . esc_js( $_product->get_sku() ? $_product->get_sku() : $_product->id ) . "',";
 					$code .= "'" . esc_js( $item['name'] ) . "',";
 
-					if ( isset( $_product->variation_data ) ) {
+					if ( is_array( $_product->variation_data ) && !empty( $_product->variation_data ) ) {
 
 						$code .= "'" . esc_js( woocommerce_get_formatted_variation( $_product->variation_data, true ) ) . "',";
 

@@ -29,7 +29,7 @@ class WC_Google_Analytics_Info_Banner {
 	public function __construct( $dismissed = false, $ga_id = '' ) {
 		$this->is_dismissed = (bool) $dismissed;
 		if ( ! empty( $ga_id ) ) {
-			//$this->is_dismissed = true;
+			$this->is_dismissed = true;
 		}
 
 		// Don't bother setting anything else up if we are not going to show the notice

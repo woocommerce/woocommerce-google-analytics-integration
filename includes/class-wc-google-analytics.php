@@ -70,7 +70,7 @@ class WC_Google_Analytics extends WC_Integration {
 			),
 			'ga_standard_tracking_enabled' => array(
 				'title' 			=> __( 'Options', 'woocommerce-google-analytics-integration' ),
-				'label' 			=> __( 'Enable standard Google Analytics tracking. Adds standard analytics tracking code to your site. This tracks session data such as demographics, system, etc. You don\'t need to enable this if you are using a 3rd party analytics plugin.', 'woocommerce-google-analytics-integration' ),
+				'label' 			=> __( 'Enable standard Google Analytics tracking. This tracks session data such as demographics, system, etc. You don\'t need to enable this if you are using a 3rd party analytics plugin.', 'woocommerce-google-analytics-integration' ),
 				'type' 				=> 'checkbox',
 				'checkboxgroup'		=> 'start',
 				'default' 			=> get_option( 'woocommerce_ga_standard_tracking_enabled' ) ? get_option( 'woocommerce_ga_standard_tracking_enabled' ) : 'no'  // Backwards compat

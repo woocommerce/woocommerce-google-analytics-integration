@@ -82,7 +82,7 @@ class WC_Google_Analytics extends WC_Integration {
 				'default' 			=> get_option( 'woocommerce_ga_support_display_advertising' ) ? get_option( 'woocommerce_ga_support_display_advertising' ) : 'no'  // Backwards compat
 			),
 			'ga_use_universal_analytics' => array(
-				'label' 			=> __( 'Use Universal Analytics instead of Classic Google Analytics.', 'woocommerce-google-analytics-integration' ),
+				'label' 			=> __( 'Use Universal Analytics instead of Classic Google Analytics. If you have not previously used Google Analytics for this site, check this box. Otherwise, <a href="https://developers.google.com/analytics/devguides/collection/upgrade/guide">follow step 1 of the Universal Analytics upgrade guide.</a> Enabling this setting will take care of step 2. <a href="https://support.google.com/analytics/answer/2790010?hl=en">Read more about Universal Analytics</a>.', 'woocommerce-google-analytics-integration' ),
 				'type' 				=> 'checkbox',
 				'checkboxgroup'		=> '',
 				'default' 			=> get_option( 'woocommerce_ga_use_universal_analytics' ) ? get_option( 'woocommerce_ga_use_universal_analytics' ) : 'no'  // Backwards compat

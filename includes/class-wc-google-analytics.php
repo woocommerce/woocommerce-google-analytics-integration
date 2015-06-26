@@ -26,16 +26,11 @@ class WC_Google_Analytics extends WC_Integration {
 		// Load the settings
 		$this->init_form_fields();
 		$this->init_settings();
+		$constructor = $this->init_options();
 
-		// Provide quick access to all of the integration settings
-		$this->ga_id                          = $this->get_option( 'ga_id' );
-		$this->ga_set_domain_name             = $this->get_option( 'ga_set_domain_name' );
-		$this->ga_standard_tracking_enabled   = $this->get_option( 'ga_standard_tracking_enabled' );
-		$this->ga_support_display_advertising = $this->get_option( 'ga_support_display_advertising' );
-		$this->ga_use_universal_analytics     = $this->get_option( 'ga_use_universal_analytics' );
-		$this->ga_anonymize_enabled           = $this->get_option( 'ga_anonymize_enabled' );
-		$this->ga_ecommerce_tracking_enabled  = $this->get_option( 'ga_ecommerce_tracking_enabled' );
-		$this->ga_event_tracking_enabled      = $this->get_option( 'ga_event_tracking_enabled' );
+		// Contains snippets/JS tracking code
+		include_once( 'class-wc-google-analytics-js.php' );
+		WC_Google_Analytics_JS::get_instance( $constructor );
 
 		// Actions
 		add_action( 'woocommerce_update_options_integration_google_analytics', array( $this, 'process_admin_options') );
@@ -49,6 +44,30 @@ class WC_Google_Analytics extends WC_Integration {
 
 		// utm_nooverride parameter for Google AdWords
 		add_filter( 'woocommerce_get_return_url', array( $this, 'utm_nooverride' ) );
+	}
+
+	/**
+	 * Loads all of our options for this plugin
+	 * @return array An array of options that can be passed to other classes
+	 */
+	public function init_options() {
+		$options = array(
+			'ga_id',
+			'ga_set_domain_name',
+			'ga_standard_tracking_enabled',
+			'ga_support_display_advertising',
+			'ga_use_universal_analytics',
+			'ga_anonymize_enabled',
+			'ga_ecommerce_tracking_enabled',
+			'ga_event_tracking_enabled'
+		);
+
+		$constructor = array();
+		foreach ( $options as $option ) {
+			$constructor[ $option ] = $this->$option = $this->get_option( $option );
+		}
+
+		return $constructor;
 	}
 
 	/**
@@ -139,27 +158,6 @@ class WC_Google_Analytics extends WC_Integration {
 	}
 
 	/**
-	 * Get the generic Google Analytics code snippet
-	 *
-	 * @return string
-	 */
-	protected function get_generic_ga_code() {
-		return "
-<script>
-	var gaProperty = '" . esc_js( $this->ga_id ) . "';
-	var disableStr = 'ga-disable-' + gaProperty;
-	if (document.cookie.indexOf(disableStr + '=true') > -1) {
-		window[disableStr] = true;
-	}
-	function gaOptout() {
-		document.cookie = disableStr + '=true; expires=Thu, 31 Dec 2099 23:59:59 UTC; path=/';
-		window[disableStr] = true;
-	}
-</script>
-";
-	}
-
-	/**
 	 * Google Analytics standard tracking
 	 *
 	 * @return string
@@ -243,7 +241,7 @@ class WC_Google_Analytics extends WC_Integration {
 
 		return "
 <!-- WooCommerce Google Analytics Integration -->
-" . $this->get_generic_ga_code() . "
+" . WC_Google_Analytics_JS::get_instance()->header() . "
 <script type='text/javascript'>$code</script>
 
 <!-- /WooCommerce Google Analytics Integration -->
@@ -436,7 +434,7 @@ class WC_Google_Analytics extends WC_Integration {
 
 		return "
 <!-- WooCommerce Google Analytics Integration -->
-" . $this->get_generic_ga_code() . "
+" . WC_Google_Analytics_JS::get_instance()->header() . "
 <script type='text/javascript'>$code</script>
 <!-- /WooCommerce Google Analytics Integration -->
 ";

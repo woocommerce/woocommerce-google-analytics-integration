@@ -36,6 +36,14 @@ class WC_Google_Analytics extends WC_Integration {
 		$this->ga_anonymize_enabled           = $this->get_option( 'ga_anonymize_enabled' );
 		$this->ga_ecommerce_tracking_enabled  = $this->get_option( 'ga_ecommerce_tracking_enabled' );
 		$this->ga_event_tracking_enabled      = $this->get_option( 'ga_event_tracking_enabled' );
+		$this->dismissed_info_banner          = get_option( 'woocommerce_dismissed_info_banner' );
+
+
+		// Display an info banner on how to configure WooCommerce
+		if ( is_admin() ) {
+			include_once( 'class-wc-google-analytics-info-banner.php' );
+			WC_Google_Analytics_Info_Banner::get_instance( $this->dismissed_info_banner, $this->ga_id );
+		}
 
 		// Actions
 		add_action( 'woocommerce_update_options_integration_google_analytics', array( $this, 'process_admin_options') );

@@ -60,6 +60,7 @@ class WC_Google_Analytics_Info_Banner {
 			$configure,
 			__( 'After configuring the plugin, please give Google Analytics 24 hours to start displaying results.', 'woocommerce-google-analytics-integration' ),
 			__( 'For transaction tracking to properly work, you will need to use a payment gateway that redirects the customer back to a WooCommerce order received/thank you page.', 'woocommerce-google-analytics-integration' ),
+			__( 'You must enable Ecommerce reporting in Google Analytics. <a href="https://support.google.com/analytics/answer/1009612?hl=en#Enable">See here for more information</a>.')
 		);
 
 		// Display the message..

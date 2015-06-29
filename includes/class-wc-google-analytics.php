@@ -121,7 +121,7 @@ class WC_Google_Analytics extends WC_Integration {
 	}
 
 	/**
-	 * 
+	 * Shows some additional help text after saving the Google Analytics settings
 	 */
 	function show_options_info() {
 		$this->method_description .= "<br /><strong>" . __( 'Please give Google Analytics 24 hours to start displaying results.', 'woocommerce-google-analytics-integration' ) . "</strong>";

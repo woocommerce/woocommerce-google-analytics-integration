@@ -47,7 +47,7 @@ class WC_Google_Analytics_Info_Banner {
 	public function banner() {
 		$screen = get_current_screen();
 
-		if ( ! in_array( $screen->base, array( 'woocommerce_page_wc-settings' ) ) || $screen->is_network || $screen->action ) {
+		if ( ! in_array( $screen->base, array( 'woocommerce_page_wc-settings', 'plugins' ) ) || $screen->is_network || $screen->action ) {
 			return;
 		}
 
@@ -55,22 +55,12 @@ class WC_Google_Analytics_Info_Banner {
 		$dismiss_url = $this->dismiss_url();
 
 		$heading = __( 'Google Analytics &amp; WooCommerce', 'woocommerce-google-analytics-integration' );
-		$configure = sprintf( __( 'Make sure to configure this plugin under the WooCommerce <a href="%s">integration tab</a>.' ), $integration_url );
-		$messages = array(
-			$configure,
-			__( 'After configuring the plugin, please give Google Analytics 24 hours to start displaying results.', 'woocommerce-google-analytics-integration' ),
-			__( 'For transaction tracking to properly work, you will need to use a payment gateway that redirects the customer back to a WooCommerce order received/thank you page.', 'woocommerce-google-analytics-integration' ),
-			__( 'You must enable Ecommerce reporting in Google Analytics. <a href="https://support.google.com/analytics/answer/1009612?hl=en#Enable">See here for more information</a>.')
-		);
+		$configure = sprintf( __( '<a href="%s">Connect WooCommerce to Google Analytics</a> to finish setting up this integration.' ), $integration_url );
 
 		// Display the message..
 		echo '<div class="updated fade"><p><strong>' . $heading . '</strong> ';
 		echo '<a href="' . esc_url( $dismiss_url ). '" title="' . __( 'Dismiss this notice.', 'woocommerce-google-analytics-integration' ) . '"> ' . __( '(Dismiss)', 'woocommerce-google-analytics-integration' ) . '</a>';
-		echo '<ul>';
-		foreach ( $messages as $message ) {
-			echo '<li>' . $message . '</li>';
-		}
-		echo "</ul></p></div>\n";
+		echo '<p>' . $configure . "</p></div>\n";
 	}
 
 	/**

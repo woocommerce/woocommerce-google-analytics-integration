@@ -130,8 +130,7 @@ class WC_Google_Analytics extends WC_Integration {
 
 	/**
 	 * Display the tracking codes
-	 *
-	 * @return string
+	 * Acts as a controller to figure out which code to display
 	 */
 	public function tracking_code_display() {
 		global $wp;
@@ -142,302 +141,50 @@ class WC_Google_Analytics extends WC_Integration {
 		}
 
 		// Check if is order received page and stop when the products and not tracked
-		if ( is_order_received_page() && 'yes' == $this->ga_ecommerce_tracking_enabled ) {
+		if ( is_order_received_page() && 'yes' === $this->ga_ecommerce_tracking_enabled ) {
 			$order_id = isset( $wp->query_vars['order-received'] ) ? $wp->query_vars['order-received'] : 0;
-
 			if ( 0 < $order_id && 1 != get_post_meta( $order_id, '_ga_tracked', true ) ) {
 				$display_ecommerce_tracking = true;
-
 				echo $this->get_ecommerce_tracking_code( $order_id );
 			}
 		}
 
-		if ( ! $display_ecommerce_tracking && 'yes' == $this->ga_standard_tracking_enabled ) {
-			echo $this->get_google_tracking_code();
+		if ( ! $display_ecommerce_tracking && 'yes' === $this->ga_standard_tracking_enabled ) {
+			echo $this->get_standard_tracking_code();
 		}
 	}
 
 	/**
-	 * Google Analytics standard tracking
-	 *
-	 * @return string
+	 * Standard Google Analytics tracking
 	 */
-	protected function get_google_tracking_code() {
-		$logged_in = ( is_user_logged_in() ) ? 'yes' : 'no';
-
-		if ( 'yes' === $logged_in ) {
-			$user_id      = get_current_user_id();
-			$current_user = get_user_by('id', $user_id);
-			$username     = $current_user->user_login;
-		} else {
-			$user_id  = '';
-			$username = __( 'Guest', 'woocommerce-google-analytics-integration' );
-		}
-
-		if ( 'yes' == $this->ga_use_universal_analytics ) {
-			if ( ! empty( $this->ga_set_domain_name ) ) {
-				$set_domain_name = esc_js( $this->ga_set_domain_name );
-			} else {
-				$set_domain_name = 'auto';
-			}
-
-			$support_display_advertising = '';
-			if ( 'yes' == $this->ga_support_display_advertising ) {
-				$support_display_advertising = "ga('require', 'displayfeatures');";
-			}
-
-			$anonymize_enabled = '';
-			if ( 'yes' == $this->ga_anonymize_enabled ) {
-				$anonymize_enabled = "ga('set', 'anonymizeIp', true);";
-			}
-
-			$code = "
-	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-	m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-	})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
-
-	ga('create', '" . esc_js( $this->ga_id ) . "', '" . $set_domain_name . "');" .
-	$support_display_advertising .
-	$anonymize_enabled . "
-	ga('set', 'dimension1', '" . $logged_in . "');
-	ga('send', 'pageview');
-";
-
-		} else {
-			if ( 'yes' == $this->ga_support_display_advertising ) {
-				$ga_url = "('https:' == document.location.protocol ? 'https://' : 'http://') + 'stats.g.doubleclick.net/dc.js'";
-			} else {
-				$ga_url = "('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js'";
-			}
-
-			$anonymize_enabled = '';
-			if ( 'yes' == $this->ga_anonymize_enabled ) {
-				$anonymize_enabled = "['_gat._anonymizeIp'],";
-			}
-
-			if ( ! empty( $this->ga_set_domain_name ) ) {
-				$set_domain_name = "['_setDomainName', '" . esc_js( $this->ga_set_domain_name ) . "'],\n";
-			} else {
-				$set_domain_name = '';
-			}
-
-			$code = "
-	var _gaq = _gaq || [];
-	_gaq.push(
-		['_setAccount', '" . esc_js( $this->ga_id ) . "'], " . $set_domain_name .
-		$anonymize_enabled . "
-		['_setCustomVar', 1, 'logged-in', '" . $logged_in . "', 1],
-		['_trackPageview']
-	);
-
-	(function() {
-		var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-		ga.src = " . $ga_url . ";
-		var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-	})();
-";
-		}
-
-		return "
-<!-- WooCommerce Google Analytics Integration -->
-" . WC_Google_Analytics_JS::get_instance()->header() . "
-<script type='text/javascript'>$code</script>
-
-<!-- /WooCommerce Google Analytics Integration -->
-
-";
-
+	protected function get_standard_tracking_code() {
+		return "<!-- WooCommerce Google Analytics Integration -->
+		" . WC_Google_Analytics_JS::get_instance()->header() . "
+		<script type='text/javascript'>" . WC_Google_Analytics_JS::get_instance()->load_analytics() . "</script>
+		<!-- /WooCommerce Google Analytics Integration -->";
 	}
 
 	/**
-	 * Google Analytics eCommerce tracking
+	 * eCommerce tracking
 	 *
 	 * @param int $order_id
-	 *
-	 * @return string
 	 */
 	protected function get_ecommerce_tracking_code( $order_id ) {
 		// Get the order and output tracking code
 		$order = new WC_Order( $order_id );
 
-		$logged_in = is_user_logged_in() ? 'yes' : 'no';
-
-		if ( 'yes' === $logged_in ) {
-			$user_id      = get_current_user_id();
-			$current_user = get_user_by( 'id', $user_id );
-			$username     = $current_user->user_login;
-		} else {
-			$user_id  = '';
-			$username = __( 'Guest', 'woocommerce-google-analytics-integration' );
-		}
-
-		if ( 'yes' == $this->ga_use_universal_analytics ) {
-			if ( ! empty( $this->ga_set_domain_name ) ) {
-				$set_domain_name = esc_js( $this->ga_set_domain_name );
-			} else {
-				$set_domain_name = 'auto';
-			}
-
-			$support_display_advertising = '';
-			if ( 'yes' == $this->ga_support_display_advertising ) {
-				$support_display_advertising = "ga('require', 'displayfeatures');";
-			}
-
-			$anonymize_enabled = '';
-			if ( 'yes' == $this->ga_anonymize_enabled ) {
-				$anonymize_enabled = "ga('set', 'anonymizeIp', true);";
-			}
-
-			$code = "
-	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-	m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-	})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
-
-	ga('create', '" . esc_js( $this->ga_id ) . "', '" . $set_domain_name . "');" .
-	$support_display_advertising .
-	$anonymize_enabled . "
-	ga('set', 'dimension1', '" . $logged_in . "');
-	ga('send', 'pageview');
-
-	ga('require', 'ecommerce', 'ecommerce.js');
-
-	ga('ecommerce:addTransaction', {
-		'id': '" . esc_js( $order->get_order_number() ) . "',         // Transaction ID. Required
-		'affiliation': '" . esc_js( get_bloginfo( 'name' ) ) . "',    // Affiliation or store name
-		'revenue': '" . esc_js( $order->get_total() ) . "',           // Grand Total
-		'shipping': '" . esc_js( $order->get_total_shipping() ) . "', // Shipping
-		'tax': '" . esc_js( $order->get_total_tax() ) . "',           // Tax
-		'currency': '" . esc_js( $order->get_order_currency() ) . "'  // Currency
-	});
-";
-
-			// Order items
-			if ( $order->get_items() ) {
-				foreach ( $order->get_items() as $item ) {
-					$_product = $order->get_product_from_item( $item );
-
-					$code .= "ga('ecommerce:addItem', {";
-					$code .= "'id': '" . esc_js( $order->get_order_number() ) . "',";
-					$code .= "'name': '" . esc_js( $item['name'] ) . "',";
-					$code .= "'sku': '" . esc_js( $_product->get_sku() ? $_product->get_sku() : $_product->id ) . "',";
-
-					if ( is_array( $_product->variation_data ) && !empty( $_product->variation_data ) ) {
-
-						$code .= "'category': '" . esc_js( woocommerce_get_formatted_variation( $_product->variation_data, true ) ) . "',";
-
-					} else {
-						$out = array();
-						$categories = get_the_terms($_product->id, 'product_cat');
-						if ( $categories ) {
-							foreach ( $categories as $category ) {
-								$out[] = $category->name;
-							}
-						}
-						$code .= "'category': '" . esc_js( join( "/", $out) ) . "',";
-					}
-
-					$code .= "'price': '" . esc_js( $order->get_item_total( $item ) ) . "',";
-					$code .= "'quantity': '" . esc_js( $item['qty'] ) . "'";
-					$code .= "});";
-				}
-			}
-
-			$code .= "ga('ecommerce:send');      // Send transaction and item data to Google Analytics.";
-
-		} else {
-			if ( $this->ga_support_display_advertising == 'yes' ) {
-				$ga_url = "('https:' == document.location.protocol ? 'https://' : 'http://') + 'stats.g.doubleclick.net/dc.js'";
-			} else {
-				$ga_url = "('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js'";
-			}
-
-			$anonymize_enabled = '';
-			if ( 'yes' == $this->ga_anonymize_enabled ) {
-				$anonymize_enabled = "['_gat._anonymizeIp'],";
-			}
-
-			if ( ! empty( $this->ga_set_domain_name ) ) {
-				$set_domain_name = "['_setDomainName', '" . esc_js( $this->ga_set_domain_name ) . "'],";
-			} else {
-				$set_domain_name = '';
-			}
-
-			$code = "
-	var _gaq = _gaq || [];
-
-	_gaq.push(
-		['_setAccount', '" . esc_js( $this->ga_id ) . "'], " . $set_domain_name .
-		$anonymize_enabled . "
-		['_setCustomVar', 1, 'logged-in', '" . esc_js( $logged_in ) . "', 1],
-		['_trackPageview'],
-		['_set', 'currencyCode', '" . esc_js( $order->get_order_currency() ) . "']
-	);
-
-	_gaq.push(['_addTrans',
-		'" . esc_js( $order->get_order_number() ) . "', 	// order ID - required
-		'" . esc_js( get_bloginfo( 'name' ) ) . "',  		// affiliation or store name
-		'" . esc_js( $order->get_total() ) . "',   	    	// total - required
-		'" . esc_js( $order->get_total_tax() ) . "',    	// tax
-		'" . esc_js( $order->get_total_shipping() ) . "',	// shipping
-		'" . esc_js( $order->billing_city ) . "',       	// city
-		'" . esc_js( $order->billing_state ) . "',      	// state or province
-		'" . esc_js( $order->billing_country ) . "'     	// country
-	]);
-";
-
-			// Order items
-			if ( $order->get_items() ) {
-				foreach ( $order->get_items() as $item ) {
-					$_product = $order->get_product_from_item( $item );
-
-					$code .= "_gaq.push(['_addItem',";
-					$code .= "'" . esc_js( $order->get_order_number() ) . "',";
-					$code .= "'" . esc_js( $_product->get_sku() ? $_product->get_sku() : $_product->id ) . "',";
-					$code .= "'" . esc_js( $item['name'] ) . "',";
-
-					if ( is_array( $_product->variation_data ) && !empty( $_product->variation_data ) ) {
-
-						$code .= "'" . esc_js( woocommerce_get_formatted_variation( $_product->variation_data, true ) ) . "',";
-
-					} else {
-						$out = array();
-						$categories = get_the_terms($_product->id, 'product_cat');
-						if ( $categories ) {
-							foreach ( $categories as $category ){
-								$out[] = $category->name;
-							}
-						}
-						$code .= "'" . esc_js( join( "/", $out) ) . "',";
-					}
-
-					$code .= "'" . esc_js( $order->get_item_total( $item ) ) . "',";
-					$code .= "'" . esc_js( $item['qty'] ) . "'";
-					$code .= "]);";
-				}
-			}
-
-			$code .= "
-	_gaq.push(['_trackTrans']); // submits transaction to the Analytics servers
-
-	(function() {
-		var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-		ga.src = " . $ga_url . ";
-		var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-	})();
-";
-		}
+		$code = WC_Google_Analytics_JS::get_instance()->load_analytics( $order );
+		$code .= WC_Google_Analytics_JS::get_instance()->add_transaction( $order );
 
 		// Mark the order as tracked
 		update_post_meta( $order_id, '_ga_tracked', 1 );
 
 		return "
-<!-- WooCommerce Google Analytics Integration -->
-" . WC_Google_Analytics_JS::get_instance()->header() . "
-<script type='text/javascript'>$code</script>
-<!-- /WooCommerce Google Analytics Integration -->
-";
+		<!-- WooCommerce Google Analytics Integration -->
+		" . WC_Google_Analytics_JS::get_instance()->header() . "
+		<script type='text/javascript'>$code</script>
+		<!-- /WooCommerce Google Analytics Integration -->
+		";
 	}
 
 	/**

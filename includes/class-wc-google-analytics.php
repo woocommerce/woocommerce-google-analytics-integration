@@ -47,6 +47,7 @@ class WC_Google_Analytics extends WC_Integration {
 
 		// Actions
 		add_action( 'woocommerce_update_options_integration_google_analytics', array( $this, 'process_admin_options') );
+		add_action( 'woocommerce_update_options_integration_google_analytics', array( $this, 'show_options_info') );
 
 		// Tracking code
 		add_action( 'wp_head', array( $this, 'tracking_code_display' ), 999999 );
@@ -117,6 +118,16 @@ class WC_Google_Analytics extends WC_Integration {
 				'default' 			=> 'no'
 			)
 		);
+	}
+
+	/**
+	 * 
+	 */
+	function show_options_info() {
+		$this->method_description .= "<br /><strong>" . __( 'Please give Google Analytics 24 hours to start displaying results.', 'woocommerce-google-analytics-integration' ) . "</strong>";
+		if ( isset( $_REQUEST['woocommerce_google_analytics_ga_ecommerce_tracking_enabled'] ) && true === (bool) $_REQUEST['woocommerce_google_analytics_ga_ecommerce_tracking_enabled'] ) {
+			$this->method_description .= "<br /><strong>" . __( 'For transaction tracking to work properly, you will need to use a payment gateway that redirects the customer back to a WooCommerce order received/thank you page.', 'woocommerce-google-analytics-integration' ) . "</strong>";
+		}
 	}
 
 	/**

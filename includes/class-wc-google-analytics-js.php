@@ -293,5 +293,28 @@ class WC_Google_Analytics_JS {
 		return $code;
 	}
 
+	/**
+	 * Add to cart
+	 *
+	 * @param array $parameters associative array of _trackEvent parameters
+	 * @param string $selector jQuery selector for binding click event
+	 *
+	 * @return void
+	 */
+	public function event_tracking_code( $parameters, $selector ) {
+		$parameters = apply_filters( 'woocommerce_ga_event_tracking_parameters', $parameters );
+
+		if ( 'yes' === self::get( 'ga_use_universal_analytics' ) ) {
+			$track_event = "ga('send', 'event', %s, %s, %s);";
+		} else {
+			$track_event = "_gaq.push(['_trackEvent', %s, %s, %s]);";
+		}
+
+		wc_enqueue_js( "
+			$( '" . $selector . "' ).click( function() {
+				" . sprintf( $track_event, $parameters['category'], $parameters['action'], $parameters['label'] ) . "
+			});
+		" );
+	}
 
 }

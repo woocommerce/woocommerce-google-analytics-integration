@@ -190,12 +190,12 @@ class WC_Google_Analytics extends WC_Integration {
 	/**
 	 * Check if tracking is disabled
 	 *
-	 * @param string $type
+	 * @param string $type The setting to check
 	 *
-	 * @return bool
+	 * @return bool True if tracking for a certain setting is disabled
 	 */
 	private function disable_tracking( $type ) {
-		if ( is_admin() || current_user_can( 'manage_options' ) || ( ! $this->ga_id ) || 'no' == $type ) {
+		if ( is_admin() || current_user_can( 'manage_options' ) || ( ! $this->ga_id ) || 'no' === $type ) {
 			return true;
 		}
 	}
@@ -206,7 +206,6 @@ class WC_Google_Analytics extends WC_Integration {
 	 * @return void
 	 */
 	public function add_to_cart() {
-
 		if ( $this->disable_tracking( $this->ga_event_tracking_enabled ) ) {
 			return;
 		}
@@ -216,13 +215,13 @@ class WC_Google_Analytics extends WC_Integration {
 
 		global $product;
 
-		$parameters = array();
 		// Add single quotes to allow jQuery to be substituted into _trackEvent parameters
+		$parameters = array();
 		$parameters['category'] = "'" . __( 'Products', 'woocommerce-google-analytics-integration' ) . "'";
 		$parameters['action']   = "'" . __( 'Add to Cart', 'woocommerce-google-analytics-integration' ) . "'";
 		$parameters['label']    = "'" . esc_js( $product->get_sku() ? __( 'SKU:', 'woocommerce-google-analytics-integration' ) . ' ' . $product->get_sku() : "#" . $product->id ) . "'";
 
-		$this->event_tracking_code( $parameters, '.single_add_to_cart_button' );
+		WC_Google_Analytics_JS::get_instance()->event_tracking_code( $parameters, '.single_add_to_cart_button' );
 	}
 
 
@@ -232,53 +231,27 @@ class WC_Google_Analytics extends WC_Integration {
 	 * @return void
 	 */
 	public function loop_add_to_cart() {
-
 		if ( $this->disable_tracking( $this->ga_event_tracking_enabled ) ) {
 			return;
 		}
 
-		$parameters = array();
 		// Add single quotes to allow jQuery to be substituted into _trackEvent parameters
+		$parameters = array();
 		$parameters['category'] = "'" . __( 'Products', 'woocommerce-google-analytics-integration' ) . "'";
 		$parameters['action']   = "'" . __( 'Add to Cart', 'woocommerce-google-analytics-integration' ) . "'";
 		$parameters['label']    = "($(this).data('product_sku')) ? ('SKU: ' + $(this).data('product_sku')) : ('#' + $(this).data('product_id'))"; // Product SKU or ID
 
-		$this->event_tracking_code( $parameters, '.add_to_cart_button:not(.product_type_variable, .product_type_grouped)' );
-	}
-
-	/**
-	 * Google Analytics event tracking for loop add to cart
-	 *
-	 * @param array $parameters associative array of _trackEvent parameters
-	 * @param string $selector jQuery selector for binding click event
-	 *
-	 * @return void
-	 */
-	private function event_tracking_code( $parameters, $selector ) {
-		$parameters = apply_filters( 'woocommerce_ga_event_tracking_parameters', $parameters );
-
-		if ( 'yes' == $this->ga_use_universal_analytics ) {
-			$track_event = "ga('send', 'event', %s, %s, %s);";
-		} else {
-			$track_event = "_gaq.push(['_trackEvent', %s, %s, %s]);";
-		}
-
-		wc_enqueue_js( "
-	$( '" . $selector . "' ).click( function() {
-		" . sprintf( $track_event, $parameters['category'], $parameters['action'], $parameters['label'] ) . "
-	});
-" );
+		WC_Google_Analytics_JS::get_instance()->event_tracking_code( $parameters, '.add_to_cart_button:not(.product_type_variable, .product_type_grouped)' );
 	}
 
 	/**
 	 * Add the utm_nooverride parameter to any return urls. This makes sure Google Adwords doesn't mistake the offsite gateway as the referrer.
 	 *
-	 * @param  string $type
+	 * @param  string $return_url WooCommerce Return URL
 	 *
-	 * @return string
+	 * @return string URL
 	 */
 	public function utm_nooverride( $return_url ) {
-
 		// We don't know if the URL already has the parameter so we should remove it just in case
 		$return_url = remove_query_arg( 'utm_nooverride', $return_url );
 

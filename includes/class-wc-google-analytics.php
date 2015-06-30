@@ -19,9 +19,10 @@ class WC_Google_Analytics extends WC_Integration {
 	 * @return void
 	 */
 	public function __construct() {
-		$this->id                 = 'google_analytics';
-		$this->method_title       = __( 'Google Analytics', 'woocommerce-google-analytics-integration' );
-		$this->method_description = __( 'Google Analytics is a free service offered by Google that generates detailed statistics about the visitors to a website.', 'woocommerce-google-analytics-integration' );
+		$this->id                    = 'google_analytics';
+		$this->method_title          = __( 'Google Analytics', 'woocommerce-google-analytics-integration' );
+		$this->method_description    = __( 'Google Analytics is a free service offered by Google that generates detailed statistics about the visitors to a website.', 'woocommerce-google-analytics-integration' );
+		$this->dismissed_info_banner = get_option( 'woocommerce_dismissed_info_banner' );
 
 		// Load the settings
 		$this->init_form_fields();
@@ -32,8 +33,15 @@ class WC_Google_Analytics extends WC_Integration {
 		include_once( 'class-wc-google-analytics-js.php' );
 		WC_Google_Analytics_JS::get_instance( $constructor );
 
+		// Display an info banner on how to configure WooCommerce
+		if ( is_admin() ) {
+			include_once( 'class-wc-google-analytics-info-banner.php' );
+			WC_Google_Analytics_Info_Banner::get_instance( $this->dismissed_info_banner, $this->ga_id );
+		}
+
 		// Actions
 		add_action( 'woocommerce_update_options_integration_google_analytics', array( $this, 'process_admin_options') );
+		add_action( 'woocommerce_update_options_integration_google_analytics', array( $this, 'show_options_info') );
 
 		// Tracking code
 		add_action( 'wp_head', array( $this, 'tracking_code_display' ), 999999 );
@@ -126,6 +134,16 @@ class WC_Google_Analytics extends WC_Integration {
 				'default' 			=> 'no'
 			)
 		);
+	}
+
+	/**
+	 * Shows some additional help text after saving the Google Analytics settings
+	 */
+	function show_options_info() {
+		$this->method_description .= "<br /><strong>" . __( 'Please give Google Analytics 24 hours to start displaying results.', 'woocommerce-google-analytics-integration' ) . "</strong>";
+		if ( isset( $_REQUEST['woocommerce_google_analytics_ga_ecommerce_tracking_enabled'] ) && true === (bool) $_REQUEST['woocommerce_google_analytics_ga_ecommerce_tracking_enabled'] ) {
+			$this->method_description .= "<br /><strong>" . __( 'For transaction tracking to work properly, you will need to use a payment gateway that redirects the customer back to a WooCommerce order received/thank you page.', 'woocommerce-google-analytics-integration' ) . "</strong>";
+		}
 	}
 
 	/**

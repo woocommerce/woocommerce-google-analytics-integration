@@ -49,6 +49,9 @@ class WC_Google_Analytics extends WC_Integration {
 		// Event tracking code
 		add_action( 'woocommerce_after_add_to_cart_button', array( $this, 'add_to_cart' ) );
 		add_action( 'wp_footer', array( $this, 'loop_add_to_cart' ) );
+		add_action( 'woocommerce_after_cart', array( $this, 'remove_from_cart' ) );
+		add_action( 'woocommerce_after_mini_cart', array( $this, 'remove_from_cart' ) );
+		add_filter( 'woocommerce_cart_item_remove_link', array( $this, 'remove_from_cart_attributes' ), 10, 2 );
 
 		// utm_nooverride parameter for Google AdWords
 		add_filter( 'woocommerce_get_return_url', array( $this, 'utm_nooverride' ) );
@@ -303,6 +306,38 @@ class WC_Google_Analytics extends WC_Integration {
 		WC_Google_Analytics_JS::get_instance()->event_tracking_code( $parameters, '.single_add_to_cart_button' );
 	}
 
+	/**
+	 * Enhanced Analytics event tracking for removing a product from the cart
+	 */
+	public function remove_from_cart() {
+		if ( $this->disable_tracking( $this->ga_use_universal_analytics ) ) {
+			return;
+		}
+
+		if ( $this->disable_tracking( $this->ga_enhanced_ecommerce_tracking_enabled ) ) {
+			return;
+		}
+
+		if ( $this->disable_tracking( $this->ga_enhanced_remove_from_cart_enabled ) ) {
+			return;
+		}
+
+		WC_Google_Analytics_JS::get_instance()->remove_from_cart();
+	}
+
+	/**
+	 * Adds the product ID and SKU to the remove product link if not present
+	 */
+	public function remove_from_cart_attributes( $url, $key ) {
+		if ( strpos( $url,'data-product_id' ) !== false ) {
+			return $url;
+		}
+
+		$item = WC()->cart->get_cart_item( $key );
+		$product = $item['data'];
+		$url = str_replace( 'href=', 'data-product_id="' . esc_attr( $product->id ) . '" data-product_sku="' . esc_attr( $product->get_sku() )  . '" href=', $url );
+		return $url;
+	}
 
 	/**
 	 * Google Analytics event tracking for loop add to cart

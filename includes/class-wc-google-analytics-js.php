@@ -344,6 +344,26 @@ class WC_Google_Analytics_JS {
 	}
 
 	/**
+	 * Tracks an enhanced ecommerce remove from cart action
+	 */
+	function remove_from_cart() {
+		echo( "
+			<script>
+			(function($) {
+				$( '.remove' ).click( function() {
+					ga( 'ec:addProduct', {
+						'id': ($(this).data('product_sku')) ? ('SKU: ' + $(this).data('product_sku')) : ('#' + $(this).data('product_id')),
+						'quantity': $(this).parent().parent().find( '.qty' ).val() ? $(this).parent().parent().find( '.qty' ).val() : '1',
+					} );
+					ga( 'ec:setAction', 'remove' );
+					ga( 'send', 'event', 'UX', 'click', 'remove from cart' );
+				});
+			})(jQuery);
+			</script>
+		" );
+	}
+
+	/**
 	 * Add to cart
 	 *
 	 * @param array $parameters associative array of _trackEvent parameters

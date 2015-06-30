@@ -147,7 +147,7 @@ class WC_Google_Analytics_JS {
 			$anonymize_enabled = "ga( 'set', 'anonymizeIp', true );";
 		}
 
-		return "(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+		$code = "(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
 		(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
 		m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
 		})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
@@ -156,8 +156,15 @@ class WC_Google_Analytics_JS {
 		$support_display_advertising .
 		$anonymize_enabled . "
 		ga( 'set', 'dimension1', '" . $logged_in . "' );
-		ga( 'send', 'pageview' );
-		ga('require', 'ecommerce', 'ecommerce.js');";
+		ga( 'send', 'pageview' );\n";
+
+		if ( 'yes' === self::get( 'ga_enhanced_ecommerce_tracking_enabled' ) ) {
+			$code .= "ga( 'require', 'ec' );";
+		} else {
+			$code .= "ga( 'require', 'ecommerce', 'ecommerce.js');";
+		}
+
+		return $code;
 	}
 
 	/**

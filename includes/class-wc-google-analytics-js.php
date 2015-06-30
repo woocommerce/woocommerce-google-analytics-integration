@@ -274,20 +274,7 @@ class WC_Google_Analytics_JS {
 		$code .= "'" . esc_js( $order->get_order_number() ) . "',";
 		$code .= "'" . esc_js( $_product->get_sku() ? $_product->get_sku() : $_product->id ) . "',";
 		$code .= "'" . esc_js( $item['name'] ) . "',";
-
-		if ( is_array( $_product->variation_data ) && ! empty( $_product->variation_data ) ) {
-			$code .= "'" . esc_js( woocommerce_get_formatted_variation( $_product->variation_data, true ) ) . "',";
-		} else {
-			$out = array();
-			$categories = get_the_terms( $_product->id, 'product_cat' );
-			if ( $categories ) {
-				foreach ( $categories as $category ){
-					$out[] = $category->name;
-				}
-			}
-			$code .= "'" . esc_js( join( "/", $out) ) . "',";
-		}
-
+		$code .= self::product_get_category_line( $_product );
 		$code .= "'" . esc_js( $order->get_item_total( $item ) ) . "',";
 		$code .= "'" . esc_js( $item['qty'] ) . "'";
 		$code .= "]);";
@@ -307,20 +294,7 @@ class WC_Google_Analytics_JS {
 		$code .= "'id': '" . esc_js( $order->get_order_number() ) . "',";
 		$code .= "'name': '" . esc_js( $item['name'] ) . "',";
 		$code .= "'sku': '" . esc_js( $_product->get_sku() ? $_product->get_sku() : $_product->id ) . "',";
-
-		if ( is_array( $_product->variation_data ) && ! empty( $_product->variation_data ) ) {
-			$code .= "'category': '" . esc_js( woocommerce_get_formatted_variation( $_product->variation_data, true ) ) . "',";
-		} else {
-			$out = array();
-			$categories = get_the_terms( $_product->id, 'product_cat' );
-			if ( $categories ) {
-				foreach ( $categories as $category ) {
-					$out[] = $category->name;
-				}
-			}
-			$code .= "'category': '" . esc_js( join( "/", $out ) ) . "',";
-		}
-
+		$code .= "'category': " . self::product_get_category_line( $_product );
 		$code .= "'price': '" . esc_js( $order->get_item_total( $item ) ) . "',";
 		$code .= "'quantity': '" . esc_js( $item['qty'] ) . "'";
 		$code .= "});";
@@ -339,8 +313,22 @@ class WC_Google_Analytics_JS {
 		$code = "ga( 'ec:addProduct', {";
 		$code .= "'id': '" . esc_js( $_product->get_sku() ? $_product->get_sku() : $_product->id ) . "',";
 		$code .= "'name': '" . esc_js( $item['name'] ) . "',";
+		$code .= "'category': " . self::product_get_category_line( $_product );
+		$code .= "'price': '" . esc_js( $order->get_item_total( $item ) ) . "',";
+		$code .= "'quantity': '" . esc_js( $item['qty'] ) . "'";
+		$code .= "});";
+
+		return $code;
+	}
+
+	/**
+	 * Returns a 'category' JSON line based on $product
+	 * @param  object $product  Product to pull info for
+	 * @return string          Line of JSON
+	 */
+	function product_get_category_line( $_product ) {
 		if ( is_array( $_product->variation_data ) && ! empty( $_product->variation_data ) ) {
-			$code .= "'category': '" . esc_js( woocommerce_get_formatted_variation( $_product->variation_data, true ) ) . "',";
+			$code = "'" . esc_js( woocommerce_get_formatted_variation( $_product->variation_data, true ) ) . "',";
 		} else {
 			$out = array();
 			$categories = get_the_terms( $_product->id, 'product_cat' );
@@ -349,12 +337,8 @@ class WC_Google_Analytics_JS {
 					$out[] = $category->name;
 				}
 			}
-			$code .= "'category': '" . esc_js( join( "/", $out ) ) . "',";
+			$code = "'" . esc_js( join( "/", $out ) ) . "',";
 		}
-
-		$code .= "'price': '" . esc_js( $order->get_item_total( $item ) ) . "',";
-		$code .= "'quantity': '" . esc_js( $item['qty'] ) . "'";
-		$code .= "});";
 
 		return $code;
 	}
@@ -371,7 +355,18 @@ class WC_Google_Analytics_JS {
 		$parameters = apply_filters( 'woocommerce_ga_event_tracking_parameters', $parameters );
 
 		if ( 'yes' === self::get( 'ga_use_universal_analytics' ) ) {
-			$track_event = "ga('send', 'event', %s, %s, %s);";
+			if ( 'yes' === self::get( 'ga_enhanced_ecommerce_tracking_enabled' ) ) {
+				wc_enqueue_js( "
+					$( '" . $selector . "' ).click( function() {
+						" . $parameters['enhanced'] . "
+						ga( 'ec:setAction', 'add' );
+						ga( 'send', 'event', 'UX', 'click', 'add to cart' );
+					});
+				" );
+				return;
+			} else {
+				$track_event = "ga('send', 'event', %s, %s, %s);";
+			}
 		} else {
 			$track_event = "_gaq.push(['_trackEvent', %s, %s, %s]);";
 		}

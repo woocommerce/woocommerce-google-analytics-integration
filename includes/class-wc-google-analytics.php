@@ -292,6 +292,14 @@ class WC_Google_Analytics extends WC_Integration {
 		$parameters['action']   = "'" . __( 'Add to Cart', 'woocommerce-google-analytics-integration' ) . "'";
 		$parameters['label']    = "'" . esc_js( $product->get_sku() ? __( 'SKU:', 'woocommerce-google-analytics-integration' ) . ' ' . $product->get_sku() : "#" . $product->id ) . "'";
 
+		if ( ! $this->disable_tracking( $this->ga_enhanced_ecommerce_tracking_enabled ) ) {
+			$code = "ga( 'ec:addProduct', {";
+			$code .= "'id': '" . esc_js( $product->get_sku() ? $product->get_sku() : $product->id ) . "',";
+			$code .= "'quantity': $( 'input.qty' ).val() ? $( 'input.qty' ).val() : '1'";
+			$code .= "} );";
+			$parameters['enhanced'] = $code;
+		}
+
 		WC_Google_Analytics_JS::get_instance()->event_tracking_code( $parameters, '.single_add_to_cart_button' );
 	}
 
@@ -311,6 +319,14 @@ class WC_Google_Analytics extends WC_Integration {
 		$parameters['category'] = "'" . __( 'Products', 'woocommerce-google-analytics-integration' ) . "'";
 		$parameters['action']   = "'" . __( 'Add to Cart', 'woocommerce-google-analytics-integration' ) . "'";
 		$parameters['label']    = "($(this).data('product_sku')) ? ('SKU: ' + $(this).data('product_sku')) : ('#' + $(this).data('product_id'))"; // Product SKU or ID
+
+		if ( ! $this->disable_tracking( $this->ga_enhanced_ecommerce_tracking_enabled ) ) {
+			$code = "ga( 'ec:addProduct', {";
+			$code .= "'id': ($(this).data('product_sku')) ? ('SKU: ' + $(this).data('product_sku')) : ('#' + $(this).data('product_id')),";
+			$code .= "'quantity': $(this).data('quantity')";
+			$code .= "} );";
+			$parameters['enhanced'] = $code;
+		}
 
 		WC_Google_Analytics_JS::get_instance()->event_tracking_code( $parameters, '.add_to_cart_button:not(.product_type_variable, .product_type_grouped)' );
 	}

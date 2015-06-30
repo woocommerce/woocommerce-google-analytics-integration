@@ -67,6 +67,11 @@ class WC_Google_Analytics extends WC_Integration {
 			'ga_use_universal_analytics',
 			'ga_anonymize_enabled',
 			'ga_ecommerce_tracking_enabled',
+			'ga_enhanced_ecommerce_tracking_enabled',
+			'ga_enhanced_remove_from_cart_enabled',
+			'ga_enhanced_product_impression_enabled',
+			'ga_enhanced_checkout_process_enabled',
+			'ga_enhanced_refunds_enabled',
 			'ga_event_tracking_enabled'
 		);
 
@@ -125,20 +130,61 @@ class WC_Google_Analytics extends WC_Integration {
 				'checkboxgroup' => '',
 				'default'       => 'yes'
 			),
+			'ga_enhanced_ecommerce_tracking_enabled' => array(
+				'label'         => __( 'Enable Enhanced eCommerce ', 'woocommerce-google-analytics-integration' ),
+				'description'   => sprintf( __( 'Enhanced eCommerce allows you to measure more user interactions with your store, including: product impressions, starting the checkout process, adding and removing cart items, and refunds. Universal Analytics must be enabled for Enhanced Analytics to work. Before enabling this setting, turn on Enhanced Ecommerce in your Google Analytics dashboard. <a href="%s">See here for more information</a>.', 'woocommerce-google-analytics-integration' ), 'https://support.google.com/analytics/answer/6032539?hl=en' ),
+				'type'          => 'checkbox',
+				'checkboxgroup' => '',
+				'default'       => 'no'
+			),
 			'ga_ecommerce_tracking_enabled' => array(
 				'title'             => __( 'Data to Track', 'woocommerce-google-analytics-integration' ),
-				'label' 			=> __( 'Transactions', 'woocommerce-google-analytics-integration' ),
+				'label' 			=> __( 'Purchase Transactions', 'woocommerce-google-analytics-integration' ),
 				'description' 			=> __( 'This requires a payment gateway that redirects to the thank you/order received page after payment. Orders paid with gateways which do not do this will not be tracked.', 'woocommerce-google-analytics-integration' ),
 				'type' 				=> 'checkbox',
-				'checkboxgroup'		=> '',
+				'checkboxgroup'		=> 'start',
 				'default' 			=> get_option( 'woocommerce_ga_ecommerce_tracking_enabled' ) ? get_option( 'woocommerce_ga_ecommerce_tracking_enabled' ) : 'yes'  // Backwards compat
 			),
 			'ga_event_tracking_enabled' => array(
 				'label' 			=> __( 'Add to Cart Events', 'woocommerce-google-analytics-integration' ),
 				'type' 				=> 'checkbox',
+				'checkboxgroup'		=> '',
+				'default' 			=> 'yes'
+			),
+
+			// Enhanced eCommerce Settings
+
+			'ga_enhanced_remove_from_cart_enabled' => array(
+				'label' 			=> __( 'Remove from Cart Events', 'woocommerce-google-analytics-integration' ),
+				'description'       => __( 'Requires Enhanced eCommerce.', 'woocommerce-google-analytics-integration' ),
+				'type' 				=> 'checkbox',
+				'checkboxgroup'		=> '',
+				'default' 			=> 'yes'
+			),
+
+			'ga_enhanced_product_impression_enabled' => array(
+				'label' 			=> __( 'Product Impressions', 'woocommerce-google-analytics-integration' ),
+				'description'       => __( 'Requires Enhanced eCommerce.', 'woocommerce-google-analytics-integration' ),
+				'type' 				=> 'checkbox',
+				'checkboxgroup'		=> '',
+				'default' 			=> 'yes'
+			),
+
+			'ga_enhanced_checkout_process_enabled' => array(
+				'label' 			=> __( 'Checkout Process Initiated', 'woocommerce-google-analytics-integration' ),
+				'description'       => __( 'Requires Enhanced eCommerce.', 'woocommerce-google-analytics-integration' ),
+				'type' 				=> 'checkbox',
+				'checkboxgroup'		=> '',
+				'default' 			=> 'yes'
+			),
+
+			'ga_enhanced_refunds_enabled' => array(
+				'label' 			=> __( 'Refund Transactions', 'woocommerce-google-analytics-integration' ),
+				'description'       => __( 'Requires Enhanced eCommerce.', 'woocommerce-google-analytics-integration' ),
+				'type' 				=> 'checkbox',
 				'checkboxgroup'		=> 'end',
 				'default' 			=> 'yes'
-			)
+			),
 		);
 	}
 

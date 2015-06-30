@@ -174,7 +174,11 @@ class WC_Google_Analytics_JS {
 	 */
 	function add_transaction( $order ) {
 		if ( 'yes' == self::get( 'ga_use_universal_analytics' ) ) {
-			return self::add_transaction_universal( $order );
+			if ( 'yes' === self::get( 'ga_enhanced_ecommerce_tracking_enabled' ) ) {
+				return self::add_transaction_enhanced( $order );
+			} else {
+				return self::add_transaction_universal( $order );
+			}
 		} else {
 			return self::add_transaction_classic( $order );
 		}
@@ -235,9 +239,33 @@ class WC_Google_Analytics_JS {
 	}
 
 	/**
+	 * Enhanced Ecommerce Universal Analytics transaction tracking
+	 */
+	function add_transaction_enhanced( $order ) {
+		$code = "ga( 'set', '&cu', '" . esc_js( $order->get_order_currency() ) . "' );";
+
+		// Order items
+		if ( $order->get_items() ) {
+			foreach ( $order->get_items() as $item ) {
+				$code .= self::add_item_enhanced( $order, $item );
+			}
+		}
+
+		$code .= "ga( 'ec:setAction', 'purchase', {
+			'id': '" . esc_js( $order->get_order_number() ) . "',
+			'affiliation': '" . esc_js( get_bloginfo( 'name' ) ) . "',
+			'revenue': '" . esc_js( $order->get_total() ) . "',
+			'tax': '" . esc_js( $order->get_total_tax() ) . "',
+			'shipping': '" . esc_js( $order->get_total_shipping() ) . "'
+		} );";
+
+		return $code;
+	}
+
+	/**
 	 * Add Item (Classic)
 	 * @param object $order WC_Order Object
-	 * @param array $item  The item to add to add to a transaction/order
+	 * @param array $item  The item to add to a transaction/order
 	 */
 	function add_item_classic( $order, $item ) {
 		$_product = $order->get_product_from_item( $item );
@@ -270,7 +298,7 @@ class WC_Google_Analytics_JS {
 	/**
 	 * Add Item (Universal)
 	 * @param object $order WC_Order Object
-	 * @param array $item  The item to add to add to a transaction/order
+	 * @param array $item  The item to add to a transaction/order
 	 */
 	function add_item_universal( $order, $item ) {
 		$_product = $order->get_product_from_item( $item );
@@ -280,6 +308,37 @@ class WC_Google_Analytics_JS {
 		$code .= "'name': '" . esc_js( $item['name'] ) . "',";
 		$code .= "'sku': '" . esc_js( $_product->get_sku() ? $_product->get_sku() : $_product->id ) . "',";
 
+		if ( is_array( $_product->variation_data ) && ! empty( $_product->variation_data ) ) {
+			$code .= "'category': '" . esc_js( woocommerce_get_formatted_variation( $_product->variation_data, true ) ) . "',";
+		} else {
+			$out = array();
+			$categories = get_the_terms( $_product->id, 'product_cat' );
+			if ( $categories ) {
+				foreach ( $categories as $category ) {
+					$out[] = $category->name;
+				}
+			}
+			$code .= "'category': '" . esc_js( join( "/", $out ) ) . "',";
+		}
+
+		$code .= "'price': '" . esc_js( $order->get_item_total( $item ) ) . "',";
+		$code .= "'quantity': '" . esc_js( $item['qty'] ) . "'";
+		$code .= "});";
+
+		return $code;
+	}
+
+	/**
+	 * Add Item (Enhanced, Universal)
+	 * @param object $order WC_Order Object
+	 * @param array $item The item to add to a transaction/order
+	 */
+	function add_item_enhanced( $order, $item ) {
+		$_product = $order->get_product_from_item( $item );
+
+		$code = "ga( 'ec:addProduct', {";
+		$code .= "'id': '" . esc_js( $_product->get_sku() ? $_product->get_sku() : $_product->id ) . "',";
+		$code .= "'name': '" . esc_js( $item['name'] ) . "',";
 		if ( is_array( $_product->variation_data ) && ! empty( $_product->variation_data ) ) {
 			$code .= "'category': '" . esc_js( woocommerce_get_formatted_variation( $_product->variation_data, true ) ) . "',";
 		} else {

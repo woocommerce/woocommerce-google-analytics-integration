@@ -84,10 +84,11 @@ class WC_Google_Analytics extends WC_Integration {
 	public function init_form_fields() {
 		$this->form_fields = array(
 			'ga_id' => array(
-				'title' 			=> __( 'Google Analytics ID', 'woocommerce-google-analytics-integration' ),
-				'description' 		=> __( 'Log into your Google Analytics account to find your ID. e.g. <code>UA-XXXXX-X</code>', 'woocommerce-google-analytics-integration' ),
-				'type' 				=> 'text',
-				'default' 			=> get_option( 'woocommerce_ga_id' ) // Backwards compat
+				'title'       => __( 'Google Analytics ID', 'woocommerce-google-analytics-integration' ),
+				'description' => __( 'Log into your Google Analytics account to find your ID. e.g. <code>UA-XXXXX-X</code>', 'woocommerce-google-analytics-integration' ),
+				'type'        => 'text',
+				'placeholder' => 'UA-XXXXX-X',
+				'default'     => get_option( 'woocommerce_ga_id' ) // Backwards compat
 			),
 			'ga_set_domain_name' => array(
 				'title' 			=> __( 'Set Domain Name', 'woocommerce-google-analytics-integration' ),
@@ -96,42 +97,47 @@ class WC_Google_Analytics extends WC_Integration {
 				'default' 			=> ''
 			),
 			'ga_standard_tracking_enabled' => array(
-				'title' 			=> __( 'Options', 'woocommerce-google-analytics-integration' ),
-				'label' 			=> __( 'Enable standard Google Analytics tracking. This tracks session data such as demographics, system, etc. You don\'t need to enable this if you are using a 3rd party analytics plugin.', 'woocommerce-google-analytics-integration' ),
-				'type' 				=> 'checkbox',
-				'checkboxgroup'		=> 'start',
-				'default' 			=> get_option( 'woocommerce_ga_standard_tracking_enabled' ) ? get_option( 'woocommerce_ga_standard_tracking_enabled' ) : 'no'  // Backwards compat
+				'title'         => __( 'Tracking Options', 'woocommerce-google-analytics-integration' ),
+				'label'         => __( 'Enable Standard Tracking', 'woocommerce-google-analytics-integration' ),
+				'description'   =>  __( 'This tracks session data such as demographics, system, etc. You don\'t need to enable this if you are using a 3rd party Google analytics plugin.', 'woocommerce-google-analytics-integration' ),
+				'type'          => 'checkbox',
+				'checkboxgroup' => 'start',
+				'default'       => get_option( 'woocommerce_ga_standard_tracking_enabled' ) ? get_option( 'woocommerce_ga_standard_tracking_enabled' ) : 'no'  // Backwards compat
 			),
 			'ga_support_display_advertising' => array(
-				'label' 			=> __( 'Set the Google Analytics code to support Display Advertising. <a href="https://support.google.com/analytics/answer/2700409" target="_blank">Read more about Display Advertising</a>.', 'woocommerce-google-analytics-integration' ),
-				'type' 				=> 'checkbox',
-				'checkboxgroup'		=> '',
-				'default' 			=> get_option( 'woocommerce_ga_support_display_advertising' ) ? get_option( 'woocommerce_ga_support_display_advertising' ) : 'no'  // Backwards compat
+				'label'         => __( '"Display Advertising" Support', 'woocommerce-google-analytics-integration' ),
+				'description'   => sprintf( __( 'Set the Google Analytics code to support Display Advertising. %sRead more about Display Advertising%s.', 'woocommerce-google-analytics-integration' ), '<a href="https://support.google.com/analytics/answer/2700409" target="_blank">', '</a>' ),
+				'type'          => 'checkbox',
+				'checkboxgroup' => '',
+				'default'       => get_option( 'woocommerce_ga_support_display_advertising' ) ? get_option( 'woocommerce_ga_support_display_advertising' ) : 'no'  // Backwards compat
 			),
 			'ga_use_universal_analytics' => array(
-				'label' 			=> __( 'Use Universal Analytics instead of Classic Google Analytics. If you have not previously used Google Analytics for this site, check this box. Otherwise, <a href="https://developers.google.com/analytics/devguides/collection/upgrade/guide">follow step 1 of the Universal Analytics upgrade guide.</a> Enabling this setting will take care of step 2. <a href="https://support.google.com/analytics/answer/2790010?hl=en">Read more about Universal Analytics</a>.', 'woocommerce-google-analytics-integration' ),
-				'type' 				=> 'checkbox',
-				'checkboxgroup'		=> '',
-				'default' 			=> get_option( 'woocommerce_ga_use_universal_analytics' ) ? get_option( 'woocommerce_ga_use_universal_analytics' ) : 'no'  // Backwards compat
+				'label'         => __( 'Enable Universal Analytics', 'woocommerce-google-analytics-integration' ),
+				'description'   => sprintf( __( 'Uses Universal Analytics instead of Classic Google Analytics. If you have <strong>not</strong> previously used Google Analytics on this site, check this box. Otherwise, %sfollow step 1 of the Universal Analytics upgrade guide.%s Enabling this setting will take care of step 2. %sRead more about Universal Analytics%s.', 'woocommerce-google-analytics-integration' ), '<a href="https://developers.google.com/analytics/devguides/collection/upgrade/guide" target="_blank">', '</a>', '<a href="https://support.google.com/analytics/answer/2790010?hl=en" target="_blank">', '</a>' ),
+				'type'          => 'checkbox',
+				'checkboxgroup' => '',
+				'default'       => get_option( 'woocommerce_ga_use_universal_analytics' ) ? get_option( 'woocommerce_ga_use_universal_analytics' ) : 'no'  // Backwards compat
 			),
 			'ga_anonymize_enabled' => array(
-				'label' 			=> __( 'Anonymize IP addresses. Setting this option is mandatory in certain countries due to national privacy laws. <a href="https://support.google.com/analytics/answer/2763052" target="_blank">Read more about IP Anonymization</a>.', 'woocommerce-google-analytics-integration' ),
-				'type' 				=> 'checkbox',
-				'checkboxgroup'		=> '',
-				'default' 			=> 'no'
+				'label'         => __( 'Anonymize IP addresses.', 'woocommerce-google-analytics-integration' ),
+				'description'   => sprintf( __( 'Enabling this option is mandatory in certain countries due to national privacy laws. %sRead more about IP Anonymization%s.', 'woocommerce-google-analytics-integration' ), '<a href="https://support.google.com/analytics/answer/2763052" target="_blank">', '</a>' ),
+				'type'          => 'checkbox',
+				'checkboxgroup' => '',
+				'default'       => 'yes'
 			),
 			'ga_ecommerce_tracking_enabled' => array(
-				'title'             => __( 'Data to track', 'woocommerce-google-analytics-integration' ),
-				'label' 			=> __( 'Transactions (requires a payment gateway that redirects to the thank you/order received page).', 'woocommerce-google-analytics-integration' ),
+				'title'             => __( 'Data to Track', 'woocommerce-google-analytics-integration' ),
+				'label' 			=> __( 'Transactions', 'woocommerce-google-analytics-integration' ),
+				'description' 			=> __( 'This requires a payment gateway that redirects to the thank you/order received page after payment. Orders paid with gateways which do not do this will not be tracked.', 'woocommerce-google-analytics-integration' ),
 				'type' 				=> 'checkbox',
 				'checkboxgroup'		=> '',
-				'default' 			=> get_option( 'woocommerce_ga_ecommerce_tracking_enabled' ) ? get_option( 'woocommerce_ga_ecommerce_tracking_enabled' ) : 'no'  // Backwards compat
+				'default' 			=> get_option( 'woocommerce_ga_ecommerce_tracking_enabled' ) ? get_option( 'woocommerce_ga_ecommerce_tracking_enabled' ) : 'yes'  // Backwards compat
 			),
 			'ga_event_tracking_enabled' => array(
-				'label' 			=> __( 'Add to Cart Actions.', 'woocommerce-google-analytics-integration' ),
+				'label' 			=> __( 'Add to Cart Events', 'woocommerce-google-analytics-integration' ),
 				'type' 				=> 'checkbox',
 				'checkboxgroup'		=> 'end',
-				'default' 			=> 'no'
+				'default' 			=> 'yes'
 			)
 		);
 	}
@@ -140,9 +146,10 @@ class WC_Google_Analytics extends WC_Integration {
 	 * Shows some additional help text after saving the Google Analytics settings
 	 */
 	function show_options_info() {
-		$this->method_description .= "<br /><strong>" . __( 'Please give Google Analytics 24 hours to start displaying results.', 'woocommerce-google-analytics-integration' ) . "</strong>";
+		$this->method_description .= "<div class='notice notice-info'><p>" . __( 'Please allow Google Analytics 24 hours to start displaying results.', 'woocommerce-google-analytics-integration' ) . "</p></div>";
+
 		if ( isset( $_REQUEST['woocommerce_google_analytics_ga_ecommerce_tracking_enabled'] ) && true === (bool) $_REQUEST['woocommerce_google_analytics_ga_ecommerce_tracking_enabled'] ) {
-			$this->method_description .= "<br /><strong>" . __( 'For transaction tracking to work properly, you will need to use a payment gateway that redirects the customer back to a WooCommerce order received/thank you page.', 'woocommerce-google-analytics-integration' ) . "</strong>";
+			$this->method_description .= "<div class='notice notice-info'><p>" . __( 'Please note, for transaction tracking to work properly, you will need to use a payment gateway that redirects the customer back to a WooCommerce order received/thank you page.', 'woocommerce-google-analytics-integration' ) . "</div>";
 		}
 	}
 

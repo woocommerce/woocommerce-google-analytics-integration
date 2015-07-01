@@ -55,6 +55,7 @@ class WC_Google_Analytics extends WC_Integration {
 		add_action( 'woocommerce_after_shop_loop_item', array( $this, 'listing_impression' ) );
 		add_action( 'woocommerce_after_shop_loop_item', array( $this, 'listing_click' ) );
 		add_action( 'woocommerce_after_single_product', array( $this, 'product_detail' ) );
+		add_action( 'woocommerce_after_checkout_form', array( $this, 'checkout_process' ) );
 
 		// utm_nooverride parameter for Google AdWords
 		add_filter( 'woocommerce_get_return_url', array( $this, 'utm_nooverride' ) );
@@ -445,6 +446,25 @@ class WC_Google_Analytics extends WC_Integration {
 
 		global $product;
 		WC_Google_Analytics_JS::get_instance()->product_detail( $product );
+	}
+
+	/**
+	 * Tracks when the checkout form is loaded
+	 */
+	public function checkout_process( $checkout ) {
+		if ( $this->disable_tracking( $this->ga_use_universal_analytics ) ) {
+			return;
+		}
+
+		if ( $this->disable_tracking( $this->ga_enhanced_ecommerce_tracking_enabled ) ) {
+			return;
+		}
+
+		if ( $this->disable_tracking( $this->ga_enhanced_checkout_process_enabled ) ) {
+			return;
+		}
+
+		WC_Google_Analytics_JS::get_instance()->checkout_process( WC()->cart->get_cart() );
 	}
 
 	/**

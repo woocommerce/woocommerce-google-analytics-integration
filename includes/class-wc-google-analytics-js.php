@@ -440,6 +440,27 @@ class WC_Google_Analytics_JS {
 	}
 
 	/**
+	 * Tracks when the checkout process is started
+	 */
+	function checkout_process( $cart ) {
+		$code = "";
+
+		foreach ( $cart as $cart_item_key => $cart_item ) {
+			$product     = apply_filters( 'woocommerce_cart_item_product', $cart_item['data'], $cart_item, $cart_item_key );
+			$code .= "ga( 'ec:addProduct', {
+				'id': '" . esc_js( $product->get_sku() ? $product->get_sku() : $product->id ) . "',
+				'name': '" . esc_js( $product->get_title() ) . "',
+				'category': " . self::product_get_category_line( $product ) . "
+				'price': '" . esc_js( $product->get_price() ) . "',
+				'quantity': '" . esc_js( $cart_item['quantity'] ) . "'
+			} );";
+		}
+
+		$code .= "ga( 'ec:setAction','checkout' );";
+		wc_enqueue_js( $code );
+	}
+
+	/**
 	 * Add to cart
 	 *
 	 * @param array $parameters associative array of _trackEvent parameters

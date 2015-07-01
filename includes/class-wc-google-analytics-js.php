@@ -425,6 +425,21 @@ class WC_Google_Analytics_JS {
 	}
 
 	/**
+	 * Tracks a product detail view
+	 */
+	function product_detail( $product ) {
+		wc_enqueue_js( "
+			ga( 'ec:addProduct', {
+				'id': '" . esc_js( $product->get_sku() ? $product->get_sku() : $product->id ) . "',
+				'name': '" . esc_js( $product->get_title() ) . "',
+				'category': " . self::product_get_category_line( $product ) . "
+				'price': '" . esc_js( $product->get_price() ) . "',
+			} );
+
+			ga( 'ec:setAction', 'detail' );" );
+	}
+
+	/**
 	 * Add to cart
 	 *
 	 * @param array $parameters associative array of _trackEvent parameters

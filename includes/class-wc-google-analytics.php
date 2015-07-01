@@ -52,8 +52,9 @@ class WC_Google_Analytics extends WC_Integration {
 		add_action( 'woocommerce_after_cart', array( $this, 'remove_from_cart' ) );
 		add_action( 'woocommerce_after_mini_cart', array( $this, 'remove_from_cart' ) );
 		add_filter( 'woocommerce_cart_item_remove_link', array( $this, 'remove_from_cart_attributes' ), 10, 2 );
-		add_filter( 'woocommerce_after_shop_loop_item', array( $this, 'listing_impression' ) );
-		add_filter( 'woocommerce_after_shop_loop_item', array( $this, 'listing_click' ) );
+		add_action( 'woocommerce_after_shop_loop_item', array( $this, 'listing_impression' ) );
+		add_action( 'woocommerce_after_shop_loop_item', array( $this, 'listing_click' ) );
+		add_action( 'woocommerce_after_single_product', array( $this, 'product_detail' ) );
 
 		// utm_nooverride parameter for Google AdWords
 		add_filter( 'woocommerce_get_return_url', array( $this, 'utm_nooverride' ) );
@@ -424,6 +425,26 @@ class WC_Google_Analytics extends WC_Integration {
 
 		global $product, $woocommerce_loop;
 		WC_Google_Analytics_JS::get_instance()->listing_click( $product, $woocommerce_loop['loop'] );
+	}
+
+	/**
+	 * Measure a product detail view
+	 */
+	public function product_detail() {
+		if ( $this->disable_tracking( $this->ga_use_universal_analytics ) ) {
+			return;
+		}
+
+		if ( $this->disable_tracking( $this->ga_enhanced_ecommerce_tracking_enabled ) ) {
+			return;
+		}
+
+		if ( $this->disable_tracking( $this->ga_enhanced_product_detail_view_enabled ) ) {
+			return;
+		}
+
+		global $product;
+		WC_Google_Analytics_JS::get_instance()->product_detail( $product );
 	}
 
 	/**

@@ -79,7 +79,6 @@ class WC_Google_Analytics extends WC_Integration {
 			'ga_enhanced_product_impression_enabled',
 			'ga_enhanced_product_click_enabled',
 			'ga_enhanced_checkout_process_enabled',
-			'ga_enhanced_refunds_enabled',
 			'ga_enhanced_product_detail_view_enabled',
 			'ga_event_tracking_enabled'
 		);
@@ -141,7 +140,7 @@ class WC_Google_Analytics extends WC_Integration {
 			),
 			'ga_enhanced_ecommerce_tracking_enabled' => array(
 				'label'         => __( 'Enable Enhanced eCommerce ', 'woocommerce-google-analytics-integration' ),
-				'description'   => sprintf( __( 'Enhanced eCommerce allows you to measure more user interactions with your store, including: product impressions, starting the checkout process, adding and removing cart items, and refunds. Universal Analytics must be enabled for Enhanced Analytics to work. Before enabling this setting, turn on Enhanced Ecommerce in your Google Analytics dashboard. <a href="%s">See here for more information</a>.', 'woocommerce-google-analytics-integration' ), 'https://support.google.com/analytics/answer/6032539?hl=en' ),
+				'description'   => sprintf( __( 'Enhanced eCommerce allows you to measure more user interactions with your store, including: product impressions, product detail views, starting the checkout process, adding cart items, and removing cart items. Universal Analytics must be enabled for Enhanced eCommerce to work. Before enabling this setting, turn on Enhanced Ecommerce in your Google Analytics dashboard. <a href="%s">See here for more information</a>.', 'woocommerce-google-analytics-integration' ), 'https://support.google.com/analytics/answer/6032539?hl=en' ),
 				'type'          => 'checkbox',
 				'checkboxgroup' => '',
 				'default'       => 'no'
@@ -200,14 +199,6 @@ class WC_Google_Analytics extends WC_Integration {
 				'description'       => __( 'Requires Enhanced eCommerce.', 'woocommerce-google-analytics-integration' ),
 				'type' 				=> 'checkbox',
 				'checkboxgroup'		=> '',
-				'default' 			=> 'yes'
-			),
-
-			'ga_enhanced_refunds_enabled' => array(
-				'label' 			=> __( 'Refund Transactions', 'woocommerce-google-analytics-integration' ),
-				'description'       => __( 'Requires Enhanced eCommerce.', 'woocommerce-google-analytics-integration' ),
-				'type' 				=> 'checkbox',
-				'checkboxgroup'		=> 'end',
 				'default' 			=> 'yes'
 			),
 		);

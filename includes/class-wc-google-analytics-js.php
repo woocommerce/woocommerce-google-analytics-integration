@@ -110,7 +110,7 @@ class WC_Google_Analytics_JS {
 	/**
 	 * Builds the addImpression object
 	 */
-	public static function cart_search_impression( $product, $position ) {
+	public static function listing_impression( $product, $position ) {
 		if ( isset( $_GET['s'] ) ) {
 			$list = "Search Results";
 		} else {
@@ -125,6 +125,39 @@ class WC_Google_Analytics_JS {
 				'list': '" . esc_js( $list ) . "',
 				'position': " . esc_js( $position ) . "
 			} );
+		" );
+	}
+
+	/**
+	 * Builds an addProduct and click object
+	 */
+	public static function listing_click( $product, $position ) {
+		if ( isset( $_GET['s'] ) ) {
+			$list = "Search Results";
+		} else {
+			$list = "Product List";
+		}
+
+		echo( "
+			<script>
+			(function($) {
+				$( '.products .post-" . esc_js( $product->id ) . " a' ).click( function() {
+					if ( true === $(this).hasClass( 'add_to_cart_button' ) ) {
+						return;
+					}
+
+					ga( 'ec:addProduct', {
+						'id': '" . esc_js( $product->id ) . "',
+						'name': '" . esc_js( $product->get_title() ) . "',
+						'category': " . self::product_get_category_line( $product ) . "
+						'position': " . esc_js( $position ) . "
+					});
+
+					ga( 'ec:setAction', 'click', { list: '" . esc_js( $list ) . "' });
+					ga( 'send', 'event', 'UX', 'click', ' " . esc_js( $list ) . "' );
+				});
+			})(jQuery);
+			</script>
 		" );
 	}
 

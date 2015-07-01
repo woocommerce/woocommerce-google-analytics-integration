@@ -65,6 +65,7 @@ class WC_Google_Analytics_JS {
 	public static function load_analytics( $order = false ) {
 		$logged_in = is_user_logged_in() ? 'yes' : 'no';
 		if ( 'yes' === self::get( 'ga_use_universal_analytics' ) ) {
+			add_action( 'wp_footer', array( 'WC_Google_Analytics_JS', 'universal_analytics_footer' ) );
 			return self::load_analytics_universal( $logged_in );
 		} else {
 			add_action( 'wp_footer', array( 'WC_Google_Analytics_JS', 'classic_analytics_footer' ) );
@@ -107,6 +108,27 @@ class WC_Google_Analytics_JS {
 	}
 
 	/**
+	 * Builds the addImpression object
+	 */
+	public static function cart_search_impression( $product, $position ) {
+		if ( isset( $_GET['s'] ) ) {
+			$list = "Search Results";
+		} else {
+			$list = "Product List";
+		}
+
+		wc_enqueue_js( "
+			ga( 'ec:addImpression', { 
+				'id': '" . esc_js( $product->id ) . "',
+				'name': '" . esc_js( $product->get_title() ) . "',
+				'category': " . self::product_get_category_line( $product ) . "
+				'list': '" . esc_js( $list ) . "',
+				'position': " . esc_js( $position ) . "
+			} );
+		" );
+	}
+
+	/**
 	 * Asyncronously loads the classic Google Analytics code, and does so after all of our properties are loaded
 	 * Loads in the footer
 	 * @see wp_footer
@@ -123,6 +145,13 @@ class WC_Google_Analytics_JS {
 		ga.src = " . $ga_url . ";
 		var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
 		})();</script>";
+	}
+
+	/**
+	 * Sends the pageview last thing (needed for things like addImpression)
+	 */
+	public static function universal_analytics_footer() {
+		wc_enqueue_js( "ga( 'send', 'pageview' ); ");
 	}
 
 	/**
@@ -155,8 +184,7 @@ class WC_Google_Analytics_JS {
 		ga( 'create', '" . esc_js( self::get( 'ga_id' ) ) . "', '" . $set_domain_name . "' );" .
 		$support_display_advertising .
 		$anonymize_enabled . "
-		ga( 'set', 'dimension1', '" . $logged_in . "' );
-		ga( 'send', 'pageview' );\n";
+		ga( 'set', 'dimension1', '" . $logged_in . "' );\n";
 
 		if ( 'yes' === self::get( 'ga_enhanced_ecommerce_tracking_enabled' ) ) {
 			$code .= "ga( 'require', 'ec' );";
@@ -326,7 +354,7 @@ class WC_Google_Analytics_JS {
 	 * @param  object $product  Product to pull info for
 	 * @return string          Line of JSON
 	 */
-	function product_get_category_line( $_product ) {
+	private static function product_get_category_line( $_product ) {
 		if ( is_array( $_product->variation_data ) && ! empty( $_product->variation_data ) ) {
 			$code = "'" . esc_js( woocommerce_get_formatted_variation( $_product->variation_data, true ) ) . "',";
 		} else {

@@ -236,6 +236,11 @@ class WC_Google_Analytics extends WC_Integration {
 			}
 		}
 
+		if ( is_woocommerce() || is_cart() || is_checkout() ) {
+			$display_ecommerce_tracking = true;
+			echo $this->get_standard_tracking_code();
+		}
+
 		if ( ! $display_ecommerce_tracking && 'yes' === $this->ga_standard_tracking_enabled ) {
 			echo $this->get_standard_tracking_code();
 		}

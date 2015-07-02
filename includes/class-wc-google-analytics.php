@@ -39,6 +39,8 @@ class WC_Google_Analytics extends WC_Integration {
 			WC_Google_Analytics_Info_Banner::get_instance( $this->dismissed_info_banner, $this->ga_id );
 		}
 
+		add_filter( 'woocommerce_tracker_data', array( $this, 'track_options' ) );
+
 		// Actions
 		add_action( 'woocommerce_update_options_integration_google_analytics', array( $this, 'process_admin_options') );
 		add_action( 'woocommerce_update_options_integration_google_analytics', array( $this, 'show_options_info') );
@@ -151,6 +153,23 @@ class WC_Google_Analytics extends WC_Integration {
 		if ( isset( $_REQUEST['woocommerce_google_analytics_ga_ecommerce_tracking_enabled'] ) && true === (bool) $_REQUEST['woocommerce_google_analytics_ga_ecommerce_tracking_enabled'] ) {
 			$this->method_description .= "<div class='notice notice-info'><p>" . __( 'Please note, for transaction tracking to work properly, you will need to use a payment gateway that redirects the customer back to a WooCommerce order received/thank you page.', 'woocommerce-google-analytics-integration' ) . "</div>";
 		}
+	}
+
+	/**
+	 * Hooks into woocommerce_tracker_data and tracks some of the analytic settings (just enabled|disabled status)
+	 * only if you have opted into WooCommerce tracking
+	 * http://www.woothemes.com/woocommerce/usage-tracking/
+	 */
+	function track_options( $data ) {
+		$data['wc-google-analytics'] = array(
+			'standard_tracking_enabled'   => $this->ga_standard_tracking_enabled,
+			'support_display_advertising' => $this->ga_support_display_advertising,
+			'use_universal_analytics'     => $this->ga_use_universal_analytics,
+			'anonymize_enabled'           => $this->ga_anonymize_enabled,
+			'ecommerce_tracking_enabled'  => $this->ga_ecommerce_tracking_enabled,
+			'event_tracking_enabled'      => $this->ga_event_tracking_enabled
+		);
+		return $data;
 	}
 
 	/**

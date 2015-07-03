@@ -51,6 +51,13 @@ class WC_Google_Analytics extends WC_Integration {
 		// Event tracking code
 		add_action( 'woocommerce_after_add_to_cart_button', array( $this, 'add_to_cart' ) );
 		add_action( 'wp_footer', array( $this, 'loop_add_to_cart' ) );
+		add_action( 'woocommerce_after_cart', array( $this, 'remove_from_cart' ) );
+		add_action( 'woocommerce_after_mini_cart', array( $this, 'remove_from_cart' ) );
+		add_filter( 'woocommerce_cart_item_remove_link', array( $this, 'remove_from_cart_attributes' ), 10, 2 );
+		add_action( 'woocommerce_after_shop_loop_item', array( $this, 'listing_impression' ) );
+		add_action( 'woocommerce_after_shop_loop_item', array( $this, 'listing_click' ) );
+		add_action( 'woocommerce_after_single_product', array( $this, 'product_detail' ) );
+		add_action( 'woocommerce_after_checkout_form', array( $this, 'checkout_process' ) );
 
 		// utm_nooverride parameter for Google AdWords
 		add_filter( 'woocommerce_get_return_url', array( $this, 'utm_nooverride' ) );
@@ -69,6 +76,12 @@ class WC_Google_Analytics extends WC_Integration {
 			'ga_use_universal_analytics',
 			'ga_anonymize_enabled',
 			'ga_ecommerce_tracking_enabled',
+			'ga_enhanced_ecommerce_tracking_enabled',
+			'ga_enhanced_remove_from_cart_enabled',
+			'ga_enhanced_product_impression_enabled',
+			'ga_enhanced_product_click_enabled',
+			'ga_enhanced_checkout_process_enabled',
+			'ga_enhanced_product_detail_view_enabled',
 			'ga_event_tracking_enabled'
 		);
 
@@ -127,20 +140,69 @@ class WC_Google_Analytics extends WC_Integration {
 				'checkboxgroup' => '',
 				'default'       => 'yes'
 			),
+			'ga_enhanced_ecommerce_tracking_enabled' => array(
+				'label'         => __( 'Enable Enhanced eCommerce ', 'woocommerce-google-analytics-integration' ),
+				'description'   => sprintf( __( 'Enhanced eCommerce allows you to measure more user interactions with your store, including: product impressions, product detail views, starting the checkout process, adding cart items, and removing cart items. Universal Analytics must be enabled for Enhanced eCommerce to work. Before enabling this setting, turn on Enhanced Ecommerce in your Google Analytics dashboard. <a href="%s">See here for more information</a>.', 'woocommerce-google-analytics-integration' ), 'https://support.google.com/analytics/answer/6032539?hl=en' ),
+				'type'          => 'checkbox',
+				'checkboxgroup' => '',
+				'default'       => 'no'
+			),
 			'ga_ecommerce_tracking_enabled' => array(
 				'title'             => __( 'Data to Track', 'woocommerce-google-analytics-integration' ),
-				'label' 			=> __( 'Transactions', 'woocommerce-google-analytics-integration' ),
+				'label' 			=> __( 'Purchase Transactions', 'woocommerce-google-analytics-integration' ),
 				'description' 			=> __( 'This requires a payment gateway that redirects to the thank you/order received page after payment. Orders paid with gateways which do not do this will not be tracked.', 'woocommerce-google-analytics-integration' ),
 				'type' 				=> 'checkbox',
-				'checkboxgroup'		=> '',
+				'checkboxgroup'		=> 'start',
 				'default' 			=> get_option( 'woocommerce_ga_ecommerce_tracking_enabled' ) ? get_option( 'woocommerce_ga_ecommerce_tracking_enabled' ) : 'yes'  // Backwards compat
 			),
 			'ga_event_tracking_enabled' => array(
 				'label' 			=> __( 'Add to Cart Events', 'woocommerce-google-analytics-integration' ),
 				'type' 				=> 'checkbox',
-				'checkboxgroup'		=> 'end',
+				'checkboxgroup'		=> '',
 				'default' 			=> 'yes'
-			)
+			),
+
+			// Enhanced eCommerce Settings
+
+			'ga_enhanced_remove_from_cart_enabled' => array(
+				'label' 			=> __( 'Remove from Cart Events', 'woocommerce-google-analytics-integration' ),
+				'description'       => __( 'Requires Enhanced eCommerce.', 'woocommerce-google-analytics-integration' ),
+				'type' 				=> 'checkbox',
+				'checkboxgroup'		=> '',
+				'default' 			=> 'yes'
+			),
+
+			'ga_enhanced_product_impression_enabled' => array(
+				'label' 			=> __( 'Product Impressions from Listing Pages', 'woocommerce-google-analytics-integration' ),
+				'description'       => __( 'Requires Enhanced eCommerce.', 'woocommerce-google-analytics-integration' ),
+				'type' 				=> 'checkbox',
+				'checkboxgroup'		=> '',
+				'default' 			=> 'yes'
+			),
+
+			'ga_enhanced_product_click_enabled' => array(
+				'label' 			=> __( 'Product Clicks from Listing Pages', 'woocommerce-google-analytics-integration' ),
+				'description'       => __( 'Requires Enhanced eCommerce.', 'woocommerce-google-analytics-integration' ),
+				'type' 				=> 'checkbox',
+				'checkboxgroup'		=> '',
+				'default' 			=> 'yes'
+			),
+
+			'ga_enhanced_product_detail_view_enabled' => array(
+				'label' 			=> __( 'Product Detail Views', 'woocommerce-google-analytics-integration' ),
+				'description'       => __( 'Requires Enhanced eCommerce.', 'woocommerce-google-analytics-integration' ),
+				'type' 				=> 'checkbox',
+				'checkboxgroup'		=> '',
+				'default' 			=> 'yes'
+			),
+
+			'ga_enhanced_checkout_process_enabled' => array(
+				'label' 			=> __( 'Checkout Process Initiated', 'woocommerce-google-analytics-integration' ),
+				'description'       => __( 'Requires Enhanced eCommerce.', 'woocommerce-google-analytics-integration' ),
+				'type' 				=> 'checkbox',
+				'checkboxgroup'		=> '',
+				'default' 			=> 'yes'
+			),
 		);
 	}
 
@@ -191,6 +253,11 @@ class WC_Google_Analytics extends WC_Integration {
 				$display_ecommerce_tracking = true;
 				echo $this->get_ecommerce_tracking_code( $order_id );
 			}
+		}
+
+		if ( is_woocommerce() || is_cart() || is_checkout() ) {
+			$display_ecommerce_tracking = true;
+			echo $this->get_standard_tracking_code();
 		}
 
 		if ( ! $display_ecommerce_tracking && 'yes' === $this->ga_standard_tracking_enabled ) {
@@ -265,9 +332,49 @@ class WC_Google_Analytics extends WC_Integration {
 		$parameters['action']   = "'" . __( 'Add to Cart', 'woocommerce-google-analytics-integration' ) . "'";
 		$parameters['label']    = "'" . esc_js( $product->get_sku() ? __( 'SKU:', 'woocommerce-google-analytics-integration' ) . ' ' . $product->get_sku() : "#" . $product->id ) . "'";
 
+		if ( ! $this->disable_tracking( $this->ga_enhanced_ecommerce_tracking_enabled ) ) {
+			$code = "ga( 'ec:addProduct', {";
+			$code .= "'id': '" . esc_js( $product->get_sku() ? $product->get_sku() : $product->id ) . "',";
+			$code .= "'quantity': $( 'input.qty' ).val() ? $( 'input.qty' ).val() : '1'";
+			$code .= "} );";
+			$parameters['enhanced'] = $code;
+		}
+
 		WC_Google_Analytics_JS::get_instance()->event_tracking_code( $parameters, '.single_add_to_cart_button' );
 	}
 
+	/**
+	 * Enhanced Analytics event tracking for removing a product from the cart
+	 */
+	public function remove_from_cart() {
+		if ( $this->disable_tracking( $this->ga_use_universal_analytics ) ) {
+			return;
+		}
+
+		if ( $this->disable_tracking( $this->ga_enhanced_ecommerce_tracking_enabled ) ) {
+			return;
+		}
+
+		if ( $this->disable_tracking( $this->ga_enhanced_remove_from_cart_enabled ) ) {
+			return;
+		}
+
+		WC_Google_Analytics_JS::get_instance()->remove_from_cart();
+	}
+
+	/**
+	 * Adds the product ID and SKU to the remove product link if not present
+	 */
+	public function remove_from_cart_attributes( $url, $key ) {
+		if ( strpos( $url,'data-product_id' ) !== false ) {
+			return $url;
+		}
+
+		$item = WC()->cart->get_cart_item( $key );
+		$product = $item['data'];
+		$url = str_replace( 'href=', 'data-product_id="' . esc_attr( $product->id ) . '" data-product_sku="' . esc_attr( $product->get_sku() )  . '" href=', $url );
+		return $url;
+	}
 
 	/**
 	 * Google Analytics event tracking for loop add to cart
@@ -285,7 +392,94 @@ class WC_Google_Analytics extends WC_Integration {
 		$parameters['action']   = "'" . __( 'Add to Cart', 'woocommerce-google-analytics-integration' ) . "'";
 		$parameters['label']    = "($(this).data('product_sku')) ? ('SKU: ' + $(this).data('product_sku')) : ('#' + $(this).data('product_id'))"; // Product SKU or ID
 
+		if ( ! $this->disable_tracking( $this->ga_enhanced_ecommerce_tracking_enabled ) ) {
+			$code = "ga( 'ec:addProduct', {";
+			$code .= "'id': ($(this).data('product_sku')) ? ('SKU: ' + $(this).data('product_sku')) : ('#' + $(this).data('product_id')),";
+			$code .= "'quantity': $(this).data('quantity')";
+			$code .= "} );";
+			$parameters['enhanced'] = $code;
+		}
+
 		WC_Google_Analytics_JS::get_instance()->event_tracking_code( $parameters, '.add_to_cart_button:not(.product_type_variable, .product_type_grouped)' );
+	}
+
+	/**
+	 * Measures a listing impression (from search results)
+	 */
+	public function listing_impression() {
+		if ( $this->disable_tracking( $this->ga_use_universal_analytics ) ) {
+			return;
+		}
+
+		if ( $this->disable_tracking( $this->ga_enhanced_ecommerce_tracking_enabled ) ) {
+			return;
+		}
+
+		if ( $this->disable_tracking( $this->ga_enhanced_product_impression_enabled ) ) {
+			return;
+		}
+
+		global $product, $woocommerce_loop;
+		WC_Google_Analytics_JS::get_instance()->listing_impression( $product, $woocommerce_loop['loop'] );
+	}
+
+	/**
+	 * Measure a product click from a listing page
+	 */
+	public function listing_click() {
+		if ( $this->disable_tracking( $this->ga_use_universal_analytics ) ) {
+			return;
+		}
+
+		if ( $this->disable_tracking( $this->ga_enhanced_ecommerce_tracking_enabled ) ) {
+			return;
+		}
+
+		if ( $this->disable_tracking( $this->ga_enhanced_product_click_enabled ) ) {
+			return;
+		}
+
+		global $product, $woocommerce_loop;
+		WC_Google_Analytics_JS::get_instance()->listing_click( $product, $woocommerce_loop['loop'] );
+	}
+
+	/**
+	 * Measure a product detail view
+	 */
+	public function product_detail() {
+		if ( $this->disable_tracking( $this->ga_use_universal_analytics ) ) {
+			return;
+		}
+
+		if ( $this->disable_tracking( $this->ga_enhanced_ecommerce_tracking_enabled ) ) {
+			return;
+		}
+
+		if ( $this->disable_tracking( $this->ga_enhanced_product_detail_view_enabled ) ) {
+			return;
+		}
+
+		global $product;
+		WC_Google_Analytics_JS::get_instance()->product_detail( $product );
+	}
+
+	/**
+	 * Tracks when the checkout form is loaded
+	 */
+	public function checkout_process( $checkout ) {
+		if ( $this->disable_tracking( $this->ga_use_universal_analytics ) ) {
+			return;
+		}
+
+		if ( $this->disable_tracking( $this->ga_enhanced_ecommerce_tracking_enabled ) ) {
+			return;
+		}
+
+		if ( $this->disable_tracking( $this->ga_enhanced_checkout_process_enabled ) ) {
+			return;
+		}
+
+		WC_Google_Analytics_JS::get_instance()->checkout_process( WC()->cart->get_cart() );
 	}
 
 	/**

@@ -65,6 +65,7 @@ class WC_Google_Analytics_JS {
 	public static function load_analytics( $order = false ) {
 		$logged_in = is_user_logged_in() ? 'yes' : 'no';
 		if ( 'yes' === self::get( 'ga_use_universal_analytics' ) ) {
+			add_action( 'wp_footer', array( 'WC_Google_Analytics_JS', 'universal_analytics_footer' ) );
 			return self::load_analytics_universal( $logged_in );
 		} else {
 			add_action( 'wp_footer', array( 'WC_Google_Analytics_JS', 'classic_analytics_footer' ) );
@@ -107,6 +108,60 @@ class WC_Google_Analytics_JS {
 	}
 
 	/**
+	 * Builds the addImpression object
+	 */
+	public static function listing_impression( $product, $position ) {
+		if ( isset( $_GET['s'] ) ) {
+			$list = "Search Results";
+		} else {
+			$list = "Product List";
+		}
+
+		wc_enqueue_js( "
+			ga( 'ec:addImpression', { 
+				'id': '" . esc_js( $product->id ) . "',
+				'name': '" . esc_js( $product->get_title() ) . "',
+				'category': " . self::product_get_category_line( $product ) . "
+				'list': '" . esc_js( $list ) . "',
+				'position': " . esc_js( $position ) . "
+			} );
+		" );
+	}
+
+	/**
+	 * Builds an addProduct and click object
+	 */
+	public static function listing_click( $product, $position ) {
+		if ( isset( $_GET['s'] ) ) {
+			$list = "Search Results";
+		} else {
+			$list = "Product List";
+		}
+
+		echo( "
+			<script>
+			(function($) {
+				$( '.products .post-" . esc_js( $product->id ) . " a' ).click( function() {
+					if ( true === $(this).hasClass( 'add_to_cart_button' ) ) {
+						return;
+					}
+
+					ga( 'ec:addProduct', {
+						'id': '" . esc_js( $product->id ) . "',
+						'name': '" . esc_js( $product->get_title() ) . "',
+						'category': " . self::product_get_category_line( $product ) . "
+						'position': " . esc_js( $position ) . "
+					});
+
+					ga( 'ec:setAction', 'click', { list: '" . esc_js( $list ) . "' });
+					ga( 'send', 'event', 'UX', 'click', ' " . esc_js( $list ) . "' );
+				});
+			})(jQuery);
+			</script>
+		" );
+	}
+
+	/**
 	 * Asyncronously loads the classic Google Analytics code, and does so after all of our properties are loaded
 	 * Loads in the footer
 	 * @see wp_footer
@@ -123,6 +178,13 @@ class WC_Google_Analytics_JS {
 		ga.src = " . $ga_url . ";
 		var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
 		})();</script>";
+	}
+
+	/**
+	 * Sends the pageview last thing (needed for things like addImpression)
+	 */
+	public static function universal_analytics_footer() {
+		wc_enqueue_js( "ga( 'send', 'pageview' ); ");
 	}
 
 	/**
@@ -147,7 +209,7 @@ class WC_Google_Analytics_JS {
 			$anonymize_enabled = "ga( 'set', 'anonymizeIp', true );";
 		}
 
-		return "(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+		$code = "(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
 		(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
 		m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
 		})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
@@ -155,9 +217,15 @@ class WC_Google_Analytics_JS {
 		ga( 'create', '" . esc_js( self::get( 'ga_id' ) ) . "', '" . $set_domain_name . "' );" .
 		$support_display_advertising .
 		$anonymize_enabled . "
-		ga( 'set', 'dimension1', '" . $logged_in . "' );
-		ga( 'send', 'pageview' );
-		ga('require', 'ecommerce', 'ecommerce.js');";
+		ga( 'set', 'dimension1', '" . $logged_in . "' );\n";
+
+		if ( 'yes' === self::get( 'ga_enhanced_ecommerce_tracking_enabled' ) ) {
+			$code .= "ga( 'require', 'ec' );";
+		} else {
+			$code .= "ga( 'require', 'ecommerce', 'ecommerce.js');";
+		}
+
+		return $code;
 	}
 
 	/**
@@ -167,7 +235,11 @@ class WC_Google_Analytics_JS {
 	 */
 	function add_transaction( $order ) {
 		if ( 'yes' == self::get( 'ga_use_universal_analytics' ) ) {
-			return self::add_transaction_universal( $order );
+			if ( 'yes' === self::get( 'ga_enhanced_ecommerce_tracking_enabled' ) ) {
+				return self::add_transaction_enhanced( $order );
+			} else {
+				return self::add_transaction_universal( $order );
+			}
 		} else {
 			return self::add_transaction_classic( $order );
 		}
@@ -228,9 +300,33 @@ class WC_Google_Analytics_JS {
 	}
 
 	/**
+	 * Enhanced Ecommerce Universal Analytics transaction tracking
+	 */
+	function add_transaction_enhanced( $order ) {
+		$code = "ga( 'set', '&cu', '" . esc_js( $order->get_order_currency() ) . "' );";
+
+		// Order items
+		if ( $order->get_items() ) {
+			foreach ( $order->get_items() as $item ) {
+				$code .= self::add_item_enhanced( $order, $item );
+			}
+		}
+
+		$code .= "ga( 'ec:setAction', 'purchase', {
+			'id': '" . esc_js( $order->get_order_number() ) . "',
+			'affiliation': '" . esc_js( get_bloginfo( 'name' ) ) . "',
+			'revenue': '" . esc_js( $order->get_total() ) . "',
+			'tax': '" . esc_js( $order->get_total_tax() ) . "',
+			'shipping': '" . esc_js( $order->get_total_shipping() ) . "'
+		} );";
+
+		return $code;
+	}
+
+	/**
 	 * Add Item (Classic)
 	 * @param object $order WC_Order Object
-	 * @param array $item  The item to add to add to a transaction/order
+	 * @param array $item  The item to add to a transaction/order
 	 */
 	function add_item_classic( $order, $item ) {
 		$_product = $order->get_product_from_item( $item );
@@ -239,20 +335,7 @@ class WC_Google_Analytics_JS {
 		$code .= "'" . esc_js( $order->get_order_number() ) . "',";
 		$code .= "'" . esc_js( $_product->get_sku() ? $_product->get_sku() : $_product->id ) . "',";
 		$code .= "'" . esc_js( $item['name'] ) . "',";
-
-		if ( is_array( $_product->variation_data ) && ! empty( $_product->variation_data ) ) {
-			$code .= "'" . esc_js( woocommerce_get_formatted_variation( $_product->variation_data, true ) ) . "',";
-		} else {
-			$out = array();
-			$categories = get_the_terms( $_product->id, 'product_cat' );
-			if ( $categories ) {
-				foreach ( $categories as $category ){
-					$out[] = $category->name;
-				}
-			}
-			$code .= "'" . esc_js( join( "/", $out) ) . "',";
-		}
-
+		$code .= self::product_get_category_line( $_product );
 		$code .= "'" . esc_js( $order->get_item_total( $item ) ) . "',";
 		$code .= "'" . esc_js( $item['qty'] ) . "'";
 		$code .= "]);";
@@ -263,7 +346,7 @@ class WC_Google_Analytics_JS {
 	/**
 	 * Add Item (Universal)
 	 * @param object $order WC_Order Object
-	 * @param array $item  The item to add to add to a transaction/order
+	 * @param array $item  The item to add to a transaction/order
 	 */
 	function add_item_universal( $order, $item ) {
 		$_product = $order->get_product_from_item( $item );
@@ -272,9 +355,41 @@ class WC_Google_Analytics_JS {
 		$code .= "'id': '" . esc_js( $order->get_order_number() ) . "',";
 		$code .= "'name': '" . esc_js( $item['name'] ) . "',";
 		$code .= "'sku': '" . esc_js( $_product->get_sku() ? $_product->get_sku() : $_product->id ) . "',";
+		$code .= "'category': " . self::product_get_category_line( $_product );
+		$code .= "'price': '" . esc_js( $order->get_item_total( $item ) ) . "',";
+		$code .= "'quantity': '" . esc_js( $item['qty'] ) . "'";
+		$code .= "});";
 
+		return $code;
+	}
+
+	/**
+	 * Add Item (Enhanced, Universal)
+	 * @param object $order WC_Order Object
+	 * @param array $item The item to add to a transaction/order
+	 */
+	function add_item_enhanced( $order, $item ) {
+		$_product = $order->get_product_from_item( $item );
+
+		$code = "ga( 'ec:addProduct', {";
+		$code .= "'id': '" . esc_js( $_product->get_sku() ? $_product->get_sku() : $_product->id ) . "',";
+		$code .= "'name': '" . esc_js( $item['name'] ) . "',";
+		$code .= "'category': " . self::product_get_category_line( $_product );
+		$code .= "'price': '" . esc_js( $order->get_item_total( $item ) ) . "',";
+		$code .= "'quantity': '" . esc_js( $item['qty'] ) . "'";
+		$code .= "});";
+
+		return $code;
+	}
+
+	/**
+	 * Returns a 'category' JSON line based on $product
+	 * @param  object $product  Product to pull info for
+	 * @return string          Line of JSON
+	 */
+	private static function product_get_category_line( $_product ) {
 		if ( is_array( $_product->variation_data ) && ! empty( $_product->variation_data ) ) {
-			$code .= "'category': '" . esc_js( woocommerce_get_formatted_variation( $_product->variation_data, true ) ) . "',";
+			$code = "'" . esc_js( woocommerce_get_formatted_variation( $_product->variation_data, true ) ) . "',";
 		} else {
 			$out = array();
 			$categories = get_the_terms( $_product->id, 'product_cat' );
@@ -283,14 +398,66 @@ class WC_Google_Analytics_JS {
 					$out[] = $category->name;
 				}
 			}
-			$code .= "'category': '" . esc_js( join( "/", $out ) ) . "',";
+			$code = "'" . esc_js( join( "/", $out ) ) . "',";
 		}
 
-		$code .= "'price': '" . esc_js( $order->get_item_total( $item ) ) . "',";
-		$code .= "'quantity': '" . esc_js( $item['qty'] ) . "'";
-		$code .= "});";
-
 		return $code;
+	}
+
+	/**
+	 * Tracks an enhanced ecommerce remove from cart action
+	 */
+	function remove_from_cart() {
+		echo( "
+			<script>
+			(function($) {
+				$( '.remove' ).click( function() {
+					ga( 'ec:addProduct', {
+						'id': ($(this).data('product_sku')) ? ('SKU: ' + $(this).data('product_sku')) : ('#' + $(this).data('product_id')),
+						'quantity': $(this).parent().parent().find( '.qty' ).val() ? $(this).parent().parent().find( '.qty' ).val() : '1',
+					} );
+					ga( 'ec:setAction', 'remove' );
+					ga( 'send', 'event', 'UX', 'click', 'remove from cart' );
+				});
+			})(jQuery);
+			</script>
+		" );
+	}
+
+	/**
+	 * Tracks a product detail view
+	 */
+	function product_detail( $product ) {
+		wc_enqueue_js( "
+			ga( 'ec:addProduct', {
+				'id': '" . esc_js( $product->get_sku() ? $product->get_sku() : $product->id ) . "',
+				'name': '" . esc_js( $product->get_title() ) . "',
+				'category': " . self::product_get_category_line( $product ) . "
+				'price': '" . esc_js( $product->get_price() ) . "',
+			} );
+
+			ga( 'ec:setAction', 'detail' );" );
+	}
+
+	/**
+	 * Tracks when the checkout process is started
+	 */
+	function checkout_process( $cart ) {
+		$code = "";
+
+		foreach ( $cart as $cart_item_key => $cart_item ) {
+			$product     = apply_filters( 'woocommerce_cart_item_product', $cart_item['data'], $cart_item, $cart_item_key );
+			$code .= "ga( 'ec:addProduct', {
+				'id': '" . esc_js( $product->get_sku() ? $product->get_sku() : $product->id ) . "',
+				'name': '" . esc_js( $product->get_title() ) . "',
+				'category': " . self::product_get_category_line( $product ) . "
+				'price': '" . esc_js( $product->get_price() ) . "',
+				'quantity': '" . esc_js( $cart_item['quantity'] ) . "'
+			} );";
+		}
+
+		$code .= "ga( 'ec:setAction','checkout' );";
+		wc_enqueue_js( $code );
 	}
 
 	/**
@@ -305,7 +472,18 @@ class WC_Google_Analytics_JS {
 		$parameters = apply_filters( 'woocommerce_ga_event_tracking_parameters', $parameters );
 
 		if ( 'yes' === self::get( 'ga_use_universal_analytics' ) ) {
-			$track_event = "ga('send', 'event', %s, %s, %s);";
+			if ( 'yes' === self::get( 'ga_enhanced_ecommerce_tracking_enabled' ) ) {
+				wc_enqueue_js( "
+					$( '" . $selector . "' ).click( function() {
+						" . $parameters['enhanced'] . "
+						ga( 'ec:setAction', 'add' );
+						ga( 'send', 'event', 'UX', 'click', 'add to cart' );
+					});
+				" );
+				return;
+			} else {
+				$track_event = "ga('send', 'event', %s, %s, %s);";
+			}
 		} else {
 			$track_event = "_gaq.push(['_trackEvent', %s, %s, %s]);";
 		}

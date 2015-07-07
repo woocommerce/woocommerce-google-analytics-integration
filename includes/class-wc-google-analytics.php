@@ -39,11 +39,11 @@ class WC_Google_Analytics extends WC_Integration {
 			WC_Google_Analytics_Info_Banner::get_instance( $this->dismissed_info_banner, $this->ga_id );
 		}
 
+		// Admin Options
 		add_filter( 'woocommerce_tracker_data', array( $this, 'track_options' ) );
-
-		// Actions
 		add_action( 'woocommerce_update_options_integration_google_analytics', array( $this, 'process_admin_options') );
 		add_action( 'woocommerce_update_options_integration_google_analytics', array( $this, 'show_options_info') );
+		add_action( 'admin_enqueue_scripts', array( $this, 'load_admin_assets') );
 
 		// Tracking code
 		add_action( 'wp_head', array( $this, 'tracking_code_display' ), 999999 );
@@ -140,15 +140,7 @@ class WC_Google_Analytics extends WC_Integration {
 				'checkboxgroup' => '',
 				'default'       => 'yes'
 			),
-			'ga_enhanced_ecommerce_tracking_enabled' => array(
-				'label'         => __( 'Enable Enhanced eCommerce ', 'woocommerce-google-analytics-integration' ),
-				'description'   => sprintf( __( 'Enhanced eCommerce allows you to measure more user interactions with your store, including: product impressions, product detail views, starting the checkout process, adding cart items, and removing cart items. Universal Analytics must be enabled for Enhanced eCommerce to work. Before enabling this setting, turn on Enhanced Ecommerce in your Google Analytics dashboard. <a href="%s">See here for more information</a>.', 'woocommerce-google-analytics-integration' ), 'https://support.google.com/analytics/answer/6032539?hl=en' ),
-				'type'          => 'checkbox',
-				'checkboxgroup' => '',
-				'default'       => 'no'
-			),
 			'ga_ecommerce_tracking_enabled' => array(
-				'title'             => __( 'Data to Track', 'woocommerce-google-analytics-integration' ),
 				'label' 			=> __( 'Purchase Transactions', 'woocommerce-google-analytics-integration' ),
 				'description' 			=> __( 'This requires a payment gateway that redirects to the thank you/order received page after payment. Orders paid with gateways which do not do this will not be tracked.', 'woocommerce-google-analytics-integration' ),
 				'type' 				=> 'checkbox',
@@ -162,11 +154,19 @@ class WC_Google_Analytics extends WC_Integration {
 				'default' 			=> 'yes'
 			),
 
+			'ga_enhanced_ecommerce_tracking_enabled' => array(
+				'title'         => __( 'Enhanced eCommerce', 'woocommerce-google-analytics-integration' ),
+				'label'         => __( 'Enable Enhanced eCommerce ', 'woocommerce-google-analytics-integration' ),
+				'description'   => sprintf( __( 'Enhanced eCommerce allows you to measure more user interactions with your store, including: product impressions, product detail views, starting the checkout process, adding cart items, and removing cart items. Universal Analytics must be enabled for Enhanced eCommerce to work. Before enabling this setting, turn on Enhanced eCommerce in your Google Analytics dashboard. <a href="%s">See here for more information</a>.', 'woocommerce-google-analytics-integration' ), 'https://support.google.com/analytics/answer/6032539?hl=en' ),
+				'type'          => 'checkbox',
+				'checkboxgroup' => '',
+				'default'       => 'no'
+			),
+
 			// Enhanced eCommerce Settings
 
 			'ga_enhanced_remove_from_cart_enabled' => array(
 				'label' 			=> __( 'Remove from Cart Events', 'woocommerce-google-analytics-integration' ),
-				'description'       => __( 'Requires Enhanced eCommerce.', 'woocommerce-google-analytics-integration' ),
 				'type' 				=> 'checkbox',
 				'checkboxgroup'		=> '',
 				'default' 			=> 'yes'
@@ -174,7 +174,6 @@ class WC_Google_Analytics extends WC_Integration {
 
 			'ga_enhanced_product_impression_enabled' => array(
 				'label' 			=> __( 'Product Impressions from Listing Pages', 'woocommerce-google-analytics-integration' ),
-				'description'       => __( 'Requires Enhanced eCommerce.', 'woocommerce-google-analytics-integration' ),
 				'type' 				=> 'checkbox',
 				'checkboxgroup'		=> '',
 				'default' 			=> 'yes'
@@ -182,7 +181,6 @@ class WC_Google_Analytics extends WC_Integration {
 
 			'ga_enhanced_product_click_enabled' => array(
 				'label' 			=> __( 'Product Clicks from Listing Pages', 'woocommerce-google-analytics-integration' ),
-				'description'       => __( 'Requires Enhanced eCommerce.', 'woocommerce-google-analytics-integration' ),
 				'type' 				=> 'checkbox',
 				'checkboxgroup'		=> '',
 				'default' 			=> 'yes'
@@ -190,7 +188,6 @@ class WC_Google_Analytics extends WC_Integration {
 
 			'ga_enhanced_product_detail_view_enabled' => array(
 				'label' 			=> __( 'Product Detail Views', 'woocommerce-google-analytics-integration' ),
-				'description'       => __( 'Requires Enhanced eCommerce.', 'woocommerce-google-analytics-integration' ),
 				'type' 				=> 'checkbox',
 				'checkboxgroup'		=> '',
 				'default' 			=> 'yes'
@@ -198,7 +195,6 @@ class WC_Google_Analytics extends WC_Integration {
 
 			'ga_enhanced_checkout_process_enabled' => array(
 				'label' 			=> __( 'Checkout Process Initiated', 'woocommerce-google-analytics-integration' ),
-				'description'       => __( 'Requires Enhanced eCommerce.', 'woocommerce-google-analytics-integration' ),
 				'type' 				=> 'checkbox',
 				'checkboxgroup'		=> '',
 				'default' 			=> 'yes'
@@ -232,6 +228,22 @@ class WC_Google_Analytics extends WC_Integration {
 			'event_tracking_enabled'      => $this->ga_event_tracking_enabled
 		);
 		return $data;
+	}
+
+	/**
+	 *
+	 */
+	function load_admin_assets() {
+		$screen = get_current_screen();
+		if ( 'woocommerce_page_wc-settings' !== $screen->id ) {
+			return;
+		}
+
+		if ( 'integration' !== $_GET['tab'] ) {
+			return;
+		}
+
+		wp_enqueue_script( 'wc-google-analytics-admin-enhanced-settings', plugins_url(  '/assets/js/admin-enhanced-settings.js', dirname(__FILE__) ) );
 	}
 
 	/**

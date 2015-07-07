@@ -169,35 +169,40 @@ class WC_Google_Analytics extends WC_Integration {
 				'label' 			=> __( 'Remove from Cart Events', 'woocommerce-google-analytics-integration' ),
 				'type' 				=> 'checkbox',
 				'checkboxgroup'		=> '',
-				'default' 			=> 'yes'
+				'default' 			=> 'yes',
+				'class'             => 'enhanced-setting'
 			),
 
 			'ga_enhanced_product_impression_enabled' => array(
 				'label' 			=> __( 'Product Impressions from Listing Pages', 'woocommerce-google-analytics-integration' ),
 				'type' 				=> 'checkbox',
 				'checkboxgroup'		=> '',
-				'default' 			=> 'yes'
+				'default' 			=> 'yes',
+				'class'             => 'enhanced-setting'
 			),
 
 			'ga_enhanced_product_click_enabled' => array(
 				'label' 			=> __( 'Product Clicks from Listing Pages', 'woocommerce-google-analytics-integration' ),
 				'type' 				=> 'checkbox',
 				'checkboxgroup'		=> '',
-				'default' 			=> 'yes'
+				'default' 			=> 'yes',
+				'class'             => 'enhanced-setting'
 			),
 
 			'ga_enhanced_product_detail_view_enabled' => array(
 				'label' 			=> __( 'Product Detail Views', 'woocommerce-google-analytics-integration' ),
 				'type' 				=> 'checkbox',
 				'checkboxgroup'		=> '',
-				'default' 			=> 'yes'
+				'default' 			=> 'yes',
+				'class'             => 'enhanced-setting'
 			),
 
 			'ga_enhanced_checkout_process_enabled' => array(
 				'label' 			=> __( 'Checkout Process Initiated', 'woocommerce-google-analytics-integration' ),
 				'type' 				=> 'checkbox',
 				'checkboxgroup'		=> '',
-				'default' 			=> 'yes'
+				'default' 			=> 'yes',
+				'class'             => 'enhanced-setting'
 			),
 		);
 	}

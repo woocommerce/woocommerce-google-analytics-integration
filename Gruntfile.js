@@ -7,6 +7,42 @@ module.exports = function( grunt ) {
 		// Gets the package vars
 		pkg: grunt.file.readJSON( 'package.json' ),
 
+		// Setting folder templates
+		dirs: {
+			js: 'assets/js'
+		},
+
+		// Minify .js files.
+		uglify: {
+			options: {
+				preserveComments: 'some'
+			},
+			jsfiles: {
+				files: [{
+					expand: true,
+					cwd: '<%= dirs.js %>/',
+					src: [
+						'*.js',
+						'!*.min.js',
+						'!Gruntfile.js',
+					],
+					dest: '<%= dirs.js %>/',
+					ext: '.min.js'
+				}]
+			}
+		},
+
+		// Watch changes for assets
+		watch: {
+			js: {
+				files: [
+					'<%= dirs.js %>/*js',
+					'!<%= dirs.js %>/*.min.js'
+				],
+				tasks: ['uglify']
+			}
+		},
+
 		// Generate POT files.
 		makepot: {
 			dist: {
@@ -54,4 +90,12 @@ module.exports = function( grunt ) {
 	// Load NPM tasks to be used here
 	grunt.loadNpmTasks( 'grunt-wp-i18n' );
 	grunt.loadNpmTasks( 'grunt-checktextdomain' );
+	grunt.loadNpmTasks( 'grunt-contrib-uglify' );
+	grunt.loadNpmTasks( 'grunt-contrib-watch' );
+
+	// Register tasks
+	grunt.registerTask( 'default', [
+		'uglify'
+	] );
+
 };

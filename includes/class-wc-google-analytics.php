@@ -350,7 +350,7 @@ class WC_Google_Analytics extends WC_Integration {
 		$parameters['label']    = "'" . esc_js( $product->get_sku() ? __( 'SKU:', 'woocommerce-google-analytics-integration' ) . ' ' . $product->get_sku() : "#" . $product->id ) . "'";
 
 		if ( ! $this->disable_tracking( $this->ga_enhanced_ecommerce_tracking_enabled ) ) {
-			$code = "ga( 'ec:addProduct', {";
+			$code = "" . WC_Google_Analytics_JS::get_instance()->tracker_var() . "( 'ec:addProduct', {";
 			$code .= "'id': '" . esc_js( $product->get_sku() ? $product->get_sku() : $product->id ) . "',";
 			$code .= "'quantity': $( 'input.qty' ).val() ? $( 'input.qty' ).val() : '1'";
 			$code .= "} );";
@@ -410,7 +410,7 @@ class WC_Google_Analytics extends WC_Integration {
 		$parameters['label']    = "($(this).data('product_sku')) ? ('SKU: ' + $(this).data('product_sku')) : ('#' + $(this).data('product_id'))"; // Product SKU or ID
 
 		if ( ! $this->disable_tracking( $this->ga_enhanced_ecommerce_tracking_enabled ) ) {
-			$code = "ga( 'ec:addProduct', {";
+			$code = "" . WC_Google_Analytics_JS::get_instance()->tracker_var() . "( 'ec:addProduct', {";
 			$code .= "'id': ($(this).data('product_sku')) ? ('SKU: ' + $(this).data('product_sku')) : ('#' + $(this).data('product_id')),";
 			$code .= "'quantity': $(this).data('quantity')";
 			$code .= "} );";

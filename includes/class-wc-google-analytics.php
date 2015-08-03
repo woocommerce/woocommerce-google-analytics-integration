@@ -244,6 +244,10 @@ class WC_Google_Analytics extends WC_Integration {
 			return;
 		}
 
+		if ( empty( $_GET['tab'] ) ) {
+			return;
+		}
+
 		if ( 'integration' !== $_GET['tab'] ) {
 			return;
 		}

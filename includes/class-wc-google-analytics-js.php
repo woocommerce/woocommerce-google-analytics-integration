@@ -41,6 +41,13 @@ class WC_Google_Analytics_JS {
 	}
 
 	/**
+	 * Returns the tracker variable this integration should use
+	 */
+	public static function tracker_var() {
+		return apply_filters( 'woocommerce_ga_tracker_variable', 'ga' );
+	}
+
+	/**
 	 * Generic GA / header snippet for opt out
 	 */
 	public static function header() {
@@ -118,7 +125,7 @@ class WC_Google_Analytics_JS {
 		}
 
 		wc_enqueue_js( "
-			ga( 'ec:addImpression', { 
+			" . self::tracker_var() . "( 'ec:addImpression', {
 				'id': '" . esc_js( $product->id ) . "',
 				'name': '" . esc_js( $product->get_title() ) . "',
 				'category': " . self::product_get_category_line( $product ) . "
@@ -146,15 +153,15 @@ class WC_Google_Analytics_JS {
 						return;
 					}
 
-					ga( 'ec:addProduct', {
+					" . self::tracker_var() . "( 'ec:addProduct', {
 						'id': '" . esc_js( $product->id ) . "',
 						'name': '" . esc_js( $product->get_title() ) . "',
 						'category': " . self::product_get_category_line( $product ) . "
 						'position': " . esc_js( $position ) . "
 					});
 
-					ga( 'ec:setAction', 'click', { list: '" . esc_js( $list ) . "' });
-					ga( 'send', 'event', 'UX', 'click', ' " . esc_js( $list ) . "' );
+					" . self::tracker_var() . "( 'ec:setAction', 'click', { list: '" . esc_js( $list ) . "' });
+					" . self::tracker_var() . "( 'send', 'event', 'UX', 'click', ' " . esc_js( $list ) . "' );
 				});
 			})(jQuery);
 			</script>
@@ -184,7 +191,7 @@ class WC_Google_Analytics_JS {
 	 * Sends the pageview last thing (needed for things like addImpression)
 	 */
 	public static function universal_analytics_footer() {
-		wc_enqueue_js( "ga( 'send', 'pageview' ); ");
+		wc_enqueue_js( "" . self::tracker_var() . "( 'send', 'pageview' ); ");
 	}
 
 	/**
@@ -201,28 +208,28 @@ class WC_Google_Analytics_JS {
 
 		$support_display_advertising = '';
 		if ( 'yes' === self::get( 'ga_support_display_advertising' ) ) {
-			$support_display_advertising = "ga( 'require', 'displayfeatures' );";
+			$support_display_advertising = "" . self::tracker_var() . "( 'require', 'displayfeatures' );";
 		}
 
 		$anonymize_enabled = '';
 		if ( 'yes' === self::get( 'ga_anonymize_enabled' ) ) {
-			$anonymize_enabled = "ga( 'set', 'anonymizeIp', true );";
+			$anonymize_enabled = "" . self::tracker_var() . "( 'set', 'anonymizeIp', true );";
 		}
 
 		$code = "(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
 		(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
 		m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-		})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+		})(window,document,'script','//www.google-analytics.com/analytics.js','" . self::tracker_var() . "');
 
-		ga( 'create', '" . esc_js( self::get( 'ga_id' ) ) . "', '" . $set_domain_name . "' );" .
+		" . self::tracker_var() . "( 'create', '" . esc_js( self::get( 'ga_id' ) ) . "', '" . $set_domain_name . "' );" .
 		$support_display_advertising .
 		$anonymize_enabled . "
-		ga( 'set', 'dimension1', '" . $logged_in . "' );\n";
+		" . self::tracker_var() . "( 'set', 'dimension1', '" . $logged_in . "' );\n";
 
 		if ( 'yes' === self::get( 'ga_enhanced_ecommerce_tracking_enabled' ) ) {
-			$code .= "ga( 'require', 'ec' );";
+			$code .= "" . self::tracker_var() . "( 'require', 'ec' );";
 		} else {
-			$code .= "ga( 'require', 'ecommerce', 'ecommerce.js');";
+			$code .= "" . self::tracker_var() . "( 'require', 'ecommerce', 'ecommerce.js');";
 		}
 
 		return $code;
@@ -279,7 +286,7 @@ class WC_Google_Analytics_JS {
 	 * @return string Add Transaction Code
 	 */
 	function add_transaction_universal( $order ) {
-		$code = "ga('ecommerce:addTransaction', {
+		$code = "" . self::tracker_var() . "('ecommerce:addTransaction', {
 			'id': '" . esc_js( $order->get_order_number() ) . "',         // Transaction ID. Required
 			'affiliation': '" . esc_js( get_bloginfo( 'name' ) ) . "',    // Affiliation or store name
 			'revenue': '" . esc_js( $order->get_total() ) . "',           // Grand Total
@@ -295,7 +302,7 @@ class WC_Google_Analytics_JS {
 			}
 		}
 
-		$code .= "ga('ecommerce:send');";
+		$code .= "" . self::tracker_var() . "('ecommerce:send');";
 		return $code;
 	}
 
@@ -303,7 +310,7 @@ class WC_Google_Analytics_JS {
 	 * Enhanced Ecommerce Universal Analytics transaction tracking
 	 */
 	function add_transaction_enhanced( $order ) {
-		$code = "ga( 'set', '&cu', '" . esc_js( $order->get_order_currency() ) . "' );";
+		$code = "" . self::tracker_var() . "( 'set', '&cu', '" . esc_js( $order->get_order_currency() ) . "' );";
 
 		// Order items
 		if ( $order->get_items() ) {
@@ -312,7 +319,7 @@ class WC_Google_Analytics_JS {
 			}
 		}
 
-		$code .= "ga( 'ec:setAction', 'purchase', {
+		$code .= "" . self::tracker_var() . "( 'ec:setAction', 'purchase', {
 			'id': '" . esc_js( $order->get_order_number() ) . "',
 			'affiliation': '" . esc_js( get_bloginfo( 'name' ) ) . "',
 			'revenue': '" . esc_js( $order->get_total() ) . "',
@@ -351,7 +358,7 @@ class WC_Google_Analytics_JS {
 	function add_item_universal( $order, $item ) {
 		$_product = $order->get_product_from_item( $item );
 
-		$code = "ga('ecommerce:addItem', {";
+		$code = "" . self::tracker_var() . "('ecommerce:addItem', {";
 		$code .= "'id': '" . esc_js( $order->get_order_number() ) . "',";
 		$code .= "'name': '" . esc_js( $item['name'] ) . "',";
 		$code .= "'sku': '" . esc_js( $_product->get_sku() ? $_product->get_sku() : $_product->id ) . "',";
@@ -371,7 +378,7 @@ class WC_Google_Analytics_JS {
 	function add_item_enhanced( $order, $item ) {
 		$_product = $order->get_product_from_item( $item );
 
-		$code = "ga( 'ec:addProduct', {";
+		$code = "" . self::tracker_var() . "( 'ec:addProduct', {";
 		$code .= "'id': '" . esc_js( $_product->get_sku() ? $_product->get_sku() : $_product->id ) . "',";
 		$code .= "'name': '" . esc_js( $item['name'] ) . "',";
 		$code .= "'category': " . self::product_get_category_line( $_product );
@@ -412,12 +419,12 @@ class WC_Google_Analytics_JS {
 			<script>
 			(function($) {
 				$( '.remove' ).click( function() {
-					ga( 'ec:addProduct', {
+					" . self::tracker_var() . "( 'ec:addProduct', {
 						'id': ($(this).data('product_sku')) ? ('SKU: ' + $(this).data('product_sku')) : ('#' + $(this).data('product_id')),
 						'quantity': $(this).parent().parent().find( '.qty' ).val() ? $(this).parent().parent().find( '.qty' ).val() : '1',
 					} );
-					ga( 'ec:setAction', 'remove' );
-					ga( 'send', 'event', 'UX', 'click', 'remove from cart' );
+					" . self::tracker_var() . "( 'ec:setAction', 'remove' );
+					" . self::tracker_var() . "( 'send', 'event', 'UX', 'click', 'remove from cart' );
 				});
 			})(jQuery);
 			</script>
@@ -429,14 +436,14 @@ class WC_Google_Analytics_JS {
 	 */
 	function product_detail( $product ) {
 		wc_enqueue_js( "
-			ga( 'ec:addProduct', {
+			" . self::tracker_var() . "( 'ec:addProduct', {
 				'id': '" . esc_js( $product->get_sku() ? $product->get_sku() : $product->id ) . "',
 				'name': '" . esc_js( $product->get_title() ) . "',
 				'category': " . self::product_get_category_line( $product ) . "
 				'price': '" . esc_js( $product->get_price() ) . "',
 			} );
 
-			ga( 'ec:setAction', 'detail' );" );
+			" . self::tracker_var() . "( 'ec:setAction', 'detail' );" );
 	}
 
 	/**
@@ -447,7 +454,7 @@ class WC_Google_Analytics_JS {
 
 		foreach ( $cart as $cart_item_key => $cart_item ) {
 			$product     = apply_filters( 'woocommerce_cart_item_product', $cart_item['data'], $cart_item, $cart_item_key );
-			$code .= "ga( 'ec:addProduct', {
+			$code .= "" . self::tracker_var() . "( 'ec:addProduct', {
 				'id': '" . esc_js( $product->get_sku() ? $product->get_sku() : $product->id ) . "',
 				'name': '" . esc_js( $product->get_title() ) . "',
 				'category': " . self::product_get_category_line( $product ) . "
@@ -456,7 +463,7 @@ class WC_Google_Analytics_JS {
 			} );";
 		}
 
-		$code .= "ga( 'ec:setAction','checkout' );";
+		$code .= "" . self::tracker_var() . "( 'ec:setAction','checkout' );";
 		wc_enqueue_js( $code );
 	}
 
@@ -476,13 +483,13 @@ class WC_Google_Analytics_JS {
 				wc_enqueue_js( "
 					$( '" . $selector . "' ).click( function() {
 						" . $parameters['enhanced'] . "
-						ga( 'ec:setAction', 'add' );
-						ga( 'send', 'event', 'UX', 'click', 'add to cart' );
+						" . self::tracker_var() . "( 'ec:setAction', 'add' );
+						" . self::tracker_var() . "( 'send', 'event', 'UX', 'click', 'add to cart' );
 					});
 				" );
 				return;
 			} else {
-				$track_event = "ga('send', 'event', %s, %s, %s);";
+				$track_event = "" . self::tracker_var() . "('send', 'event', %s, %s, %s);";
 			}
 		} else {
 			$track_event = "_gaq.push(['_trackEvent', %s, %s, %s]);";

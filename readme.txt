@@ -67,7 +67,7 @@ Exact wording depends on the national data privacy laws and should be adjusted.
 = 1.4.0 - X =
 * Feature - Support for enhanced eCommerce (tracking full store process from view to order)
 * Tweak - Setting up the plugin is now clearer with some helpful links and clearer language
-* Tweak - New filter on the ga global variable 
+* Tweak - New filter on the ga global variable
 * Refactor - JavaScript generation functions have been moved to their own class
 
 = 1.3.0 - 12/11/2014 =

@@ -91,8 +91,10 @@ class WC_Google_Analytics_JS {
 		if ( 'yes' === self::get( 'ga_anonymize_enabled' ) ) {
 			$anonymize_enabled = "['_gat._anonymizeIp'],";
 		}
-
-		if ( ! empty( self::get( 'ga_set_domain_name' ) ) ) {
+		
+		$domainname = self::get( 'ga_set_domain_name' );
+		
+		if ( ! empty( $domainname ) ) {
 			$set_domain_name = "['_setDomainName', '" . esc_js( self::get( 'ga_set_domain_name' ) ) . "'],";
 		} else {
 			$set_domain_name = '';
@@ -200,7 +202,10 @@ class WC_Google_Analytics_JS {
 	 * @return string Universal Analytics Code
 	 */
 	public static function load_analytics_universal( $logged_in ) {
-		if ( ! empty( self::get( 'ga_set_domain_name' ) ) ) {
+		
+		$domainname = self::get( 'ga_set_domain_name' );
+		
+		if ( ! empty( $domainname ) ) {
 			$set_domain_name = esc_js( self::get( 'ga_set_domain_name' ) );
 		} else {
 			$set_domain_name = 'auto';

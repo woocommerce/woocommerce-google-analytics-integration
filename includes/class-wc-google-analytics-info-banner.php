@@ -51,7 +51,7 @@ class WC_Google_Analytics_Info_Banner {
 			return;
 		}
 
-		$integration_url = esc_url( admin_url('admin.php?page=wc-settings&tab=integration' ) );
+		$integration_url = esc_url( admin_url('admin.php?page=wc-settings&tab=integration&section=google_analytics' ) );
 		$dismiss_url = $this->dismiss_url();
 
 		$heading = __( 'Google Analytics &amp; WooCommerce', 'woocommerce-google-analytics-integration' );

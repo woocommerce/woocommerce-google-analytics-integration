@@ -91,9 +91,9 @@ class WC_Google_Analytics_JS {
 		if ( 'yes' === self::get( 'ga_anonymize_enabled' ) ) {
 			$anonymize_enabled = "['_gat._anonymizeIp'],";
 		}
-		
+
 		$domainname = self::get( 'ga_set_domain_name' );
-		
+
 		if ( ! empty( $domainname ) ) {
 			$set_domain_name = "['_setDomainName', '" . esc_js( self::get( 'ga_set_domain_name' ) ) . "'],";
 		} else {
@@ -202,9 +202,9 @@ class WC_Google_Analytics_JS {
 	 * @return string Universal Analytics Code
 	 */
 	public static function load_analytics_universal( $logged_in ) {
-		
+
 		$domainname = self::get( 'ga_set_domain_name' );
-		
+
 		if ( ! empty( $domainname ) ) {
 			$set_domain_name = esc_js( self::get( 'ga_set_domain_name' ) );
 		} else {
@@ -214,6 +214,11 @@ class WC_Google_Analytics_JS {
 		$support_display_advertising = '';
 		if ( 'yes' === self::get( 'ga_support_display_advertising' ) ) {
 			$support_display_advertising = "" . self::tracker_var() . "( 'require', 'displayfeatures' );";
+		}
+
+		$support_enhanced_link_attribution = '';
+		if ( 'yes' === self::get( 'ga_support_enhanced_link_attribution' ) ) {
+			$support_enhanced_link_attribution = "" . self::tracker_var() . "( 'require', 'linkid' );";
 		}
 
 		$anonymize_enabled = '';
@@ -228,6 +233,7 @@ class WC_Google_Analytics_JS {
 
 		" . self::tracker_var() . "( 'create', '" . esc_js( self::get( 'ga_id' ) ) . "', '" . $set_domain_name . "' );" .
 		$support_display_advertising .
+		$support_enhanced_link_attribution .
 		$anonymize_enabled . "
 		" . self::tracker_var() . "( 'set', 'dimension1', '" . $logged_in . "' );\n";
 

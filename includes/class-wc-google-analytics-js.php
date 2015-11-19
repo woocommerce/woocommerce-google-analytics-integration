@@ -245,6 +245,8 @@ class WC_Google_Analytics_JS {
 
 		$code = $ga_snippet_head . $ga_snippet_create . $ga_snippet_require;
 		$code = apply_filters('ga_snippet_output', $code);
+
+		return $code;
 	}
 
 	/**

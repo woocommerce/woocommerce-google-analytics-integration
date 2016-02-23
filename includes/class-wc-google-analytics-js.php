@@ -239,12 +239,12 @@ class WC_Google_Analytics_JS {
 			$ga_snippet_require .= "" . self::tracker_var() . "( 'require', 'ecommerce', 'ecommerce.js');";
 		}
 
-		$ga_snippet_head = apply_filters('ga_snippet_head', $ga_snippet_head);
-		$ga_snippet_create = apply_filters('ga_snippet_create', $ga_snippet_create, $ga_id);
-		$ga_snippet_require = apply_filters('ga_snippet_require', $ga_snippet_require);
+		$ga_snippet_head = apply_filters( 'woocommerce_ga_snippet_head' , $ga_snippet_head );
+		$ga_snippet_create = apply_filters( 'woocommerce_ga_snippet_create' , $ga_snippet_create, $ga_id );
+		$ga_snippet_require = apply_filters( 'woocommerce_ga_snippet_require' , $ga_snippet_require );
 
 		$code = $ga_snippet_head . $ga_snippet_create . $ga_snippet_require;
-		$code = apply_filters('ga_snippet_output', $code);
+		$code = apply_filters( 'woocommerce_ga_snippet_output', $code );
 
 		return $code;
 	}

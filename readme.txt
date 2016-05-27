@@ -103,3 +103,8 @@ Exact wording depends on the national data privacy laws and should be adjusted.
 = 1.0 - 22/11/2013 =
 
 * Initial release
+
+
+== Upgrade Notice ==
+= 1.4.0 =
+Adds support for enhanced eCommerce (tracking full store process from view to order)

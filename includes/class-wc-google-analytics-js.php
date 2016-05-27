@@ -91,9 +91,9 @@ class WC_Google_Analytics_JS {
 		if ( 'yes' === self::get( 'ga_anonymize_enabled' ) ) {
 			$anonymize_enabled = "['_gat._anonymizeIp'],";
 		}
-		
+
 		$domainname = self::get( 'ga_set_domain_name' );
-		
+
 		if ( ! empty( $domainname ) ) {
 			$set_domain_name = "['_setDomainName', '" . esc_js( self::get( 'ga_set_domain_name' ) ) . "'],";
 		} else {
@@ -202,9 +202,9 @@ class WC_Google_Analytics_JS {
 	 * @return string Universal Analytics Code
 	 */
 	public static function load_analytics_universal( $logged_in ) {
-		
+
 		$domainname = self::get( 'ga_set_domain_name' );
-		
+
 		if ( ! empty( $domainname ) ) {
 			$set_domain_name = esc_js( self::get( 'ga_set_domain_name' ) );
 		} else {
@@ -221,21 +221,30 @@ class WC_Google_Analytics_JS {
 			$anonymize_enabled = "" . self::tracker_var() . "( 'set', 'anonymizeIp', true );";
 		}
 
-		$code = "(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+		$ga_snippet_head = "(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
 		(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
 		m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-		})(window,document,'script','//www.google-analytics.com/analytics.js','" . self::tracker_var() . "');
+		})(window,document,'script','//www.google-analytics.com/analytics.js','" . self::tracker_var() . "');";
 
-		" . self::tracker_var() . "( 'create', '" . esc_js( self::get( 'ga_id' ) ) . "', '" . $set_domain_name . "' );" .
+		$ga_snippet_create = self::tracker_var() . "( 'create', '" . esc_js( $ga_id ) . "', '" . $set_domain_name . "' );";
+
+		$ga_snippet_require =
 		$support_display_advertising .
 		$anonymize_enabled . "
 		" . self::tracker_var() . "( 'set', 'dimension1', '" . $logged_in . "' );\n";
 
 		if ( 'yes' === self::get( 'ga_enhanced_ecommerce_tracking_enabled' ) ) {
-			$code .= "" . self::tracker_var() . "( 'require', 'ec' );";
+			$ga_snippet_require .= "" . self::tracker_var() . "( 'require', 'ec' );";
 		} else {
-			$code .= "" . self::tracker_var() . "( 'require', 'ecommerce', 'ecommerce.js');";
+			$ga_snippet_require .= "" . self::tracker_var() . "( 'require', 'ecommerce', 'ecommerce.js');";
 		}
+
+		$ga_snippet_head = apply_filters( 'woocommerce_ga_snippet_head' , $ga_snippet_head );
+		$ga_snippet_create = apply_filters( 'woocommerce_ga_snippet_create' , $ga_snippet_create, $ga_id );
+		$ga_snippet_require = apply_filters( 'woocommerce_ga_snippet_require' , $ga_snippet_require );
+
+		$code = $ga_snippet_head . $ga_snippet_create . $ga_snippet_require;
+		$code = apply_filters( 'woocommerce_ga_snippet_output', $code );
 
 		return $code;
 	}

@@ -73,6 +73,7 @@ class WC_Google_Analytics extends WC_Integration {
 			'ga_set_domain_name',
 			'ga_standard_tracking_enabled',
 			'ga_support_display_advertising',
+			'ga_support_enhanced_link_attribution',
 			'ga_use_universal_analytics',
 			'ga_anonymize_enabled',
 			'ga_ecommerce_tracking_enabled',
@@ -125,6 +126,13 @@ class WC_Google_Analytics extends WC_Integration {
 				'type'          => 'checkbox',
 				'checkboxgroup' => '',
 				'default'       => get_option( 'woocommerce_ga_support_display_advertising' ) ? get_option( 'woocommerce_ga_support_display_advertising' ) : 'no'  // Backwards compat
+			),
+			'ga_support_enhanced_link_attribution' => array(
+				'label'         => __( 'Use Enhanced Link Attribution', 'woocommerce-google-analytics-integration' ),
+				'description'   => sprintf( __( 'Set the Google Analytics code to support Enhanced Link Attribution. %sRead more about Enhanced Link Attribution%s.', 'woocommerce-google-analytics-integration' ), '<a href="https://support.google.com/analytics/answer/2558867?hl=en" target="_blank">', '</a>' ),
+				'type'          => 'checkbox',
+				'checkboxgroup' => '',
+				'default'       => get_option( 'woocommerce_ga_support_enhanced_link_attribution' ) ? get_option( 'woocommerce_ga_support_enhanced_link_attribution' ) : 'no'  // Backwards compat
 			),
 			'ga_use_universal_analytics' => array(
 				'label'         => __( 'Enable Universal Analytics', 'woocommerce-google-analytics-integration' ),
@@ -225,12 +233,13 @@ class WC_Google_Analytics extends WC_Integration {
 	 */
 	function track_options( $data ) {
 		$data['wc-google-analytics'] = array(
-			'standard_tracking_enabled'   => $this->ga_standard_tracking_enabled,
-			'support_display_advertising' => $this->ga_support_display_advertising,
-			'use_universal_analytics'     => $this->ga_use_universal_analytics,
-			'anonymize_enabled'           => $this->ga_anonymize_enabled,
-			'ecommerce_tracking_enabled'  => $this->ga_ecommerce_tracking_enabled,
-			'event_tracking_enabled'      => $this->ga_event_tracking_enabled
+			'standard_tracking_enabled'   		=> $this->ga_standard_tracking_enabled,
+			'support_display_advertising' 		=> $this->ga_support_display_advertising,
+			'support_enhanced_link_attribution' => $this->ga_support_enhanced_link_attribution,
+			'use_universal_analytics'     		=> $this->ga_use_universal_analytics,
+			'anonymize_enabled'           		=> $this->ga_anonymize_enabled,
+			'ecommerce_tracking_enabled'  		=> $this->ga_ecommerce_tracking_enabled,
+			'event_tracking_enabled'      		=> $this->ga_event_tracking_enabled
 		);
 		return $data;
 	}

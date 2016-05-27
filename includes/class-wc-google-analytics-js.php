@@ -216,6 +216,11 @@ class WC_Google_Analytics_JS {
 			$support_display_advertising = "" . self::tracker_var() . "( 'require', 'displayfeatures' );";
 		}
 
+		$support_enhanced_link_attribution = '';
+		if ( 'yes' === self::get( 'ga_support_enhanced_link_attribution' ) ) {
+			$support_enhanced_link_attribution = "" . self::tracker_var() . "( 'require', 'linkid' );";
+		}
+
 		$anonymize_enabled = '';
 		if ( 'yes' === self::get( 'ga_anonymize_enabled' ) ) {
 			$anonymize_enabled = "" . self::tracker_var() . "( 'set', 'anonymizeIp', true );";
@@ -230,6 +235,7 @@ class WC_Google_Analytics_JS {
 
 		$ga_snippet_require =
 		$support_display_advertising .
+		$support_enhanced_link_attribution .
 		$anonymize_enabled . "
 		" . self::tracker_var() . "( 'set', 'dimension1', '" . $logged_in . "' );\n";
 

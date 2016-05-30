@@ -8,3 +8,4 @@ Thumbs.db
 sftp-config.json
 deploy.sh
 node_modules/
+deploy-to-wp-org.sh

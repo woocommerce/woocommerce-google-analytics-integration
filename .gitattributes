@@ -1,0 +1,12 @@
+.gitattributes export-ignore
+.gitmodules export-ignore
+.gitignore export-ignore
+deploy-to-wp-org.sh export-ignore
+tests export-ignore
+.travis.yml export-ignore
+Gruntfile.js export-ignore
+README.md export-ignore
+package.json export-ignore
+phpunit.xml.dist export-ignore
+.tx export-ignore
+codecov.yml export-ignore

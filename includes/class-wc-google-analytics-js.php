@@ -132,7 +132,7 @@ class WC_Google_Analytics_JS {
 				'name': '" . esc_js( $product->get_title() ) . "',
 				'category': " . self::product_get_category_line( $product ) . "
 				'list': '" . esc_js( $list ) . "',
-				'position': " . esc_js( $position ) . "
+				'position': '" . esc_js( $position ) . "'
 			} );
 		" );
 	}
@@ -159,7 +159,7 @@ class WC_Google_Analytics_JS {
 						'id': '" . esc_js( $product->id ) . "',
 						'name': '" . esc_js( $product->get_title() ) . "',
 						'category': " . self::product_get_category_line( $product ) . "
-						'position': " . esc_js( $position ) . "
+						'position': '" . esc_js( $position ) . "'
 					});
 
 					" . self::tracker_var() . "( 'ec:setAction', 'click', { list: '" . esc_js( $list ) . "' });

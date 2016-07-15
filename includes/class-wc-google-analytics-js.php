@@ -93,7 +93,7 @@ class WC_Google_Analytics_JS {
 		}
 
 		$track_404_enabled = '';
-		if ( 'yes' === self::get( 'ga_404_tracking_enabled' ) ) {
+		if ( 'yes' === self::get( 'ga_404_tracking_enabled' ) && is_404() ) {
 			// See https://developers.google.com/analytics/devguides/collection/gajs/methods/gaJSApiEventTracking#_trackevent
 			$track_404_enabled = "['_trackEvent', 'Error', '404 Not Found', 'page: ' + document.location.pathname + document.location.search + ' referrer: ' + document.referrer ],";
 		}
@@ -235,8 +235,7 @@ class WC_Google_Analytics_JS {
 		}
 
 		$track_404_enabled = '';
-		if ( 'yes' === self::get( 'ga_404_tracking_enabled' && is_404() ) ) {
-			// FIXME:   ga('send', 'event', 'error', '404', 'page: ' + document.location.pathname + document.location.search + ' ref: ' + document.referrer, {'nonInteraction': 1});
+		if ( 'yes' === self::get( 'ga_404_tracking_enabled' ) && is_404() ) {
 			// See https://developers.google.com/analytics/devguides/collection/analyticsjs/events for reference
 			$track_404_enabled = "" . self::tracker_var() . "( 'send', 'event', 'Error', '404 Not Found', 'page: ' + document.location.pathname + document.location.search + ' referrer: ' + document.referrer );";
 		}

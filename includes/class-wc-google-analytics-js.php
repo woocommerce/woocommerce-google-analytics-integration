@@ -211,6 +211,8 @@ class WC_Google_Analytics_JS {
 	 */
 	public static function load_analytics_universal( $logged_in ) {
 
+		$ga_id = self::get( 'ga_id' );
+
 		$domainname = self::get( 'ga_set_domain_name' );
 
 		if ( ! empty( $domainname ) ) {

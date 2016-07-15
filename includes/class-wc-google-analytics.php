@@ -76,6 +76,7 @@ class WC_Google_Analytics extends WC_Integration {
 			'ga_support_enhanced_link_attribution',
 			'ga_use_universal_analytics',
 			'ga_anonymize_enabled',
+			'ga_404_tracking_enabled',
 			'ga_ecommerce_tracking_enabled',
 			'ga_enhanced_ecommerce_tracking_enabled',
 			'ga_enhanced_remove_from_cart_enabled',
@@ -148,6 +149,13 @@ class WC_Google_Analytics extends WC_Integration {
 				'checkboxgroup' => '',
 				'default'       => 'yes'
 			),
+			'ga_404_tracking_enabled' => array(
+				'label'         => __( 'Track 404 (Not found) Errors.', 'woocommerce-google-analytics-integration' ),
+				'description'   => sprintf( __( 'Enable this to find broken or dead links. An "Event" with category "Error" and action "404 Not Found" will be created in Google Analytics for each incoming pageview to a non-existing page. By setting up a "Custom Goal" for these events within Google Analytics you can find out where broken links originated from (the referrer). %sRead how to set up a goal%s.', 'woocommerce-google-analytics-integration' ), '<a href="https://support.google.com/analytics/answer/1032415" target="_blank">', '</a>' ),
+				'type'          => 'checkbox',
+				'checkboxgroup' => '',
+				'default'       => 'yes'
+			),			
 			'ga_ecommerce_tracking_enabled' => array(
 				'label' 			=> __( 'Purchase Transactions', 'woocommerce-google-analytics-integration' ),
 				'description' 			=> __( 'This requires a payment gateway that redirects to the thank you/order received page after payment. Orders paid with gateways which do not do this will not be tracked.', 'woocommerce-google-analytics-integration' ),
@@ -238,6 +246,7 @@ class WC_Google_Analytics extends WC_Integration {
 			'support_enhanced_link_attribution' => $this->ga_support_enhanced_link_attribution,
 			'use_universal_analytics'     		=> $this->ga_use_universal_analytics,
 			'anonymize_enabled'           		=> $this->ga_anonymize_enabled,
+			'ga_404_tracking_enabled'           => $this->ga_404_tracking_enabled,
 			'ecommerce_tracking_enabled'  		=> $this->ga_ecommerce_tracking_enabled,
 			'event_tracking_enabled'      		=> $this->ga_event_tracking_enabled
 		);

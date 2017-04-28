@@ -52,6 +52,25 @@ class WC_Google_Analytics_Integration {
 		} else {
 			add_action( 'admin_notices', array( $this, 'woocommerce_missing_notice' ) );
 		}
+
+		add_filter( 'plugin_action_links_' . plugin_basename( __FILE__ ), array( $this, 'plugin_links' ) );
+	}
+
+	public function plugin_links( $links ) {
+		$settings_url = add_query_arg(
+			array(
+				'page' => 'wc-settings',
+				'tab' => 'integration',
+			),
+			admin_url( 'admin.php' )
+		);
+
+		$plugin_links = array(
+			'<a href="' . esc_url( $settings_url ) . '">' . __( 'Settings', 'woocommerce-google-analytics-integration' ) . '</a>',
+			'<a href="https://wordpress.org/support/plugin/woocommerce-google-analytics-integration">' . __( 'Support', 'woocommerce-google-analytics-integration' ) . '</a>',
+		);
+
+		return array_merge( $plugin_links, $links );
 	}
 
 	/**

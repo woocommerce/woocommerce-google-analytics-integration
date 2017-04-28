@@ -64,6 +64,9 @@ Exact wording depends on the national data privacy laws and should be adjusted.
 
 == Changelog ==
 
+= 1.4.1 - 28-04-2017 =
+* Add - Settings link to the plugin in the Plugins screen
+
 = 1.4.0 - 20-11-2015 =
 * Feature - Support for enhanced eCommerce (tracking full store process from view to order)
 * Tweak - Setting up the plugin is now clearer with some helpful links and clearer language

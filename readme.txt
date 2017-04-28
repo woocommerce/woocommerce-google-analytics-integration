@@ -1,5 +1,5 @@
 === WooCommerce Google Analytics Integration ===
-Contributors: woothemes
+Contributors: woothemes, bor0
 Tags: woocommerce, google analytics
 Requires at least: 3.8
 Tested up to: 4.5.2
@@ -63,6 +63,9 @@ Exact wording depends on the national data privacy laws and should be adjusted.
 1. Google Analytics Integration Settings.
 
 == Changelog ==
+
+= 1.4.1 - 28-04-2017 =
+* Fix - Use ID and SKU data in a consistent way so that all products are correctly tracked.
 
 = 1.4.0 - 20-11-2015 =
 * Feature - Support for enhanced eCommerce (tracking full store process from view to order)

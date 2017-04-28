@@ -63,6 +63,8 @@ Exact wording depends on the national data privacy laws and should be adjusted.
 1. Google Analytics Integration Settings.
 
 == Changelog ==
+= 1.4.1 - 28-04-2017 =
+* Fix - Fatal error on shortcode usage for empty product
 
 = 1.4.0 - 20-11-2015 =
 * Feature - Support for enhanced eCommerce (tracking full store process from view to order)

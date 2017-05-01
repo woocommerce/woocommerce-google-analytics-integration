@@ -62,7 +62,8 @@ Exact wording depends on the national data privacy laws and should be adjusted.
 
 1. Google Analytics Integration Settings.
 
-= 1.4.1 - 01-05-2017 =
+= 1.4.1 - 01/05/2017 =
+
 * Add - Filters for GA snippet (woocommerce_ga_snippet_head, woocommerce_ga_snippet_create, woocommerce_ga_snippet_require, woocommerce_ga_snippet_output)
 * Add - Option to toggle on/off Enhanced Link Attribution
 * Fix - JavaScript break by wrapping it in quotes
@@ -71,7 +72,8 @@ Exact wording depends on the national data privacy laws and should be adjusted.
 * Add - Settings link to the plugin in the Plugins screen
 * Fix - Fatal error on shortcode usage for empty product
 
-= 1.4.0 - 20-11-2015 =
+= 1.4.0 - 20/11/2015 =
+
 * Feature - Support for enhanced eCommerce (tracking full store process from view to order)
 * Tweak - Setting up the plugin is now clearer with some helpful links and clearer language
 * Tweak - New filter on the ga global variable

@@ -456,6 +456,10 @@ class WC_Google_Analytics_JS {
 	 * Tracks a product detail view
 	 */
 	function product_detail( $product ) {
+		if ( empty( $product ) ) {
+			return;
+		}
+
 		wc_enqueue_js( "
 			" . self::tracker_var() . "( 'ec:addProduct', {
 				'id': '" . esc_js( $product->get_sku() ? $product->get_sku() : ( '#' . $product->get_id() ) ) . "',

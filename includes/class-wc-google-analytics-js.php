@@ -440,7 +440,7 @@ class WC_Google_Analytics_JS {
 			(function($) {
 				$( '.remove' ).click( function() {
 					" . self::tracker_var() . "( 'ec:addProduct', {
-						'id': ($(this).data('product_sku')) ? ('SKU: ' + $(this).data('product_sku')) : ('#' + $(this).data('product_id')),
+						'id': ($(this).data('product_sku')) ? ($(this).data('product_sku')) : ('#' + $(this).data('product_id')),
 						'quantity': $(this).parent().parent().find( '.qty' ).val() ? $(this).parent().parent().find( '.qty' ).val() : '1',
 					} );
 					" . self::tracker_var() . "( 'ec:setAction', 'remove' );
@@ -457,7 +457,7 @@ class WC_Google_Analytics_JS {
 	function product_detail( $product ) {
 		wc_enqueue_js( "
 			" . self::tracker_var() . "( 'ec:addProduct', {
-				'id': '" . esc_js( $product->get_sku() ? $product->get_sku() : $product->id ) . "',
+				'id': '" . esc_js( $product->get_sku() ? $product->get_sku() : ( '#' . $product->id ) ) . "',
 				'name': '" . esc_js( $product->get_title() ) . "',
 				'category': " . self::product_get_category_line( $product ) . "
 				'price': '" . esc_js( $product->get_price() ) . "',
@@ -475,7 +475,7 @@ class WC_Google_Analytics_JS {
 		foreach ( $cart as $cart_item_key => $cart_item ) {
 			$product     = apply_filters( 'woocommerce_cart_item_product', $cart_item['data'], $cart_item, $cart_item_key );
 			$code .= "" . self::tracker_var() . "( 'ec:addProduct', {
-				'id': '" . esc_js( $product->get_sku() ? $product->get_sku() : $product->id ) . "',
+				'id': '" . esc_js( $product->get_sku() ? $product->get_sku() : ( '#' . $product->id ) ) . "',
 				'name': '" . esc_js( $product->get_title() ) . "',
 				'category': " . self::product_get_category_line( $product ) . "
 				'price': '" . esc_js( $product->get_price() ) . "',

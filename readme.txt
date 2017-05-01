@@ -62,6 +62,8 @@ Exact wording depends on the national data privacy laws and should be adjusted.
 
 1. Google Analytics Integration Settings.
 
+== Changelog ==
+
 = 1.4.1 - 01/05/2017 =
 
 * Add - Filters for GA snippet (woocommerce_ga_snippet_head, woocommerce_ga_snippet_create, woocommerce_ga_snippet_require, woocommerce_ga_snippet_output)

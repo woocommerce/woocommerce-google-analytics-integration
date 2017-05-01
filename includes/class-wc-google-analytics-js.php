@@ -455,7 +455,7 @@ class WC_Google_Analytics_JS {
 	 * Tracks a product detail view
 	 */
 	function product_detail( $product ) {
-		if ( ! empty( $product ) ) {
+		if ( empty( $product ) ) {
 			return;
 		}
 

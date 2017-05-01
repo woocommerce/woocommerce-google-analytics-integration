@@ -65,6 +65,7 @@ Exact wording depends on the national data privacy laws and should be adjusted.
 == Changelog ==
 
 = 1.4.1 - 28-04-2017 =
+* Fix - Updates for WooCommerce 3.0 compatibility.
 * Fix - Use ID and SKU data in a consistent way so that all products are correctly tracked.
 
 = 1.4.0 - 20-11-2015 =

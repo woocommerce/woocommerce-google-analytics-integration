@@ -418,7 +418,7 @@ class WC_Google_Analytics_JS {
 	private static function product_get_category_line( $_product ) {
 		$variation_data = version_compare( WC_VERSION, '3.0', '<' ) ? $_product->variation_data : ( $_product->is_type( 'variation' ) ? wc_get_product_variation_attributes( $_product->get_id() ) : '' );
 		if ( is_array( $variation_data ) && ! empty( $variation_data ) ) {
-			$code = "'" . esc_js( wc_get_formatted_variation( $_product->variation_data, true ) ) . "',";
+			$code = "'" . esc_js( wc_get_formatted_variation( $variation_data, true ) ) . "',";
 		} else {
 			$out = array();
 			$categories = get_the_terms( $_product->get_id(), 'product_cat' );

@@ -3,7 +3,7 @@ Contributors: woothemes, claudiosanches, bor0
 Tags: woocommerce, google analytics
 Requires at least: 3.8
 Tested up to: 4.5.2
-Stable tag: 1.4.1
+Stable tag: 1.4.2
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -63,6 +63,9 @@ Exact wording depends on the national data privacy laws and should be adjusted.
 1. Google Analytics Integration Settings.
 
 == Changelog ==
+
+= 1.4.2 - 09/05/2017 =
+* Fix - Missing Google Analytics ID.
 
 = 1.4.1 - 01/05/2017 =
 

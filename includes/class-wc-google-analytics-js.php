@@ -110,7 +110,7 @@ class WC_Google_Analytics_JS {
 		$code = "var _gaq = _gaq || [];
 		_gaq.push(
 			['_setAccount', '" . esc_js( self::get( 'ga_id' ) ) . "'], " . $set_domain_name .
-			$anonymize_enabled . 
+			$anonymize_enabled .
 			$track_404_enabled . "
 			['_setCustomVar', 1, 'logged-in', '" . esc_js( $logged_in ) . "', 1],
 			['_trackPageview']";
@@ -211,8 +211,6 @@ class WC_Google_Analytics_JS {
 	 */
 	public static function load_analytics_universal( $logged_in ) {
 
-		$ga_id = self::get( 'ga_id' );
-
 		$domainname = self::get( 'ga_set_domain_name' );
 
 		if ( ! empty( $domainname ) ) {
@@ -253,7 +251,7 @@ class WC_Google_Analytics_JS {
 		$ga_snippet_require =
 		$support_display_advertising .
 		$support_enhanced_link_attribution .
-		$anonymize_enabled . 
+		$anonymize_enabled .
 		$track_404_enabled . "
 		" . self::tracker_var() . "( 'set', 'dimension1', '" . $logged_in . "' );\n";
 

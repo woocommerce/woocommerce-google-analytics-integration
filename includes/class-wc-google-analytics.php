@@ -155,7 +155,7 @@ class WC_Google_Analytics extends WC_Integration {
 				'type'          => 'checkbox',
 				'checkboxgroup' => '',
 				'default'       => 'yes'
-			),			
+			),
 			'ga_ecommerce_tracking_enabled' => array(
 				'label' 			=> __( 'Purchase Transactions', 'woocommerce-google-analytics-integration' ),
 				'description' 			=> __( 'This requires a payment gateway that redirects to the thank you/order received page after payment. Orders paid with gateways which do not do this will not be tracked.', 'woocommerce-google-analytics-integration' ),

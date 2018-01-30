@@ -281,7 +281,7 @@ class WC_Google_Analytics extends WC_Integration {
 		global $wp;
 		$display_ecommerce_tracking = false;
 
-		if ( is_admin() || current_user_can( 'manage_options' ) || ! $this->ga_id ) {
+		if ( $this->disable_tracking( 'all' ) ) {
 			return;
 		}
 
@@ -345,7 +345,7 @@ class WC_Google_Analytics extends WC_Integration {
 	 * @return bool True if tracking for a certain setting is disabled
 	 */
 	private function disable_tracking( $type ) {
-		if ( is_admin() || current_user_can( 'manage_options' ) || ( ! $this->ga_id ) || 'no' === $type ) {
+		if ( is_admin() || current_user_can( 'manage_options' ) || ( ! $this->ga_id ) || 'no' === $type || apply_filters( 'woocommerce_ga_disable_tracking', false ) ) {
 			return true;
 		}
 	}

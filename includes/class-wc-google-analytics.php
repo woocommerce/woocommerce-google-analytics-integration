@@ -410,8 +410,17 @@ class WC_Google_Analytics extends WC_Integration {
 			return $url;
 		}
 
+		if ( ! is_object( WC()->cart ) ) {
+			return $url;
+		}
+
 		$item = WC()->cart->get_cart_item( $key );
 		$product = $item['data'];
+
+		if ( ! is_object( $product ) ) {
+			return $url;
+		}
+
 		$url = str_replace( 'href=', 'data-product_id="' . esc_attr( $product->get_id() ) . '" data-product_sku="' . esc_attr( $product->get_sku() )  . '" href=', $url );
 		return $url;
 	}

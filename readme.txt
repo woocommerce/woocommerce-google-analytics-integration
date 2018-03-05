@@ -66,6 +66,7 @@ Exact wording depends on the national data privacy laws and should be adjusted.
 
 = 1.4.4 - 2018-xx-xx =
 * Fix - WC30 compatibility error when using deprecated get_product_from_item method.
+* Fix - Check object before using methods to prevent errors.
 
 = 1.4.3 - 15/06/2017 =
 * Fix - WC 3.x notice by using proper variation data.

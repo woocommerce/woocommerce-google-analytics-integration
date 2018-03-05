@@ -1,19 +1,37 @@
-# Copyright (C) 2014 WooThemes
+# Copyright (C) 2018 WooCommerce
 # This file is distributed under the GPLv2 or later.
 msgid ""
 msgstr ""
-"Project-Id-Version: WooCommerce Google Analytics Integration 1.4.0\n"
+"Project-Id-Version: WooCommerce Google Analytics Integration 1.4.3\n"
 "Report-Msgid-Bugs-To: "
-"https://wordpress.org/support/plugin/woocommerce-google-analytics-"
-"integration\n"
-"POT-Creation-Date: 2014-11-11 21:09:47+00:00\n"
+"https://github.com/woocommerce/woocommerce-google-analytics-integration/"
+"issues\n"
+"POT-Creation-Date: 2018-03-05 20:33:03+00:00\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"PO-Revision-Date: 2014-MO-DA HO:MI+ZONE\n"
+"PO-Revision-Date: 2018-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"
-"X-Generator: grunt-wp-i18n 0.4.9\n"
+"X-Generator: grunt-wp-i18n1.0.2\n"
+
+#: includes/class-wc-google-analytics-info-banner.php:57
+msgid "Google Analytics &amp; WooCommerce"
+msgstr ""
+
+#: includes/class-wc-google-analytics-info-banner.php:58
+msgid ""
+"<a href=\"%s\">Connect WooCommerce to Google Analytics</a> to finish "
+"setting up this integration."
+msgstr ""
+
+#: includes/class-wc-google-analytics-info-banner.php:62
+msgid "Dismiss this notice."
+msgstr ""
+
+#: includes/class-wc-google-analytics-info-banner.php:62
+msgid "(Dismiss)"
+msgstr ""
 
 #: includes/class-wc-google-analytics.php:23
 msgid "Google Analytics"
@@ -25,87 +43,188 @@ msgid ""
 "detailed statistics about the visitors to a website."
 msgstr ""
 
-#: includes/class-wc-google-analytics.php:63
+#: includes/class-wc-google-analytics.php:104
 msgid "Google Analytics ID"
 msgstr ""
 
-#: includes/class-wc-google-analytics.php:64
+#: includes/class-wc-google-analytics.php:105
 msgid ""
-"Log into your google analytics account to find your ID. e.g. "
+"Log into your Google Analytics account to find your ID. e.g. "
 "<code>UA-XXXXX-X</code>"
 msgstr ""
 
-#: includes/class-wc-google-analytics.php:69
+#: includes/class-wc-google-analytics.php:111
 msgid "Set Domain Name"
 msgstr ""
 
-#: includes/class-wc-google-analytics.php:70
+#: includes/class-wc-google-analytics.php:112
 msgid ""
 "(Optional) Sets the <code>_setDomainName</code> variable. <a "
 "href=\"%s\">See here for more information</a>."
 msgstr ""
 
-#: includes/class-wc-google-analytics.php:75
-msgid "Tracking code"
+#: includes/class-wc-google-analytics.php:117
+msgid "Tracking Options"
 msgstr ""
 
-#: includes/class-wc-google-analytics.php:76
+#: includes/class-wc-google-analytics.php:118
+msgid "Enable Standard Tracking"
+msgstr ""
+
+#: includes/class-wc-google-analytics.php:119
 msgid ""
-"Add tracking code to your site. You don't need to enable this if using a "
-"3rd party analytics plugin."
+"This tracks session data such as demographics, system, etc. You don't need "
+"to enable this if you are using a 3rd party Google analytics plugin."
 msgstr ""
 
-#: includes/class-wc-google-analytics.php:82
+#: includes/class-wc-google-analytics.php:125
+msgid "\"Display Advertising\" Support"
+msgstr ""
+
+#: includes/class-wc-google-analytics.php:126
 msgid ""
-"Set the Google Analytics code to support Display Advertising. <a "
-"href=\"https://support.google.com/analytics/answer/2700409\" "
-"target=\"_blank\">Read more about Display Advertising</a>."
+"Set the Google Analytics code to support Display Advertising. %sRead more "
+"about Display Advertising%s."
 msgstr ""
 
-#: includes/class-wc-google-analytics.php:88
-msgid "Use Universal Analytics instead of Classic Google Analytics"
+#: includes/class-wc-google-analytics.php:132
+msgid "Use Enhanced Link Attribution"
 msgstr ""
 
-#: includes/class-wc-google-analytics.php:94
+#: includes/class-wc-google-analytics.php:133
 msgid ""
-"Anonymize IP addresses. Setting this option is mandatory in certain "
-"countries due to national privacy laws. <a "
-"href=\"https://support.google.com/analytics/answer/2763052\" "
-"target=\"_blank\">Read more about IP Anonymization</a>."
+"Set the Google Analytics code to support Enhanced Link Attribution. %sRead "
+"more about Enhanced Link Attribution%s."
 msgstr ""
 
-#: includes/class-wc-google-analytics.php:100
-msgid "Add eCommerce tracking code to the thankyou page"
+#: includes/class-wc-google-analytics.php:139
+msgid "Enable Universal Analytics"
 msgstr ""
 
-#: includes/class-wc-google-analytics.php:106
-msgid "Add event tracking code for add to cart actions"
+#: includes/class-wc-google-analytics.php:140
+msgid ""
+"Uses Universal Analytics instead of Classic Google Analytics. If you have "
+"<strong>not</strong> previously used Google Analytics on this site, check "
+"this box. Otherwise, %sfollow step 1 of the Universal Analytics upgrade "
+"guide.%s Enabling this setting will take care of step 2. %sRead more about "
+"Universal Analytics%s. Universal Analytics must be enabled to enable "
+"enhanced eCommerce."
 msgstr ""
 
-#: includes/class-wc-google-analytics.php:178
-#: includes/class-wc-google-analytics.php:276
-msgid "Guest"
+#: includes/class-wc-google-analytics.php:146
+msgid "Anonymize IP addresses."
 msgstr ""
 
-#: includes/class-wc-google-analytics.php:478
-#: includes/class-wc-google-analytics.php:499
+#: includes/class-wc-google-analytics.php:147
+msgid ""
+"Enabling this option is mandatory in certain countries due to national "
+"privacy laws. %sRead more about IP Anonymization%s."
+msgstr ""
+
+#: includes/class-wc-google-analytics.php:153
+msgid "Track 404 (Not found) Errors."
+msgstr ""
+
+#: includes/class-wc-google-analytics.php:154
+msgid ""
+"Enable this to find broken or dead links. An \"Event\" with category "
+"\"Error\" and action \"404 Not Found\" will be created in Google Analytics "
+"for each incoming pageview to a non-existing page. By setting up a \"Custom "
+"Goal\" for these events within Google Analytics you can find out where "
+"broken links originated from (the referrer). %sRead how to set up a goal%s."
+msgstr ""
+
+#: includes/class-wc-google-analytics.php:160
+msgid "Purchase Transactions"
+msgstr ""
+
+#: includes/class-wc-google-analytics.php:161
+msgid ""
+"This requires a payment gateway that redirects to the thank you/order "
+"received page after payment. Orders paid with gateways which do not do this "
+"will not be tracked."
+msgstr ""
+
+#: includes/class-wc-google-analytics.php:167
+msgid "Add to Cart Events"
+msgstr ""
+
+#: includes/class-wc-google-analytics.php:174
+msgid "Enhanced eCommerce"
+msgstr ""
+
+#: includes/class-wc-google-analytics.php:175
+msgid "Enable Enhanced eCommerce "
+msgstr ""
+
+#: includes/class-wc-google-analytics.php:176
+msgid ""
+"Enhanced eCommerce allows you to measure more user interactions with your "
+"store, including: product impressions, product detail views, starting the "
+"checkout process, adding cart items, and removing cart items. Universal "
+"Analytics must be enabled for Enhanced eCommerce to work. Before enabling "
+"this setting, turn on Enhanced eCommerce in your Google Analytics "
+"dashboard. <a href=\"%s\">See here for more information</a>."
+msgstr ""
+
+#: includes/class-wc-google-analytics.php:185
+msgid "Remove from Cart Events"
+msgstr ""
+
+#: includes/class-wc-google-analytics.php:193
+msgid "Product Impressions from Listing Pages"
+msgstr ""
+
+#: includes/class-wc-google-analytics.php:201
+msgid "Product Clicks from Listing Pages"
+msgstr ""
+
+#: includes/class-wc-google-analytics.php:209
+msgid "Product Detail Views"
+msgstr ""
+
+#: includes/class-wc-google-analytics.php:217
+msgid "Checkout Process Initiated"
+msgstr ""
+
+#: includes/class-wc-google-analytics.php:230
+msgid "Please allow Google Analytics 24 hours to start displaying results."
+msgstr ""
+
+#: includes/class-wc-google-analytics.php:233
+msgid ""
+"Please note, for transaction tracking to work properly, you will need to "
+"use a payment gateway that redirects the customer back to a WooCommerce "
+"order received/thank you page."
+msgstr ""
+
+#: includes/class-wc-google-analytics.php:370
+#: includes/class-wc-google-analytics.php:431
 msgid "Products"
 msgstr ""
 
-#: includes/class-wc-google-analytics.php:479
-#: includes/class-wc-google-analytics.php:500
+#: includes/class-wc-google-analytics.php:371
+#: includes/class-wc-google-analytics.php:432
 msgid "Add to Cart"
 msgstr ""
 
-#: includes/class-wc-google-analytics.php:480
-msgid "SKU:"
+#: includes/class-wc-google-analytics.php:372
+msgid "ID:"
 msgstr ""
 
-#: woocommerce-google-analytics-integration.php:89
+#: woocommerce-google-analytics-integration.php:71
+msgid "Settings"
+msgstr ""
+
+#: woocommerce-google-analytics-integration.php:72
+msgid "Support"
+msgstr ""
+
+#: woocommerce-google-analytics-integration.php:110
 msgid "WooCommerce Google Analytics depends on the last version of %s to work!"
 msgstr ""
 
-#: woocommerce-google-analytics-integration.php:89
+#. Author of the plugin/theme
 msgid "WooCommerce"
 msgstr ""
 
@@ -123,10 +242,6 @@ msgid ""
 "pages."
 msgstr ""
 
-#. Author of the plugin/theme
-msgid "WooThemes"
-msgstr ""
-
 #. Author URI of the plugin/theme
-msgid "http://woothemes.com"
+msgid "https://woocommerce.com"
 msgstr ""

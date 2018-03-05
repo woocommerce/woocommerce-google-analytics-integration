@@ -51,15 +51,15 @@ class WC_Google_Analytics_Info_Banner {
 			return;
 		}
 
-		$integration_url = esc_url( admin_url('admin.php?page=wc-settings&tab=integration&section=google_analytics' ) );
+		$integration_url = esc_url( admin_url( 'admin.php?page=wc-settings&tab=integration&section=google_analytics' ) );
 		$dismiss_url = $this->dismiss_url();
 
 		$heading = __( 'Google Analytics &amp; WooCommerce', 'woocommerce-google-analytics-integration' );
-		$configure = sprintf( __( '<a href="%s">Connect WooCommerce to Google Analytics</a> to finish setting up this integration.' ), $integration_url );
+		$configure = sprintf( __( '<a href="%s">Connect WooCommerce to Google Analytics</a> to finish setting up this integration.', 'woocommerce-google-analytics-integration' ), $integration_url );
 
 		// Display the message..
 		echo '<div class="updated fade"><p><strong>' . $heading . '</strong> ';
-		echo '<a href="' . esc_url( $dismiss_url ). '" title="' . __( 'Dismiss this notice.', 'woocommerce-google-analytics-integration' ) . '"> ' . __( '(Dismiss)', 'woocommerce-google-analytics-integration' ) . '</a>';
+		echo '<a href="' . esc_url( $dismiss_url ) . '" title="' . __( 'Dismiss this notice.', 'woocommerce-google-analytics-integration' ) . '"> ' . __( '(Dismiss)', 'woocommerce-google-analytics-integration' ) . '</a>';
 		echo '<p>' . $configure . "</p></div>\n";
 	}
 

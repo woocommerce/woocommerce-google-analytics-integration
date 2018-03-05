@@ -372,7 +372,7 @@ class WC_Google_Analytics_JS {
 	 * @param array $item  The item to add to a transaction/order
 	 */
 	function add_item_classic( $order, $item ) {
-		$_product = $order->get_product_from_item( $item );
+		$_product = version_compare( WC_VERSION, '3.0', '<' ) ? $order->get_product_from_item( $item ) : $item->get_product();
 
 		$code = "_gaq.push(['_addItem',";
 		$code .= "'" . esc_js( $order->get_order_number() ) . "',";
@@ -392,7 +392,7 @@ class WC_Google_Analytics_JS {
 	 * @param array $item  The item to add to a transaction/order
 	 */
 	function add_item_universal( $order, $item ) {
-		$_product = $order->get_product_from_item( $item );
+		$_product = version_compare( WC_VERSION, '3.0', '<' ) ? $order->get_product_from_item( $item ) : $item->get_product();
 
 		$code = "" . self::tracker_var() . "('ecommerce:addItem', {";
 		$code .= "'id': '" . esc_js( $order->get_order_number() ) . "',";
@@ -412,7 +412,7 @@ class WC_Google_Analytics_JS {
 	 * @param array $item The item to add to a transaction/order
 	 */
 	function add_item_enhanced( $order, $item ) {
-		$_product = $order->get_product_from_item( $item );
+		$_product = version_compare( WC_VERSION, '3.0', '<' ) ? $order->get_product_from_item( $item ) : $item->get_product();
 
 		$code = "" . self::tracker_var() . "( 'ec:addProduct', {";
 		$code .= "'id': '" . esc_js( $_product->get_sku() ? $_product->get_sku() : $_product->get_id() ) . "',";

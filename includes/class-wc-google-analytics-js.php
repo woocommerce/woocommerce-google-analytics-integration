@@ -418,6 +418,7 @@ class WC_Google_Analytics_JS {
 		$code .= "'id': '" . esc_js( $_product->get_sku() ? $_product->get_sku() : $_product->get_id() ) . "',";
 		$code .= "'name': '" . esc_js( $item['name'] ) . "',";
 		$code .= "'category': " . self::product_get_category_line( $_product );
+		$code .= "'variant': " . self::product_get_varient_line( $_product );
 		$code .= "'price': '" . esc_js( $order->get_item_total( $item ) ) . "',";
 		$code .= "'quantity': '" . esc_js( $item['qty'] ) . "'";
 		$code .= "});";
@@ -431,21 +432,40 @@ class WC_Google_Analytics_JS {
 	 * @return string          Line of JSON
 	 */
 	private static function product_get_category_line( $_product ) {
+
+		$out            = array();
 		$variation_data = version_compare( WC_VERSION, '3.0', '<' ) ? $_product->variation_data : ( $_product->is_type( 'variation' ) ? wc_get_product_variation_attributes( $_product->get_id() ) : '' );
+		$categories     = get_the_terms( $_product->get_id(), 'product_cat' );
+
 		if ( is_array( $variation_data ) && ! empty( $variation_data ) ) {
-			$code = "'" . esc_js( wc_get_formatted_variation( $variation_data, true ) ) . "',";
-		} else {
-			$out = array();
-			$categories = get_the_terms( $_product->get_id(), 'product_cat' );
-			if ( $categories ) {
-				foreach ( $categories as $category ) {
-					$out[] = $category->name;
-				}
-			}
-			$code = "'" . esc_js( join( "/", $out ) ) . "',";
+			$parent_product = wc_get_product( $_product->get_parent_id() );
+			$categories = get_the_terms( $parent_product->get_id(), 'product_cat' );
 		}
 
-		return $code;
+		if ( $categories ) {
+			foreach ( $categories as $category ) {
+				$out[] = $category->name;
+			}
+		}
+
+		return "'" . esc_js( join( "/", $out ) ) . "',";
+	}
+
+	/**
+	 * Returns a 'varient' JSON line based on $product
+	 * @param  object $product  Product to pull info for
+	 * @return string          Line of JSON
+	 */
+	private static function product_get_variant_line( $_product ) {
+
+		$out            = '';
+		$variation_data = version_compare( WC_VERSION, '3.0', '<' ) ? $_product->variation_data : ( $_product->is_type( 'variation' ) ? wc_get_product_variation_attributes( $_product->get_id() ) : '' );
+
+		if ( is_array( $variation_data ) && ! empty( $variation_data ) ) {
+			$out = "'" . esc_js( wc_get_formatted_variation( $variation_data, true ) ) . "',";
+		}
+
+		return $out;
 	}
 
 	/**
@@ -495,11 +515,17 @@ class WC_Google_Analytics_JS {
 
 		foreach ( $cart as $cart_item_key => $cart_item ) {
 			$product     = apply_filters( 'woocommerce_cart_item_product', $cart_item['data'], $cart_item, $cart_item_key );
+			$variant     = self::product_get_variant_line( $product );
 			$code .= "" . self::tracker_var() . "( 'ec:addProduct', {
 				'id': '" . esc_js( $product->get_sku() ? $product->get_sku() : ( '#' . $product->get_id() ) ) . "',
 				'name': '" . esc_js( $product->get_title() ) . "',
-				'category': " . self::product_get_category_line( $product ) . "
-				'price': '" . esc_js( $product->get_price() ) . "',
+				'category': " . self::product_get_category_line( $product );
+
+			if ( '' !== $variant ) {
+				$code .= "'variant': " . $variant;
+			}
+
+			$code .= "'price': '" . esc_js( $product->get_price() ) . "',
 				'quantity': '" . esc_js( $cart_item['quantity'] ) . "'
 			} );";
 		}

@@ -50,6 +50,10 @@ Until you've updated to WooCommerce 2.1, this plugin puts itself in some sort of
 
 You can leave this plugin activated and it will seamlessly take over the integration that once was in the WooCommerce plugin, once you update to the next version.
 
+= My settings are not saving! =
+
+Do you have SUHOSIN installed/active on your server? If so, the default index length is 64 and some settings on this plugin requires longer lengths. Try setting your SUHOSIN configuration's "max_array_index_length" to "100" and test again.
+
 = My national data privacy laws require that I offer an opt-out for users, how can I do this? =
 
 Include the following html code snippet within the page where you want to have the opt-out, e.g. the your Imprint our Data Privacy page:

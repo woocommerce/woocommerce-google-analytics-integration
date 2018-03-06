@@ -413,12 +413,17 @@ class WC_Google_Analytics_JS {
 	 */
 	function add_item_enhanced( $order, $item ) {
 		$_product = version_compare( WC_VERSION, '3.0', '<' ) ? $order->get_product_from_item( $item ) : $item->get_product();
+		$variant  = self::product_get_varient_line( $_product );
 
 		$code = "" . self::tracker_var() . "( 'ec:addProduct', {";
 		$code .= "'id': '" . esc_js( $_product->get_sku() ? $_product->get_sku() : $_product->get_id() ) . "',";
 		$code .= "'name': '" . esc_js( $item['name'] ) . "',";
 		$code .= "'category': " . self::product_get_category_line( $_product );
-		$code .= "'variant': " . self::product_get_varient_line( $_product );
+
+		if ( '' !== $variant ) {
+			$code .= "'variant': " . $variant;
+		}
+
 		$code .= "'price': '" . esc_js( $order->get_item_total( $item ) ) . "',";
 		$code .= "'quantity': '" . esc_js( $item['qty'] ) . "'";
 		$code .= "});";

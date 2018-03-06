@@ -2,6 +2,7 @@
 
 = 1.4.3 - 15/06/2017 =
 * Fix - WC 3.x notice by using proper variation data.
+* Fix - Variations not reporting category in cart tracking.
 * Add - Option to track 404 (Not found) errors.
 
 = 1.4.2 - 09/05/2017 =

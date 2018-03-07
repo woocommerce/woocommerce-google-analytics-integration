@@ -413,7 +413,7 @@ class WC_Google_Analytics_JS {
 	 */
 	function add_item_enhanced( $order, $item ) {
 		$_product = version_compare( WC_VERSION, '3.0', '<' ) ? $order->get_product_from_item( $item ) : $item->get_product();
-		$variant  = self::product_get_varient_line( $_product );
+		$variant  = self::product_get_variant_line( $_product );
 
 		$code = "" . self::tracker_var() . "( 'ec:addProduct', {";
 		$code .= "'id': '" . esc_js( $_product->get_sku() ? $_product->get_sku() : $_product->get_id() ) . "',";
@@ -457,7 +457,7 @@ class WC_Google_Analytics_JS {
 	}
 
 	/**
-	 * Returns a 'varient' JSON line based on $product
+	 * Returns a 'variant' JSON line based on $product
 	 * @param  object $product  Product to pull info for
 	 * @return string          Line of JSON
 	 */

@@ -443,7 +443,7 @@ class WC_Google_Analytics_JS {
 		$categories     = get_the_terms( $_product->get_id(), 'product_cat' );
 
 		if ( is_array( $variation_data ) && ! empty( $variation_data ) ) {
-			$parent_product = wc_get_product( $_product->get_parent_id() );
+			$parent_product = wc_get_product( version_compare( WC_VERSION, '3.0', '<' ) ? $_product->parent->id : $_product->get_parent_id() );
 			$categories = get_the_terms( $parent_product->get_id(), 'product_cat' );
 		}
 

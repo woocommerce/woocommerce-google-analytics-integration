@@ -11,6 +11,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 
 	/**
+	 * Get the class instance
+	 */
+	public static function get_instance( $options = array() ) {
+		return null === self::$instance ? ( self::$instance = new self( $options ) ) : self::$instance;
+	}
+
+	/**
 	 * Constructor
 	 * Takes our options from the parent class so we can later use them in the JS snippets
 	 */

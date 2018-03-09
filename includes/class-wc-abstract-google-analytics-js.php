@@ -11,17 +11,15 @@ if ( ! defined( 'ABSPATH' ) ) {
 abstract class WC_Abstract_Google_Analytics_JS {
 
 	/** @var object Class Instance */
-	private static $instance;
+	protected static $instance;
 
 	/** @var array Inherited Analytics options */
-	private static $options;
+	protected static $options;
 
 	/**
 	 * Get the class instance
 	 */
-	public static function get_instance( $options = array() ) {
-		return null === self::$instance ? ( self::$instance = new self( $options ) ) : self::$instance;
-	}
+	abstract public static function get_instance( $options = array() );
 
 	/**
 	 * Return one of our options

@@ -253,26 +253,11 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 	public function event_tracking_code( $parameters, $selector ) {
 		$parameters = apply_filters( 'woocommerce_gtag_event_tracking_parameters', $parameters );
 
-		if ( 'yes' === self::get( 'ga_use_universal_analytics' ) ) {
-			if ( 'yes' === self::get( 'ga_enhanced_ecommerce_tracking_enabled' ) ) {
-				wc_enqueue_js( "
-					$( '" . $selector . "' ).click( function() {
-						" . $parameters['enhanced'] . "
-						" . self::tracker_var() . "( 'ec:setAction', 'add' );
-						" . self::tracker_var() . "( 'event', 'UX', 'click', 'add to cart' );
-					});
-				" );
-				return;
-			} else {
-				$track_event = "" . self::tracker_var() . "('event', %s, %s, %s);";
-			}
-		} else {
-			$track_event = "_gaq.push(['_trackEvent', %s, %s, %s]);";
-		}
+		$track_event = self::tracker_var() . "( 'event', %s, { 'event_category': %s, 'event_label': %s } );";
 
 		wc_enqueue_js( "
 			$( '" . $selector . "' ).click( function() {
-				" . sprintf( $track_event, $parameters['category'], $parameters['action'], $parameters['label'] ) . "
+				" . sprintf( $track_event, $parameters['action'], $parameters['category'], $parameters['label'] ) . "
 			});
 		" );
 	}

@@ -4,9 +4,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * WC_Google_Gtag_JS class
+ * WC_Abstract_Google_Analytics_JS class
  *
- * JS for recording Google Gtag info
+ * Abstract JS for recording Google Analytics/Gtag info
  */
 abstract class WC_Abstract_Google_Analytics_JS {
 

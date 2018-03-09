@@ -260,15 +260,11 @@ class WC_Google_Analytics_JS extends WC_Abstract_Google_Analytics_JS {
 	 * @return string Add Transaction code
 	 */
 	public function add_transaction( $order ) {
-		if ( 'yes' == self::get( 'ga_use_universal_analytics' ) ) {
-			if ( 'yes' === self::get( 'ga_enhanced_ecommerce_tracking_enabled' ) ) {
-				return self::add_transaction_enhanced( $order );
-			} else {
-				return self::add_transaction_universal( $order );
-			}
-		} else {
+		if ( 'yes' != self::get( 'ga_use_universal_analytics' ) ) {
 			return self::add_transaction_classic( $order );
 		}
+
+		return parent::add_transaction( $order );
 	}
 
 	/**
@@ -296,32 +292,6 @@ class WC_Google_Analytics_JS extends WC_Abstract_Google_Analytics_JS {
 		}
 
 		$code .= "_gaq.push(['_trackTrans']);";
-		return $code;
-	}
-
-	/**
-	 * Universal Analytics transaction tracking
-	 * @param object $order WC_Order object
-	 * @return string Add Transaction Code
-	 */
-	public function add_transaction_universal( $order ) {
-		$code = "" . self::tracker_var() . "('ecommerce:addTransaction', {
-			'id': '" . esc_js( $order->get_order_number() ) . "',         // Transaction ID. Required
-			'affiliation': '" . esc_js( get_bloginfo( 'name' ) ) . "',    // Affiliation or store name
-			'revenue': '" . esc_js( $order->get_total() ) . "',           // Grand Total
-			'shipping': '" . esc_js( $order->get_total_shipping() ) . "', // Shipping
-			'tax': '" . esc_js( $order->get_total_tax() ) . "',           // Tax
-			'currency': '" . esc_js( version_compare( WC_VERSION, '3.0', '<' ) ? $order->get_order_currency() : $order->get_currency() ) . "'  // Currency
-		});";
-
-		// Order items
-		if ( $order->get_items() ) {
-			foreach ( $order->get_items() as $item ) {
-				$code .= self::add_item_universal( $order, $item );
-			}
-		}
-
-		$code .= "" . self::tracker_var() . "('ecommerce:send');";
 		return $code;
 	}
 

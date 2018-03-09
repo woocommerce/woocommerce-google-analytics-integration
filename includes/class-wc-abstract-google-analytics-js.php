@@ -66,7 +66,39 @@ abstract class WC_Abstract_Google_Analytics_JS {
 	 * @param object $order WC_Order Object
 	 * @return string Add Transaction code
 	 */
-	abstract public function add_transaction( $order );
+	public function add_transaction( $order ) {
+		if ( 'yes' === self::get( 'ga_enhanced_ecommerce_tracking_enabled' ) ) {
+			return self::add_transaction_enhanced( $order );
+		} else {
+			return self::add_transaction_universal( $order );
+		}
+	}
+
+	/**
+	 * Universal Gtag transaction tracking
+	 * @param object $order WC_Order object
+	 * @return string Add Transaction Code
+	 */
+	public function add_transaction_universal( $order ) {
+		$code = "ga('ecommerce:addTransaction', {
+			'id': '" . esc_js( $order->get_order_number() ) . "',         // Transaction ID. Required
+			'affiliation': '" . esc_js( get_bloginfo( 'name' ) ) . "',    // Affiliation or store name
+			'revenue': '" . esc_js( $order->get_total() ) . "',           // Grand Total
+			'shipping': '" . esc_js( $order->get_total_shipping() ) . "', // Shipping
+			'tax': '" . esc_js( $order->get_total_tax() ) . "',           // Tax
+			'currency': '" . esc_js( version_compare( WC_VERSION, '3.0', '<' ) ? $order->get_order_currency() : $order->get_currency() ) . "'  // Currency
+		});";
+
+		// Order items
+		if ( $order->get_items() ) {
+			foreach ( $order->get_items() as $item ) {
+				$code .= self::add_item_universal( $order, $item );
+			}
+		}
+
+		$code .= "" . self::tracker_var() . "('ecommerce:send');";
+		return $code;
+	}
 
 	/**
 	 * Returns a 'category' JSON line based on $product

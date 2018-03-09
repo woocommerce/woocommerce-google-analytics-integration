@@ -10,17 +10,27 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 abstract class WC_Abstract_Google_Analytics_JS {
 
+	/** @var object Class Instance */
+	private static $instance;
+
+	/** @var array Inherited Analytics options */
+	private static $options;
+
 	/**
 	 * Get the class instance
 	 */
-	abstract public static function get_instance( $options = array() );
+	public static function get_instance( $options = array() ) {
+		return null === self::$instance ? ( self::$instance = new self( $options ) ) : self::$instance;
+	}
 
 	/**
 	 * Return one of our options
 	 * @param  string $option Key/name for the option
 	 * @return string         Value of the option
 	 */
-	abstract public static function get( $option );
+	protected static function get( $option ) {
+		return self::$options[$option];
+	}
 
 	/**
 	 * Returns the tracker variable this integration should use
@@ -79,14 +89,14 @@ abstract class WC_Abstract_Google_Analytics_JS {
 	 * @param object $order WC_Order object
 	 * @return string Add Transaction Code
 	 */
-	abstract public function add_transaction_enhanced( $order );
+	abstract protected function add_transaction_enhanced( $order );
 
 	/**
 	 * Add Item (Universal)
 	 * @param object $order WC_Order Object
 	 * @param array $item  The item to add to a transaction/order
 	 */
-	public function add_item_universal( $order, $item ) {
+	protected function add_item_universal( $order, $item ) {
 		$_product = version_compare( WC_VERSION, '3.0', '<' ) ? $order->get_product_from_item( $item ) : $item->get_product();
 
 		$code = "ga('ecommerce:addItem', {";
@@ -106,7 +116,7 @@ abstract class WC_Abstract_Google_Analytics_JS {
 	 * @param object $order WC_Order object
 	 * @return string Add Transaction Code
 	 */
-	public function add_transaction_universal( $order ) {
+	protected function add_transaction_universal( $order ) {
 		$code = "ga('ecommerce:addTransaction', {
 			'id': '" . esc_js( $order->get_order_number() ) . "',         // Transaction ID. Required
 			'affiliation': '" . esc_js( get_bloginfo( 'name' ) ) . "',    // Affiliation or store name

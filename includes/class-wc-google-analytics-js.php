@@ -340,26 +340,6 @@ class WC_Google_Analytics_JS extends WC_Abstract_Google_Analytics_JS {
 	}
 
 	/**
-	 * Add Item (Universal)
-	 * @param object $order WC_Order Object
-	 * @param array $item  The item to add to a transaction/order
-	 */
-	public function add_item_universal( $order, $item ) {
-		$_product = version_compare( WC_VERSION, '3.0', '<' ) ? $order->get_product_from_item( $item ) : $item->get_product();
-
-		$code = "" . self::tracker_var() . "('ecommerce:addItem', {";
-		$code .= "'id': '" . esc_js( $order->get_order_number() ) . "',";
-		$code .= "'name': '" . esc_js( $item['name'] ) . "',";
-		$code .= "'sku': '" . esc_js( $_product->get_sku() ? $_product->get_sku() : $_product->get_id() ) . "',";
-		$code .= "'category': " . self::product_get_category_line( $_product );
-		$code .= "'price': '" . esc_js( $order->get_item_total( $item ) ) . "',";
-		$code .= "'quantity': '" . esc_js( $item['qty'] ) . "'";
-		$code .= "});";
-
-		return $code;
-	}
-
-	/**
 	 * Add Item (Enhanced, Universal)
 	 * @param object $order WC_Order Object
 	 * @param array $item The item to add to a transaction/order

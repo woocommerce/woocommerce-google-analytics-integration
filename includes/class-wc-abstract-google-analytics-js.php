@@ -75,6 +75,33 @@ abstract class WC_Abstract_Google_Analytics_JS {
 	}
 
 	/**
+	 * Enhanced Gtag transaction tracking
+	 * @param object $order WC_Order object
+	 * @return string Add Transaction Code
+	 */
+	abstract public function add_transaction_enhanced( $order );
+
+	/**
+	 * Add Item (Universal)
+	 * @param object $order WC_Order Object
+	 * @param array $item  The item to add to a transaction/order
+	 */
+	public function add_item_universal( $order, $item ) {
+		$_product = version_compare( WC_VERSION, '3.0', '<' ) ? $order->get_product_from_item( $item ) : $item->get_product();
+
+		$code = "ga('ecommerce:addItem', {";
+		$code .= "'id': '" . esc_js( $order->get_order_number() ) . "',";
+		$code .= "'name': '" . esc_js( $item['name'] ) . "',";
+		$code .= "'sku': '" . esc_js( $_product->get_sku() ? $_product->get_sku() : $_product->get_id() ) . "',";
+		$code .= "'category': " . self::product_get_category_line( $_product );
+		$code .= "'price': '" . esc_js( $order->get_item_total( $item ) ) . "',";
+		$code .= "'quantity': '" . esc_js( $item['qty'] ) . "'";
+		$code .= "});";
+
+		return $code;
+	}
+
+	/**
 	 * Universal Gtag transaction tracking
 	 * @param object $order WC_Order object
 	 * @return string Add Transaction Code
@@ -96,7 +123,7 @@ abstract class WC_Abstract_Google_Analytics_JS {
 			}
 		}
 
-		$code .= "" . self::tracker_var() . "('ecommerce:send');";
+		$code .= "ga('ecommerce:send');";
 		return $code;
 	}
 

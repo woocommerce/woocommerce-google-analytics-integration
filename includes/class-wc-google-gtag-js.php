@@ -199,12 +199,12 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 			<script>
 			(function($) {
 				$( '.remove' ).click( function() {
-					" . self::tracker_var() . "( 'ec:addProduct', {
-						'id': ($(this).data('product_sku')) ? ($(this).data('product_sku')) : ('#' + $(this).data('product_id')),
-						'quantity': $(this).parent().parent().find( '.qty' ).val() ? $(this).parent().parent().find( '.qty' ).val() : '1',
+					" . self::tracker_var() . "( 'event', 'remove_from_cart', {
+						'items': [ {
+							'id': ($(this).data('product_sku')) ? ($(this).data('product_sku')) : ('#' + $(this).data('product_id')),
+							'quantity': $(this).parent().parent().find( '.qty' ).val() ? $(this).parent().parent().find( '.qty' ).val() : '1',
+						] }
 					} );
-					" . self::tracker_var() . "( 'ec:setAction', 'remove' );
-					" . self::tracker_var() . "( 'event', 'UX', 'click', 'remove from cart' );
 				});
 			})(jQuery);
 			</script>

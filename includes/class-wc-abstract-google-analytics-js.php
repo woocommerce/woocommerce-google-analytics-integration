@@ -8,7 +8,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * JS for recording Google Gtag info
  */
-abstract class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
+abstract class WC_Abstract_Google_Analytics_JS {
 
 	/**
 	 * Get the class instance

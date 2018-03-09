@@ -220,14 +220,14 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 		}
 
 		wc_enqueue_js( "
-			" . self::tracker_var() . "( 'ec:addProduct', {
-				'id': '" . esc_js( $product->get_sku() ? $product->get_sku() : ( '#' . $product->get_id() ) ) . "',
-				'name': '" . esc_js( $product->get_title() ) . "',
-				'category': " . self::product_get_category_line( $product ) . "
-				'price': '" . esc_js( $product->get_price() ) . "',
-			} );
-
-			" . self::tracker_var() . "( 'ec:setAction', 'detail' );" );
+			" . self::tracker_var() . "( 'event', 'view_item', {
+				'items': [ {
+					'id': '" . esc_js( $product->get_sku() ? $product->get_sku() : ( '#' . $product->get_id() ) ) . "',
+					'name': '" . esc_js( $product->get_title() ) . "',
+					'category': " . self::product_get_category_line( $product ) . "
+					'price': '" . esc_js( $product->get_price() ) . "',
+				} ]
+			} );" );
 	}
 
 	/**

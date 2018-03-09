@@ -145,11 +145,13 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 	 */
 	public function add_transaction_enhanced( $order ) {
 		// Order items
+		$items = "[";
 		if ( $order->get_items() ) {
 			foreach ( $order->get_items() as $item ) {
-				$code .= self::add_item_enhanced( $order, $item );
+				$items .= self::add_item( $order, $item );
 			}
 		}
+		$items = "]";
 
 		$code .= "" . self::tracker_var() . "( 'event', 'purchase', {
 			'transaction_id': '" . esc_js( $order->get_order_number() ) . "',
@@ -157,28 +159,9 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 			'value': '" . esc_js( $order->get_total() ) . "',
 			'tax': '" . esc_js( $order->get_total_tax() ) . "',
 			'shipping': '" . esc_js( $order->get_total_shipping() ) . "',
-			'currency': '" . esc_js( version_compare( WC_VERSION, '3.0', '<' ) ? $order->get_order_currency() : $order->get_currency() ) . "'  // Currency
+			'currency': '" . esc_js( version_compare( WC_VERSION, '3.0', '<' ) ? $order->get_order_currency() : $order->get_currency() ) . "'  // Currency,
+			'items': " . $items . ",
 		} );";
-
-		return $code;
-	}
-
-	/**
-	 * Add Item (Universal)
-	 * @param object $order WC_Order Object
-	 * @param array $item  The item to add to a transaction/order
-	 */
-	public function add_item_universal( $order, $item ) {
-		$_product = version_compare( WC_VERSION, '3.0', '<' ) ? $order->get_product_from_item( $item ) : $item->get_product();
-
-		$code = "" . self::tracker_var() . "('ecommerce:addItem', {";
-		$code .= "'id': '" . esc_js( $order->get_order_number() ) . "',";
-		$code .= "'name': '" . esc_js( $item['name'] ) . "',";
-		$code .= "'sku': '" . esc_js( $_product->get_sku() ? $_product->get_sku() : $_product->get_id() ) . "',";
-		$code .= "'category': " . self::product_get_category_line( $_product );
-		$code .= "'price': '" . esc_js( $order->get_item_total( $item ) ) . "',";
-		$code .= "'quantity': '" . esc_js( $item['qty'] ) . "'";
-		$code .= "});";
 
 		return $code;
 	}
@@ -188,11 +171,11 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 	 * @param object $order WC_Order Object
 	 * @param array $item The item to add to a transaction/order
 	 */
-	public function add_item_enhanced( $order, $item ) {
+	public function add_item( $order, $item ) {
 		$_product = version_compare( WC_VERSION, '3.0', '<' ) ? $order->get_product_from_item( $item ) : $item->get_product();
 		$variant  = self::product_get_variant_line( $_product );
 
-		$code = "" . self::tracker_var() . "( 'ec:addProduct', {";
+		$code = "{";
 		$code .= "'id': '" . esc_js( $_product->get_sku() ? $_product->get_sku() : $_product->get_id() ) . "',";
 		$code .= "'name': '" . esc_js( $item['name'] ) . "',";
 		$code .= "'category': " . self::product_get_category_line( $_product );
@@ -203,7 +186,7 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 
 		$code .= "'price': '" . esc_js( $order->get_item_total( $item ) ) . "',";
 		$code .= "'quantity': '" . esc_js( $item['qty'] ) . "'";
-		$code .= "});";
+		$code .= "},";
 
 		return $code;
 	}

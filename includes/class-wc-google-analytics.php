@@ -20,7 +20,7 @@ class WC_Google_Analytics extends WC_Integration {
 	 * @return mixed
 	 */
 	protected function get_tracking_instance( $options = array() ) {
-		if ( 'yes' === $this->ga_gtag_enabled )
+		if ( 'yes' === $this->ga_gtag_enabled ) {
 			return WC_Google_Gtag_JS::get_instance( $options );
 		}
 

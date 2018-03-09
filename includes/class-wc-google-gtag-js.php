@@ -10,12 +10,6 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 
-	/** @var object Class Instance */
-	private static $instance;
-
-	/** @var array Inherited Gtag options */
-	private static $options;
-
 	/**
 	 * Get the class instance
 	 */
@@ -29,15 +23,6 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 	 */
 	public function __construct( $options = array() ) {
 		self::$options = $options;
-	}
-
-	/**
-	 * Return one of our options
-	 * @param  string $option Key/name for the option
-	 * @return string         Value of the option
-	 */
-	public static function get( $option ) {
-		return self::$options[$option];
 	}
 
 	/**
@@ -143,7 +128,7 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 	/**
 	 * Enhanced Ecommerce Universal Gtag transaction tracking
 	 */
-	public function add_transaction_enhanced( $order ) {
+	protected function add_transaction_enhanced( $order ) {
 		// Order items
 		$items = "[";
 		if ( $order->get_items() ) {
@@ -171,7 +156,7 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 	 * @param object $order WC_Order Object
 	 * @param array $item The item to add to a transaction/order
 	 */
-	public function add_item( $order, $item ) {
+	protected function add_item( $order, $item ) {
 		$_product = version_compare( WC_VERSION, '3.0', '<' ) ? $order->get_product_from_item( $item ) : $item->get_product();
 		$variant  = self::product_get_variant_line( $_product );
 

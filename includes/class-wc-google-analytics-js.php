@@ -10,12 +10,6 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class WC_Google_Analytics_JS extends WC_Abstract_Google_Analytics_JS {
 
-	/** @var object Class Instance */
-	private static $instance;
-
-	/** @var array Inherited Analytics options */
-	private static $options;
-
 	/**
 	 * Get the class instance
 	 * @param array $options
@@ -34,15 +28,6 @@ class WC_Google_Analytics_JS extends WC_Abstract_Google_Analytics_JS {
 	 */
 	public function __construct( $options = array() ) {
 		self::$options = $options;
-	}
-
-	/**
-	 * Return one of our options
-	 * @param  string $option Key/name for the option
-	 * @return string         Value of the option
-	 */
-	public static function get( $option ) {
-		return self::$options[$option];
 	}
 
 	/**
@@ -75,7 +60,7 @@ class WC_Google_Analytics_JS extends WC_Abstract_Google_Analytics_JS {
 	 * @param  boolean|object $order  We don't always need to load order data for currency, so we omit that if false is set, otherwise this is an order object
 	 * @return string         Classic Analytics loading code
 	 */
-	public static function load_analytics_classic( $logged_in, $order = false ) {
+	protected static function load_analytics_classic( $logged_in, $order = false ) {
 		$anonymize_enabled = '';
 		if ( 'yes' === self::get( 'ga_anonymize_enabled' ) ) {
 			$anonymize_enabled = "['_gat._anonymizeIp'],";
@@ -168,7 +153,7 @@ class WC_Google_Analytics_JS extends WC_Abstract_Google_Analytics_JS {
 	 * Loads in the footer
 	 * @see wp_footer
 	 */
-	public static function classic_analytics_footer() {
+	protected static function classic_analytics_footer() {
 		if ( 'yes' === self::get( 'ga_support_display_advertising' ) ) {
 			$ga_url = "('https:' == document.location.protocol ? 'https://' : 'http://') + 'stats.g.doubleclick.net/dc.js'";
 		} else {
@@ -204,7 +189,7 @@ class WC_Google_Analytics_JS extends WC_Abstract_Google_Analytics_JS {
 	 * @param  string $logged_in 'yes' if the user is logged in, no if not (this is a string so we can pass it to GA)
 	 * @return string Universal Analytics Code
 	 */
-	public static function load_analytics_universal( $logged_in ) {
+	protected static function load_analytics_universal( $logged_in ) {
 
 		$domainname = self::get( 'ga_set_domain_name' );
 
@@ -308,7 +293,7 @@ class WC_Google_Analytics_JS extends WC_Abstract_Google_Analytics_JS {
 	 * @param object $order WC_Order Object
 	 * @return string Add Transaction Code
 	 */
-	public function add_transaction_classic( $order ) {
+	protected function add_transaction_classic( $order ) {
 		$code = "_gaq.push(['_addTrans',
 			'" . esc_js( $order->get_order_number() ) . "', 	// order ID - required
 			'" . esc_js( get_bloginfo( 'name' ) ) . "',  		// affiliation or store name
@@ -334,7 +319,7 @@ class WC_Google_Analytics_JS extends WC_Abstract_Google_Analytics_JS {
 	/**
 	 * Enhanced Ecommerce Universal Analytics transaction tracking
 	 */
-	public function add_transaction_enhanced( $order ) {
+	protected function add_transaction_enhanced( $order ) {
 		$code = "" . self::tracker_var() . "( 'set', '&cu', '" . esc_js( version_compare( WC_VERSION, '3.0', '<' ) ? $order->get_order_currency() : $order->get_currency() ) . "' );";
 
 		// Order items
@@ -360,7 +345,7 @@ class WC_Google_Analytics_JS extends WC_Abstract_Google_Analytics_JS {
 	 * @param object $order WC_Order Object
 	 * @param array $item  The item to add to a transaction/order
 	 */
-	public function add_item_classic( $order, $item ) {
+	protected function add_item_classic( $order, $item ) {
 		$_product = version_compare( WC_VERSION, '3.0', '<' ) ? $order->get_product_from_item( $item ) : $item->get_product();
 
 		$code = "_gaq.push(['_addItem',";
@@ -380,7 +365,7 @@ class WC_Google_Analytics_JS extends WC_Abstract_Google_Analytics_JS {
 	 * @param object $order WC_Order Object
 	 * @param array $item The item to add to a transaction/order
 	 */
-	public function add_item_enhanced( $order, $item ) {
+	protected function add_item_enhanced( $order, $item ) {
 		$_product = version_compare( WC_VERSION, '3.0', '<' ) ? $order->get_product_from_item( $item ) : $item->get_product();
 		$variant  = self::product_get_variant_line( $_product );
 

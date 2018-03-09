@@ -124,27 +124,7 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 	 * @return string         Gtag loading code
 	 */
 	public static function load_analytics( $order = false ) {
-
-		$support_display_advertising = '';
-		if ( 'yes' === self::get( 'ga_support_display_advertising' ) ) {
-			$support_display_advertising = "" . self::tracker_var() . "( 'require', 'displayfeatures' );";
-		}
-
-		$support_enhanced_link_attribution = '';
-		if ( 'yes' === self::get( 'ga_support_enhanced_link_attribution' ) ) {
-			$support_enhanced_link_attribution = "" . self::tracker_var() . "( 'require', 'linkid' );";
-		}
-
-		$anonymize_enabled = '';
-		if ( 'yes' === self::get( 'ga_anonymize_enabled' ) ) {
-			$anonymize_enabled = "" . self::tracker_var() . "( 'set', 'anonymizeIp', true );";
-		}
-
-		$track_404_enabled = '';
-		if ( 'yes' === self::get( 'ga_404_tracking_enabled' ) && is_404() ) {
-			// See https://developers.google.com/analytics/devguides/collection/analyticsjs/events for reference
-			$track_404_enabled = "" . self::tracker_var() . "( 'event', 'Error', '404 Not Found', 'page: ' + document.location.pathname + document.location.search + ' referrer: ' + document.referrer );";
-		}
+		$logged_in = is_user_logged_in() ? 'yes' : 'no';
 
 		$gtag_id = self::get( 'ga_id' );
 		$gtag_snippet_head = "<script async src='https://www.googletagmanager.com/gtag/js?id=" . esc_js( $gtag_id ) . "'></script>";
@@ -154,28 +134,21 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
 
-  gtag('config', '" . esc_js( $gtag_id ) . "');
+  gtag('config', '" . esc_js( $gtag_id ) . "', {
+    'allow_display_features': " . ( 'yes' === self::get( 'ga_support_display_advertising' ) ? 'true' : 'false' ) . ",
+    'link_attribution': " . ( 'yes' === self::get( 'ga_support_enhanced_link_attribution' ) ? 'true' : 'false' ) . ",
+    'anonymize_ip': " . ( 'yes' === self::get( 'ga_anonymize_enabled' ) ? 'true' : 'false' ) . ",
+    'custom_map': {
+      'dimension1': " . ( $logged_in ? 'true' : 'false' ) . ",
+    },
+  } );
 </script>
 		";
 
-		$gtag_snippet_require =
-		$support_display_advertising .
-		$support_enhanced_link_attribution .
-		$anonymize_enabled .
-		$track_404_enabled . "
-		" . self::tracker_var() . "( 'set', 'dimension1', '" . $logged_in . "' );\n";
-
-		if ( 'yes' === self::get( 'ga_enhanced_ecommerce_tracking_enabled' ) ) {
-			$gtag_snippet_require .= "" . self::tracker_var() . "( 'require', 'ec' );";
-		} else {
-			$gtag_snippet_require .= "" . self::tracker_var() . "( 'require', 'ecommerce', 'ecommerce.js');";
-		}
-
 		$gtag_snippet_head = apply_filters( 'woocommerce_gtag_snippet_head' , $gtag_snippet_head );
 		$gtag_snippet_create = apply_filters( 'woocommerce_gtag_snippet_create' , $gtag_snippet_create, $gtag_id );
-		$gtag_snippet_require = apply_filters( 'woocommerce_gtag_snippet_require' , $gtag_snippet_require );
 
-		$code = $gtag_snippet_head . $gtag_snippet_create . $gtag_snippet_require;
+		$code = $gtag_snippet_head . $gtag_snippet_create;
 		$code = apply_filters( 'woocommerce_gtag_snippet_output', $code );
 
 		return $code;

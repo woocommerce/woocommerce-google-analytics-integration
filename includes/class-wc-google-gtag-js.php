@@ -58,13 +58,13 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 		}
 
 		wc_enqueue_js( "
-			" . self::tracker_var() . "( 'ec:addImpression', {
+			" . self::tracker_var() . "( 'event', 'view_item_list', 'items': [ {
 				'id': '" . esc_js( $product->get_id() ) . "',
 				'name': '" . esc_js( $product->get_title() ) . "',
 				'category': " . self::product_get_category_line( $product ) . "
 				'list': '" . esc_js( $list ) . "',
-				'position': '" . esc_js( $position ) . "'
-			} );
+				'list_position': '" . esc_js( $position ) . "'
+			} ] );
 		" );
 	}
 
@@ -86,12 +86,15 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 						return;
 					}
 
-					" . self::tracker_var() . "( 'ec:addProduct', {
-						'id': '" . esc_js( $product->get_id() ) . "',
-						'name': '" . esc_js( $product->get_title() ) . "',
-						'category': " . self::product_get_category_line( $product ) . "
-						'position': '" . esc_js( $position ) . "'
-					});
+					" . self::tracker_var() . "( 'event', 'select_content', {
+						'content_type': 'product',
+						'items': [ {
+							'id': '" . esc_js( $product->get_id() ) . "',
+							'name': '" . esc_js( $product->get_title() ) . "',
+							'category': " . self::product_get_category_line( $product ) . "
+							'list_position': '" . esc_js( $position ) . "'
+						} ],
+					} );
 
 					" . self::tracker_var() . "( 'ec:setAction', 'click', { list: '" . esc_js( $list ) . "' });
 					" . self::tracker_var() . "( 'event', 'UX', 'click', ' " . esc_js( $list ) . "' );
@@ -112,20 +115,20 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 		$gtag_id = self::get( 'ga_id' );
 		$gtag_snippet_head = "<script async src='https://www.googletagmanager.com/gtag/js?id=" . esc_js( $gtag_id ) . "'></script>";
 		$gtag_snipped_head .= "
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
+		<script>
+		window.dataLayer = window.dataLayer || [];
+		function gtag(){dataLayer.push(arguments);}
+		gtag('js', new Date());
 
-  gtag('config', '" . esc_js( $gtag_id ) . "', {
-    'allow_display_features': " . ( 'yes' === self::get( 'ga_support_display_advertising' ) ? 'true' : 'false' ) . ",
-    'link_attribution': " . ( 'yes' === self::get( 'ga_support_enhanced_link_attribution' ) ? 'true' : 'false' ) . ",
-    'anonymize_ip': " . ( 'yes' === self::get( 'ga_anonymize_enabled' ) ? 'true' : 'false' ) . ",
-    'custom_map': {
-      'dimension1': " . ( $logged_in ? 'true' : 'false' ) . ",
-    },
-  } );
-</script>
+		gtag('config', '" . esc_js( $gtag_id ) . "', {
+			'allow_display_features': " . ( 'yes' === self::get( 'ga_support_display_advertising' ) ? 'true' : 'false' ) . ",
+			'link_attribution': " . ( 'yes' === self::get( 'ga_support_enhanced_link_attribution' ) ? 'true' : 'false' ) . ",
+			'anonymize_ip': " . ( 'yes' === self::get( 'ga_anonymize_enabled' ) ? 'true' : 'false' ) . ",
+			'custom_map': {
+				'dimension1': " . ( $logged_in ? 'true' : 'false' ) . ",
+			},
+		} );
+		</script>
 		";
 
 		$gtag_snippet_head = apply_filters( 'woocommerce_gtag_snippet_head' , $gtag_snippet_head );

@@ -8,7 +8,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * JS for recording Google Analytics info
  */
-class WC_Google_Analytics_JS {
+class WC_Google_Analytics_JS extends WC_Abstract_Google_Analytics_JS {
 
 	/** @var object Class Instance */
 	private static $instance;
@@ -325,7 +325,7 @@ class WC_Google_Analytics_JS {
 	 * @param object $order WC_Order Object
 	 * @return string Add Transaction Code
 	 */
-	function add_transaction_classic( $order ) {
+	public function add_transaction_classic( $order ) {
 		$code = "_gaq.push(['_addTrans',
 			'" . esc_js( $order->get_order_number() ) . "', 	// order ID - required
 			'" . esc_js( get_bloginfo( 'name' ) ) . "',  		// affiliation or store name
@@ -353,7 +353,7 @@ class WC_Google_Analytics_JS {
 	 * @param object $order WC_Order object
 	 * @return string Add Transaction Code
 	 */
-	function add_transaction_universal( $order ) {
+	public function add_transaction_universal( $order ) {
 		$code = "" . self::tracker_var() . "('ecommerce:addTransaction', {
 			'id': '" . esc_js( $order->get_order_number() ) . "',         // Transaction ID. Required
 			'affiliation': '" . esc_js( get_bloginfo( 'name' ) ) . "',    // Affiliation or store name
@@ -377,7 +377,7 @@ class WC_Google_Analytics_JS {
 	/**
 	 * Enhanced Ecommerce Universal Analytics transaction tracking
 	 */
-	function add_transaction_enhanced( $order ) {
+	public function add_transaction_enhanced( $order ) {
 		$code = "" . self::tracker_var() . "( 'set', '&cu', '" . esc_js( version_compare( WC_VERSION, '3.0', '<' ) ? $order->get_order_currency() : $order->get_currency() ) . "' );";
 
 		// Order items
@@ -403,7 +403,7 @@ class WC_Google_Analytics_JS {
 	 * @param object $order WC_Order Object
 	 * @param array $item  The item to add to a transaction/order
 	 */
-	function add_item_classic( $order, $item ) {
+	public function add_item_classic( $order, $item ) {
 		$_product = version_compare( WC_VERSION, '3.0', '<' ) ? $order->get_product_from_item( $item ) : $item->get_product();
 
 		$code = "_gaq.push(['_addItem',";
@@ -423,7 +423,7 @@ class WC_Google_Analytics_JS {
 	 * @param object $order WC_Order Object
 	 * @param array $item  The item to add to a transaction/order
 	 */
-	function add_item_universal( $order, $item ) {
+	public function add_item_universal( $order, $item ) {
 		$_product = version_compare( WC_VERSION, '3.0', '<' ) ? $order->get_product_from_item( $item ) : $item->get_product();
 
 		$code = "" . self::tracker_var() . "('ecommerce:addItem', {";
@@ -443,7 +443,7 @@ class WC_Google_Analytics_JS {
 	 * @param object $order WC_Order Object
 	 * @param array $item The item to add to a transaction/order
 	 */
-	function add_item_enhanced( $order, $item ) {
+	public function add_item_enhanced( $order, $item ) {
 		$_product = version_compare( WC_VERSION, '3.0', '<' ) ? $order->get_product_from_item( $item ) : $item->get_product();
 		$variant  = self::product_get_variant_line( $_product );
 
@@ -464,51 +464,9 @@ class WC_Google_Analytics_JS {
 	}
 
 	/**
-	 * Returns a 'category' JSON line based on $product
-	 * @param  object $product  Product to pull info for
-	 * @return string          Line of JSON
-	 */
-	private static function product_get_category_line( $_product ) {
-
-		$out            = array();
-		$variation_data = version_compare( WC_VERSION, '3.0', '<' ) ? $_product->variation_data : ( $_product->is_type( 'variation' ) ? wc_get_product_variation_attributes( $_product->get_id() ) : '' );
-		$categories     = get_the_terms( $_product->get_id(), 'product_cat' );
-
-		if ( is_array( $variation_data ) && ! empty( $variation_data ) ) {
-			$parent_product = wc_get_product( version_compare( WC_VERSION, '3.0', '<' ) ? $_product->parent->id : $_product->get_parent_id() );
-			$categories = get_the_terms( $parent_product->get_id(), 'product_cat' );
-		}
-
-		if ( $categories ) {
-			foreach ( $categories as $category ) {
-				$out[] = $category->name;
-			}
-		}
-
-		return "'" . esc_js( join( "/", $out ) ) . "',";
-	}
-
-	/**
-	 * Returns a 'variant' JSON line based on $product
-	 * @param  object $product  Product to pull info for
-	 * @return string          Line of JSON
-	 */
-	private static function product_get_variant_line( $_product ) {
-
-		$out            = '';
-		$variation_data = version_compare( WC_VERSION, '3.0', '<' ) ? $_product->variation_data : ( $_product->is_type( 'variation' ) ? wc_get_product_variation_attributes( $_product->get_id() ) : '' );
-
-		if ( is_array( $variation_data ) && ! empty( $variation_data ) ) {
-			$out = "'" . esc_js( wc_get_formatted_variation( $variation_data, true ) ) . "',";
-		}
-
-		return $out;
-	}
-
-	/**
 	 * Tracks an enhanced ecommerce remove from cart action
 	 */
-	function remove_from_cart() {
+	public function remove_from_cart() {
 		echo( "
 			<script>
 			(function($) {
@@ -528,7 +486,7 @@ class WC_Google_Analytics_JS {
 	/**
 	 * Tracks a product detail view
 	 */
-	function product_detail( $product ) {
+	public function product_detail( $product ) {
 		if ( empty( $product ) ) {
 			return;
 		}
@@ -547,7 +505,7 @@ class WC_Google_Analytics_JS {
 	/**
 	 * Tracks when the checkout process is started
 	 */
-	function checkout_process( $cart ) {
+	public function checkout_process( $cart ) {
 		$code = "";
 
 		foreach ( $cart as $cart_item_key => $cart_item ) {

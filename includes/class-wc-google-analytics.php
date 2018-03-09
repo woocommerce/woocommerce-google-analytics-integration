@@ -14,6 +14,20 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WC_Google_Analytics extends WC_Integration {
 
 	/**
+	 * Returns the proper class based on Gtag settings.
+	 *
+	 * @param array $options Options
+	 * @return mixed
+	 */
+	protected function get_tracking_instance( $options = array() ) {
+		if ( 'yes' === $this->ga_gtag_enabled )
+			return WC_Google_Gtag_JS::get_instance( $options );
+		}
+
+		return WC_Google_Analytics_JS::get_instance( $options );
+	}
+
+	/**
 	 * Init and hook in the integration.
 	 *
 	 * @return void
@@ -30,8 +44,10 @@ class WC_Google_Analytics extends WC_Integration {
 		$constructor = $this->init_options();
 
 		// Contains snippets/JS tracking code
+		include_once( 'class-wc-abstract-google-analytics-js.php' );
 		include_once( 'class-wc-google-analytics-js.php' );
-		WC_Google_Analytics_JS::get_instance( $constructor );
+		include_once( 'class-wc-google-gtag-js.php' );
+		$this->get_tracking_instance( $constructor );
 
 		// Display an info banner on how to configure WooCommerce
 		if ( is_admin() ) {
@@ -78,6 +94,7 @@ class WC_Google_Analytics extends WC_Integration {
 			'ga_anonymize_enabled',
 			'ga_404_tracking_enabled',
 			'ga_ecommerce_tracking_enabled',
+			'ga_gtag_enabled',
 			'ga_enhanced_ecommerce_tracking_enabled',
 			'ga_enhanced_remove_from_cart_enabled',
 			'ga_enhanced_product_impression_enabled',
@@ -168,6 +185,15 @@ class WC_Google_Analytics extends WC_Integration {
 				'type' 				=> 'checkbox',
 				'checkboxgroup'		=> '',
 				'default' 			=> 'yes'
+			),
+
+			'ga_gtag_enabled' => array(
+				'title'         => __( 'Global Site Tag', 'woocommerce-google-analytics-integration' ),
+				'label'         => __( 'Enable Global Site Tag', 'woocommerce-google-analytics-integration' ),
+				'description'   => sprintf( __( 'The Global Site Tag provides streamlined tagging across Google’s site measurement, conversion tracking, and remarketing products. <a href="%s">See here for more information</a>.', 'woocommerce-google-analytics-integration' ), 'https://support.google.com/analytics/answer/7475631?hl=en' ),
+				'type'          => 'checkbox',
+				'checkboxgroup' => '',
+				'default'       => 'no'
 			),
 
 			'ga_enhanced_ecommerce_tracking_enabled' => array(
@@ -309,8 +335,8 @@ class WC_Google_Analytics extends WC_Integration {
 	 */
 	protected function get_standard_tracking_code() {
 		return "<!-- WooCommerce Google Analytics Integration -->
-		" . WC_Google_Analytics_JS::get_instance()->header() . "
-		<script type='text/javascript'>" . WC_Google_Analytics_JS::get_instance()->load_analytics() . "</script>
+		" . $this->get_tracking_instance()->header() . "
+		<script type='text/javascript'>" . $this->get_tracking_instance()->load_analytics() . "</script>
 		<!-- /WooCommerce Google Analytics Integration -->";
 	}
 
@@ -323,15 +349,15 @@ class WC_Google_Analytics extends WC_Integration {
 		// Get the order and output tracking code
 		$order = new WC_Order( $order_id );
 
-		$code = WC_Google_Analytics_JS::get_instance()->load_analytics( $order );
-		$code .= WC_Google_Analytics_JS::get_instance()->add_transaction( $order );
+		$code = $this->get_tracking_instance()->load_analytics( $order );
+		$code .= $this->get_tracking_instance()->add_transaction( $order );
 
 		// Mark the order as tracked
 		update_post_meta( $order_id, '_ga_tracked', 1 );
 
 		return "
 		<!-- WooCommerce Google Analytics Integration -->
-		" . WC_Google_Analytics_JS::get_instance()->header() . "
+		" . $this->get_tracking_instance()->header() . "
 		<script type='text/javascript'>$code</script>
 		<!-- /WooCommerce Google Analytics Integration -->
 		";
@@ -345,9 +371,7 @@ class WC_Google_Analytics extends WC_Integration {
 	 * @return bool True if tracking for a certain setting is disabled
 	 */
 	private function disable_tracking( $type ) {
-		if ( is_admin() || current_user_can( 'manage_options' ) || ( ! $this->ga_id ) || 'no' === $type || apply_filters( 'woocommerce_ga_disable_tracking', false, $type ) ) {
-			return true;
-		}
+		return is_admin() || current_user_can( 'manage_options' ) || ( ! $this->ga_id ) || 'no' === $type || apply_filters( 'woocommerce_ga_disable_tracking', false, $type );
 	}
 
 	/**
@@ -372,7 +396,7 @@ class WC_Google_Analytics extends WC_Integration {
 		$parameters['label']    = "'" . esc_js( $product->get_sku() ? __( 'ID:', 'woocommerce-google-analytics-integration' ) . ' ' . $product->get_sku() : "#" . $product->get_id() ) . "'";
 
 		if ( ! $this->disable_tracking( $this->ga_enhanced_ecommerce_tracking_enabled ) ) {
-			$code = "" . WC_Google_Analytics_JS::get_instance()->tracker_var() . "( 'ec:addProduct', {";
+			$code = "" . $this->get_tracking_instance()->tracker_var() . "( 'ec:addProduct', {";
 			$code .= "'id': '" . esc_js( $product->get_sku() ? $product->get_sku() : ( '#' . $product->get_id() ) ) . "',";
 			$code .= "'name': '" . esc_js( $product->get_title() ) . "',";
 			$code .= "'quantity': $( 'input.qty' ).val() ? $( 'input.qty' ).val() : '1'";
@@ -380,7 +404,7 @@ class WC_Google_Analytics extends WC_Integration {
 			$parameters['enhanced'] = $code;
 		}
 
-		WC_Google_Analytics_JS::get_instance()->event_tracking_code( $parameters, '.single_add_to_cart_button' );
+		$this->get_tracking_instance()->event_tracking_code( $parameters, '.single_add_to_cart_button' );
 	}
 
 	/**
@@ -399,7 +423,7 @@ class WC_Google_Analytics extends WC_Integration {
 			return;
 		}
 
-		WC_Google_Analytics_JS::get_instance()->remove_from_cart();
+		$this->get_tracking_instance()->remove_from_cart();
 	}
 
 	/**
@@ -442,14 +466,14 @@ class WC_Google_Analytics extends WC_Integration {
 		$parameters['label']    = "($(this).data('product_sku')) ? ($(this).data('product_sku')) : ('#' + $(this).data('product_id'))"; // Product SKU or ID
 
 		if ( ! $this->disable_tracking( $this->ga_enhanced_ecommerce_tracking_enabled ) ) {
-			$code = "" . WC_Google_Analytics_JS::get_instance()->tracker_var() . "( 'ec:addProduct', {";
+			$code = "" . $this->get_tracking_instance()->tracker_var() . "( 'ec:addProduct', {";
 			$code .= "'id': ($(this).data('product_sku')) ? ($(this).data('product_sku')) : ('#' + $(this).data('product_id')),";
 			$code .= "'quantity': $(this).data('quantity')";
 			$code .= "} );";
 			$parameters['enhanced'] = $code;
 		}
 
-		WC_Google_Analytics_JS::get_instance()->event_tracking_code( $parameters, '.add_to_cart_button:not(.product_type_variable, .product_type_grouped)' );
+		$this->get_tracking_instance()->event_tracking_code( $parameters, '.add_to_cart_button:not(.product_type_variable, .product_type_grouped)' );
 	}
 
 	/**
@@ -469,7 +493,7 @@ class WC_Google_Analytics extends WC_Integration {
 		}
 
 		global $product, $woocommerce_loop;
-		WC_Google_Analytics_JS::get_instance()->listing_impression( $product, $woocommerce_loop['loop'] );
+		$this->get_tracking_instance()->listing_impression( $product, $woocommerce_loop['loop'] );
 	}
 
 	/**
@@ -489,7 +513,7 @@ class WC_Google_Analytics extends WC_Integration {
 		}
 
 		global $product, $woocommerce_loop;
-		WC_Google_Analytics_JS::get_instance()->listing_click( $product, $woocommerce_loop['loop'] );
+		$this->get_tracking_instance()->listing_click( $product, $woocommerce_loop['loop'] );
 	}
 
 	/**
@@ -509,7 +533,7 @@ class WC_Google_Analytics extends WC_Integration {
 		}
 
 		global $product;
-		WC_Google_Analytics_JS::get_instance()->product_detail( $product );
+		$this->get_tracking_instance()->product_detail( $product );
 	}
 
 	/**
@@ -528,7 +552,7 @@ class WC_Google_Analytics extends WC_Integration {
 			return;
 		}
 
-		WC_Google_Analytics_JS::get_instance()->checkout_process( WC()->cart->get_cart() );
+		$this->get_tracking_instance()->checkout_process( WC()->cart->get_cart() );
 	}
 
 	/**

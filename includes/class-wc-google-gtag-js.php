@@ -4,16 +4,16 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * WC_Google_Analytics_JS class
+ * WC_Google_Gtag_JS class
  *
- * JS for recording Google Analytics info
+ * JS for recording Google Gtag info
  */
-class WC_Google_Analytics_JS extends WC_Abstract_Google_Analytics_JS {
+class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 
 	/** @var object Class Instance */
 	private static $instance;
 
-	/** @var array Inherited Analytics options */
+	/** @var array Inherited Gtag options */
 	private static $options;
 
 	/**
@@ -44,7 +44,7 @@ class WC_Google_Analytics_JS extends WC_Abstract_Google_Analytics_JS {
 	 * Returns the tracker variable this integration should use
 	 */
 	public static function tracker_var() {
-		return apply_filters( 'woocommerce_ga_tracker_variable', 'ga' );
+		return apply_filters( 'woocommerce_gtag_tracker_variable', 'gtag' );
 	}
 
 	/**
@@ -62,66 +62,6 @@ class WC_Google_Analytics_JS extends WC_Abstract_Google_Analytics_JS {
 				window[disableStr] = true;
 			}
 		</script>";
-	}
-
-	/**
-	 * Loads the correct Google Analytics code (classic or universal)
-	 * @param  boolean $order Classic analytics needs order data to set the currency correctly
-	 * @return string         Analytics loading code
-	 */
-	public static function load_analytics( $order = false ) {
-		$logged_in = is_user_logged_in() ? 'yes' : 'no';
-		if ( 'yes' === self::get( 'ga_use_universal_analytics' ) ) {
-			add_action( 'wp_footer', array( 'WC_Google_Analytics_JS', 'universal_analytics_footer' ) );
-			return self::load_analytics_universal( $logged_in );
-		} else {
-			add_action( 'wp_footer', array( 'WC_Google_Analytics_JS', 'classic_analytics_footer' ) );
-			return self::load_analytics_classic( $logged_in, $order );
-		}
-	}
-
-	/**
-	 * Loads ga.js analytics tracking code
-	 * @param  string  $logged_in 'yes' if the user is logged in, no if not (this is a string so we can pass it to GA)
-	 * @param  boolean|object $order  We don't always need to load order data for currency, so we omit that if false is set, otherwise this is an order object
-	 * @return string         Classic Analytics loading code
-	 */
-	public static function load_analytics_classic( $logged_in, $order = false ) {
-		$anonymize_enabled = '';
-		if ( 'yes' === self::get( 'ga_anonymize_enabled' ) ) {
-			$anonymize_enabled = "['_gat._anonymizeIp'],";
-		}
-
-		$track_404_enabled = '';
-		if ( 'yes' === self::get( 'ga_404_tracking_enabled' ) && is_404() ) {
-			// See https://developers.google.com/analytics/devguides/collection/gajs/methods/gaJSApiEventTracking#_trackevent
-			$track_404_enabled = "['_trackEvent', 'Error', '404 Not Found', 'page: ' + document.location.pathname + document.location.search + ' referrer: ' + document.referrer ],";
-		}
-
-
-		$domainname = self::get( 'ga_set_domain_name' );
-
-		if ( ! empty( $domainname ) ) {
-			$set_domain_name = "['_setDomainName', '" . esc_js( self::get( 'ga_set_domain_name' ) ) . "'],";
-		} else {
-			$set_domain_name = '';
-		}
-
-		$code = "var _gaq = _gaq || [];
-		_gaq.push(
-			['_setAccount', '" . esc_js( self::get( 'ga_id' ) ) . "'], " . $set_domain_name .
-			$anonymize_enabled .
-			$track_404_enabled . "
-			['_setCustomVar', 1, 'logged-in', '" . esc_js( $logged_in ) . "', 1],
-			['_trackPageview']";
-
-		if ( false !== $order ) {
-			$code .= ",['_set', 'currencyCode', '" . esc_js( version_compare( WC_VERSION, '3.0', '<' ) ? $order->get_order_currency() : $order->get_currency() ) . "']";
-		}
-
-		$code .= ");";
-
-		return $code;
 	}
 
 	/**
@@ -171,7 +111,7 @@ class WC_Google_Analytics_JS extends WC_Abstract_Google_Analytics_JS {
 					});
 
 					" . self::tracker_var() . "( 'ec:setAction', 'click', { list: '" . esc_js( $list ) . "' });
-					" . self::tracker_var() . "( 'send', 'event', 'UX', 'click', ' " . esc_js( $list ) . "' );
+					" . self::tracker_var() . "( 'event', 'UX', 'click', ' " . esc_js( $list ) . "' );
 				});
 			})(jQuery);
 			</script>
@@ -179,45 +119,11 @@ class WC_Google_Analytics_JS extends WC_Abstract_Google_Analytics_JS {
 	}
 
 	/**
-	 * Asyncronously loads the classic Google Analytics code, and does so after all of our properties are loaded
-	 * Loads in the footer
-	 * @see wp_footer
+	 * Loads the correct Google Gtag code (classic or universal)
+	 * @param  boolean $order Classic analytics needs order data to set the currency correctly
+	 * @return string         Gtag loading code
 	 */
-	public static function classic_analytics_footer() {
-		if ( 'yes' === self::get( 'ga_support_display_advertising' ) ) {
-			$ga_url = "('https:' == document.location.protocol ? 'https://' : 'http://') + 'stats.g.doubleclick.net/dc.js'";
-		} else {
-			$ga_url = "('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js'";
-		}
-
-		echo "<script type='text/javascript'>(function() {
-		var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-		ga.src = " . $ga_url . ";
-		var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-		})();</script>";
-	}
-
-	/**
-	 * Sends the pageview last thing (needed for things like addImpression)
-	 */
-	public static function universal_analytics_footer() {
-		wc_enqueue_js( "" . self::tracker_var() . "( 'send', 'pageview' ); ");
-	}
-
-	/**
-	 * Loads the universal analytics code
-	 * @param  string $logged_in 'yes' if the user is logged in, no if not (this is a string so we can pass it to GA)
-	 * @return string Universal Analytics Code
-	 */
-	public static function load_analytics_universal( $logged_in ) {
-
-		$domainname = self::get( 'ga_set_domain_name' );
-
-		if ( ! empty( $domainname ) ) {
-			$set_domain_name = esc_js( self::get( 'ga_set_domain_name' ) );
-		} else {
-			$set_domain_name = 'auto';
-		}
+	public static function load_analytics( $order = false ) {
 
 		$support_display_advertising = '';
 		if ( 'yes' === self::get( 'ga_support_display_advertising' ) ) {
@@ -237,18 +143,22 @@ class WC_Google_Analytics_JS extends WC_Abstract_Google_Analytics_JS {
 		$track_404_enabled = '';
 		if ( 'yes' === self::get( 'ga_404_tracking_enabled' ) && is_404() ) {
 			// See https://developers.google.com/analytics/devguides/collection/analyticsjs/events for reference
-			$track_404_enabled = "" . self::tracker_var() . "( 'send', 'event', 'Error', '404 Not Found', 'page: ' + document.location.pathname + document.location.search + ' referrer: ' + document.referrer );";
+			$track_404_enabled = "" . self::tracker_var() . "( 'event', 'Error', '404 Not Found', 'page: ' + document.location.pathname + document.location.search + ' referrer: ' + document.referrer );";
 		}
 
-		$ga_snippet_head = "(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-		(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-		m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-		})(window,document,'script','//www.google-analytics.com/analytics.js','" . self::tracker_var() . "');";
-		
-		$ga_id = self::get( 'ga_id' );
-		$ga_snippet_create = self::tracker_var() . "( 'create', '" . esc_js( $ga_id ) . "', '" . $set_domain_name . "' );";
+		$gtag_id = self::get( 'ga_id' );
+		$gtag_snippet_head = "<script async src='https://www.googletagmanager.com/gtag/js?id=" . esc_js( $gtag_id ) . "'></script>";
+		$gtag_snipped_head .= "
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
 
-		$ga_snippet_require =
+  gtag('config', '" . esc_js( $gtag_id ) . "');
+</script>
+		";
+
+		$gtag_snippet_require =
 		$support_display_advertising .
 		$support_enhanced_link_attribution .
 		$anonymize_enabled .
@@ -256,68 +166,36 @@ class WC_Google_Analytics_JS extends WC_Abstract_Google_Analytics_JS {
 		" . self::tracker_var() . "( 'set', 'dimension1', '" . $logged_in . "' );\n";
 
 		if ( 'yes' === self::get( 'ga_enhanced_ecommerce_tracking_enabled' ) ) {
-			$ga_snippet_require .= "" . self::tracker_var() . "( 'require', 'ec' );";
+			$gtag_snippet_require .= "" . self::tracker_var() . "( 'require', 'ec' );";
 		} else {
-			$ga_snippet_require .= "" . self::tracker_var() . "( 'require', 'ecommerce', 'ecommerce.js');";
+			$gtag_snippet_require .= "" . self::tracker_var() . "( 'require', 'ecommerce', 'ecommerce.js');";
 		}
 
-		$ga_snippet_head = apply_filters( 'woocommerce_ga_snippet_head' , $ga_snippet_head );
-		$ga_snippet_create = apply_filters( 'woocommerce_ga_snippet_create' , $ga_snippet_create, $ga_id );
-		$ga_snippet_require = apply_filters( 'woocommerce_ga_snippet_require' , $ga_snippet_require );
+		$gtag_snippet_head = apply_filters( 'woocommerce_gtag_snippet_head' , $gtag_snippet_head );
+		$gtag_snippet_create = apply_filters( 'woocommerce_gtag_snippet_create' , $gtag_snippet_create, $gtag_id );
+		$gtag_snippet_require = apply_filters( 'woocommerce_gtag_snippet_require' , $gtag_snippet_require );
 
-		$code = $ga_snippet_head . $ga_snippet_create . $ga_snippet_require;
-		$code = apply_filters( 'woocommerce_ga_snippet_output', $code );
+		$code = $gtag_snippet_head . $gtag_snippet_create . $gtag_snippet_require;
+		$code = apply_filters( 'woocommerce_gtag_snippet_output', $code );
 
 		return $code;
 	}
 
 	/**
-	 * Used to pass transaction data to Google Analytics
+	 * Used to pass transaction data to Google Gtag
 	 * @param object $order WC_Order Object
 	 * @return string Add Transaction code
 	 */
 	public function add_transaction( $order ) {
-		if ( 'yes' == self::get( 'ga_use_universal_analytics' ) ) {
-			if ( 'yes' === self::get( 'ga_enhanced_ecommerce_tracking_enabled' ) ) {
-				return self::add_transaction_enhanced( $order );
-			} else {
-				return self::add_transaction_universal( $order );
-			}
+		if ( 'yes' === self::get( 'ga_enhanced_ecommerce_tracking_enabled' ) ) {
+			return self::add_transaction_enhanced( $order );
 		} else {
-			return self::add_transaction_classic( $order );
+			return self::add_transaction_universal( $order );
 		}
 	}
 
 	/**
-	 * ga.js (classic) transaction tracking
-	 * @param object $order WC_Order Object
-	 * @return string Add Transaction Code
-	 */
-	public function add_transaction_classic( $order ) {
-		$code = "_gaq.push(['_addTrans',
-			'" . esc_js( $order->get_order_number() ) . "', 	// order ID - required
-			'" . esc_js( get_bloginfo( 'name' ) ) . "',  		// affiliation or store name
-			'" . esc_js( $order->get_total() ) . "',   	    	// total - required
-			'" . esc_js( $order->get_total_tax() ) . "',    	// tax
-			'" . esc_js( $order->get_total_shipping() ) . "',	// shipping
-			'" . esc_js( version_compare( WC_VERSION, '3.0', '<' ) ? $order->billing_city : $order->get_billing_city() ) . "',       	// city
-			'" . esc_js( version_compare( WC_VERSION, '3.0', '<' ) ? $order->billing_state : $order->get_billing_state() ) . "',      	// state or province
-			'" . esc_js( version_compare( WC_VERSION, '3.0', '<' ) ? $order->billing_country : $order->get_billing_country() ) . "'     	// country
-		]);";
-
-		// Order items
-		if ( $order->get_items() ) {
-			foreach ( $order->get_items() as $item ) {
-				$code .= self::add_item_classic( $order, $item );
-			}
-		}
-
-		$code .= "_gaq.push(['_trackTrans']);";
-		return $code;
-	}
-
-	/**
-	 * Universal Analytics transaction tracking
+	 * Universal Gtag transaction tracking
 	 * @param object $order WC_Order object
 	 * @return string Add Transaction Code
 	 */
@@ -343,7 +221,7 @@ class WC_Google_Analytics_JS extends WC_Abstract_Google_Analytics_JS {
 	}
 
 	/**
-	 * Enhanced Ecommerce Universal Analytics transaction tracking
+	 * Enhanced Ecommerce Universal Gtag transaction tracking
 	 */
 	public function add_transaction_enhanced( $order ) {
 		$code = "" . self::tracker_var() . "( 'set', '&cu', '" . esc_js( version_compare( WC_VERSION, '3.0', '<' ) ? $order->get_order_currency() : $order->get_currency() ) . "' );";
@@ -362,26 +240,6 @@ class WC_Google_Analytics_JS extends WC_Abstract_Google_Analytics_JS {
 			'tax': '" . esc_js( $order->get_total_tax() ) . "',
 			'shipping': '" . esc_js( $order->get_total_shipping() ) . "'
 		} );";
-
-		return $code;
-	}
-
-	/**
-	 * Add Item (Classic)
-	 * @param object $order WC_Order Object
-	 * @param array $item  The item to add to a transaction/order
-	 */
-	public function add_item_classic( $order, $item ) {
-		$_product = version_compare( WC_VERSION, '3.0', '<' ) ? $order->get_product_from_item( $item ) : $item->get_product();
-
-		$code = "_gaq.push(['_addItem',";
-		$code .= "'" . esc_js( $order->get_order_number() ) . "',";
-		$code .= "'" . esc_js( $_product->get_sku() ? $_product->get_sku() : $_product->get_id() ) . "',";
-		$code .= "'" . esc_js( $item['name'] ) . "',";
-		$code .= self::product_get_category_line( $_product );
-		$code .= "'" . esc_js( $order->get_item_total( $item ) ) . "',";
-		$code .= "'" . esc_js( $item['qty'] ) . "'";
-		$code .= "]);";
 
 		return $code;
 	}
@@ -444,7 +302,7 @@ class WC_Google_Analytics_JS extends WC_Abstract_Google_Analytics_JS {
 						'quantity': $(this).parent().parent().find( '.qty' ).val() ? $(this).parent().parent().find( '.qty' ).val() : '1',
 					} );
 					" . self::tracker_var() . "( 'ec:setAction', 'remove' );
-					" . self::tracker_var() . "( 'send', 'event', 'UX', 'click', 'remove from cart' );
+					" . self::tracker_var() . "( 'event', 'UX', 'click', 'remove from cart' );
 				});
 			})(jQuery);
 			</script>
@@ -506,7 +364,7 @@ class WC_Google_Analytics_JS extends WC_Abstract_Google_Analytics_JS {
 	 * @return void
 	 */
 	public function event_tracking_code( $parameters, $selector ) {
-		$parameters = apply_filters( 'woocommerce_ga_event_tracking_parameters', $parameters );
+		$parameters = apply_filters( 'woocommerce_gtag_event_tracking_parameters', $parameters );
 
 		if ( 'yes' === self::get( 'ga_use_universal_analytics' ) ) {
 			if ( 'yes' === self::get( 'ga_enhanced_ecommerce_tracking_enabled' ) ) {
@@ -514,12 +372,12 @@ class WC_Google_Analytics_JS extends WC_Abstract_Google_Analytics_JS {
 					$( '" . $selector . "' ).click( function() {
 						" . $parameters['enhanced'] . "
 						" . self::tracker_var() . "( 'ec:setAction', 'add' );
-						" . self::tracker_var() . "( 'send', 'event', 'UX', 'click', 'add to cart' );
+						" . self::tracker_var() . "( 'event', 'UX', 'click', 'add to cart' );
 					});
 				" );
 				return;
 			} else {
-				$track_event = "" . self::tracker_var() . "('send', 'event', %s, %s, %s);";
+				$track_event = "" . self::tracker_var() . "('event', %s, %s, %s);";
 			}
 		} else {
 			$track_event = "_gaq.push(['_trackEvent', %s, %s, %s]);";

@@ -48,23 +48,6 @@ class WC_Google_Analytics_JS extends WC_Abstract_Google_Analytics_JS {
 	}
 
 	/**
-	 * Generic GA / header snippet for opt out
-	 */
-	public static function header() {
-		return "<script type='text/javascript'>
-			var gaProperty = '" . esc_js( self::get( 'ga_id' ) ) . "';
-			var disableStr = 'ga-disable-' + gaProperty;
-			if ( document.cookie.indexOf( disableStr + '=true' ) > -1 ) {
-				window[disableStr] = true;
-			}
-			function gaOptout() {
-				document.cookie = disableStr + '=true; expires=Thu, 31 Dec 2099 23:59:59 UTC; path=/';
-				window[disableStr] = true;
-			}
-		</script>";
-	}
-
-	/**
 	 * Loads the correct Google Analytics code (classic or universal)
 	 * @param  boolean $order Classic analytics needs order data to set the currency correctly
 	 * @return string         Analytics loading code

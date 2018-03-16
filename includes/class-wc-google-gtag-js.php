@@ -43,13 +43,13 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 		}
 
 		wc_enqueue_js( "
-			" . self::tracker_var() . "( 'event', 'view_item_list', 'items': [ {
+			" . self::tracker_var() . "( 'event', 'view_item_list', { 'items': [ {
 				'id': '" . esc_js( $product->get_id() ) . "',
 				'name': '" . esc_js( $product->get_title() ) . "',
 				'category': " . self::product_get_category_line( $product ) . "
 				'list': '" . esc_js( $list ) . "',
 				'list_position': '" . esc_js( $position ) . "'
-			} ] );
+			} ] } );
 		" );
 	}
 
@@ -98,8 +98,8 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 		$logged_in = is_user_logged_in() ? 'yes' : 'no';
 
 		$gtag_id = self::get( 'ga_id' );
-		$gtag_snippet_head = "<script async src='https://www.googletagmanager.com/gtag/js?id=" . esc_js( $gtag_id ) . "'></script>";
-		$gtag_snipped_head .= "
+		$gtag_snippet = "<script async src='https://www.googletagmanager.com/gtag/js?id=" . esc_js( $gtag_id ) . "'></script>";
+		$gtag_snippet .= "
 		<script>
 		window.dataLayer = window.dataLayer || [];
 		function gtag(){dataLayer.push(arguments);}
@@ -116,13 +116,9 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 		</script>
 		";
 
-		$gtag_snippet_head = apply_filters( 'woocommerce_gtag_snippet_head' , $gtag_snippet_head );
-		$gtag_snippet_create = apply_filters( 'woocommerce_gtag_snippet_create' , $gtag_snippet_create, $gtag_id );
+		$gtag_snippet = apply_filters( 'woocommerce_gtag_snippet' , $gtag_snippet );
 
-		$code = $gtag_snippet_head . $gtag_snippet_create;
-		$code = apply_filters( 'woocommerce_gtag_snippet_output', $code );
-
-		return $code;
+		return $gtag_snippet;
 	}
 
 	/**

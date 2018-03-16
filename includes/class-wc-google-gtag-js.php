@@ -184,7 +184,7 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 						'items': [ {
 							'id': ($(this).data('product_sku')) ? ($(this).data('product_sku')) : ('#' + $(this).data('product_id')),
 							'quantity': $(this).parent().parent().find( '.qty' ).val() ? $(this).parent().parent().find( '.qty' ).val() : '1',
-						] }
+						} ]
 					} );
 				});
 			})(jQuery);

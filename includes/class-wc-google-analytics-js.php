@@ -168,7 +168,7 @@ class WC_Google_Analytics_JS extends WC_Abstract_Google_Analytics_JS {
 	/**
 	 * Sends the pageview last thing (needed for things like addImpression)
 	 */
-	protected static function universal_analytics_footer() {
+	public static function universal_analytics_footer() {
 		wc_enqueue_js( "" . self::tracker_var() . "( 'send', 'pageview' ); ");
 	}
 

@@ -247,7 +247,7 @@ class WC_Google_Analytics_JS extends WC_Abstract_Google_Analytics_JS {
 		$ga_snippet_create = apply_filters( 'woocommerce_ga_snippet_create' , $ga_snippet_create, $ga_id );
 		$ga_snippet_require = apply_filters( 'woocommerce_ga_snippet_require' , $ga_snippet_require );
 
-		$code = $ga_snippet_head . $ga_snippet_create . $ga_snippet_require;
+		$code = "<script type='text/javascript'>" . $ga_snippet_head . $ga_snippet_create . $ga_snippet_require . "</script>";
 		$code = apply_filters( 'woocommerce_ga_snippet_output', $code );
 
 		return $code;

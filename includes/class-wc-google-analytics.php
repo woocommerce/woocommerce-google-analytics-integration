@@ -339,8 +339,8 @@ class WC_Google_Analytics extends WC_Integration {
 	 */
 	protected function get_standard_tracking_code() {
 		return "<!-- WooCommerce Google Analytics Integration -->
-		" . $this->get_tracking_instance()->header() . "
-		<script type='text/javascript'>" . $this->get_tracking_instance()->load_analytics() . "</script>
+		" . $this->get_tracking_instance()->header() .
+		$this->get_tracking_instance()->load_analytics() . "
 		<!-- /WooCommerce Google Analytics Integration -->";
 	}
 
@@ -359,8 +359,8 @@ class WC_Google_Analytics extends WC_Integration {
 			return '';
 		}
 
-		$code = $this->get_tracking_instance()->load_analytics( $order );
-		$code .= $this->get_tracking_instance()->add_transaction( $order );
+		$load = $this->get_tracking_instance()->load_analytics( $order );
+		$code = $this->get_tracking_instance()->add_transaction( $order );
 
 		// Mark the order as tracked.
 		update_post_meta( $order_id, '_ga_tracked', 1 );
@@ -368,6 +368,7 @@ class WC_Google_Analytics extends WC_Integration {
 		return "
 		<!-- WooCommerce Google Analytics Integration -->
 		" . $this->get_tracking_instance()->header() . "
+		" . $load . "
 		<script type='text/javascript'>$code</script>
 		<!-- /WooCommerce Google Analytics Integration -->
 		";

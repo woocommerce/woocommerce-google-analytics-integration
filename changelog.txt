@@ -1,11 +1,15 @@
 *** Changelog ***
 
-= 1.4.3 - XX/XX/2018 =
-* Fix   - WC 3.x notice by using proper variation data.
+= 1.4.4 - 03/20/2018 =
+* Fix   - WC30 compatibility error when using deprecated get_product_from_item method.
+* Fix   - Check object before using methods to prevent errors.
 * Fix   - Variations not reporting category in cart tracking.
-* Add   - Option to track 404 (Not found) errors.
 * Add   - Filter woocommerce_ga_disable_tracking added to disable tracking.
 * Tweak - Rebuilt languages pot file.
+
+= 1.4.3 - 06/15/2018 =
+* Fix   - WC 3.x notice by using proper variation data.
+* Add   - Option to track 404 (Not found) errors.
 
 = 1.4.2 - 09/05/2017 =
 * Fix - Missing Google Analytics ID.

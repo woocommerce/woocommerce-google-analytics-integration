@@ -41,9 +41,10 @@ if ( ! class_exists( 'WC_Google_Analytics_Integration' ) ) {
 		/**
 		 * Initialize the plugin.
 		 */
-		private function __construct() {
+		public function __construct() {
 			// Load plugin text domain
 			add_action( 'init', array( $this, 'load_plugin_textdomain' ) );
+			add_action( 'init', array( $this, 'show_ga_pro_notices' ) );
 
 			// Checks with WooCommerce is installed.
 			if ( class_exists( 'WC_Integration' ) && defined( 'WOOCOMMERCE_VERSION' ) && version_compare( WOOCOMMERCE_VERSION, '2.1-beta-1', '>=' ) ) {
@@ -121,6 +122,31 @@ if ( ! class_exists( 'WC_Google_Analytics_Integration' ) ) {
 			$integrations[] = 'WC_Google_Analytics';
 
 			return $integrations;
+		}
+
+		/**
+		 * Logic for Google Analytics Pro notices.
+		 */
+		public function show_ga_pro_notices() {
+			// Notice was already shown
+			if ( get_option( 'woocommerce_google_analytics_pro_notice_shown', false ) ) {
+				return;
+			}
+
+			$completed_orders = wc_orders_count( 'completed' );
+
+			// Only show the notice if there are 10 < completed orders < 100.
+			if ( ! ( 10 <= $completed_orders && $completed_orders <= 100 ) ) {
+				//return;
+			}
+
+			$notice_html  = '<strong>' . esc_html__( 'Introducing Google Analytics Pro', 'woocommerce-google-analytics-integration' ) . '</strong><br><br>';
+
+			/* translators: 1: href link to GA pro */
+			$notice_html .= sprintf( __( 'Visit Google Analytics Pro <a href="%s" target="_blank">here</a> for better analytics tracking!', 'woocommerce-google-analytics-integration' ), 'https://woocommerce.com/products/woocommerce-google-analytics-pro/' );
+
+			WC_Admin_Notices::add_custom_notice( 'woocommerce_google_analytics_pro_notice', $notice_html );
+			update_option( 'woocommerce_google_analytics_pro_notice_shown', true );
 		}
 	}
 

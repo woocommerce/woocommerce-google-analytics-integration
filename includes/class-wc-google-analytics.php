@@ -109,7 +109,7 @@ class WC_Google_Analytics extends WC_Integration {
 			),
 			'ga_set_domain_name' => array(
 				'title' 			=> __( 'Set Domain Name', 'woocommerce-google-analytics-integration' ),
-				'description' 		=> sprintf( __( '(Optional) Sets the <code>_setDomainName</code> variable. <a href="%s">See here for more information</a>.', 'woocommerce-google-analytics-integration' ), 'https://developers.google.com/analytics/devguides/collection/gajs/gaTrackingSite#multipleDomains' ),
+				'description' 		=> sprintf( __( '(Optional) Sets the <code>_setDomainName</code> variable. <a href="%s" target="_blank">See here for more information</a>.', 'woocommerce-google-analytics-integration' ), 'https://developers.google.com/analytics/devguides/collection/gajs/gaTrackingSite#multipleDomains' ),
 				'type' 				=> 'text',
 				'default' 			=> ''
 			),

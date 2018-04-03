@@ -135,15 +135,15 @@ if ( ! class_exists( 'WC_Google_Analytics_Integration' ) ) {
 
 			$completed_orders = wc_orders_count( 'completed' );
 
-			// Only show the notice if there are 10 < completed orders < 100.
+			// Only show the notice if there are 10 <= completed orders <= 100.
 			if ( ! ( 10 <= $completed_orders && $completed_orders <= 100 ) ) {
-				//return;
+				return;
 			}
 
-			$notice_html  = '<strong>' . esc_html__( 'Introducing Google Analytics Pro', 'woocommerce-google-analytics-integration' ) . '</strong><br><br>';
+			$notice_html  = '<strong>' . esc_html__( 'Get detailed insights into your sales with Google Analytics Pro', 'woocommerce-google-analytics-integration' ) . '</strong><br><br>';
 
 			/* translators: 1: href link to GA pro */
-			$notice_html .= sprintf( __( 'Visit Google Analytics Pro <a href="%s" target="_blank">here</a> for better analytics tracking!', 'woocommerce-google-analytics-integration' ), 'https://woocommerce.com/products/woocommerce-google-analytics-pro/' );
+			$notice_html .= sprintf( __( 'Add advanced tracking for your sales funnel, coupons and more. [<a href="%s" target="_blank">Learn more</a> &gt;]', 'woocommerce-google-analytics-integration' ), 'https://woocommerce.com/products/woocommerce-google-analytics-pro/?utm_source=product&utm_medium=upsell&utm_campaign=google%20analytics%20free%20to%20pro%20extension%20upsell' );
 
 			WC_Admin_Notices::add_custom_notice( 'woocommerce_google_analytics_pro_notice', $notice_html );
 			update_option( 'woocommerce_google_analytics_pro_notice_shown', true );

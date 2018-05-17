@@ -51,6 +51,11 @@ if ( ! class_exists( 'WC_Google_Analytics_Integration' ) ) {
 
 				// Register the integration.
 				add_filter( 'woocommerce_integrations', array( $this, 'add_integration' ) );
+
+				if ( is_admin() ) {
+					require_once( dirname( __FILE__ ) . '/includes/class-wc-google-analytics-privacy.php' );
+				}
+
 			} else {
 				add_action( 'admin_notices', array( $this, 'woocommerce_missing_notice' ) );
 			}

@@ -58,7 +58,7 @@ Do you have SUHOSIN installed/active on your server? If so, the default index le
 
 Include the following html code snippet within the page where you want to have the opt-out, e.g. the your Imprint our Data Privacy page:
 
-https://gist.github.com/claudiosmweb/b12d15b245be21c92ebc
+https://gist.github.com/claudiosanches/b12d15b245be21c92ebc
 
 Exact wording depends on the national data privacy laws and should be adjusted.
 

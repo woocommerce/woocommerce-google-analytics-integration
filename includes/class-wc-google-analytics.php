@@ -321,7 +321,10 @@ class WC_Google_Analytics extends WC_Integration {
 	 */
 	protected function get_ecommerce_tracking_code( $order_id ) {
 		// Get the order and output tracking code
-		$order = new WC_Order( $order_id );
+		$order = wc_get_order( $order_id );
+
+		// Make sure we have a valid order object
+		if ( ! $order || is_wp_error( $order ) ) return "";
 
 		$code = WC_Google_Analytics_JS::get_instance()->load_analytics( $order );
 		$code .= WC_Google_Analytics_JS::get_instance()->add_transaction( $order );

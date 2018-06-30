@@ -334,12 +334,12 @@ class WC_Google_Analytics extends WC_Integration {
 		// Mark the order as tracked.
 		update_post_meta( $order_id, '_ga_tracked', 1 );
 
-		return '
+		return "
 		<!-- WooCommerce Google Analytics Integration -->
-		' . WC_Google_Analytics_JS::get_instance()->header() . '
+		" . WC_Google_Analytics_JS::get_instance()->header() . "
 		<script type='text/javascript'>$code</script>
 		<!-- /WooCommerce Google Analytics Integration -->
-		';
+		";
 	}
 
 	/**

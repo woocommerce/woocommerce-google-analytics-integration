@@ -320,21 +320,26 @@ class WC_Google_Analytics extends WC_Integration {
 	 * @param int $order_id
 	 */
 	protected function get_ecommerce_tracking_code( $order_id ) {
-		// Get the order and output tracking code
-		$order = new WC_Order( $order_id );
+		// Get the order and output tracking code.
+		$order = wc_get_order( $order_id );
+
+		// Make sure we have a valid order object.
+		if ( ! $order ) {
+			return '';
+		}
 
 		$code = WC_Google_Analytics_JS::get_instance()->load_analytics( $order );
 		$code .= WC_Google_Analytics_JS::get_instance()->add_transaction( $order );
 
-		// Mark the order as tracked
+		// Mark the order as tracked.
 		update_post_meta( $order_id, '_ga_tracked', 1 );
 
-		return "
+		return '
 		<!-- WooCommerce Google Analytics Integration -->
-		" . WC_Google_Analytics_JS::get_instance()->header() . "
+		' . WC_Google_Analytics_JS::get_instance()->header() . '
 		<script type='text/javascript'>$code</script>
 		<!-- /WooCommerce Google Analytics Integration -->
-		";
+		';
 	}
 
 	/**

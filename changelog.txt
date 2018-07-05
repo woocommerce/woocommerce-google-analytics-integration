@@ -1,5 +1,8 @@
 *** Changelog ***
 
+= 1.4.5 - xx/xx/xxxx =
+* Tweak - Mention Google Analytics Pro in certain cases.
+
 = 1.4.4 - 03/20/2018 =
 * Fix   - WC30 compatibility error when using deprecated get_product_from_item method.
 * Fix   - Check object before using methods to prevent errors.

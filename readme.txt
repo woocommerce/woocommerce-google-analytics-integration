@@ -1,9 +1,9 @@
 === WooCommerce Google Analytics Integration ===
-Contributors: woocommerce, claudiosanches, bor0, royho, laurendavissmith001
+Contributors: woocommerce, claudiosanches, bor0, royho, laurendavissmith001, c-shultz
 Tags: woocommerce, google analytics
 Requires at least: 3.8
 Tested up to: 4.9
-Stable tag: 1.4.4
+Stable tag: 1.4.5
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -67,6 +67,10 @@ Exact wording depends on the national data privacy laws and should be adjusted.
 1. Google Analytics Integration Settings.
 
 == Changelog ==
+
+= 1.4.5 - 16/10/2018 =
+* Tweak - Mention Google Analytics Pro in certain cases.
+* Tweak - WC 3.5 compatibility.
 
 = 1.4.4 - 20/03/2018 =
 * Fix   - WC30 compatibility error when using deprecated get_product_from_item method.

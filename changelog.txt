@@ -1,5 +1,8 @@
 *** Changelog ***
 
+= 1.4.6 - xx/xx/2018 =
+* Fix - Check for active WooCommerce plugin.
+
 = 1.4.5 - 10/16/2018 =
 * Tweak - Mention Google Analytics Pro in certain cases.
 * Tweak - WC 3.5 compatibility.

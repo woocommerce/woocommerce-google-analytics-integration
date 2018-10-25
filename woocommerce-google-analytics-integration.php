@@ -17,6 +17,17 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+/**
+ * Required functions
+ */
+if ( ! function_exists( 'is_woocommerce_active' ) ) {
+	require_once( 'woo-includes/woo-functions.php' );
+}
+
+if ( ! is_woocommerce_active() ) {
+	return;
+}
+
 if ( ! class_exists( 'WC_Google_Analytics_Integration' ) ) {
 
 	/**

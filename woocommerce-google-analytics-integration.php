@@ -17,17 +17,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-/**
- * Required functions
- */
-if ( ! function_exists( 'is_woocommerce_active' ) ) {
-	require_once( 'woo-includes/woo-functions.php' );
-}
-
-if ( ! is_woocommerce_active() ) {
-	return;
-}
-
 if ( ! class_exists( 'WC_Google_Analytics_Integration' ) ) {
 
 	/**
@@ -53,6 +42,10 @@ if ( ! class_exists( 'WC_Google_Analytics_Integration' ) ) {
 		 * Initialize the plugin.
 		 */
 		public function __construct() {
+			if ( ! class_exists( 'WooCommerce' ) ) {
+				return;
+			}
+
 			// Load plugin text domain
 			add_action( 'init', array( $this, 'load_plugin_textdomain' ) );
 			add_action( 'init', array( $this, 'show_ga_pro_notices' ) );

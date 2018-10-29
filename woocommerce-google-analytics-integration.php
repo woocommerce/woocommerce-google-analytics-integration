@@ -42,6 +42,10 @@ if ( ! class_exists( 'WC_Google_Analytics_Integration' ) ) {
 		 * Initialize the plugin.
 		 */
 		public function __construct() {
+			if ( ! class_exists( 'WooCommerce' ) ) {
+				return;
+			}
+
 			// Load plugin text domain
 			add_action( 'init', array( $this, 'load_plugin_textdomain' ) );
 			add_action( 'init', array( $this, 'show_ga_pro_notices' ) );

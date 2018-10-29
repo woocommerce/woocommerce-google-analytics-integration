@@ -67,6 +67,8 @@ Exact wording depends on the national data privacy laws and should be adjusted.
 1. Google Analytics Integration Settings.
 
 == Changelog ==
+= 1.4.6 - xx/xx/2018 =
+* Fix - Check for active WooCommerce plugin.
 
 = 1.4.5 - 16/10/2018 =
 * Tweak - Mention Google Analytics Pro in certain cases.

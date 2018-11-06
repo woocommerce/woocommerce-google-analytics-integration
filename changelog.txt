@@ -1,6 +1,6 @@
 *** Changelog ***
 
-= 1.4.6 - xx/xx/2018 =
+= 1.4.6 - 11/06/2018 =
 * Fix - Check for active WooCommerce plugin.
 
 = 1.4.5 - 10/16/2018 =

@@ -2,7 +2,7 @@
 Contributors: woocommerce, claudiosanches, bor0, royho, laurendavissmith001, c-shultz
 Tags: woocommerce, google analytics
 Requires at least: 3.8
-Tested up to: 4.9
+Tested up to: 5.0
 Stable tag: 1.4.6
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
@@ -67,6 +67,9 @@ Exact wording depends on the national data privacy laws and should be adjusted.
 1. Google Analytics Integration Settings.
 
 == Changelog ==
+= 1.4.7 - */*/2018 =
+* Tweak - WP 5.0 compatibility.
+
 = 1.4.6 - 06/11/2018 =
 * Fix - Check for active WooCommerce plugin.
 

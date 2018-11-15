@@ -155,26 +155,22 @@ class WC_Google_Analytics_JS {
 			$list = "Product List";
 		}
 
-		echo( "
-			<script>
-			(function($) {
-				$( '.products .post-" . esc_js( $product->get_id() ) . " a' ).click( function() {
-					if ( true === $(this).hasClass( 'add_to_cart_button' ) ) {
-						return;
-					}
+		wc_enqueue_js( "
+			$( '.products .post-" . esc_js( $product->get_id() ) . " a' ).click( function() {
+				if ( true === $(this).hasClass( 'add_to_cart_button' ) ) {
+					return;
+				}
 
-					" . self::tracker_var() . "( 'ec:addProduct', {
-						'id': '" . esc_js( $product->get_id() ) . "',
-						'name': '" . esc_js( $product->get_title() ) . "',
-						'category': " . self::product_get_category_line( $product ) . "
-						'position': '" . esc_js( $position ) . "'
-					});
-
-					" . self::tracker_var() . "( 'ec:setAction', 'click', { list: '" . esc_js( $list ) . "' });
-					" . self::tracker_var() . "( 'send', 'event', 'UX', 'click', ' " . esc_js( $list ) . "' );
+				" . self::tracker_var() . "( 'ec:addProduct', {
+					'id': '" . esc_js( $product->get_id() ) . "',
+					'name': '" . esc_js( $product->get_title() ) . "',
+					'category': " . self::product_get_category_line( $product ) . "
+					'position': '" . esc_js( $position ) . "'
 				});
-			})(jQuery);
-			</script>
+
+				" . self::tracker_var() . "( 'ec:setAction', 'click', { list: '" . esc_js( $list ) . "' });
+				" . self::tracker_var() . "( 'send', 'event', 'UX', 'click', ' " . esc_js( $list ) . "' );
+			});
 		" );
 	}
 
@@ -244,7 +240,7 @@ class WC_Google_Analytics_JS {
 		(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
 		m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
 		})(window,document,'script','//www.google-analytics.com/analytics.js','" . self::tracker_var() . "');";
-		
+
 		$ga_id = self::get( 'ga_id' );
 		$ga_snippet_create = self::tracker_var() . "( 'create', '" . esc_js( $ga_id ) . "', '" . $set_domain_name . "' );";
 

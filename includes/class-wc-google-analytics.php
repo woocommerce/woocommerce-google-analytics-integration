@@ -382,6 +382,7 @@ class WC_Google_Analytics extends WC_Integration {
 			$code .= "'name': '" . esc_js( $product->get_title() ) . "',";
 			$code .= "'quantity': $( 'input.qty' ).val() ? $( 'input.qty' ).val() : '1'";
 			$code .= "} );";
+			$code = apply_filter("ga_add_to_card_item_object_js,$code,$product);
 			$parameters['enhanced'] = $code;
 		}
 

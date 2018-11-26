@@ -350,7 +350,7 @@ class WC_Google_Analytics extends WC_Integration {
 	 * @return bool True if tracking for a certain setting is disabled
 	 */
 	private function disable_tracking( $type ) {
-		if ( is_admin() || current_user_can( 'manage_options' ) || ( ! $this->ga_id ) || 'no' === $type || apply_filters( 'woocommerce_ga_disable_tracking', false, $type ) ) {
+		if ( current_user_can( 'manage_options' ) || ( ! $this->ga_id ) || 'no' === $type || apply_filters( 'woocommerce_ga_disable_tracking', false, $type ) ) {
 			return true;
 		}
 	}

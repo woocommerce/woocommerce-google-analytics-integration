@@ -68,6 +68,9 @@ Exact wording depends on the national data privacy laws and should be adjusted.
 
 == Changelog ==
 
+= 1.4.8 - xx/xx/2019 =
+* Fix - Event for deleting from cart not sent after a cart update.
+
 = 1.4.7 - 11/19/2018 =
 * Tweak - WP 5.0 compatibility.
 

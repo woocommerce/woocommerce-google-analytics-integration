@@ -1,6 +1,6 @@
 *** Changelog ***
 
-= 1.4.8 - xx/xx/2019 =
+= 1.4.8 - 2019-03-04 =
 * Fix - Event for deleting from cart not sent after a cart update.
 
 = 1.4.7 - 11/19/2018 =

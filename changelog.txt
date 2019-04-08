@@ -1,5 +1,8 @@
 *** Changelog ***
 
+= 1.4.9 - xx/xx/2019 =
+* Tweak - WC 3.6 compatibility.
+
 = 1.4.8 - 2019-03-04 =
 * Fix - Event for deleting from cart not sent after a cart update.
 

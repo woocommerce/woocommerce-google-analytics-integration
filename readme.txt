@@ -2,8 +2,8 @@
 Contributors: woocommerce, claudiosanches, bor0, royho, laurendavissmith001, c-shultz
 Tags: woocommerce, google analytics
 Requires at least: 3.8
-Tested up to: 5.0
-Stable tag: 1.4.8
+Tested up to: 5.1
+Stable tag: 1.4.9
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -67,6 +67,9 @@ Exact wording depends on the national data privacy laws and should be adjusted.
 1. Google Analytics Integration Settings.
 
 == Changelog ==
+
+= 1.4.9 - 2019-04-16 =
+* Tweak - WC 3.6 compatibility.
 
 = 1.4.8 - 2019-03-04 =
 * Fix - Event for deleting from cart not sent after a cart update.

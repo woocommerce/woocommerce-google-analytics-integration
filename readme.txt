@@ -3,7 +3,7 @@ Contributors: woocommerce, claudiosanches, bor0, royho, laurendavissmith001, c-s
 Tags: woocommerce, google analytics
 Requires at least: 3.8
 Tested up to: 5.1
-Stable tag: 1.4.9
+Stable tag: 1.4.10
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -67,6 +67,9 @@ Exact wording depends on the national data privacy laws and should be adjusted.
 1. Google Analytics Integration Settings.
 
 == Changelog ==
+
+= 1.4.10 - 2019-07-10 =
+* Fix - Ensure universal analytics pageview doesn’t occur if standard tracking is disabled.
 
 = 1.4.9 - 2019-04-16 =
 * Tweak - WC 3.6 compatibility.

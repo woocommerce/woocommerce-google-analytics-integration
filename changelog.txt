@@ -1,5 +1,8 @@
 *** Changelog ***
 
+= 1.4.10 - 2019-07-10 =
+* Fix - Ensure universal analytics pageview doesn’t occur if standard tracking is disabled.
+ 
 = 1.4.9 - 2019-04-16 =
 * Tweak - WC 3.6 compatibility.
 

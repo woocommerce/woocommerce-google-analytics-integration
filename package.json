@@ -16,7 +16,7 @@
   "devDependencies": {
     "config": "^3.0.1",
     "cross-env": "^5.2.0",
-    "grunt": "^1.0.3",
+    "grunt": "^1.0.4",
     "grunt-checktextdomain": "~1.0.1",
     "grunt-contrib-clean": "~2.0.0",
     "grunt-contrib-concat": "~1.0.1",
@@ -35,6 +35,6 @@
     "npm": ">=5.5.1"
   },
   "dependencies": {
-    "npm": "^6.7.0"
+    "npm": "^6.10.2"
   }
 }

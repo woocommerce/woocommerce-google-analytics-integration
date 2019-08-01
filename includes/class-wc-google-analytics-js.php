@@ -197,9 +197,7 @@ class WC_Google_Analytics_JS {
 	 * Sends the pageview last thing (needed for things like addImpression)
 	 */
 	public static function universal_analytics_footer() {
-		if ( 'yes' === self::get( 'ga_standard_tracking_enabled' ) ) {
-			wc_enqueue_js( "" . self::tracker_var() . "( 'send', 'pageview' ); " );
-		}
+		wc_enqueue_js( "" . self::tracker_var() . "( 'send', 'pageview' ); " );
 	}
 
 	/**

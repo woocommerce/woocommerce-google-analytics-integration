@@ -1,5 +1,8 @@
 *** Changelog ***
 
+= 1.4.11 - 2019-08-01 =
+* Fix - Revert last release due to it causing ecommerce tracking to be disabled when standard tracking is disabled.
+
 = 1.4.10 - 2019-07-10 =
 * Fix - Ensure universal analytics pageview doesn’t occur if standard tracking is disabled.
  

@@ -68,7 +68,8 @@ Exact wording depends on the national data privacy laws and should be adjusted.
 
 == Changelog ==
 
-= 1.4.11 - 2019-08-01 =
+= 1.4.11 - 2019-08-02 =
+* Add - Filter to bypass "send pageview" for users whom want to use separate standard GA. `wc_goole_analytics_send_pageview`.
 * Fix - Revert last release due to it causing ecommerce tracking to be disabled when standard tracking is disabled.
 
 = 1.4.10 - 2019-07-10 =

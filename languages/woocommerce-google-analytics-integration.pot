@@ -2,7 +2,7 @@
 # This file is distributed under the GPLv2 or later.
 msgid ""
 msgstr ""
-"Project-Id-Version: WooCommerce Google Analytics Integration 1.4.11\n"
+"Project-Id-Version: WooCommerce Google Analytics Integration 1.4.12\n"
 "Report-Msgid-Bugs-To: "
 "https://github.com/woocommerce/woocommerce-google-analytics-integration/"
 "issues\n"

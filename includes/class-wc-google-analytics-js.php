@@ -237,11 +237,13 @@ class WC_Google_Analytics_JS {
 			// See https://developers.google.com/analytics/devguides/collection/analyticsjs/events for reference
 			$track_404_enabled = "" . self::tracker_var() . "( 'send', 'event', 'Error', '404 Not Found', 'page: ' + document.location.pathname + document.location.search + ' referrer: ' + document.referrer );";
 		}
+		
+		$src = apply_filters('woocommerce_google_analytics_script_src', '//www.google-analytics.com/analytics.js');
 
 		$ga_snippet_head = "(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
 		(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
 		m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-		})(window,document,'script','//www.google-analytics.com/analytics.js','" . self::tracker_var() . "');";
+		})(window,document,'script', $src" . self::tracker_var() . "');";
 
 		$ga_id = self::get( 'ga_id' );
 		$ga_snippet_create = self::tracker_var() . "( 'create', '" . esc_js( $ga_id ) . "', '" . $set_domain_name . "' );";

@@ -1,5 +1,8 @@
 *** Changelog ***
 
+= 1.4.13 - 2019-xx-xx =
+* Tweak - Make Google Analytics JS script URL filterable.
+
 = 1.4.12 - 2019-08-13 =
 * Tweak - WC 3.7 compatibility.
 

@@ -1,6 +1,6 @@
 *** Changelog ***
 
-= 1.4.13 - 2019-xx-xx =
+= 1.4.13 - 2019-09-03 =
 * Tweak - Make Google Analytics JS script URL filterable.
 
 = 1.4.12 - 2019-08-13 =

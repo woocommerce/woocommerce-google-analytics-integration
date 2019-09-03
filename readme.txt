@@ -3,7 +3,7 @@ Contributors: woocommerce, claudiosanches, bor0, royho, laurendavissmith001, c-s
 Tags: woocommerce, google analytics
 Requires at least: 3.8
 Tested up to: 5.2
-Stable tag: 1.4.12
+Stable tag: 1.4.13
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -67,6 +67,9 @@ Exact wording depends on the national data privacy laws and should be adjusted.
 1. Google Analytics Integration Settings.
 
 == Changelog ==
+
+= 1.4.13 - 2019-09-03 =
+* Tweak - Make Google Analytics JS script URL filterable.
 
 = 1.4.12 - 2019-08-13 =
 * Tweak - WC 3.7 compatibility.

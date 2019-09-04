@@ -1,5 +1,8 @@
 *** Changelog ***
 
+= 1.4.14 - 2019-xx-xx =
+* Fix - Google Analytics JS URL missing quotes.
+
 = 1.4.13 - 2019-09-03 =
 * Tweak - Make Google Analytics JS script URL filterable.
 

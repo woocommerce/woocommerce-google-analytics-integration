@@ -36,5 +36,8 @@
   },
   "dependencies": {
     "npm": "^6.10.2"
+  },
+  "config": {
+    "wp_org_slug": "woocommerce-google-analytics-integration"
   }
 }

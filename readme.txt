@@ -2,8 +2,8 @@
 Contributors: woocommerce, claudiosanches, bor0, royho, laurendavissmith001, c-shultz
 Tags: woocommerce, google analytics
 Requires at least: 3.8
-Tested up to: 5.2
-Stable tag: 1.4.14
+Tested up to: 5.3
+Stable tag: 1.4.15
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -68,6 +68,9 @@ Exact wording depends on the national data privacy laws and should be adjusted.
 
 == Changelog ==
 
+= 1.4.15 - 2019-11-04 =
+* Tweak - WC 3.8 compatibility.
+
 = 1.4.14 - 2019-09-04 =
 * Fix - Google Analytics JS URL missing quotes.
 
@@ -99,18 +102,6 @@ Exact wording depends on the national data privacy laws and should be adjusted.
 = 1.4.5 - 16/10/2018 =
 * Tweak - Mention Google Analytics Pro in certain cases.
 * Tweak - WC 3.5 compatibility.
-
-= 1.4.4 - 20/03/2018 =
-* Fix   - WC30 compatibility error when using deprecated get_product_from_item method.
-* Fix   - Check object before using methods to prevent errors.
-* Fix   - Variations not reporting category in cart tracking.
-* Add   - Filter woocommerce_ga_disable_tracking added to disable tracking.
-* Tweak - Rebuilt languages pot file.
-
-= 1.4.3 - 15/06/2017 =
-* Fix - WC 3.x notice by using proper variation data.
-* Add - Option to track 404 (Not found) errors.
-
 
 == Upgrade Notice ==
 = 1.4.0 =

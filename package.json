@@ -11,7 +11,9 @@
   "main": "Gruntfile.js",
   "scripts": {
     "build": "grunt",
-    "update-deps": "npm install -g rimraf && rimraf node_modules && rimraf npm-shrinkwrap.json && npm install && npm shrinkwrap --dev"
+    "update-deps": "npm install -g rimraf && rimraf node_modules && rimraf npm-shrinkwrap.json && npm install && npm shrinkwrap --dev",
+    "woorelease": "npm run build && npm run archive",
+    "archive": "git archive -v -o woocommerce-google-analytics-integration.zip --format=zip HEAD"
   },
   "devDependencies": {
     "config": "^3.0.1",

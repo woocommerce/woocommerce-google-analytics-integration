@@ -68,6 +68,9 @@ Exact wording depends on the national data privacy laws and should be adjusted.
 
 == Changelog ==
 
+= 1.4.16 - 2020-01-13 =
+* Tweak - WC 3.9 compatibility.
+
 = 1.4.15 - 2019-11-04 =
 * Tweak - WC 3.8 compatibility.
 

@@ -68,6 +68,9 @@ Exact wording depends on the national data privacy laws and should be adjusted.
 
 == Changelog ==
 
+= 1.4.17 - 2020-01-13 =
+* Tweak - Update constant VERSION in plugin file
+
 = 1.4.16 - 2020-01-13 =
 * Tweak - WC 3.9 compatibility.
 

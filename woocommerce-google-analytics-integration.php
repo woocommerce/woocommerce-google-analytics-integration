@@ -20,17 +20,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 if ( ! class_exists( 'WC_Google_Analytics_Integration' ) ) {
 
+	define( 'WC_GOOGLE_ANALYTICS_INTEGRATION_VERSION', '1.4.17' ); // WRCS: DEFINED_VERSION.
+
 	/**
 	 * WooCommerce Google Analytics Integration main class.
 	 */
 	class WC_Google_Analytics_Integration {
-
-		/**
-		 * Plugin version.
-		 *
-		 * @var string
-		 */
-		const VERSION = '1.4.17';
 
 		/**
 		 * Instance of this class.

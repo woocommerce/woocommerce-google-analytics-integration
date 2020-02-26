@@ -1,3 +1,5 @@
+/nbproject/private/
+node_modules
 project.xml
 project.properties
 .DS_Store
@@ -5,7 +7,24 @@ Thumbs.db
 .buildpath
 .project
 .settings*
+.vscode
 sftp-config.json
-deploy.sh
-node_modules/
-deploy-to-wp-org.sh
+/deploy/
+/wc-apidocs/
+/languages/
+screenshots/
+/assets/**/*.min.js
+/assets/**/*.css
+
+# Ignore all log files except for .htaccess
+/logs/*
+!/logs/.htaccess
+
+tests/e2e/config/local-*
+.eslintcache
+
+/vendor/
+
+dist
+
+woocommerce-google-analytics-integration.zip

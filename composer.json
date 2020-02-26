@@ -1,0 +1,12 @@
+{
+    "name": "woocommerce/woocommerce-google-analytics-integration",
+    "description": "Allows Google Analytics tracking code to be inserted into WooCommerce store pages.",
+    "homepage": "http://wordpress.org/plugins/woocommerce-google-analytics-integration/",
+    "type": "wordpress-plugin",
+    "license": "GPL-2.0+",
+    "archive": {
+        "exclude": [
+            "!/assets"
+        ]
+    }
+}

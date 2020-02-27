@@ -8,36 +8,29 @@
     "type": "git",
     "url": "git://github.com/woocommerce/woocommerce-google-analytics-integration.git"
   },
-  "main": "Gruntfile.js",
-  "scripts": {
-    "build": "grunt",
-    "update-deps": "npm install -g rimraf && rimraf node_modules && rimraf npm-shrinkwrap.json && npm install && npm shrinkwrap --dev",
-    "woorelease": "npm run build && npm run archive",
-    "archive": "git archive -v -o woocommerce-google-analytics-integration.zip --format=zip HEAD"
-  },
   "devDependencies": {
-    "config": "^3.0.1",
-    "cross-env": "^5.2.0",
-    "grunt": "^1.0.4",
-    "grunt-checktextdomain": "~1.0.1",
-    "grunt-contrib-clean": "~2.0.0",
-    "grunt-contrib-concat": "~1.0.1",
-    "grunt-contrib-cssmin": "~3.0.0",
-    "grunt-contrib-uglify": "~4.0.0",
-    "grunt-contrib-watch": "^1.1.0",
-    "grunt-phpcs": "~0.4.0",
-    "grunt-postcss": "~0.9.0",
-    "grunt-rtlcss": "~2.0.1",
-    "grunt-shell": "~3.0.1",
-    "grunt-wp-i18n": "~1.0.3",
-    "shortid": "^2.2.14"
+    "node-wp-i18n": "~1.2.3",
+    "uglify-js": "^3.6.0"
+  },
+  "assets": {
+    "js": {
+      "min": "assets/js/*.min.js",
+      "js": "assets/js/*.js"
+    }
+  },
+  "scripts": {
+    "build": "npm run uglify && npm run makepot",
+    "postbuild": "npm run -s && npm run archive",
+    "archive": "composer archive --file=$npm_package_name --format=zip",
+    "postarchive": "rm -rf $npm_package_name && unzip $npm_package_name.zip -d $npm_package_name && rm $npm_package_name.zip && zip -r $npm_package_name.zip $npm_package_name && rm -rf $npm_package_name",
+    "preuglify": "rm -f $npm_package_assets_js_min",
+    "uglify": "for f in $npm_package_assets_js_js; do file=${f%.js}; node_modules/.bin/uglifyjs $f -c -m > $file.min.js; done",
+    "makepot": "wpi18n makepot --domain-path languages --pot-file $npm_package_name.pot --type plugin --main-file $npm_package_name.php --exclude node_modules,tests,docs",
+    "woorelease": "npm run build"
   },
   "engines": {
     "node": ">=8.9.3",
     "npm": ">=5.5.1"
-  },
-  "dependencies": {
-    "npm": "^6.10.2"
   },
   "config": {
     "wp_org_slug": "woocommerce-google-analytics-integration"

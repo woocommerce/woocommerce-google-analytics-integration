@@ -3,7 +3,7 @@ Contributors: woocommerce, claudiosanches, bor0, royho, laurendavissmith001, c-s
 Tags: woocommerce, google analytics
 Requires at least: 3.9
 Tested up to: 5.3
-Stable tag: 1.4.17
+Stable tag: 1.4.18
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 

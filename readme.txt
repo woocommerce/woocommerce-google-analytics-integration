@@ -68,6 +68,13 @@ Exact wording depends on the national data privacy laws and should be adjusted.
 
 == Changelog ==
 
+= 1.4.19 - 2020-03-09 =
+* Tweak - WordPress 5.4 compatibility.
+
+= 1.4.18 - 2020-03-04 =
+* Tweak - Use code sniff version.
+* Tweak - WC 4.0 compatibility.
+
 = 1.4.17 - 2020-01-13 =
 * Tweak - Update constant VERSION in plugin file
 

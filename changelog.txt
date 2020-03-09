@@ -1,5 +1,8 @@
 *** Changelog ***
 
+= 1.4.19 - 2020-xx-xx =
+* Tweak - WordPress 5.4 compatibility.
+
 = 1.4.18 - 2020-03-04 =
 * Tweak - Use code sniff version.
 * Tweak - WC 4.0 compatibility.

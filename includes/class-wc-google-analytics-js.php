@@ -71,6 +71,7 @@ class WC_Google_Analytics_JS {
 	 */
 	public static function load_analytics( $order = false ) {
 		$logged_in = is_user_logged_in() ? 'yes' : 'no';
+		add_filter( 'wc_google_analytics_send_pageview', array( 'WC_Google_Analytics_JS', 'universal_analytics_footer_filter' ), 10, 1 );
 		if ( 'yes' === self::get( 'ga_use_universal_analytics' ) ) {
 			add_action( 'wp_footer', array( 'WC_Google_Analytics_JS', 'universal_analytics_footer' ) );
 			return self::load_analytics_universal( $logged_in );

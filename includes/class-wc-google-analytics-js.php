@@ -71,6 +71,7 @@ class WC_Google_Analytics_JS {
 	 */
 	public static function load_analytics( $order = false ) {
 		$logged_in = is_user_logged_in() ? 'yes' : 'no';
+		add_filter( 'wc_google_analytics_send_pageview', array( 'WC_Google_Analytics_JS', 'universal_analytics_footer_filter' ), 10, 1 );
 		if ( 'yes' === self::get( 'ga_use_universal_analytics' ) ) {
 			add_action( 'wp_footer', array( 'WC_Google_Analytics_JS', 'universal_analytics_footer' ) );
 			return self::load_analytics_universal( $logged_in );
@@ -197,9 +198,17 @@ class WC_Google_Analytics_JS {
 	 * Sends the pageview last thing (needed for things like addImpression)
 	 */
 	public static function universal_analytics_footer() {
-		if ( apply_filters( 'wc_goole_analytics_send_pageview', true ) ) {
+		if ( apply_filters( 'wc_google_analytics_send_pageview', true ) ) {
 			wc_enqueue_js( "" . self::tracker_var() . "( 'send', 'pageview' ); " );
 		}
+	}
+
+	/**
+	 * This was created to fix public facing api typo in a filter name
+	 * and inform about the deprecation.
+	 */
+	public static function universal_analytics_footer_filter( $send_pageview ) {
+		return apply_filters_deprecated( 'wc_goole_analytics_send_pageview', array( $send_pageview ), '1.4.20', 'wc_google_analytics_send_pageview' );
 	}
 
 	/**

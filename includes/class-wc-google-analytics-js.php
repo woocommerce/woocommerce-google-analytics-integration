@@ -203,6 +203,19 @@ class WC_Google_Analytics_JS {
 	}
 
 	/**
+	 * This was created to fix public facing api typo in a filter nam
+	 * and inform about the deprecation.
+	 */
+	public static function universal_analytics_footer_filter( $send_pageview ) {
+		if ( has_filter( 'wc_goole_analytics_send_pageview' ) ) {
+			$log_string  = "The wc_goole_analytics_send_pageview filter is deprecated since version 1.4.20.";
+			$log_string .= "Replace with wc_google_analytics_send_pageview";
+			error_log( $log_string );
+		}
+		return apply_filters( 'wc_goole_analytics_send_pageview', $send_pageview );
+	}
+
+	/**
 	 * Loads the universal analytics code
 	 * @param  string $logged_in 'yes' if the user is logged in, no if not (this is a string so we can pass it to GA)
 	 * @return string Universal Analytics Code

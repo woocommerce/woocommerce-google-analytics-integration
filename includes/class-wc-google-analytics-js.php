@@ -208,13 +208,7 @@ class WC_Google_Analytics_JS {
 	 * and inform about the deprecation.
 	 */
 	public static function universal_analytics_footer_filter( $send_pageview ) {
-		if ( has_filter( 'wc_goole_analytics_send_pageview' ) ) {
-			$log_string  = "The wc_goole_analytics_send_pageview filter is deprecated since version 1.4.20.";
-			$log_string .= "Replace with wc_google_analytics_send_pageview";
-			error_log( $log_string );
-			return apply_filters( 'wc_goole_analytics_send_pageview', $send_pageview );
-		}
-		return $send_pageview;
+		return apply_filters_deprecated( 'wc_goole_analytics_send_pageview', array( $send_pageview ), '1.4.20', 'wc_google_analytics_send_pageview' );
 	}
 
 	/**

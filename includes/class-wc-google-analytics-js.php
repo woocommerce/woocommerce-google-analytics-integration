@@ -204,7 +204,7 @@ class WC_Google_Analytics_JS {
 	}
 
 	/**
-	 * This was created to fix public facing api typo in a filter nam
+	 * This was created to fix public facing api typo in a filter name
 	 * and inform about the deprecation.
 	 */
 	public static function universal_analytics_footer_filter( $send_pageview ) {

@@ -68,6 +68,9 @@ Exact wording depends on the national data privacy laws and should be adjusted.
 
 == Changelog ==
 
+= 1.4.20 - 2020-03-29 =
+* Fix - Change wc_goole_analytics_send_pageview fiter name to wc_google_analytics_send_pageview.
+
 = 1.4.19 - 2020-03-09 =
 * Tweak - WordPress 5.4 compatibility.
 

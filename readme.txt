@@ -68,6 +68,9 @@ Exact wording depends on the national data privacy laws and should be adjusted.
 
 == Changelog ==
 
+= 1.4.21 - 2020-xx-xx =
+* Tweak - WC 4.1 compatibility.
+
 = 1.4.20 - 2020-03-29 =
 * Fix - Change wc_goole_analytics_send_pageview fiter name to wc_google_analytics_send_pageview.
 

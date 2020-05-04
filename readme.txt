@@ -68,7 +68,7 @@ Exact wording depends on the national data privacy laws and should be adjusted.
 
 == Changelog ==
 
-= 1.4.21 - 2020-xx-xx =
+= 1.4.21 - 2020-05-04 =
 * Tweak - WC 4.1 compatibility.
 
 = 1.4.20 - 2020-03-29 =

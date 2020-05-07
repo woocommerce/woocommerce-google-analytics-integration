@@ -288,13 +288,23 @@ class WC_Google_Analytics_JS {
 	function add_transaction( $order ) {
 		if ( 'yes' == self::get( 'ga_use_universal_analytics' ) ) {
 			if ( 'yes' === self::get( 'ga_enhanced_ecommerce_tracking_enabled' ) ) {
-				return self::add_transaction_enhanced( $order );
+				$transaction_code = self::add_transaction_enhanced( $order );
 			} else {
-				return self::add_transaction_universal( $order );
+				$transaction_code = self::add_transaction_universal( $order );
 			}
 		} else {
-			return self::add_transaction_classic( $order );
+			$transaction_code = self::add_transaction_classic( $order );
 		}
+
+		// Wrap the transaction in a check against localStorage to avoid duplicate firing if page is reloaded without hitting server
+		$code = "var gaOrders = localStorage.getItem('ga-orders');";
+		$code .= "gaOrders = (gaOrders !== null) ? gaOrders : '';";
+		$code .= "if (gaOrders.split(';').indexOf('" . esc_js( $order->get_order_number() ) . "') === -1) {";
+		$code .= $transaction_code;
+		$code .= "localStorage.setItem('ga-orders', gaOrders + '" . esc_js( $order->get_order_number() ) . "');";
+		$code .= "}";
+
+		return $code;
 	}
 
 	/**

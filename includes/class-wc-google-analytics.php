@@ -109,7 +109,7 @@ class WC_Google_Analytics extends WC_Integration {
 			),
 			'ga_set_domain_name' => array(
 				'title' 			=> __( 'Set Domain Name', 'woocommerce-google-analytics-integration' ),
-				'description' 		=> sprintf( __( '(Optional) Sets the <code>_setDomainName</code> variable. <a href="%s">See here for more information</a>.', 'woocommerce-google-analytics-integration' ), 'https://developers.google.com/analytics/devguides/collection/gajs/gaTrackingSite#multipleDomains' ),
+				'description' 		=> sprintf( __( '(Optional) Sets the <code>_setDomainName</code> variable. <a href="%s" target="_blank">See here for more information</a>.', 'woocommerce-google-analytics-integration' ), 'https://developers.google.com/analytics/devguides/collection/gajs/gaTrackingSite#multipleDomains' ),
 				'type' 				=> 'text',
 				'default' 			=> ''
 			),
@@ -130,7 +130,7 @@ class WC_Google_Analytics extends WC_Integration {
 			),
 			'ga_support_enhanced_link_attribution' => array(
 				'label'         => __( 'Use Enhanced Link Attribution', 'woocommerce-google-analytics-integration' ),
-				'description'   => sprintf( __( 'Set the Google Analytics code to support Enhanced Link Attribution. %sRead more about Enhanced Link Attribution%s.', 'woocommerce-google-analytics-integration' ), '<a href="https://support.google.com/analytics/answer/2558867?hl=en" target="_blank">', '</a>' ),
+				'description'   => sprintf( __( 'Set the Google Analytics code to support Enhanced Link Attribution. %sRead more about Enhanced Link Attribution%s.', 'woocommerce-google-analytics-integration' ), '<a href="https://support.google.com/analytics/answer/7377126?hl=en" target="_blank">', '</a>' ),
 				'type'          => 'checkbox',
 				'checkboxgroup' => '',
 				'default'       => get_option( 'woocommerce_ga_support_enhanced_link_attribution' ) ? get_option( 'woocommerce_ga_support_enhanced_link_attribution' ) : 'no'  // Backwards compat

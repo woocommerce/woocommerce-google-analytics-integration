@@ -19,14 +19,14 @@
     }
   },
   "scripts": {
-    "build": "npm run uglify && npm run makepot",
-    "postbuild": "npm run -s && npm run archive",
+    "prebuild": "rm -rf ./vendor",
+    "build": "npm run uglify && npm run makepot && npm run archive",
+    "build:dev": "npm run uglify && npm run makepot",
     "archive": "composer archive --file=$npm_package_name --format=zip",
     "postarchive": "rm -rf $npm_package_name && unzip $npm_package_name.zip -d $npm_package_name && rm $npm_package_name.zip && zip -r $npm_package_name.zip $npm_package_name && rm -rf $npm_package_name",
     "preuglify": "rm -f $npm_package_assets_js_min",
     "uglify": "for f in $npm_package_assets_js_js; do file=${f%.js}; node_modules/.bin/uglifyjs $f -c -m > $file.min.js; done",
-    "makepot": "wpi18n makepot --domain-path languages --pot-file $npm_package_name.pot --type plugin --main-file $npm_package_name.php --exclude node_modules,tests,docs",
-    "woorelease": "npm run build"
+    "makepot": "wpi18n makepot --domain-path languages --pot-file $npm_package_name.pot --type plugin --main-file $npm_package_name.php --exclude node_modules,tests,docs"
   },
   "engines": {
     "node": ">=8.9.3",

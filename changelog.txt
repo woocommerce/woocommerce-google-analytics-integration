@@ -1,5 +1,8 @@
 *** Changelog ***
 
+= 1.4.23 - 2020-xx-xx =
+* Fix - Prevent transaction from being tracked a second time when page is reloaded locally or from cache.
+
 = 1.4.22 - 2020-06-05 =
 * Tweak - WC 4.2 compatibility.
 

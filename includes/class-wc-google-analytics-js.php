@@ -246,7 +246,7 @@ class WC_Google_Analytics_JS {
 			// See https://developers.google.com/analytics/devguides/collection/analyticsjs/events for reference
 			$track_404_enabled = "" . self::tracker_var() . "( 'send', 'event', 'Error', '404 Not Found', 'page: ' + document.location.pathname + document.location.search + ' referrer: ' + document.referrer );";
 		}
-		
+
 		$src = apply_filters('woocommerce_google_analytics_script_src', '//www.google-analytics.com/analytics.js');
 
 		$ga_snippet_head = "(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
@@ -281,20 +281,38 @@ class WC_Google_Analytics_JS {
 	}
 
 	/**
-	 * Used to pass transaction data to Google Analytics
-	 * @param object $order WC_Order Object
-	 * @return string Add Transaction code
+	 * Used to pass transaction data to Google Analytics.
+	 *
+	 * @param object $order WC_Order Object.
+	 * @return string Add Transaction code.
 	 */
-	function add_transaction( $order ) {
-		if ( 'yes' == self::get( 'ga_use_universal_analytics' ) ) {
+	public function add_transaction( $order ) {
+		if ( 'yes' === self::get( 'ga_use_universal_analytics' ) ) {
 			if ( 'yes' === self::get( 'ga_enhanced_ecommerce_tracking_enabled' ) ) {
-				return self::add_transaction_enhanced( $order );
+				$transaction_code = self::add_transaction_enhanced( $order );
 			} else {
-				return self::add_transaction_universal( $order );
+				$transaction_code = self::add_transaction_universal( $order );
 			}
 		} else {
-			return self::add_transaction_classic( $order );
+			$transaction_code = self::add_transaction_classic( $order );
 		}
+
+		// Check localStorage to avoid duplicate transactions if page is reloaded without hitting server.
+		$code = "
+			var ga_orders = [];
+			try {
+				ga_orders = localStorage.getItem( 'ga_orders' );
+				ga_orders = ga_orders ? JSON.parse( ga_orders ) : [];
+			} catch {}
+			if ( -1 === ga_orders.indexOf( '" . esc_js( $order->get_order_number() ) . "' ) ) {
+				" . $transaction_code . "
+				try {
+					ga_orders.push( '" . esc_js( $order->get_order_number() ) . "' );
+					localStorage.setItem( 'ga_orders', JSON.stringify( ga_orders ) );
+				} catch {}
+			}";
+
+		return $code;
 	}
 
 	/**

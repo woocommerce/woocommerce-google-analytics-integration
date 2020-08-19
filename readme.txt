@@ -68,6 +68,10 @@ Exact wording depends on the national data privacy laws and should be adjusted.
 
 == Changelog ==
 
+= 1.4.23 - 2020-xx-xx =
+* Fix   - Prevent transaction from being tracked a second time when page is reloaded locally or from cache.
+* Tweak - WordPress 5.5 compatibility.
+
 = 1.4.22 - 2020-06-05 =
 * Tweak - WC 4.2 compatibility.
 

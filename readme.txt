@@ -2,8 +2,8 @@
 Contributors: woocommerce, claudiosanches, bor0, royho, laurendavissmith001, c-shultz
 Tags: woocommerce, google analytics
 Requires at least: 3.9
-Tested up to: 5.4
-Stable tag: 1.4.22
+Tested up to: 5.5
+Stable tag: 1.4.23
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -68,7 +68,7 @@ Exact wording depends on the national data privacy laws and should be adjusted.
 
 == Changelog ==
 
-= 1.4.23 - 2020-xx-xx =
+= 1.4.23 - 2020-08-19 =
 * Fix   - Prevent transaction from being tracked a second time when page is reloaded locally or from cache.
 * Tweak - WordPress 5.5 compatibility.
 

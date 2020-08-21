@@ -442,18 +442,19 @@ class WC_Google_Analytics_JS {
 		$_product = version_compare( WC_VERSION, '3.0', '<' ) ? $order->get_product_from_item( $item ) : $item->get_product();
 		$variant  = self::product_get_variant_line( $_product );
 
-		$code = "" . self::tracker_var() . "( 'ec:addProduct', {";
-		$code .= "'id': '" . esc_js( $_product->get_sku() ? $_product->get_sku() : $_product->get_id() ) . "',";
-		$code .= "'name': '" . esc_js( $item['name'] ) . "',";
-		$code .= "'category': " . self::product_get_category_line( $_product );
+		$code_vars = [
+			'id'  	   => esc_js( $_product->get_sku() ? $_product->get_sku() : $_product->get_id() ),
+			'name'     => esc_js( $item['name'] ),
+			'category' => self::product_get_category_line( $_product ),
+			'price'    => esc_js( $order->get_item_total( $item ) ),
+			'quantity' => esc_js( $item['qty'] ),
+		];
 
-		if ( '' !== $variant ) {
-			$code .= "'variant': " . $variant;
+		if ( '' !== $variant ) { 
+			$code_vars['variant'] = $variant;
 		}
-
-		$code .= "'price': '" . esc_js( $order->get_item_total( $item ) ) . "',";
-		$code .= "'quantity': '" . esc_js( $item['qty'] ) . "'";
-		$code .= "});";
+		$code_vars = apply_filters('wc_google_analytics_add_items_enhanced', $code_vars, $item );
+		$code =  sprintf('%s( "ec:addProduct", %s);', self::tracker_var(), json_encode( $code_vars, JSON_PRETTY_PRINT | JSON_FORCE_OBJECT ) );
 
 		return $code;
 	}

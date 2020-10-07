@@ -1,13 +1,13 @@
 <?php
 /**
  * Plugin Name: WooCommerce Google Analytics Integration
- * Plugin URI: http://wordpress.org/plugins/woocommerce-google-analytics-integration/
+ * Plugin URI: https://wordpress.org/plugins/woocommerce-google-analytics-integration/
  * Description: Allows Google Analytics tracking code to be inserted into WooCommerce store pages.
  * Author: WooCommerce
  * Author URI: https://woocommerce.com
  * Version: 1.4.23
  * WC requires at least: 2.1
- * WC tested up to: 4.2
+ * WC tested up to: 4.5
  * Tested up to: 5.5
  * License: GPLv2 or later
  * Text Domain: woocommerce-google-analytics-integration

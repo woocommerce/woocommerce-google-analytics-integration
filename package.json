@@ -33,6 +33,7 @@
     "npm": ">=5.5.1"
   },
   "config": {
-    "wp_org_slug": "woocommerce-google-analytics-integration"
+		"wp_org_slug": "woocommerce-google-analytics-integration",
+		"translate": true
   }
 }

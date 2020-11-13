@@ -46,7 +46,7 @@ if ( ! class_exists( 'WC_Google_Analytics_Integration' ) ) {
 			add_action( 'init', array( $this, 'load_plugin_textdomain' ) );
 			add_action( 'init', array( $this, 'show_ga_pro_notices' ) );
 
-			// Checks with WooCommerce is installed.
+			// Checks which WooCommerce is installed.
 			if ( class_exists( 'WC_Integration' ) && defined( 'WOOCOMMERCE_VERSION' ) && version_compare( WOOCOMMERCE_VERSION, '2.1-beta-1', '>=' ) ) {
 				include_once 'includes/class-wc-google-analytics.php';
 

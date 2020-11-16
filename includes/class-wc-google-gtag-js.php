@@ -256,11 +256,9 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 	 */
 	public function event_tracking_code( $parameters, $selector ) {
 
-		// Fix for gtags
-		if ( '\'Add to Cart\'' === $parameters['action'] ){
-			$parameters['action']   = '\'add_to_cart\'';
-			$parameters['category'] = '\'ecommerce\'';
-		}
+		// Called with invalid 'Add to Cart' action, update to sync with Default Google Analytics Event 'add_to_cart'
+		$parameters['action']   = '\'add_to_cart\'';
+		$parameters['category'] = '\'ecommerce\'';
 
 		$parameters = apply_filters( 'woocommerce_gtag_event_tracking_parameters', $parameters );
 

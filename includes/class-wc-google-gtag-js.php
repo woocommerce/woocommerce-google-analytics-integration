@@ -104,7 +104,7 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 		gtag('js', new Date());
 
 		gtag('config', '" . esc_js( $gtag_id ) . "', {
-			'allow_display_features': " . ( 'yes' === self::get( 'ga_support_display_advertising' ) ? 'true' : 'false' ) . ",
+			'allow_google_signals': " . ( 'yes' === self::get( 'ga_support_display_advertising' ) ? 'true' : 'false' ) . ",
 			'link_attribution': " . ( 'yes' === self::get( 'ga_support_enhanced_link_attribution' ) ? 'true' : 'false' ) . ",
 			'anonymize_ip': " . ( 'yes' === self::get( 'ga_anonymize_enabled' ) ? 'true' : 'false' ) . ",
 			'custom_map': {

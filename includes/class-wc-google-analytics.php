@@ -17,7 +17,7 @@ class WC_Google_Analytics extends WC_Integration {
 	 * Returns the proper class based on Gtag settings.
 	 *
 	 * @param array $options Options
-	 * @return mixed
+	 * @return WC_Abstract_Google_Analytics_JS
 	 */
 	protected function get_tracking_instance( $options = array() ) {
 		if ( 'yes' === $this->ga_gtag_enabled ) {

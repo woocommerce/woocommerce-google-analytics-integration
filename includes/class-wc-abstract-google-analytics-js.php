@@ -76,7 +76,7 @@ abstract class WC_Abstract_Google_Analytics_JS {
 	 */
 	public function add_transaction( $order ) {
 		if ( 'yes' === self::get( 'ga_enhanced_ecommerce_tracking_enabled' ) ) {
-			return self::add_transaction_enhanced( $order );
+			return static::add_transaction_enhanced( $order );
 		} else {
 			return self::add_transaction_universal( $order );
 		}
@@ -164,7 +164,7 @@ abstract class WC_Abstract_Google_Analytics_JS {
 	 * @param  object $product  Product to pull info for
 	 * @return string          Line of JSON
 	 */
-	private static function product_get_variant_line( $_product ) {
+	protected static function product_get_variant_line( $_product ) {
 		$out            = '';
 		$variation_data = version_compare( WC_VERSION, '3.0', '<' ) ? $_product->variation_data : ( $_product->is_type( 'variation' ) ? wc_get_product_variation_attributes( $_product->get_id() ) : '' );
 

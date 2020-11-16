@@ -134,7 +134,7 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 		}
 		$items = "]";
 
-		$code .= "" . self::tracker_var() . "( 'event', 'purchase', {
+		$code  = "" . self::tracker_var() . "( 'event', 'purchase', {
 			'transaction_id': '" . esc_js( $order->get_order_number() ) . "',
 			'affiliation': '" . esc_js( get_bloginfo( 'name' ) ) . "',
 			'value': '" . esc_js( $order->get_total() ) . "',
@@ -220,10 +220,12 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 		foreach ( $cart as $cart_item_key => $cart_item ) {
 			$product     = apply_filters( 'woocommerce_cart_item_product', $cart_item['data'], $cart_item, $cart_item_key );
 			$variant     = self::product_get_variant_line( $product );
-			$items .= "" . self::tracker_var() . "{
-				'id': '" . esc_js( $product->get_sku() ? $product->get_sku() : ( '#' . $product->get_id() ) ) . "',
-				'name': '" . esc_js( $product->get_title() ) . "',
-				'category': " . self::product_get_category_line( $product );
+			$items .= "
+				{
+					'id': '" . esc_js( $product->get_sku() ? $product->get_sku() : ( '#' . $product->get_id() ) ) . "',
+					'name': '" . esc_js( $product->get_title() ) . "',
+					'category': " . self::product_get_category_line( $product ) . '
+				},';
 
 			if ( '' !== $variant ) {
 				$code .= "'variant': " . $variant;
@@ -234,7 +236,8 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 			},";
 		}
 
-		$items = "]";
+		$items .= '
+			]';
 
 		$code  = "" . self::tracker_var() . "( 'event', 'begin_checkout', {
 			'items': " . $items . ",

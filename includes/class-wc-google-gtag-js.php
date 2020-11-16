@@ -130,7 +130,7 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 				$items .= self::add_item( $order, $item );
 			}
 		}
-		$items = "]";
+		$items .= "]";
 
 		$code  = "" . self::tracker_var() . "( 'event', 'purchase', {
 			'transaction_id': '" . esc_js( $order->get_order_number() ) . "',
@@ -138,7 +138,7 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 			'value': '" . esc_js( $order->get_total() ) . "',
 			'tax': '" . esc_js( $order->get_total_tax() ) . "',
 			'shipping': '" . esc_js( $order->get_total_shipping() ) . "',
-			'currency': '" . esc_js( version_compare( WC_VERSION, '3.0', '<' ) ? $order->get_order_currency() : $order->get_currency() ) . "'  // Currency,
+			'currency': '" . esc_js( version_compare( WC_VERSION, '3.0', '<' ) ? $order->get_order_currency() : $order->get_currency() ) . "',  // Currency,
 			'items': " . $items . ",
 		} );";
 

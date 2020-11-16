@@ -80,8 +80,6 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 							'list_position': '" . esc_js( $position ) . "'
 						} ],
 					} );
-
-					" . self::tracker_var() . "( 'ec:setAction', 'click', { list: '" . esc_js( $list ) . "' });
 					" . self::tracker_var() . "( 'event', 'UX', 'click', ' " . esc_js( $list ) . "' );
 				});
 			})(jQuery);

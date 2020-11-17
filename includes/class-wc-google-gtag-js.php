@@ -95,8 +95,15 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 	public static function load_analytics( $order = false ) {
 		$logged_in = is_user_logged_in() ? 'yes' : 'no';
 
+		$track_404_enabled = '';
+		if ( 'yes' === self::get( 'ga_404_tracking_enabled' ) && is_404() ) {
+			// See https://developers.google.com/analytics/devguides/collection/gtagjs/events for reference
+			$track_404_enabled = self::tracker_var() . "( 'event', '404_not_found', { 'event_category':'error', 'event_label':'page: ' + document.location.pathname + document.location.search + ' referrer: ' + document.referrer });";
+		}
+
+
 		$gtag_id = self::get( 'ga_id' );
-		$gtag_snippet = "<script async src='https://www.googletagmanager.com/gtag/js?id=" . esc_js( $gtag_id ) . "'></script>";
+		$gtag_snippet = '<script async src="https://www.googletagmanager.com/gtag/js?id=' . esc_js( $gtag_id ) . '"></script>';
 		$gtag_snippet .= "
 		<script>
 		window.dataLayer = window.dataLayer || [];
@@ -111,6 +118,8 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 				'dimension1': " . ( $logged_in ? 'true' : 'false' ) . ",
 			},
 		} );
+
+		$track_404_enabled
 		</script>
 		";
 

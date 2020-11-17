@@ -95,7 +95,9 @@ class WC_Google_Analytics_JS extends WC_Abstract_Google_Analytics_JS {
 
 		$code .= ");";
 
-		return $code;
+
+		$code = "<script type='text/javascript'>" . $code . "</script>";
+		return apply_filters( 'woocommerce_ga_classic_snippet_output', $code );
 	}
 
 	/**
@@ -153,7 +155,7 @@ class WC_Google_Analytics_JS extends WC_Abstract_Google_Analytics_JS {
 	 * Loads in the footer
 	 * @see wp_footer
 	 */
-	protected static function classic_analytics_footer() {
+	public static function classic_analytics_footer() {
 		if ( 'yes' === self::get( 'ga_support_display_advertising' ) ) {
 			$ga_url = "('https:' == document.location.protocol ? 'https://' : 'http://') + 'stats.g.doubleclick.net/dc.js'";
 		} else {

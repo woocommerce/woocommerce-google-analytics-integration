@@ -104,8 +104,6 @@ if ( ! class_exists( 'WC_Google_Analytics_Integration' ) ) {
 
 		/**
 		 * WooCommerce fallback notice.
-		 *
-		 * @return string
 		 */
 		public function woocommerce_missing_notice() {
 			echo '<div class="error"><p>' . sprintf( __( 'WooCommerce Google Analytics depends on the last version of %s to work!', 'woocommerce-google-analytics-integration' ), '<a href="http://www.woothemes.com/woocommerce/" target="_blank">' . __( 'WooCommerce', 'woocommerce-google-analytics-integration' ) . '</a>' ) . '</p></div>';

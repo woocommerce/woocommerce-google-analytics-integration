@@ -62,8 +62,9 @@ if ( ! class_exists( 'WC_Google_Analytics_Integration' ) ) {
 		public function plugin_links( $links ) {
 			$settings_url = add_query_arg(
 				array(
-					'page' => 'wc-settings',
-					'tab' => 'integration',
+					'page'    => 'wc-settings',
+					'tab'     => 'integration',
+					'section' => 'google_analytics',
 				),
 				admin_url( 'admin.php' )
 			);

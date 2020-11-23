@@ -18,6 +18,9 @@ class WC_Google_Analytics_JS {
 
 	/**
 	 * Get the class instance
+	 * @param array $options
+	 *
+	 * @return WC_Google_Analytics_JS
 	 */
 	public static function get_instance( $options = array() ) {
 		return null === self::$instance ? ( self::$instance = new self( $options ) ) : self::$instance;
@@ -26,6 +29,8 @@ class WC_Google_Analytics_JS {
 	/**
 	 * Constructor
 	 * Takes our options from the parent class so we can later use them in the JS snippets
+	 *
+	 * @param array $options
 	 */
 	public function __construct( $options = array() ) {
 		self::$options = $options;
@@ -176,7 +181,7 @@ class WC_Google_Analytics_JS {
 	}
 
 	/**
-	 * Asyncronously loads the classic Google Analytics code, and does so after all of our properties are loaded
+	 * Asynchronously loads the classic Google Analytics code, and does so after all of our properties are loaded
 	 * Loads in the footer
 	 * @see wp_footer
 	 */

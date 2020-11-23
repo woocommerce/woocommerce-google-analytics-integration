@@ -238,6 +238,10 @@ class WC_Google_Analytics extends WC_Integration {
 	 * Hooks into woocommerce_tracker_data and tracks some of the analytic settings (just enabled|disabled status)
 	 * only if you have opted into WooCommerce tracking
 	 * http://www.woothemes.com/woocommerce/usage-tracking/
+	 *
+	 * @param array $data Current WC tracker data.
+	 *
+	 * @return array Updated WC Tracker data.
 	 */
 	function track_options( $data ) {
 		$data['wc-google-analytics'] = array(
@@ -318,6 +322,7 @@ class WC_Google_Analytics extends WC_Integration {
 	 * eCommerce tracking
 	 *
 	 * @param int $order_id
+	 * @return string
 	 */
 	protected function get_ecommerce_tracking_code( $order_id ) {
 		// Get the order and output tracking code.
@@ -409,6 +414,11 @@ class WC_Google_Analytics extends WC_Integration {
 
 	/**
 	 * Adds the product ID and SKU to the remove product link if not present
+	 *
+	 * @param string $url
+	 * @param string $key
+	 *
+	 * @return string|string[]
 	 */
 	public function remove_from_cart_attributes( $url, $key ) {
 		if ( strpos( $url,'data-product_id' ) !== false ) {
@@ -519,6 +529,8 @@ class WC_Google_Analytics extends WC_Integration {
 
 	/**
 	 * Tracks when the checkout form is loaded
+	 *
+	 * @param $checkout
 	 */
 	public function checkout_process( $checkout ) {
 		if ( $this->disable_tracking( $this->ga_use_universal_analytics ) ) {

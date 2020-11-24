@@ -10,6 +10,24 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * @class   WC_Google_Analytics
  * @extends WC_Integration
+ *
+ * @property $ga_id
+ * @property $ga_set_domain_name
+ * @property $ga_gtag_enabled
+ * @property $ga_standard_tracking_enabled
+ * @property $ga_support_display_advertising
+ * @property $ga_support_enhanced_link_attribution
+ * @property $ga_use_universal_analytics
+ * @property $ga_anonymize_enabled
+ * @property $ga_404_tracking_enabled
+ * @property $ga_ecommerce_tracking_enabled
+ * @property $ga_enhanced_ecommerce_tracking_enabled
+ * @property $ga_enhanced_remove_from_cart_enabled
+ * @property $ga_enhanced_product_impression_enabled
+ * @property $ga_enhanced_product_click_enabled
+ * @property $ga_enhanced_checkout_process_enabled
+ * @property $ga_enhanced_product_detail_view_enabled
+ * @property $ga_event_tracking_enabled
  */
 class WC_Google_Analytics extends WC_Integration {
 

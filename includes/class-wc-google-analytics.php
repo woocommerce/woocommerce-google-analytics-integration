@@ -299,8 +299,17 @@ class WC_Google_Analytics extends WC_Integration {
 			'ga_404_tracking_enabled'           => $this->ga_404_tracking_enabled,
 			'ecommerce_tracking_enabled'  		=> $this->ga_ecommerce_tracking_enabled,
 			'event_tracking_enabled'      		=> $this->ga_event_tracking_enabled,
-			'ga_gtag_enabled'                   => $this->ga_gtag_enabled,
+			'gtag_enabled'                      => $this->ga_gtag_enabled,
 		);
+
+		// ID prefix, blank, or X for unknown
+		$prefix = substr( strtoupper( $this->ga_id ), 0, 2 );
+		if ( 'UA' === $prefix || 'G-' === $prefix || empty( $prefix ) ) {
+			$data['wc-google-analytics']['ga_id'] = str_replace( '-', '', $prefix );
+		} else {
+			$data['wc-google-analytics']['ga_id'] = 'X';
+		}
+
 		return $data;
 	}
 

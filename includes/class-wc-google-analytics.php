@@ -188,13 +188,13 @@ class WC_Google_Analytics extends WC_Integration {
 				'description' 			=> __( 'This requires a payment gateway that redirects to the thank you/order received page after payment. Orders paid with gateways which do not do this will not be tracked.', 'woocommerce-google-analytics-integration' ),
 				'type' 				=> 'checkbox',
 				'checkboxgroup'		=> 'start',
-				'default' 			=> get_option( 'woocommerce_ga_ecommerce_tracking_enabled' ) ? get_option( 'woocommerce_ga_ecommerce_tracking_enabled' ) : 'yes'  // Backwards compat
+				'default' 			=> get_option( 'woocommerce_ga_ecommerce_tracking_enabled' ) ? get_option( 'woocommerce_ga_ecommerce_tracking_enabled' ) : 'yes',  // Backwards compat
 			),
 			'ga_event_tracking_enabled' => array(
 				'label' 			=> __( 'Add to Cart Events', 'woocommerce-google-analytics-integration' ),
 				'type' 				=> 'checkbox',
 				'checkboxgroup'		=> '',
-				'default' 			=> 'yes'
+				'default' 			=> 'yes',
 			),
 
 			'ga_enhanced_ecommerce_tracking_enabled' => array(
@@ -303,7 +303,7 @@ class WC_Google_Analytics extends WC_Integration {
 			return;
 		}
 
-		wp_enqueue_script( 'wc-google-analytics-admin-enhanced-settings', plugins_url( '/assets/js/admin-enhanced-settings.js', dirname( __FILE__ ) ), array(), WC_GOOGLE_ANALYTICS_INTEGRATION_VERSION, true );
+		wp_enqueue_script( 'wc-google-analytics-admin-enhanced-settings', plugins_url( '/assets/js/admin-ga-settings.js', dirname( __FILE__ ) ), array(), WC_GOOGLE_ANALYTICS_INTEGRATION_VERSION, true );
 	}
 
 	/**

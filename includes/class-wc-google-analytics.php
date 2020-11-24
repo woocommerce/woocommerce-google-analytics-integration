@@ -87,6 +87,7 @@ class WC_Google_Analytics extends WC_Integration {
 		$options = array(
 			'ga_id',
 			'ga_set_domain_name',
+			'ga_gtag_enabled',
 			'ga_standard_tracking_enabled',
 			'ga_support_display_advertising',
 			'ga_support_enhanced_link_attribution',
@@ -94,14 +95,13 @@ class WC_Google_Analytics extends WC_Integration {
 			'ga_anonymize_enabled',
 			'ga_404_tracking_enabled',
 			'ga_ecommerce_tracking_enabled',
-			'ga_gtag_enabled',
 			'ga_enhanced_ecommerce_tracking_enabled',
 			'ga_enhanced_remove_from_cart_enabled',
 			'ga_enhanced_product_impression_enabled',
 			'ga_enhanced_product_click_enabled',
 			'ga_enhanced_checkout_process_enabled',
 			'ga_enhanced_product_detail_view_enabled',
-			'ga_event_tracking_enabled'
+			'ga_event_tracking_enabled',
 		);
 
 		$constructor = array();
@@ -118,7 +118,7 @@ class WC_Google_Analytics extends WC_Integration {
 	public function init_form_fields() {
 		$this->form_fields = array(
 			'ga_id' => array(
-				'title'       => __( 'Google Analytics ID', 'woocommerce-google-analytics-integration' ),
+				'title'       => __( 'Google Analytics Tracking ID', 'woocommerce-google-analytics-integration' ),
 				'description' => __( 'Log into your Google Analytics account to find your ID. e.g. <code>UA-XXXXX-X</code>', 'woocommerce-google-analytics-integration' ),
 				'type'        => 'text',
 				'placeholder' => 'UA-XXXXX-X',
@@ -130,8 +130,17 @@ class WC_Google_Analytics extends WC_Integration {
 				'type' 				=> 'text',
 				'default' 			=> ''
 			),
-			'ga_standard_tracking_enabled' => array(
+
+			'ga_gtag_enabled' => array(
 				'title'         => __( 'Tracking Options', 'woocommerce-google-analytics-integration' ),
+				'label'         => __( 'Use Global Site Tag', 'woocommerce-google-analytics-integration' ),
+				'description'   => sprintf( __( 'The Global Site Tag provides streamlined tagging across Google’s site measurement, conversion tracking, and remarketing products. <a href="%s">See here for more information</a>.', 'woocommerce-google-analytics-integration' ), 'https://support.google.com/analytics/answer/7475631?hl=en' ),
+				'type'          => 'checkbox',
+				'checkboxgroup' => '',
+				'default'       => 'no',
+			),
+
+			'ga_standard_tracking_enabled' => array(
 				'label'         => __( 'Enable Standard Tracking', 'woocommerce-google-analytics-integration' ),
 				'description'   =>  __( 'This tracks session data such as demographics, system, etc. You don\'t need to enable this if you are using a 3rd party Google analytics plugin.', 'woocommerce-google-analytics-integration' ),
 				'type'          => 'checkbox',
@@ -143,7 +152,7 @@ class WC_Google_Analytics extends WC_Integration {
 				'description'   => sprintf( __( 'Set the Google Analytics code to support Display Advertising. %sRead more about Display Advertising%s.', 'woocommerce-google-analytics-integration' ), '<a href="https://support.google.com/analytics/answer/2700409" target="_blank">', '</a>' ),
 				'type'          => 'checkbox',
 				'checkboxgroup' => '',
-				'default'       => get_option( 'woocommerce_ga_support_display_advertising' ) ? get_option( 'woocommerce_ga_support_display_advertising' ) : 'no'  // Backwards compat
+				'default'       => get_option( 'woocommerce_ga_support_display_advertising' ) ? get_option( 'woocommerce_ga_support_display_advertising' ) : 'yes', // Backwards compat
 			),
 			'ga_support_enhanced_link_attribution' => array(
 				'label'         => __( 'Use Enhanced Link Attribution', 'woocommerce-google-analytics-integration' ),
@@ -157,7 +166,8 @@ class WC_Google_Analytics extends WC_Integration {
 				'description'   => sprintf( __( 'Uses Universal Analytics instead of Classic Google Analytics. If you have <strong>not</strong> previously used Google Analytics on this site, check this box. Otherwise, %sfollow step 1 of the Universal Analytics upgrade guide.%s Enabling this setting will take care of step 2. %sRead more about Universal Analytics%s. Universal Analytics must be enabled to enable enhanced eCommerce.', 'woocommerce-google-analytics-integration' ), '<a href="https://developers.google.com/analytics/devguides/collection/upgrade/guide" target="_blank">', '</a>', '<a href="https://support.google.com/analytics/answer/2790010?hl=en" target="_blank">', '</a>' ),
 				'type'          => 'checkbox',
 				'checkboxgroup' => '',
-				'default'       => get_option( 'woocommerce_ga_use_universal_analytics' ) ? get_option( 'woocommerce_ga_use_universal_analytics' ) : 'no'  // Backwards compat
+				'default'       => get_option( 'woocommerce_ga_use_universal_analytics' ) ? get_option( 'woocommerce_ga_use_universal_analytics' ) : 'no',  // Backwards compat
+				'class'         => 'legacy-setting',
 			),
 			'ga_anonymize_enabled' => array(
 				'label'         => __( 'Anonymize IP addresses', 'woocommerce-google-analytics-integration' ),
@@ -187,25 +197,17 @@ class WC_Google_Analytics extends WC_Integration {
 				'default' 			=> 'yes'
 			),
 
-			'ga_gtag_enabled' => array(
-				'title'         => __( 'Global Site Tag', 'woocommerce-google-analytics-integration' ),
-				'label'         => __( 'Enable Global Site Tag', 'woocommerce-google-analytics-integration' ),
-				'description'   => sprintf( __( 'The Global Site Tag provides streamlined tagging across Google’s site measurement, conversion tracking, and remarketing products. <a href="%s">See here for more information</a>.', 'woocommerce-google-analytics-integration' ), 'https://support.google.com/analytics/answer/7475631?hl=en' ),
-				'type'          => 'checkbox',
-				'checkboxgroup' => '',
-				'default'       => 'no'
-			),
-
 			'ga_enhanced_ecommerce_tracking_enabled' => array(
 				'title'         => __( 'Enhanced eCommerce', 'woocommerce-google-analytics-integration' ),
 				'label'         => __( 'Enable Enhanced eCommerce ', 'woocommerce-google-analytics-integration' ),
 				'description'   => sprintf( __( 'Enhanced eCommerce allows you to measure more user interactions with your store, including: product impressions, product detail views, starting the checkout process, adding cart items, and removing cart items. Universal Analytics must be enabled for Enhanced eCommerce to work. Before enabling this setting, turn on Enhanced eCommerce in your Google Analytics dashboard. <a href="%s" target="_blank">See here for more information</a>.', 'woocommerce-google-analytics-integration' ), 'https://support.google.com/analytics/answer/6032539?hl=en' ),
 				'type'          => 'checkbox',
 				'checkboxgroup' => '',
-				'default'       => 'no'
+				'default'       => 'no',
+				'class'         => 'legacy-setting'
 			),
 
-			// Enhanced eCommerce Settings
+			// Enhanced eCommerce Sub-Settings
 
 			'ga_enhanced_remove_from_cart_enabled' => array(
 				'label' 			=> __( 'Remove from Cart Events', 'woocommerce-google-analytics-integration' ),
@@ -278,7 +280,8 @@ class WC_Google_Analytics extends WC_Integration {
 			'anonymize_enabled'           		=> $this->ga_anonymize_enabled,
 			'ga_404_tracking_enabled'           => $this->ga_404_tracking_enabled,
 			'ecommerce_tracking_enabled'  		=> $this->ga_ecommerce_tracking_enabled,
-			'event_tracking_enabled'      		=> $this->ga_event_tracking_enabled
+			'event_tracking_enabled'      		=> $this->ga_event_tracking_enabled,
+			'ga_gtag_enabled'                   => $this->ga_gtag_enabled,
 		);
 		return $data;
 	}

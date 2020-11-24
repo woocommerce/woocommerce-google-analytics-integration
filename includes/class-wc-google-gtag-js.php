@@ -66,7 +66,7 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 		echo( "
 			<script>
 			(function($) {
-				$( '.products .post-" . esc_js( $product->get_id() ) . " a' ).click( function() {
+				$( '.products .post-" . esc_js( $product->get_id() ) . " a' ).on( 'click', function() {
 					if ( true === $(this).hasClass( 'add_to_cart_button' ) ) {
 						return;
 					}
@@ -88,7 +88,7 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 	}
 
 	/**
-	 * Loads the correct Google Gtag code (classic or universal)
+	 * Loads the standard Google Gtag code
 	 * @param  boolean $order Classic analytics needs order data to set the currency correctly
 	 * @return string         Gtag loading code
 	 */
@@ -186,7 +186,7 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 		echo( "
 			<script>
 			(function($) {
-				$( '.remove' ).click( function() {
+				$( '.remove' ).on( 'click', function() {
 					" . self::tracker_var() . "( 'event', 'remove_from_cart', {
 						'items': [ {
 							'id': ($(this).data('product_sku')) ? ($(this).data('product_sku')) : ('#' + $(this).data('product_id')),
@@ -272,7 +272,7 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 		$track_event = self::tracker_var() . "( 'event', %s, { 'event_category': %s, 'event_label': %s } );";
 
 		wc_enqueue_js( "
-			$( '" . $selector . "' ).click( function() {
+			$( '" . $selector . "' ).on( 'click', function() {
 				" . sprintf( $track_event, $parameters['action'], $parameters['category'], $parameters['label'] ) . "
 			});
 		" );

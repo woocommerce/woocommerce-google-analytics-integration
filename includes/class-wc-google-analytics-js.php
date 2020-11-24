@@ -132,7 +132,7 @@ class WC_Google_Analytics_JS extends WC_Abstract_Google_Analytics_JS {
 		}
 
 		wc_enqueue_js( "
-			$( '.products .post-" . esc_js( $product->get_id() ) . " a' ).click( function() {
+			$( '.products .post-" . esc_js( $product->get_id() ) . " a' ).on( 'click', function() {
 				if ( true === $(this).hasClass( 'add_to_cart_button' ) ) {
 					return;
 				}
@@ -467,7 +467,7 @@ class WC_Google_Analytics_JS extends WC_Abstract_Google_Analytics_JS {
 		if ( 'yes' === self::get( 'ga_use_universal_analytics' ) ) {
 			if ( 'yes' === self::get( 'ga_enhanced_ecommerce_tracking_enabled' ) ) {
 				wc_enqueue_js( "
-					$( '" . $selector . "' ).click( function() {
+					$( '" . $selector . "' ).on( 'click', function() {
 						" . $parameters['enhanced'] . "
 						" . self::tracker_var() . "( 'ec:setAction', 'add' );
 						" . self::tracker_var() . "( 'send', 'event', 'UX', 'click', 'add to cart' );
@@ -482,7 +482,7 @@ class WC_Google_Analytics_JS extends WC_Abstract_Google_Analytics_JS {
 		}
 
 		wc_enqueue_js( "
-			$( '" . $selector . "' ).click( function() {
+			$( '" . $selector . "' ).on( 'click', function() {
 				" . sprintf( $track_event, $parameters['category'], $parameters['action'], $parameters['label'] ) . "
 			});
 		" );

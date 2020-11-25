@@ -68,6 +68,10 @@ Exact wording depends on the national data privacy laws and should be adjusted.
 
 == Changelog ==
 
+= 1.4.25 - 2020-xx-xx =
+* Tweak - WC 4.7 compatibility.
+* Tweak - WordPress 5.6 compatibility.
+
 = 1.4.24 - 2020-10-12 =
 * Tweak - WC 4.5 compatibility.
 

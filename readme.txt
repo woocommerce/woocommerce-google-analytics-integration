@@ -3,7 +3,7 @@ Contributors: woocommerce, automattic, claudiosanches, bor0, royho, laurendaviss
 Tags: woocommerce, google analytics
 Requires at least: 3.9
 Tested up to: 5.5
-Stable tag: 1.4.24
+Stable tag: 1.4.25
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -68,7 +68,7 @@ Exact wording depends on the national data privacy laws and should be adjusted.
 
 == Changelog ==
 
-= 1.4.25 - 2020-xx-xx =
+= 1.4.25 - 2020-11-25 =
 * Tweak - WC 4.7 compatibility.
 * Tweak - WordPress 5.6 compatibility.
 

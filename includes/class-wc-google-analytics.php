@@ -155,7 +155,7 @@ class WC_Google_Analytics extends WC_Integration {
 				'description'   => sprintf( __( 'The Global Site Tag provides streamlined tagging across Google’s site measurement, conversion tracking, and remarketing products. <a href="%s">See here for more information</a>.', 'woocommerce-google-analytics-integration' ), 'https://support.google.com/analytics/answer/7475631?hl=en' ),
 				'type'          => 'checkbox',
 				'checkboxgroup' => '',
-				'default'       => 'no',
+				'default'       => get_option( $this->get_option_key() ) ? 'no' : 'yes', // don't enable on updates, only default on new installs
 			),
 
 			'ga_standard_tracking_enabled' => array(

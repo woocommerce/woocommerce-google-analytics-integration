@@ -12,6 +12,9 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 
 	/**
 	 * Get the class instance
+	 *
+	 * @param array $options Options
+	 * @return WC_Abstract_Google_Analytics_JS
 	 */
 	public static function get_instance( $options = array() ) {
 		return null === self::$instance ? ( self::$instance = new self( $options ) ) : self::$instance;
@@ -20,6 +23,8 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 	/**
 	 * Constructor
 	 * Takes our options from the parent class so we can later use them in the JS snippets
+	 *
+	 * @param array $options Options
 	 */
 	public function __construct( $options = array() ) {
 		self::$options = $options;
@@ -27,13 +32,18 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 
 	/**
 	 * Returns the tracker variable this integration should use
+	 *
+	 * @return string
 	 */
 	public static function tracker_var() {
 		return apply_filters( 'woocommerce_gtag_tracker_variable', 'gtag' );
 	}
 
 	/**
-	 * Builds the addImpression object
+	 * Enqueues JavaScript to build the addImpression event
+	 *
+	 * @param WC_Product $product
+	 * @param int $position
 	 */
 	public static function listing_impression( $product, $position ) {
 		if ( isset( $_GET['s'] ) ) {
@@ -54,7 +64,10 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 	}
 
 	/**
-	 * Builds an addProduct and click object
+	 * Enqueues JavaScript to build an addProduct and click event
+	 *
+	 * @param WC_Product $product
+	 * @param int $position
 	 */
 	public static function listing_click( $product, $position ) {
 		if ( isset( $_GET['s'] ) ) {
@@ -88,9 +101,10 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 	}
 
 	/**
-	 * Loads the standard Google Gtag code
-	 * @param  boolean $order Classic analytics needs order data to set the currency correctly
-	 * @return string         Gtag loading code
+	 * Loads the standard Gtag code
+	 *
+	 * @param  boolean|WC_Order $order Classic analytics needs order data to set the currency correctly
+	 * @return string                  Gtag loading code
 	 */
 	public static function load_analytics( $order = false ) {
 		$logged_in = is_user_logged_in() ? 'yes' : 'no';
@@ -100,7 +114,6 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 			// See https://developers.google.com/analytics/devguides/collection/gtagjs/events for reference
 			$track_404_enabled = self::tracker_var() . "( 'event', '404_not_found', { 'event_category':'error', 'event_label':'page: ' + document.location.pathname + document.location.search + ' referrer: ' + document.referrer });";
 		}
-
 
 		$gtag_id      = self::get( 'ga_id' );
 		$gtag_snippet = '<script async src="https://www.googletagmanager.com/gtag/js?id=' . esc_js( $gtag_id ) . '"></script>';
@@ -130,7 +143,10 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 	}
 
 	/**
-	 * Enhanced Ecommerce Universal Gtag transaction tracking
+	 * Generate Gtag transaction tracking code
+	 *
+	 * @param  WC_Order $order
+	 * @return string
 	 */
 	protected function add_transaction_enhanced( $order ) {
 		// Order items
@@ -156,9 +172,10 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 	}
 
 	/**
-	 * Add Item (Enhanced, Universal)
-	 * @param object $order WC_Order Object
-	 * @param array $item The item to add to a transaction/order
+	 * Add Item
+	 *
+	 * @param WC_Order $order WC_Order Object
+	 * @param WC_Order_Item $item    The item to add to a transaction/order
 	 */
 	protected function add_item( $order, $item ) {
 		$_product = version_compare( WC_VERSION, '3.0', '<' ) ? $order->get_product_from_item( $item ) : $item->get_product();
@@ -181,7 +198,7 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 	}
 
 	/**
-	 * Tracks an enhanced ecommerce remove from cart action
+	 * Output JavaScript to track an enhanced ecommerce remove from cart action
 	 */
 	public function remove_from_cart() {
 		echo( "
@@ -201,7 +218,9 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 	}
 
 	/**
-	 * Tracks a product detail view
+	 * Enqueue JavaScript to track a product detail view
+	 *
+	 * @param WC_Product $product
 	 */
 	public function product_detail( $product ) {
 		if ( empty( $product ) ) {
@@ -220,7 +239,9 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 	}
 
 	/**
-	 * Tracks when the checkout process is started
+	 * Enqueue JS to track when the checkout process is started
+	 *
+	 * @param WC_Cart $cart
 	 */
 	public function checkout_process( $cart ) {
 		$items = "[";
@@ -255,12 +276,10 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 	}
 
 	/**
-	 * Add to cart
+	 * Enqueue JavaScript for Add to cart tracking
 	 *
 	 * @param array $parameters associative array of _trackEvent parameters
 	 * @param string $selector jQuery selector for binding click event
-	 *
-	 * @return void
 	 */
 	public function event_tracking_code( $parameters, $selector ) {
 

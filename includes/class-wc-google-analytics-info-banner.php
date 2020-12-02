@@ -10,7 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class WC_Google_Analytics_Info_Banner {
 
-	/** @var object Class Instance */
+	/** @var WC_Google_Analytics_Info_Banner Class Instance */
 	private static $instance;
 
 	/** @var boolean If the banner has been dismissed */
@@ -18,6 +18,10 @@ class WC_Google_Analytics_Info_Banner {
 
 	/**
 	 * Get the class instance
+	 *
+	 * @param  boolean $dismissed
+	 * @param  string $ga_id
+	 * @return WC_Google_Analytics_Info_Banner
 	 */
 	public static function get_instance( $dismissed = false, $ga_id = '' ) {
 		return null === self::$instance ? ( self::$instance = new self( $dismissed, $ga_id ) ) : self::$instance;
@@ -25,6 +29,9 @@ class WC_Google_Analytics_Info_Banner {
 
 	/**
 	 * Constructor
+	 *
+	 * @param boolean $dismissed
+	 * @param string $ga_id
 	 */
 	public function __construct( $dismissed = false, $ga_id = '' ) {
 		$this->is_dismissed = (bool) $dismissed;
@@ -42,7 +49,7 @@ class WC_Google_Analytics_Info_Banner {
 	}
 
 	/**
-	 * Displays a info banner on WooCommerce settings pages
+	 * Displays an info banner on WooCommerce settings pages
 	 */
 	public function banner() {
 		$screen = get_current_screen();

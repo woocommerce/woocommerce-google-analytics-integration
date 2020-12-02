@@ -10,10 +10,10 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 abstract class WC_Abstract_Google_Analytics_JS {
 
-	/** @var object Class Instance */
+	/** @var WC_Abstract_Google_Analytics_JS $instance Class Instance */
 	protected static $instance;
 
-	/** @var array Inherited Analytics options */
+	/** @var array $options Inherited Analytics options */
 	protected static $options;
 
 	/** @var string Developer ID */
@@ -21,11 +21,15 @@ abstract class WC_Abstract_Google_Analytics_JS {
 
 	/**
 	 * Get the class instance
+	 *
+	 * @param  array $options Options
+	 * @return WC_Abstract_Google_Analytics_JS
 	 */
 	abstract public static function get_instance( $options = array() );
 
 	/**
 	 * Return one of our options
+	 *
 	 * @param  string $option Key/name for the option
 	 * @return string         Value of the option
 	 */
@@ -35,6 +39,8 @@ abstract class WC_Abstract_Google_Analytics_JS {
 
 	/**
 	 * Returns the tracker variable this integration should use
+	 *
+	 * @return string
 	 */
 	abstract public static function tracker_var();
 
@@ -56,26 +62,34 @@ abstract class WC_Abstract_Google_Analytics_JS {
 	}
 
 	/**
-	 * Builds the addImpression object
+	 * Enqueues JavaScript to build the addImpression object
+	 *
+	 * @param WC_Product $product
+	 * @param int $position
 	 */
 	abstract public static function listing_impression( $product, $position );
 
 	/**
-	 * Builds an addProduct and click object
+	 * Enqueues JavaScript to build an addProduct and click object
+	 *
+	 * @param WC_Product $product
+	 * @param int $position
 	 */
 	abstract public static function listing_click( $product, $position ) ;
 
 	/**
 	 * Loads the correct Google Gtag code (classic or universal)
-	 * @param  boolean $order Classic analytics needs order data to set the currency correctly
-	 * @return string         Gtag loading code
+	 *
+	 * @param  boolean|WC_Order $order Classic analytics needs order data to set the currency correctly
+	 * @return string                  Analytics loading code
 	 */
 	abstract public static function load_analytics( $order = false );
 
 	/**
-	 * Used to pass transaction data to Google Gtag
-	 * @param object $order WC_Order Object
-	 * @return string Add Transaction code
+	 * Generate code used to pass transaction data to Google Analytics.
+	 *
+	 * @param  WC_Order $order WC_Order Object
+	 * @return string          Add Transaction code
 	 */
 	public function add_transaction( $order ) {
 		if ( 'yes' === self::get( 'ga_enhanced_ecommerce_tracking_enabled' ) ) {
@@ -86,16 +100,19 @@ abstract class WC_Abstract_Google_Analytics_JS {
 	}
 
 	/**
-	 * Enhanced Gtag transaction tracking
-	 * @param object $order WC_Order object
-	 * @return string Add Transaction Code
+	 * Generate Enhanced eCommerce transaction tracking code
+	 *
+	 * @param  WC_Order $order WC_Order object
+	 * @return string          Add Transaction Code
 	 */
 	abstract protected function add_transaction_enhanced( $order );
 
 	/**
-	 * Add Item (Universal)
-	 * @param object $order WC_Order Object
-	 * @param array $item  The item to add to a transaction/order
+	 * Generate Universal Analytics add item tracking code
+	 *
+	 * @param  WC_Order $order     WC_Order Object
+	 * @param  WC_Order_Item $item The item to add to a transaction/order
+	 * @return string
 	 */
 	protected function add_item_universal( $order, $item ) {
 		$_product = version_compare( WC_VERSION, '3.0', '<' ) ? $order->get_product_from_item( $item ) : $item->get_product();
@@ -113,9 +130,10 @@ abstract class WC_Abstract_Google_Analytics_JS {
 	}
 
 	/**
-	 * Universal Gtag transaction tracking
-	 * @param object $order WC_Order object
-	 * @return string Add Transaction Code
+	 * Generate Universal Analytics transaction tracking code
+	 *
+	 * @param  WC_Order $order WC_Order object
+	 * @return string          Add Transaction tracking code
 	 */
 	protected function add_transaction_universal( $order ) {
 		$code = "ga('ecommerce:addTransaction', {
@@ -140,8 +158,9 @@ abstract class WC_Abstract_Google_Analytics_JS {
 
 	/**
 	 * Returns a 'category' JSON line based on $product
-	 * @param  object $product  Product to pull info for
-	 * @return string          Line of JSON
+	 *
+	 * @param  WC_Product $_product  Product to pull info for
+	 * @return string               Line of JSON
 	 */
 	protected static function product_get_category_line( $_product ) {
 		$out            = array();
@@ -164,8 +183,9 @@ abstract class WC_Abstract_Google_Analytics_JS {
 
 	/**
 	 * Returns a 'variant' JSON line based on $product
-	 * @param  object $product  Product to pull info for
-	 * @return string          Line of JSON
+	 *
+	 * @param  WC_Product $_product  Product to pull info for
+	 * @return string               Line of JSON
 	 */
 	protected static function product_get_variant_line( $_product ) {
 		$out            = '';
@@ -179,27 +199,29 @@ abstract class WC_Abstract_Google_Analytics_JS {
 	}
 
 	/**
-	 * Tracks an enhanced ecommerce remove from cart action
+	 * Echo JavaScript to track an enhanced ecommerce remove from cart action
 	 */
 	abstract public function remove_from_cart();
 
 	/**
-	 * Tracks a product detail view
+	 * Enqueue JavaScript to track a product detail view
+	 *
+	 * @param WC_Product $product
 	 */
 	abstract public function product_detail( $product );
 
 	/**
-	 * Tracks when the checkout process is started
+	 * Enqueue JS to track when the checkout process is started
+	 *
+	 * @param WC_Cart $cart
 	 */
 	abstract public function checkout_process( $cart );
 
 	/**
-	 * Add to cart
+	 * Enqueue JavaScript for Add to cart tracking
 	 *
 	 * @param array $parameters associative array of _trackEvent parameters
 	 * @param string $selector jQuery selector for binding click event
-	 *
-	 * @return void
 	 */
 	abstract public function event_tracking_code( $parameters, $selector );
 }

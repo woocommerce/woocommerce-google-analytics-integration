@@ -12,9 +12,9 @@ class WC_Google_Analytics_JS extends WC_Abstract_Google_Analytics_JS {
 
 	/**
 	 * Get the class instance
-	 * @param array $options
 	 *
-	 * @return WC_Google_Analytics_JS
+	 * @param array $options Options
+	 * @return WC_Abstract_Google_Analytics_JS
 	 */
 	public static function get_instance( $options = array() ) {
 		return null === self::$instance ? ( self::$instance = new self( $options ) ) : self::$instance;
@@ -24,7 +24,7 @@ class WC_Google_Analytics_JS extends WC_Abstract_Google_Analytics_JS {
 	 * Constructor
 	 * Takes our options from the parent class so we can later use them in the JS snippets
 	 *
-	 * @param array $options
+	 * @param array $options Options
 	 */
 	public function __construct( $options = array() ) {
 		self::$options = $options;
@@ -32,6 +32,8 @@ class WC_Google_Analytics_JS extends WC_Abstract_Google_Analytics_JS {
 
 	/**
 	 * Returns the tracker variable this integration should use
+     *
+	 * @return string
 	 */
 	public static function tracker_var() {
 		return apply_filters( 'woocommerce_ga_tracker_variable', 'ga' );
@@ -39,8 +41,9 @@ class WC_Google_Analytics_JS extends WC_Abstract_Google_Analytics_JS {
 
 	/**
 	 * Loads the correct Google Analytics code (classic or universal)
-	 * @param  boolean $order Classic analytics needs order data to set the currency correctly
-	 * @return string         Analytics loading code
+	 *
+	 * @param  boolean|WC_Order $order Classic analytics needs order data to set the currency correctly
+	 * @return string                  Analytics loading code
 	 */
 	public static function load_analytics( $order = false ) {
 		$logged_in = is_user_logged_in() ? 'yes' : 'no';
@@ -56,9 +59,10 @@ class WC_Google_Analytics_JS extends WC_Abstract_Google_Analytics_JS {
 
 	/**
 	 * Loads ga.js analytics tracking code
-	 * @param  string  $logged_in 'yes' if the user is logged in, no if not (this is a string so we can pass it to GA)
+	 *
+	 * @param  string  $logged_in     'yes' if the user is logged in, no if not (this is a string so we can pass it to GA)
 	 * @param  boolean|object $order  We don't always need to load order data for currency, so we omit that if false is set, otherwise this is an order object
-	 * @return string         Classic Analytics loading code
+	 * @return string                 Classic Analytics loading code
 	 */
 	protected static function load_analytics_classic( $logged_in, $order = false ) {
 		$anonymize_enabled = '';
@@ -101,7 +105,10 @@ class WC_Google_Analytics_JS extends WC_Abstract_Google_Analytics_JS {
 	}
 
 	/**
-	 * Builds the addImpression object
+	 * Enqueues JavaScript to build the addImpression object
+	 *
+	 * @param WC_Product $product
+	 * @param int $position
 	 */
 	public static function listing_impression( $product, $position ) {
 		if ( isset( $_GET['s'] ) ) {
@@ -122,7 +129,10 @@ class WC_Google_Analytics_JS extends WC_Abstract_Google_Analytics_JS {
 	}
 
 	/**
-	 * Builds an addProduct and click object
+	 * Enqueues JavaScript to build an addProduct and click object
+	 *
+	 * @param WC_Product $product
+	 * @param int $position
 	 */
 	public static function listing_click( $product, $position ) {
 		if ( isset( $_GET['s'] ) ) {
@@ -151,7 +161,6 @@ class WC_Google_Analytics_JS extends WC_Abstract_Google_Analytics_JS {
 	}
 
 	/**
-	 * Asynchronously loads the classic Google Analytics code, and does so after all of our properties are loaded
 	 * Loads in the footer
 	 * @see wp_footer
 	 */
@@ -170,7 +179,7 @@ class WC_Google_Analytics_JS extends WC_Abstract_Google_Analytics_JS {
 	}
 
 	/**
-	 * Sends the pageview last thing (needed for things like addImpression)
+	 * Enqueues JavaScript to send the pageview last thing (needed for things like addImpression)
 	 */
 	public static function universal_analytics_footer() {
 		if ( apply_filters( 'wc_google_analytics_send_pageview', true ) ) {
@@ -181,6 +190,8 @@ class WC_Google_Analytics_JS extends WC_Abstract_Google_Analytics_JS {
 	/**
 	 * This was created to fix public facing api typo in a filter name
 	 * and inform about the deprecation.
+	 *
+	 * @param boolean $send_pageview
 	 */
 	public static function universal_analytics_footer_filter( $send_pageview ) {
 		return apply_filters_deprecated( 'wc_goole_analytics_send_pageview', array( $send_pageview ), '1.4.20', 'wc_google_analytics_send_pageview' );
@@ -188,8 +199,9 @@ class WC_Google_Analytics_JS extends WC_Abstract_Google_Analytics_JS {
 
 	/**
 	 * Loads the universal analytics code
+	 *
 	 * @param  string $logged_in 'yes' if the user is logged in, no if not (this is a string so we can pass it to GA)
-	 * @return string Universal Analytics Code
+	 * @return string            Universal Analytics Code
 	 */
 	protected static function load_analytics_universal( $logged_in ) {
 
@@ -262,10 +274,10 @@ class WC_Google_Analytics_JS extends WC_Abstract_Google_Analytics_JS {
 	}
 
 	/**
-	 * Used to pass transaction data to Google Analytics.
+	 * Generate code used to pass transaction data to Google Analytics.
 	 *
-	 * @param object $order WC_Order Object.
-	 * @return string Add Transaction code.
+	 * @param  WC_Order $order WC_Order Object.
+	 * @return string          Add Transaction code.
 	 */
 	public function add_transaction( $order ) {
 		if ( 'yes' === self::get( 'ga_use_universal_analytics' ) ) {
@@ -298,8 +310,8 @@ class WC_Google_Analytics_JS extends WC_Abstract_Google_Analytics_JS {
 
 	/**
 	 * ga.js (classic) transaction tracking
-	 * @param object $order WC_Order Object
-	 * @return string Add Transaction Code
+	 * @param  WC_Order $order WC_Order Object
+	 * @return string          Add Transaction Code
 	 */
 	protected function add_transaction_classic( $order ) {
 		$code = "_gaq.push(['_addTrans',
@@ -325,7 +337,10 @@ class WC_Google_Analytics_JS extends WC_Abstract_Google_Analytics_JS {
 	}
 
 	/**
-	 * Enhanced Ecommerce Universal Analytics transaction tracking
+	 * Generate Universal Analytics Enhanced Ecommerce transaction tracking code
+	 *
+	 * @param  WC_Order $order
+	 * @return string
 	 */
 	protected function add_transaction_enhanced( $order ) {
 		$code = "" . self::tracker_var() . "( 'set', '&cu', '" . esc_js( version_compare( WC_VERSION, '3.0', '<' ) ? $order->get_order_currency() : $order->get_currency() ) . "' );";
@@ -350,8 +365,10 @@ class WC_Google_Analytics_JS extends WC_Abstract_Google_Analytics_JS {
 
 	/**
 	 * Add Item (Classic)
-	 * @param object $order WC_Order Object
-	 * @param array $item  The item to add to a transaction/order
+	 *
+	 * @param  WC_Order $order WC_Order Object
+	 * @param  array $item     The item to add to a transaction/order
+	 * @return string
 	 */
 	protected function add_item_classic( $order, $item ) {
 		$_product = version_compare( WC_VERSION, '3.0', '<' ) ? $order->get_product_from_item( $item ) : $item->get_product();
@@ -370,8 +387,10 @@ class WC_Google_Analytics_JS extends WC_Abstract_Google_Analytics_JS {
 
 	/**
 	 * Add Item (Enhanced, Universal)
-	 * @param object $order WC_Order Object
-	 * @param array $item The item to add to a transaction/order
+	 *
+	 * @param  WC_Order $order     WC_Order Object
+	 * @param  WC_Order_Item $item The item to add to a transaction/order
+	 * @return string
 	 */
 	protected function add_item_enhanced( $order, $item ) {
 		$_product = version_compare( WC_VERSION, '3.0', '<' ) ? $order->get_product_from_item( $item ) : $item->get_product();
@@ -394,7 +413,7 @@ class WC_Google_Analytics_JS extends WC_Abstract_Google_Analytics_JS {
 	}
 
 	/**
-	 * Tracks an enhanced ecommerce remove from cart action
+	 * Output JavaScript to track an enhanced ecommerce remove from cart action
 	 */
 	public function remove_from_cart() {
 		echo( "
@@ -414,7 +433,9 @@ class WC_Google_Analytics_JS extends WC_Abstract_Google_Analytics_JS {
 	}
 
 	/**
-	 * Tracks a product detail view
+	 * Enqueue JavaScript to track a product detail view
+	 *
+	 * @param WC_Product $product
 	 */
 	public function product_detail( $product ) {
 		if ( empty( $product ) ) {
@@ -433,7 +454,9 @@ class WC_Google_Analytics_JS extends WC_Abstract_Google_Analytics_JS {
 	}
 
 	/**
-	 * Tracks when the checkout process is started
+	 * Enqueue JS to track when the checkout process is started
+	 *
+	 * @param WC_Cart $cart
 	 */
 	public function checkout_process( $cart ) {
 		$code = "";
@@ -460,12 +483,10 @@ class WC_Google_Analytics_JS extends WC_Abstract_Google_Analytics_JS {
 	}
 
 	/**
-	 * Add to cart
+	 * Enqueue JavaScript for Add to cart tracking
 	 *
 	 * @param array $parameters associative array of _trackEvent parameters
 	 * @param string $selector jQuery selector for binding click event
-	 *
-	 * @return void
 	 */
 	public function event_tracking_code( $parameters, $selector ) {
 		$parameters = apply_filters( 'woocommerce_ga_event_tracking_parameters', $parameters );

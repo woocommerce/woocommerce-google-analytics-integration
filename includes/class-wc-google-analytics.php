@@ -34,7 +34,7 @@ class WC_Google_Analytics extends WC_Integration {
 	/**
 	 * Returns the proper class based on Gtag settings.
 	 *
-	 * @param array $options Options
+	 * @param  array $options                  Options
 	 * @return WC_Abstract_Google_Analytics_JS
 	 */
 	protected function get_tracking_instance( $options = array() ) {
@@ -46,9 +46,8 @@ class WC_Google_Analytics extends WC_Integration {
 	}
 
 	/**
+	 * Constructor
 	 * Init and hook in the integration.
-	 *
-	 * @return void
 	 */
 	public function __construct() {
 		$this->id                    = 'google_analytics';
@@ -98,7 +97,8 @@ class WC_Google_Analytics extends WC_Integration {
 	}
 
 	/**
-	 * Loads all of our options for this plugin
+	 * Loads all of our options for this plugin (stored as properties as well)
+	 *
 	 * @return array An array of options that can be passed to other classes
 	 */
 	public function init_options() {
@@ -285,9 +285,8 @@ class WC_Google_Analytics extends WC_Integration {
 	 * only if you have opted into WooCommerce tracking
 	 * http://www.woothemes.com/woocommerce/usage-tracking/
 	 *
-	 * @param array $data Current WC tracker data.
-	 *
-	 * @return array Updated WC Tracker data.
+	 * @param  array $data Current WC tracker data.
+	 * @return array       Updated WC Tracker data.
 	 */
 	function track_options( $data ) {
 		$data['wc-google-analytics'] = array(
@@ -314,7 +313,7 @@ class WC_Google_Analytics extends WC_Integration {
 	}
 
 	/**
-	 *
+	 * Enqueue the admin JavaScript
 	 */
 	function load_admin_assets() {
 		$screen = get_current_screen();
@@ -365,7 +364,7 @@ class WC_Google_Analytics extends WC_Integration {
 	}
 
 	/**
-	 * Standard Google Analytics tracking
+	 * Generate Standard Google Analytics tracking
 	 */
 	protected function get_standard_tracking_code() {
 		return "<!-- WooCommerce Google Analytics Integration -->
@@ -375,7 +374,7 @@ class WC_Google_Analytics extends WC_Integration {
 	}
 
 	/**
-	 * eCommerce tracking
+	 * Generate eCommerce tracking code
 	 *
 	 * @param int $order_id
 	 * @return string
@@ -407,9 +406,8 @@ class WC_Google_Analytics extends WC_Integration {
 	/**
 	 * Check if tracking is disabled
 	 *
-	 * @param string $type The setting to check
-	 *
-	 * @return bool True if tracking for a certain setting is disabled
+	 * @param  string $type The setting to check
+	 * @return bool         True if tracking for a certain setting is disabled
 	 */
 	private function disable_tracking( $type ) {
 		return is_admin() || current_user_can( 'manage_options' ) || ( ! $this->ga_id ) || 'no' === $type || apply_filters( 'woocommerce_ga_disable_tracking', false, $type );
@@ -417,8 +415,6 @@ class WC_Google_Analytics extends WC_Integration {
 
 	/**
 	 * Google Analytics event tracking for single product add to cart
-	 *
-	 * @return void
 	 */
 	public function add_to_cart() {
 		if ( $this->disable_tracking( $this->ga_event_tracking_enabled ) ) {
@@ -470,10 +466,9 @@ class WC_Google_Analytics extends WC_Integration {
 	/**
 	 * Adds the product ID and SKU to the remove product link if not present
 	 *
-	 * @param string $url
-	 * @param string $key
-	 *
-	 * @return string|string[]
+	 * @param  string $url
+	 * @param  string $key
+	 * @return string
 	 */
 	public function remove_from_cart_attributes( $url, $key ) {
 		if ( strpos( $url,'data-product_id' ) !== false ) {
@@ -497,8 +492,6 @@ class WC_Google_Analytics extends WC_Integration {
 
 	/**
 	 * Google Analytics event tracking for loop add to cart
-	 *
-	 * @return void
 	 */
 	public function loop_add_to_cart() {
 		if ( $this->disable_tracking( $this->ga_event_tracking_enabled ) ) {
@@ -585,7 +578,7 @@ class WC_Google_Analytics extends WC_Integration {
 	/**
 	 * Tracks when the checkout form is loaded
 	 *
-	 * @param $checkout
+	 * @param mixed $checkout (unused)
 	 */
 	public function checkout_process( $checkout ) {
 		if ( $this->disable_tracking( $this->ga_use_universal_analytics ) ) {
@@ -607,7 +600,6 @@ class WC_Google_Analytics extends WC_Integration {
 	 * Add the utm_nooverride parameter to any return urls. This makes sure Google Adwords doesn't mistake the offsite gateway as the referrer.
 	 *
 	 * @param  string $return_url WooCommerce Return URL
-	 *
 	 * @return string URL
 	 */
 	public function utm_nooverride( $return_url ) {

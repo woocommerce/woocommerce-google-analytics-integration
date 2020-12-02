@@ -136,7 +136,7 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 			'custom_map': {
 				'dimension1': 'logged_in'
 			},
-			'logged_in':" . ( $logged_in ? 'true' : 'false' ) . "
+			'logged_in': '$logged_in'
 		} );
 
 		$track_404_enabled

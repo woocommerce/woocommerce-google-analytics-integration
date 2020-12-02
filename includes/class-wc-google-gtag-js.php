@@ -102,13 +102,14 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 		}
 
 
-		$gtag_id = self::get( 'ga_id' );
+		$gtag_id      = self::get( 'ga_id' );
 		$gtag_snippet = '<script async src="https://www.googletagmanager.com/gtag/js?id=' . esc_js( $gtag_id ) . '"></script>';
 		$gtag_snippet .= "
 		<script>
 		window.dataLayer = window.dataLayer || [];
 		function gtag(){dataLayer.push(arguments);}
 		gtag('js', new Date());
+		" . ( ! empty( self::DEVELOPER_ID )  ? "gtag('set', 'developer_id." . self::DEVELOPER_ID . "', true);" : '' ) . "
 
 		gtag('config', '" . esc_js( $gtag_id ) . "', {
 			'allow_google_signals': " . ( 'yes' === self::get( 'ga_support_display_advertising' ) ? 'true' : 'false' ) . ",

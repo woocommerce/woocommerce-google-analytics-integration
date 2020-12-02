@@ -16,6 +16,9 @@ abstract class WC_Abstract_Google_Analytics_JS {
 	/** @var array Inherited Analytics options */
 	protected static $options;
 
+	/** @var string Developer ID */
+	const DEVELOPER_ID = '5CDcaG';
+
 	/**
 	 * Get the class instance
 	 */

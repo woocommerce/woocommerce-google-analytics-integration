@@ -230,13 +230,18 @@ class WC_Google_Analytics_JS extends WC_Abstract_Google_Analytics_JS {
 		})(window,document,'script', '{$src}','" . self::tracker_var() . "');";
 
 		$ga_id = self::get( 'ga_id' );
-		$ga_snippet_create = self::tracker_var() . "( 'create', '" . esc_js( $ga_id ) . "', '" . $set_domain_name . "' );";
+		$ga_snippet_create       = self::tracker_var() . "( 'create', '" . esc_js( $ga_id ) . "', '" . $set_domain_name . "' );";
 
-		$ga_snippet_require =
-		$support_display_advertising .
-		$support_enhanced_link_attribution .
-		$anonymize_enabled .
-		$track_404_enabled . "
+		if ( ! empty( self::DEVELOPER_ID ) ) {
+			$ga_snippet_developer_id = "(window.gaDevIds=window.gaDevIds||[]).push('" . self::DEVELOPER_ID . "');";
+		} else {
+			$ga_snippet_developer_id = '';
+		}
+
+		$ga_snippet_require      = $support_display_advertising .
+			$support_enhanced_link_attribution .
+			$anonymize_enabled .
+			$track_404_enabled . "
 		" . self::tracker_var() . "( 'set', 'dimension1', '" . $logged_in . "' );\n";
 
 		if ( 'yes' === self::get( 'ga_enhanced_ecommerce_tracking_enabled' ) ) {
@@ -245,11 +250,12 @@ class WC_Google_Analytics_JS extends WC_Abstract_Google_Analytics_JS {
 			$ga_snippet_require .= "" . self::tracker_var() . "( 'require', 'ecommerce', 'ecommerce.js');";
 		}
 
-		$ga_snippet_head = apply_filters( 'woocommerce_ga_snippet_head' , $ga_snippet_head );
-		$ga_snippet_create = apply_filters( 'woocommerce_ga_snippet_create' , $ga_snippet_create, $ga_id );
-		$ga_snippet_require = apply_filters( 'woocommerce_ga_snippet_require' , $ga_snippet_require );
+		$ga_snippet_head         = apply_filters( 'woocommerce_ga_snippet_head', $ga_snippet_head );
+		$ga_snippet_create       = apply_filters( 'woocommerce_ga_snippet_create', $ga_snippet_create, $ga_id );
+		$ga_snippet_developer_id = apply_filters( 'woocommerce_ga_snippet_developer_id', $ga_snippet_developer_id );
+		$ga_snippet_require      = apply_filters( 'woocommerce_ga_snippet_require', $ga_snippet_require );
 
-		$code = "<script type='text/javascript'>" . $ga_snippet_head . $ga_snippet_create . $ga_snippet_require . "</script>";
+		$code = "<script type='text/javascript'>" . $ga_snippet_head . $ga_snippet_create . $ga_snippet_developer_id . $ga_snippet_require . "</script>";
 		$code = apply_filters( 'woocommerce_ga_snippet_output', $code );
 
 		return $code;

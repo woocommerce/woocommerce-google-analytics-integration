@@ -60,9 +60,10 @@ class WC_Google_Analytics_JS extends WC_Abstract_Google_Analytics_JS {
 	/**
 	 * Loads ga.js analytics tracking code
 	 *
-	 * @param  string  $logged_in     'yes' if the user is logged in, no if not (this is a string so we can pass it to GA)
-	 * @param  boolean|object $order  We don't always need to load order data for currency, so we omit that if false is set, otherwise this is an order object
-	 * @return string                 Classic Analytics loading code
+	 * @param  string  $logged_in      'yes' if the user is logged in, no if not (this is a string so we can pass it to GA)
+	 * @param  boolean|WC_Order $order We don't always need to load order data for currency, so we omit
+	 *                                 that if false is set, otherwise this is an order object
+	 * @return string                  Classic Analytics loading code
 	 */
 	protected static function load_analytics_classic( $logged_in, $order = false ) {
 		$anonymize_enabled = '';

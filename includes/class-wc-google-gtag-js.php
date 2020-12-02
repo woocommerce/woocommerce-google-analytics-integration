@@ -134,8 +134,9 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 			'link_attribution': " . ( 'yes' === self::get( 'ga_support_enhanced_link_attribution' ) ? 'true' : 'false' ) . ",
 			'anonymize_ip': " . ( 'yes' === self::get( 'ga_anonymize_enabled' ) ? 'true' : 'false' ) . ",
 			'custom_map': {
-				'dimension1': " . ( $logged_in ? 'true' : 'false' ) . ",
+				'dimension1': 'logged_in'
 			},
+			'logged_in':" . ( $logged_in ? 'true' : 'false' ) . "
 		} );
 
 		$track_404_enabled

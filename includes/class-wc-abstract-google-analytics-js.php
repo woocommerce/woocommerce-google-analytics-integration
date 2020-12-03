@@ -17,7 +17,7 @@ abstract class WC_Abstract_Google_Analytics_JS {
 	protected static $options;
 
 	/** @var string Developer ID */
-	const DEVELOPER_ID = '5CDcaG';
+	const DEVELOPER_ID = 'dOGY3NW';
 
 	/**
 	 * Get the class instance

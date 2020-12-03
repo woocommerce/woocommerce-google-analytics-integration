@@ -213,7 +213,7 @@ abstract class WC_Abstract_Google_Analytics_JS {
 	/**
 	 * Enqueue JS to track when the checkout process is started
 	 *
-	 * @param WC_Cart $cart
+	 * @param array $cart items/contents of the cart
 	 */
 	abstract public function checkout_process( $cart );
 

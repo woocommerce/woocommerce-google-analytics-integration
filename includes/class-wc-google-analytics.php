@@ -146,7 +146,8 @@ class WC_Google_Analytics extends WC_Integration {
 				'title' 			=> __( 'Set Domain Name', 'woocommerce-google-analytics-integration' ),
 				'description' 		=> sprintf( __( '(Optional) Sets the <code>_setDomainName</code> variable. <a href="%s" target="_blank">See here for more information</a>.', 'woocommerce-google-analytics-integration' ), 'https://developers.google.com/analytics/devguides/collection/gajs/gaTrackingSite#multipleDomains' ),
 				'type' 				=> 'text',
-				'default' 			=> ''
+				'default' 			=> '',
+				'class'             => 'legacy-setting',
 			),
 
 			'ga_gtag_enabled' => array(
@@ -299,6 +300,7 @@ class WC_Google_Analytics extends WC_Integration {
 			'ecommerce_tracking_enabled'  		=> $this->ga_ecommerce_tracking_enabled,
 			'event_tracking_enabled'      		=> $this->ga_event_tracking_enabled,
 			'gtag_enabled'                      => $this->ga_gtag_enabled,
+			'set_domain_name'                   => empty( $this->ga_set_domain_name ) ? 'no' : 'yes',
 		);
 
 		// ID prefix, blank, or X for unknown

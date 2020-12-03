@@ -515,19 +515,42 @@ class WC_Google_Analytics extends WC_Integration {
 		$this->get_tracking_instance()->event_tracking_code( $parameters, '.add_to_cart_button:not(.product_type_variable, .product_type_grouped)' );
 	}
 
+	protected function enhanced_ecommerce_enabled( $extra_checks = [] ) {
+		if ( !is_array( $extra_checks ) ) {
+			$extra_checks = [ $extra_checks ];
+		}
+
+		// Always true if gtag is enabled.
+		if ( ! $this->disable_tracking( $this->ga_gtag_enabled ) ) {
+			return true;
+		}
+
+		// False if gtag and UA are disabled.
+		if ( $this->disable_tracking( $this->ga_use_universal_analytics ) ) {
+			return false;
+		}
+
+		// False if gtag is disabled, UA is enabled, but enhanced ecommerce is disabled.
+		if ( $this->disable_tracking( $this->ga_enhanced_ecommerce_tracking_enabled ) ) {
+			return false;
+		}
+
+		// False if any specified interaction-level checks are disabled.
+		foreach ( $extra_checks as $option_value ) {
+			if ( $this->disable_tracking( $option_value ) ) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
 	/**
 	 * Measures a listing impression (from search results)
 	 */
 	public function listing_impression() {
-		if ( $this->disable_tracking( $this->ga_use_universal_analytics ) ) {
-			return;
-		}
 
-		if ( $this->disable_tracking( $this->ga_enhanced_ecommerce_tracking_enabled ) ) {
-			return;
-		}
-
-		if ( $this->disable_tracking( $this->ga_enhanced_product_impression_enabled ) ) {
+		if ( ! $this->enhanced_ecommerce_enabled( $this->ga_enhanced_product_impression_enabled ) ) {
 			return;
 		}
 
@@ -539,15 +562,8 @@ class WC_Google_Analytics extends WC_Integration {
 	 * Measure a product click from a listing page
 	 */
 	public function listing_click() {
-		if ( $this->disable_tracking( $this->ga_use_universal_analytics ) ) {
-			return;
-		}
 
-		if ( $this->disable_tracking( $this->ga_enhanced_ecommerce_tracking_enabled ) ) {
-			return;
-		}
-
-		if ( $this->disable_tracking( $this->ga_enhanced_product_click_enabled ) ) {
+		if ( ! $this->enhanced_ecommerce_enabled( $this->ga_enhanced_product_click_enabled ) ) {
 			return;
 		}
 
@@ -559,15 +575,8 @@ class WC_Google_Analytics extends WC_Integration {
 	 * Measure a product detail view
 	 */
 	public function product_detail() {
-		if ( $this->disable_tracking( $this->ga_use_universal_analytics ) ) {
-			return;
-		}
 
-		if ( $this->disable_tracking( $this->ga_enhanced_ecommerce_tracking_enabled ) ) {
-			return;
-		}
-
-		if ( $this->disable_tracking( $this->ga_enhanced_product_detail_view_enabled ) ) {
+		if ( ! $this->enhanced_ecommerce_enabled( $this->ga_enhanced_product_detail_view_enabled ) ) {
 			return;
 		}
 
@@ -581,15 +590,8 @@ class WC_Google_Analytics extends WC_Integration {
 	 * @param mixed $checkout (unused)
 	 */
 	public function checkout_process( $checkout ) {
-		if ( $this->disable_tracking( $this->ga_use_universal_analytics ) ) {
-			return;
-		}
 
-		if ( $this->disable_tracking( $this->ga_enhanced_ecommerce_tracking_enabled ) ) {
-			return;
-		}
-
-		if ( $this->disable_tracking( $this->ga_enhanced_checkout_process_enabled ) ) {
+		if ( ! $this->enhanced_ecommerce_enabled( $this->ga_enhanced_checkout_process_enabled ) ) {
 			return;
 		}
 

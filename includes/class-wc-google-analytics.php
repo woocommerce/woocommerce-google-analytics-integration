@@ -450,15 +450,8 @@ class WC_Google_Analytics extends WC_Integration {
 	 * Enhanced Analytics event tracking for removing a product from the cart
 	 */
 	public function remove_from_cart() {
-		if ( $this->disable_tracking( $this->ga_use_universal_analytics ) ) {
-			return;
-		}
 
-		if ( $this->disable_tracking( $this->ga_enhanced_ecommerce_tracking_enabled ) ) {
-			return;
-		}
-
-		if ( $this->disable_tracking( $this->ga_enhanced_remove_from_cart_enabled ) ) {
+		if ( ! $this->enhanced_ecommerce_enabled( $this->ga_enhanced_remove_from_cart_enabled ) ) {
 			return;
 		}
 
@@ -517,22 +510,24 @@ class WC_Google_Analytics extends WC_Integration {
 		$this->get_tracking_instance()->event_tracking_code( $parameters, '.add_to_cart_button:not(.product_type_variable, .product_type_grouped)' );
 	}
 
+	/**
+	 * Determine if the conditions are met for enhanced ecommerce interactions to be displayed.
+	 * Currently checks if Global Tags OR Universal Analytics are enabled, plus Enhanced eCommerce.
+	 *
+	 * @param  array $extra_checks Any extra option values that should be 'yes' to proceed
+	 * @return bool                Whether enhanced ecommerce transactions can be displayed.
+	 */
 	protected function enhanced_ecommerce_enabled( $extra_checks = [] ) {
 		if ( !is_array( $extra_checks ) ) {
 			$extra_checks = [ $extra_checks ];
 		}
 
-		// Always true if gtag is enabled.
-		if ( ! $this->disable_tracking( $this->ga_gtag_enabled ) ) {
-			return true;
-		}
-
 		// False if gtag and UA are disabled.
-		if ( $this->disable_tracking( $this->ga_use_universal_analytics ) ) {
+		if ( $this->disable_tracking( $this->ga_use_universal_analytics ) && $this->disable_tracking( $this->ga_gtag_enabled ) ) {
 			return false;
 		}
 
-		// False if gtag is disabled, UA is enabled, but enhanced ecommerce is disabled.
+		// False if gtag or UA is enabled, but enhanced ecommerce is disabled.
 		if ( $this->disable_tracking( $this->ga_enhanced_ecommerce_tracking_enabled ) ) {
 			return false;
 		}

@@ -18,11 +18,11 @@ jQuery(document).ready( function($) {
 		// Legacy: gtag NO
 		toggleCheckboxRow( $( '.legacy-setting' ), ! isGtag );
 
-		// Enhanced settings: Enhanced YES, universal YES, gtag NO
-		toggleCheckboxRow( $( '.enhanced-setting' ), isEnhancedEcommerce && isUniversalAnalytics && ! isGtag );
+		// Enhanced settings: Enhanced YES + universal YES or gtag YES
+		toggleCheckboxRow( $( '.enhanced-setting' ), isEnhancedEcommerce && ( isUniversalAnalytics || isGtag ) );
 
-		// Enhanced toggle: universal YES, gtag NO
-		toggleCheckboxRow( ecCheckbox, isUniversalAnalytics && ! isGtag );
+		// Enhanced toggle: universal YES or gtag YES
+		toggleCheckboxRow( ecCheckbox, isUniversalAnalytics || isGtag );
 
 		// Universal toggle: gtag NO
 		toggleCheckboxRow( uaCheckbox, ! isGtag );

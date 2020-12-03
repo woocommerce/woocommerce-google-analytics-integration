@@ -137,7 +137,7 @@ class WC_Google_Analytics extends WC_Integration {
 		$this->form_fields = array(
 			'ga_id' => array(
 				'title'       => __( 'Google Analytics Tracking ID', 'woocommerce-google-analytics-integration' ),
-				'description' => __( 'Log into your Google Analytics account to find your ID. e.g. <code>UA-XXXXX-X</code>', 'woocommerce-google-analytics-integration' ),
+				'description' => __( 'Log into your Google Analytics account to find your ID. e.g. <code>G-XXXXX</code> or <code>UA-XXXXX-X</code>', 'woocommerce-google-analytics-integration' ),
 				'type'        => 'text',
 				'placeholder' => 'UA-XXXXX-X',
 				'default'     => get_option( 'woocommerce_ga_id' ) // Backwards compat
@@ -152,7 +152,7 @@ class WC_Google_Analytics extends WC_Integration {
 			'ga_gtag_enabled' => array(
 				'title'         => __( 'Tracking Options', 'woocommerce-google-analytics-integration' ),
 				'label'         => __( 'Use Global Site Tag', 'woocommerce-google-analytics-integration' ),
-				'description'   => sprintf( __( 'The Global Site Tag provides streamlined tagging across Google’s site measurement, conversion tracking, and remarketing products. <a href="%s">See here for more information</a>.', 'woocommerce-google-analytics-integration' ), 'https://support.google.com/analytics/answer/7475631?hl=en' ),
+				'description'   => sprintf( __( 'The Global Site Tag provides streamlined tagging across Google’s site measurement, conversion tracking, and remarketing products. This MUST be enabled to use a Google Analytics 4 Measurement ID (e.g., <code>G-XXXXX</code>). <a href="%s">See here for more information</a>.', 'woocommerce-google-analytics-integration' ), 'https://support.google.com/analytics/answer/7475631?hl=en' ),
 				'type'          => 'checkbox',
 				'checkboxgroup' => '',
 				'default'       => get_option( $this->get_option_key() ) ? 'no' : 'yes', // don't enable on updates, only default on new installs

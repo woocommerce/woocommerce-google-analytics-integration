@@ -301,6 +301,7 @@ class WC_Google_Analytics extends WC_Integration {
 			'event_tracking_enabled'      		=> $this->ga_event_tracking_enabled,
 			'gtag_enabled'                      => $this->ga_gtag_enabled,
 			'set_domain_name'                   => empty( $this->ga_set_domain_name ) ? 'no' : 'yes',
+			'plugin_version'                    => WC_GOOGLE_ANALYTICS_INTEGRATION_VERSION,
 		);
 
 		// ID prefix, blank, or X for unknown

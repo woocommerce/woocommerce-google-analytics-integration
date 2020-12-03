@@ -76,26 +76,21 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 			$list = "Product List";
 		}
 
-		echo( "
-			<script>
-			(function($) {
-				$( '.products .post-" . esc_js( $product->get_id() ) . " a' ).on( 'click', function() {
-					if ( true === $(this).hasClass( 'add_to_cart_button' ) ) {
-						return;
-					}
-
-					" . self::tracker_var() . "( 'event', 'select_content', {
-						'content_type': 'product',
-						'items': [ {
-							'id': '" . esc_js( $product->get_id() ) . "',
-							'name': '" . esc_js( $product->get_title() ) . "',
-							'category': " . self::product_get_category_line( $product ) . "
-							'list_position': '" . esc_js( $position ) . "'
-						} ],
-					} );
-				});
-			})(jQuery);
-			</script>
+		wc_enqueue_js( "
+			$( '.products .post-" . esc_js( $product->get_id() ) . " a' ).on('click', function() {
+				if ( true === $(this).hasClass( 'add_to_cart_button' ) ) {
+					return;
+				}
+				" . self::tracker_var() . "( 'event', 'select_content', {
+					'content_type': 'product',
+					'items': [ {
+						'id': '" . esc_js( $product->get_id() ) . "',
+						'name': '" . esc_js( $product->get_title() ) . "',
+						'category': " . self::product_get_category_line( $product ) . "
+						'list_position': '" . esc_js( $position ) . "'
+					} ],
+				} );
+			});
 		" );
 	}
 

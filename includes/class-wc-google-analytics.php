@@ -159,6 +159,14 @@ class WC_Google_Analytics extends WC_Integration {
 				'default'       => get_option( $this->get_option_key() ) ? 'no' : 'yes', // don't enable on updates, only default on new installs
 			),
 
+			'ga_use_universal_analytics' => array(
+				'label'         => __( 'Enable Universal Analytics', 'woocommerce-google-analytics-integration' ),
+				'description'   => sprintf( __( 'Uses Universal Analytics instead of Classic Google Analytics. If you have <strong>not</strong> previously used Google Analytics on this site, check this box. Otherwise, %sfollow step 1 of the Universal Analytics upgrade guide.%s Enabling this setting will take care of step 2. %sRead more about Universal Analytics%s. Universal Analytics must be enabled to enable enhanced eCommerce.', 'woocommerce-google-analytics-integration' ), '<a href="https://developers.google.com/analytics/devguides/collection/upgrade/guide" target="_blank">', '</a>', '<a href="https://support.google.com/analytics/answer/2790010?hl=en" target="_blank">', '</a>' ),
+				'type'          => 'checkbox',
+				'checkboxgroup' => '',
+				'default'       => get_option( 'woocommerce_ga_use_universal_analytics' ) ? get_option( 'woocommerce_ga_use_universal_analytics' ) : 'no',  // Backwards compat
+				'class'         => 'legacy-setting',
+			),
 			'ga_standard_tracking_enabled' => array(
 				'label'         => __( 'Enable Standard Tracking', 'woocommerce-google-analytics-integration' ),
 				'description'   =>  __( 'This tracks session data such as demographics, system, etc. You don\'t need to enable this if you are using a 3rd party Google analytics plugin.', 'woocommerce-google-analytics-integration' ),
@@ -179,14 +187,6 @@ class WC_Google_Analytics extends WC_Integration {
 				'type'          => 'checkbox',
 				'checkboxgroup' => '',
 				'default'       => get_option( 'woocommerce_ga_support_enhanced_link_attribution' ) ? get_option( 'woocommerce_ga_support_enhanced_link_attribution' ) : 'no'  // Backwards compat
-			),
-			'ga_use_universal_analytics' => array(
-				'label'         => __( 'Enable Universal Analytics', 'woocommerce-google-analytics-integration' ),
-				'description'   => sprintf( __( 'Uses Universal Analytics instead of Classic Google Analytics. If you have <strong>not</strong> previously used Google Analytics on this site, check this box. Otherwise, %sfollow step 1 of the Universal Analytics upgrade guide.%s Enabling this setting will take care of step 2. %sRead more about Universal Analytics%s. Universal Analytics must be enabled to enable enhanced eCommerce.', 'woocommerce-google-analytics-integration' ), '<a href="https://developers.google.com/analytics/devguides/collection/upgrade/guide" target="_blank">', '</a>', '<a href="https://support.google.com/analytics/answer/2790010?hl=en" target="_blank">', '</a>' ),
-				'type'          => 'checkbox',
-				'checkboxgroup' => '',
-				'default'       => get_option( 'woocommerce_ga_use_universal_analytics' ) ? get_option( 'woocommerce_ga_use_universal_analytics' ) : 'no',  // Backwards compat
-				'class'         => 'legacy-setting',
 			),
 			'ga_anonymize_enabled' => array(
 				'label'         => __( 'Anonymize IP addresses', 'woocommerce-google-analytics-integration' ),

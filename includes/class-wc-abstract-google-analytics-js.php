@@ -92,7 +92,7 @@ abstract class WC_Abstract_Google_Analytics_JS {
 	 * @return string          Add Transaction code
 	 */
 	public function add_transaction( $order ) {
-		if ( 'yes' === self::get( 'ga_enhanced_ecommerce_tracking_enabled' ) ) {
+		if ( 'yes' === self::get( 'ga_enhanced_ecommerce_tracking_enabled' ) || 'yes' === self::get( 'ga_gtag_enabled' ) ) {
 			return static::add_transaction_enhanced( $order );
 		} else {
 			return self::add_transaction_universal( $order );

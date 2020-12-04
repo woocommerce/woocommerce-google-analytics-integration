@@ -11,9 +11,9 @@ jQuery(document).ready( function($) {
 	gtagCheckbox.change(updateToggles);
 
 	function updateToggles() {
-		var isEnhancedEcommerce  = ( true === ecCheckbox.is( ':checked' ) );
-		var isUniversalAnalytics = ( true === uaCheckbox.is( ':checked' ) );
-		var isGtag               = ( true === gtagCheckbox.is( ':checked' ) );
+		var isEnhancedEcommerce  = ecCheckbox.is( ':checked' );
+		var isUniversalAnalytics = uaCheckbox.is( ':checked' );
+		var isGtag               = gtagCheckbox.is( ':checked' );
 
 		// Legacy: gtag NO
 		toggleCheckboxRow( $( '.legacy-setting' ), ! isGtag );
@@ -29,11 +29,11 @@ jQuery(document).ready( function($) {
 
 	}
 
-	function toggleCheckboxRow ( row, isVisible ) {
+	function toggleCheckboxRow ( checkbox, isVisible ) {
 		if ( isVisible ) {
-			row.closest('tr').show();
+			checkbox.closest('tr').show();
 		} else {
-			row.closest('tr').hide();
+			checkbox.closest('tr').hide();
 		}
 	}
 } );

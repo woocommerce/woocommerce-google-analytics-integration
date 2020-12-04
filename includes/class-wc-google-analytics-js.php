@@ -8,19 +8,13 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * JS for recording Google Analytics info
  */
-class WC_Google_Analytics_JS {
-
-	/** @var object Class Instance */
-	private static $instance;
-
-	/** @var array Inherited Analytics options */
-	private static $options;
+class WC_Google_Analytics_JS extends WC_Abstract_Google_Analytics_JS {
 
 	/**
 	 * Get the class instance
-	 * @param array $options
 	 *
-	 * @return WC_Google_Analytics_JS
+	 * @param array $options Options
+	 * @return WC_Abstract_Google_Analytics_JS
 	 */
 	public static function get_instance( $options = array() ) {
 		return null === self::$instance ? ( self::$instance = new self( $options ) ) : self::$instance;
@@ -30,49 +24,26 @@ class WC_Google_Analytics_JS {
 	 * Constructor
 	 * Takes our options from the parent class so we can later use them in the JS snippets
 	 *
-	 * @param array $options
+	 * @param array $options Options
 	 */
 	public function __construct( $options = array() ) {
 		self::$options = $options;
 	}
 
 	/**
-	 * Return one of our options
-	 * @param  string $option Key/name for the option
-	 * @return string         Value of the option
-	 */
-	public static function get( $option ) {
-		return self::$options[$option];
-	}
-
-	/**
 	 * Returns the tracker variable this integration should use
+     *
+	 * @return string
 	 */
 	public static function tracker_var() {
 		return apply_filters( 'woocommerce_ga_tracker_variable', 'ga' );
 	}
 
 	/**
-	 * Generic GA / header snippet for opt out
-	 */
-	public static function header() {
-		return "<script type='text/javascript'>
-			var gaProperty = '" . esc_js( self::get( 'ga_id' ) ) . "';
-			var disableStr = 'ga-disable-' + gaProperty;
-			if ( document.cookie.indexOf( disableStr + '=true' ) > -1 ) {
-				window[disableStr] = true;
-			}
-			function gaOptout() {
-				document.cookie = disableStr + '=true; expires=Thu, 31 Dec 2099 23:59:59 UTC; path=/';
-				window[disableStr] = true;
-			}
-		</script>";
-	}
-
-	/**
 	 * Loads the correct Google Analytics code (classic or universal)
-	 * @param  boolean $order Classic analytics needs order data to set the currency correctly
-	 * @return string         Analytics loading code
+	 *
+	 * @param  boolean|WC_Order $order Classic analytics needs order data to set the currency correctly
+	 * @return string                  Analytics loading code
 	 */
 	public static function load_analytics( $order = false ) {
 		$logged_in = is_user_logged_in() ? 'yes' : 'no';
@@ -88,11 +59,13 @@ class WC_Google_Analytics_JS {
 
 	/**
 	 * Loads ga.js analytics tracking code
-	 * @param  string  $logged_in 'yes' if the user is logged in, no if not (this is a string so we can pass it to GA)
-	 * @param  boolean|object $order  We don't always need to load order data for currency, so we omit that if false is set, otherwise this is an order object
-	 * @return string         Classic Analytics loading code
+	 *
+	 * @param  string  $logged_in      'yes' if the user is logged in, no if not (this is a string so we can pass it to GA)
+	 * @param  boolean|WC_Order $order We don't always need to load order data for currency, so we omit
+	 *                                 that if false is set, otherwise this is an order object
+	 * @return string                  Classic Analytics loading code
 	 */
-	public static function load_analytics_classic( $logged_in, $order = false ) {
+	protected static function load_analytics_classic( $logged_in, $order = false ) {
 		$anonymize_enabled = '';
 		if ( 'yes' === self::get( 'ga_anonymize_enabled' ) ) {
 			$anonymize_enabled = "['_gat._anonymizeIp'],";
@@ -127,11 +100,16 @@ class WC_Google_Analytics_JS {
 
 		$code .= ");";
 
-		return $code;
+
+		$code = "<script type='text/javascript'>" . $code . "</script>";
+		return apply_filters( 'woocommerce_ga_classic_snippet_output', $code );
 	}
 
 	/**
-	 * Builds the addImpression object
+	 * Enqueues JavaScript to build the addImpression object
+	 *
+	 * @param WC_Product $product
+	 * @param int $position
 	 */
 	public static function listing_impression( $product, $position ) {
 		if ( isset( $_GET['s'] ) ) {
@@ -152,7 +130,10 @@ class WC_Google_Analytics_JS {
 	}
 
 	/**
-	 * Builds an addProduct and click object
+	 * Enqueues JavaScript to build an addProduct and click object
+	 *
+	 * @param WC_Product $product
+	 * @param int $position
 	 */
 	public static function listing_click( $product, $position ) {
 		if ( isset( $_GET['s'] ) ) {
@@ -162,7 +143,7 @@ class WC_Google_Analytics_JS {
 		}
 
 		wc_enqueue_js( "
-			$( '.products .post-" . esc_js( $product->get_id() ) . " a' ).click( function() {
+			$( '.products .post-" . esc_js( $product->get_id() ) . " a' ).on( 'click', function() {
 				if ( true === $(this).hasClass( 'add_to_cart_button' ) ) {
 					return;
 				}
@@ -181,7 +162,6 @@ class WC_Google_Analytics_JS {
 	}
 
 	/**
-	 * Asynchronously loads the classic Google Analytics code, and does so after all of our properties are loaded
 	 * Loads in the footer
 	 * @see wp_footer
 	 */
@@ -200,7 +180,7 @@ class WC_Google_Analytics_JS {
 	}
 
 	/**
-	 * Sends the pageview last thing (needed for things like addImpression)
+	 * Enqueues JavaScript to send the pageview last thing (needed for things like addImpression)
 	 */
 	public static function universal_analytics_footer() {
 		if ( apply_filters( 'wc_google_analytics_send_pageview', true ) ) {
@@ -211,6 +191,8 @@ class WC_Google_Analytics_JS {
 	/**
 	 * This was created to fix public facing api typo in a filter name
 	 * and inform about the deprecation.
+	 *
+	 * @param boolean $send_pageview
 	 */
 	public static function universal_analytics_footer_filter( $send_pageview ) {
 		return apply_filters_deprecated( 'wc_goole_analytics_send_pageview', array( $send_pageview ), '1.4.20', 'wc_google_analytics_send_pageview' );
@@ -218,10 +200,11 @@ class WC_Google_Analytics_JS {
 
 	/**
 	 * Loads the universal analytics code
+	 *
 	 * @param  string $logged_in 'yes' if the user is logged in, no if not (this is a string so we can pass it to GA)
-	 * @return string Universal Analytics Code
+	 * @return string            Universal Analytics Code
 	 */
-	public static function load_analytics_universal( $logged_in ) {
+	protected static function load_analytics_universal( $logged_in ) {
 
 		$domainname = self::get( 'ga_set_domain_name' );
 
@@ -260,13 +243,18 @@ class WC_Google_Analytics_JS {
 		})(window,document,'script', '{$src}','" . self::tracker_var() . "');";
 
 		$ga_id = self::get( 'ga_id' );
-		$ga_snippet_create = self::tracker_var() . "( 'create', '" . esc_js( $ga_id ) . "', '" . $set_domain_name . "' );";
+		$ga_snippet_create       = self::tracker_var() . "( 'create', '" . esc_js( $ga_id ) . "', '" . $set_domain_name . "' );";
 
-		$ga_snippet_require =
-		$support_display_advertising .
-		$support_enhanced_link_attribution .
-		$anonymize_enabled .
-		$track_404_enabled . "
+		if ( ! empty( self::DEVELOPER_ID ) ) {
+			$ga_snippet_developer_id = "(window.gaDevIds=window.gaDevIds||[]).push('" . self::DEVELOPER_ID . "');";
+		} else {
+			$ga_snippet_developer_id = '';
+		}
+
+		$ga_snippet_require      = $support_display_advertising .
+			$support_enhanced_link_attribution .
+			$anonymize_enabled .
+			$track_404_enabled . "
 		" . self::tracker_var() . "( 'set', 'dimension1', '" . $logged_in . "' );\n";
 
 		if ( 'yes' === self::get( 'ga_enhanced_ecommerce_tracking_enabled' ) ) {
@@ -275,21 +263,22 @@ class WC_Google_Analytics_JS {
 			$ga_snippet_require .= "" . self::tracker_var() . "( 'require', 'ecommerce', 'ecommerce.js');";
 		}
 
-		$ga_snippet_head = apply_filters( 'woocommerce_ga_snippet_head' , $ga_snippet_head );
-		$ga_snippet_create = apply_filters( 'woocommerce_ga_snippet_create' , $ga_snippet_create, $ga_id );
-		$ga_snippet_require = apply_filters( 'woocommerce_ga_snippet_require' , $ga_snippet_require );
+		$ga_snippet_head         = apply_filters( 'woocommerce_ga_snippet_head', $ga_snippet_head );
+		$ga_snippet_create       = apply_filters( 'woocommerce_ga_snippet_create', $ga_snippet_create, $ga_id );
+		$ga_snippet_developer_id = apply_filters( 'woocommerce_ga_snippet_developer_id', $ga_snippet_developer_id );
+		$ga_snippet_require      = apply_filters( 'woocommerce_ga_snippet_require', $ga_snippet_require );
 
-		$code = $ga_snippet_head . $ga_snippet_create . $ga_snippet_require;
+		$code = "<script type='text/javascript'>" . $ga_snippet_head . $ga_snippet_create . $ga_snippet_developer_id . $ga_snippet_require . "</script>";
 		$code = apply_filters( 'woocommerce_ga_snippet_output', $code );
 
 		return $code;
 	}
 
 	/**
-	 * Used to pass transaction data to Google Analytics.
+	 * Generate code used to pass transaction data to Google Analytics.
 	 *
-	 * @param object $order WC_Order Object.
-	 * @return string Add Transaction code.
+	 * @param  WC_Order $order WC_Order Object.
+	 * @return string          Add Transaction code.
 	 */
 	public function add_transaction( $order ) {
 		if ( 'yes' === self::get( 'ga_use_universal_analytics' ) ) {
@@ -322,10 +311,10 @@ class WC_Google_Analytics_JS {
 
 	/**
 	 * ga.js (classic) transaction tracking
-	 * @param object $order WC_Order Object
-	 * @return string Add Transaction Code
+	 * @param  WC_Order $order WC_Order Object
+	 * @return string          Add Transaction Code
 	 */
-	function add_transaction_classic( $order ) {
+	protected function add_transaction_classic( $order ) {
 		$code = "_gaq.push(['_addTrans',
 			'" . esc_js( $order->get_order_number() ) . "', 	// order ID - required
 			'" . esc_js( get_bloginfo( 'name' ) ) . "',  		// affiliation or store name
@@ -349,35 +338,12 @@ class WC_Google_Analytics_JS {
 	}
 
 	/**
-	 * Universal Analytics transaction tracking
-	 * @param object $order WC_Order object
-	 * @return string Add Transaction Code
+	 * Generate Universal Analytics Enhanced Ecommerce transaction tracking code
+	 *
+	 * @param  WC_Order $order
+	 * @return string
 	 */
-	function add_transaction_universal( $order ) {
-		$code = "" . self::tracker_var() . "('ecommerce:addTransaction', {
-			'id': '" . esc_js( $order->get_order_number() ) . "',         // Transaction ID. Required
-			'affiliation': '" . esc_js( get_bloginfo( 'name' ) ) . "',    // Affiliation or store name
-			'revenue': '" . esc_js( $order->get_total() ) . "',           // Grand Total
-			'shipping': '" . esc_js( $order->get_total_shipping() ) . "', // Shipping
-			'tax': '" . esc_js( $order->get_total_tax() ) . "',           // Tax
-			'currency': '" . esc_js( version_compare( WC_VERSION, '3.0', '<' ) ? $order->get_order_currency() : $order->get_currency() ) . "'  // Currency
-		});";
-
-		// Order items
-		if ( $order->get_items() ) {
-			foreach ( $order->get_items() as $item ) {
-				$code .= self::add_item_universal( $order, $item );
-			}
-		}
-
-		$code .= "" . self::tracker_var() . "('ecommerce:send');";
-		return $code;
-	}
-
-	/**
-	 * Enhanced Ecommerce Universal Analytics transaction tracking
-	 */
-	function add_transaction_enhanced( $order ) {
+	protected function add_transaction_enhanced( $order ) {
 		$code = "" . self::tracker_var() . "( 'set', '&cu', '" . esc_js( version_compare( WC_VERSION, '3.0', '<' ) ? $order->get_order_currency() : $order->get_currency() ) . "' );";
 
 		// Order items
@@ -400,10 +366,12 @@ class WC_Google_Analytics_JS {
 
 	/**
 	 * Add Item (Classic)
-	 * @param object $order WC_Order Object
-	 * @param array $item  The item to add to a transaction/order
+	 *
+	 * @param  WC_Order $order WC_Order Object
+	 * @param  array $item     The item to add to a transaction/order
+	 * @return string
 	 */
-	function add_item_classic( $order, $item ) {
+	protected function add_item_classic( $order, $item ) {
 		$_product = version_compare( WC_VERSION, '3.0', '<' ) ? $order->get_product_from_item( $item ) : $item->get_product();
 
 		$code = "_gaq.push(['_addItem',";
@@ -419,31 +387,13 @@ class WC_Google_Analytics_JS {
 	}
 
 	/**
-	 * Add Item (Universal)
-	 * @param object $order WC_Order Object
-	 * @param array $item  The item to add to a transaction/order
-	 */
-	function add_item_universal( $order, $item ) {
-		$_product = version_compare( WC_VERSION, '3.0', '<' ) ? $order->get_product_from_item( $item ) : $item->get_product();
-
-		$code = "" . self::tracker_var() . "('ecommerce:addItem', {";
-		$code .= "'id': '" . esc_js( $order->get_order_number() ) . "',";
-		$code .= "'name': '" . esc_js( $item['name'] ) . "',";
-		$code .= "'sku': '" . esc_js( $_product->get_sku() ? $_product->get_sku() : $_product->get_id() ) . "',";
-		$code .= "'category': " . self::product_get_category_line( $_product );
-		$code .= "'price': '" . esc_js( $order->get_item_total( $item ) ) . "',";
-		$code .= "'quantity': '" . esc_js( $item['qty'] ) . "'";
-		$code .= "});";
-
-		return $code;
-	}
-
-	/**
 	 * Add Item (Enhanced, Universal)
-	 * @param object $order WC_Order Object
-	 * @param array $item The item to add to a transaction/order
+	 *
+	 * @param  WC_Order $order     WC_Order Object
+	 * @param  WC_Order_Item $item The item to add to a transaction/order
+	 * @return string
 	 */
-	function add_item_enhanced( $order, $item ) {
+	protected function add_item_enhanced( $order, $item ) {
 		$_product = version_compare( WC_VERSION, '3.0', '<' ) ? $order->get_product_from_item( $item ) : $item->get_product();
 		$variant  = self::product_get_variant_line( $_product );
 
@@ -464,51 +414,9 @@ class WC_Google_Analytics_JS {
 	}
 
 	/**
-	 * Returns a 'category' JSON line based on $product
-	 * @param  object $product  Product to pull info for
-	 * @return string          Line of JSON
+	 * Output JavaScript to track an enhanced ecommerce remove from cart action
 	 */
-	private static function product_get_category_line( $_product ) {
-
-		$out            = array();
-		$variation_data = version_compare( WC_VERSION, '3.0', '<' ) ? $_product->variation_data : ( $_product->is_type( 'variation' ) ? wc_get_product_variation_attributes( $_product->get_id() ) : '' );
-		$categories     = get_the_terms( $_product->get_id(), 'product_cat' );
-
-		if ( is_array( $variation_data ) && ! empty( $variation_data ) ) {
-			$parent_product = wc_get_product( version_compare( WC_VERSION, '3.0', '<' ) ? $_product->parent->id : $_product->get_parent_id() );
-			$categories = get_the_terms( $parent_product->get_id(), 'product_cat' );
-		}
-
-		if ( $categories ) {
-			foreach ( $categories as $category ) {
-				$out[] = $category->name;
-			}
-		}
-
-		return "'" . esc_js( join( "/", $out ) ) . "',";
-	}
-
-	/**
-	 * Returns a 'variant' JSON line based on $product
-	 * @param  object $product  Product to pull info for
-	 * @return string          Line of JSON
-	 */
-	private static function product_get_variant_line( $_product ) {
-
-		$out            = '';
-		$variation_data = version_compare( WC_VERSION, '3.0', '<' ) ? $_product->variation_data : ( $_product->is_type( 'variation' ) ? wc_get_product_variation_attributes( $_product->get_id() ) : '' );
-
-		if ( is_array( $variation_data ) && ! empty( $variation_data ) ) {
-			$out = "'" . esc_js( wc_get_formatted_variation( $variation_data, true ) ) . "',";
-		}
-
-		return $out;
-	}
-
-	/**
-	 * Tracks an enhanced ecommerce remove from cart action
-	 */
-	function remove_from_cart() {
+	public function remove_from_cart() {
 		echo( "
 			<script>
 			(function($) {
@@ -526,9 +434,11 @@ class WC_Google_Analytics_JS {
 	}
 
 	/**
-	 * Tracks a product detail view
+	 * Enqueue JavaScript to track a product detail view
+	 *
+	 * @param WC_Product $product
 	 */
-	function product_detail( $product ) {
+	public function product_detail( $product ) {
 		if ( empty( $product ) ) {
 			return;
 		}
@@ -545,9 +455,11 @@ class WC_Google_Analytics_JS {
 	}
 
 	/**
-	 * Tracks when the checkout process is started
+	 * Enqueue JS to track when the checkout process is started
+	 *
+	 * @param array $cart items/contents of the cart
 	 */
-	function checkout_process( $cart ) {
+	public function checkout_process( $cart ) {
 		$code = "";
 
 		foreach ( $cart as $cart_item_key => $cart_item ) {
@@ -572,12 +484,10 @@ class WC_Google_Analytics_JS {
 	}
 
 	/**
-	 * Add to cart
+	 * Enqueue JavaScript for Add to cart tracking
 	 *
 	 * @param array $parameters associative array of _trackEvent parameters
 	 * @param string $selector jQuery selector for binding click event
-	 *
-	 * @return void
 	 */
 	public function event_tracking_code( $parameters, $selector ) {
 		$parameters = apply_filters( 'woocommerce_ga_event_tracking_parameters', $parameters );
@@ -585,7 +495,7 @@ class WC_Google_Analytics_JS {
 		if ( 'yes' === self::get( 'ga_use_universal_analytics' ) ) {
 			if ( 'yes' === self::get( 'ga_enhanced_ecommerce_tracking_enabled' ) ) {
 				wc_enqueue_js( "
-					$( '" . $selector . "' ).click( function() {
+					$( '" . $selector . "' ).on( 'click', function() {
 						" . $parameters['enhanced'] . "
 						" . self::tracker_var() . "( 'ec:setAction', 'add' );
 						" . self::tracker_var() . "( 'send', 'event', 'UX', 'click', 'add to cart' );
@@ -600,7 +510,7 @@ class WC_Google_Analytics_JS {
 		}
 
 		wc_enqueue_js( "
-			$( '" . $selector . "' ).click( function() {
+			$( '" . $selector . "' ).on( 'click', function() {
 				" . sprintf( $track_event, $parameters['category'], $parameters['action'], $parameters['label'] ) . "
 			});
 		" );

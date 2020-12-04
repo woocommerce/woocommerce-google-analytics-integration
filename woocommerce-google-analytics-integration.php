@@ -27,11 +27,7 @@ if ( ! class_exists( 'WC_Google_Analytics_Integration' ) ) {
 	 */
 	class WC_Google_Analytics_Integration {
 
-		/**
-		 * Instance of this class.
-		 *
-		 * @var object
-		 */
+		/** @var WC_Google_Analytics_Integration $instance Instance of this class. */
 		protected static $instance = null;
 
 		/**
@@ -46,7 +42,7 @@ if ( ! class_exists( 'WC_Google_Analytics_Integration' ) ) {
 			add_action( 'init', array( $this, 'load_plugin_textdomain' ) );
 			add_action( 'init', array( $this, 'show_ga_pro_notices' ) );
 
-			// Checks with WooCommerce is installed.
+			// Checks which WooCommerce is installed.
 			if ( class_exists( 'WC_Integration' ) && defined( 'WOOCOMMERCE_VERSION' ) && version_compare( WOOCOMMERCE_VERSION, '2.1-beta-1', '>=' ) ) {
 				include_once 'includes/class-wc-google-analytics.php';
 
@@ -59,11 +55,18 @@ if ( ! class_exists( 'WC_Google_Analytics_Integration' ) ) {
 			add_filter( 'plugin_action_links_' . plugin_basename( __FILE__ ), array( $this, 'plugin_links' ) );
 		}
 
+		/**
+		 * Add links on the plugins page (Settings & Support)
+		 *
+		 * @param  array $links Default links
+		 * @return array        Default + added links
+		 */
 		public function plugin_links( $links ) {
 			$settings_url = add_query_arg(
 				array(
-					'page' => 'wc-settings',
-					'tab' => 'integration',
+					'page'    => 'wc-settings',
+					'tab'     => 'integration',
+					'section' => 'google_analytics',
 				),
 				admin_url( 'admin.php' )
 			);
@@ -79,7 +82,7 @@ if ( ! class_exists( 'WC_Google_Analytics_Integration' ) ) {
 		/**
 		 * Return an instance of this class.
 		 *
-		 * @return object A single instance of this class.
+		 * @return WC_Google_Analytics_Integration A single instance of this class.
 		 */
 		public static function get_instance() {
 			// If the single instance hasn't been set, set it now.
@@ -92,8 +95,6 @@ if ( ! class_exists( 'WC_Google_Analytics_Integration' ) ) {
 
 		/**
 		 * Load the plugin text domain for translation.
-		 *
-		 * @return void
 		 */
 		public function load_plugin_textdomain() {
 			$locale = apply_filters( 'plugin_locale', get_locale(), 'woocommerce-google-analytics-integration' );
@@ -113,8 +114,7 @@ if ( ! class_exists( 'WC_Google_Analytics_Integration' ) ) {
 		 * Add a new integration to WooCommerce.
 		 *
 		 * @param  array $integrations WooCommerce integrations.
-		 *
-		 * @return array               Google Analytics integration.
+		 * @return array               Google Analytics integration added.
 		 */
 		public function add_integration( $integrations ) {
 			$integrations[] = 'WC_Google_Analytics';

@@ -248,21 +248,23 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 
 		foreach ( $cart as $cart_item_key => $cart_item ) {
 			$product     = apply_filters( 'woocommerce_cart_item_product', $cart_item['data'], $cart_item, $cart_item_key );
-			$variant     = self::product_get_variant_line( $product );
+
 			$items .= "
 				{
 					'id': '" . esc_js( $product->get_sku() ? $product->get_sku() : ( '#' . $product->get_id() ) ) . "',
 					'name': '" . esc_js( $product->get_title() ) . "',
-					'category': " . self::product_get_category_line( $product ) . '
-				},';
+					'category': " . self::product_get_category_line( $product );
 
+			$variant     = self::product_get_variant_line( $product );
 			if ( '' !== $variant ) {
-				$code .= "'variant': " . $variant;
+				$items .= "
+					'variant': " . $variant;
 			}
 
-			$code .= "'price': '" . esc_js( $product->get_price() ) . "',
-				'quantity': '" . esc_js( $cart_item['quantity'] ) . "'
-			},";
+			$items .= "
+					'price': '" . esc_js( $product->get_price() ) . "',
+					'quantity': '" . esc_js( $cart_item['quantity'] ) . "'
+				},";
 		}
 
 		$items .= '

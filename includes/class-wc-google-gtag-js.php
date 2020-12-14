@@ -291,11 +291,21 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 
 		$parameters = apply_filters( 'woocommerce_gtag_event_tracking_parameters', $parameters );
 
-		$track_event = self::tracker_var() . "( 'event', %s, { 'event_category': %s, 'event_label': %s } );";
+		if ( 'yes' === self::get( 'ga_enhanced_ecommerce_tracking_enabled' ) ) {
+			$track_event = sprintf(
+				self::tracker_var() . "( 'event', %s, { 'event_category': %s, 'event_label': %s, 'items': [ %s ] } );",
+				$parameters['action'], $parameters['category'], $parameters['label'], $parameters['item']
+			);
+		} else {
+			$track_event = sprintf(
+				self::tracker_var() . "( 'event', %s, { 'event_category': %s, 'event_label': %s } );",
+				$parameters['action'], $parameters['category'], $parameters['label']
+			);
+		}
 
 		wc_enqueue_js( "
 			$( '" . $selector . "' ).on( 'click', function() {
-				" . sprintf( $track_event, $parameters['action'], $parameters['category'], $parameters['label'] ) . "
+				" . $track_event . "
 			});
 		" );
 	}

@@ -436,11 +436,14 @@ class WC_Google_Analytics extends WC_Integration {
 		$parameters['label']    = "'" . esc_js( $product->get_sku() ? __( 'ID:', 'woocommerce-google-analytics-integration' ) . ' ' . $product->get_sku() : "#" . $product->get_id() ) . "'";
 
 		if ( ! $this->disable_tracking( $this->ga_enhanced_ecommerce_tracking_enabled ) ) {
-			$code = "" . $this->get_tracking_instance()->tracker_var() . "( 'ec:addProduct', {";
-			$code .= "'id': '" . esc_js( $product->get_sku() ? $product->get_sku() : ( '#' . $product->get_id() ) ) . "',";
-			$code .= "'name': '" . esc_js( $product->get_title() ) . "',";
-			$code .= "'quantity': $( 'input.qty' ).val() ? $( 'input.qty' ).val() : '1'";
-			$code .= "} );";
+			$item = "{";
+			$item .= "'id': '" . esc_js( $product->get_sku() ? $product->get_sku() : ( '#' . $product->get_id() ) ) . "',";
+			$item .= "'name': '" . esc_js( $product->get_title() ) . "',";
+			$item .= "'quantity': $( 'input.qty' ).val() ? $( 'input.qty' ).val() : '1'";
+			$item .= "}";
+			$parameters['item'] = $item;
+
+			$code = "" . $this->get_tracking_instance()->tracker_var() . "( 'ec:addProduct', " . $item . " );";
 			$parameters['enhanced'] = $code;
 		}
 
@@ -501,10 +504,13 @@ class WC_Google_Analytics extends WC_Integration {
 		$parameters['label']    = "($(this).data('product_sku')) ? ($(this).data('product_sku')) : ('#' + $(this).data('product_id'))"; // Product SKU or ID
 
 		if ( ! $this->disable_tracking( $this->ga_enhanced_ecommerce_tracking_enabled ) ) {
-			$code = "" . $this->get_tracking_instance()->tracker_var() . "( 'ec:addProduct', {";
-			$code .= "'id': ($(this).data('product_sku')) ? ($(this).data('product_sku')) : ('#' + $(this).data('product_id')),";
-			$code .= "'quantity': $(this).data('quantity')";
-			$code .= "} );";
+			$item = "{";
+			$item .= "'id': ($(this).data('product_sku')) ? ($(this).data('product_sku')) : ('#' + $(this).data('product_id')),";
+			$item .= "'quantity': $(this).data('quantity')";
+			$item .= "}";
+			$parameters['item'] = $item;
+
+			$code = "" . $this->get_tracking_instance()->tracker_var() . "( 'ec:addProduct', " . $item ." );";
 			$parameters['enhanced'] = $code;
 		}
 

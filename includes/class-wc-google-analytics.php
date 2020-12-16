@@ -134,6 +134,15 @@ class WC_Google_Analytics extends WC_Integration {
 	 * Tells WooCommerce which settings to display under the "integration" tab
 	 */
 	public function init_form_fields() {
+
+		// backwards_compatibility
+		if ( get_option( 'woocommerce_ga_use_universal_analytics' ) ) {
+			 $ua_default_value = get_option( 'woocommerce_ga_use_universal_analytics' );
+		} else {
+			// don't enable for extension updates, only default to enabled on new installs
+			$ua_default_value = get_option( $this->get_option_key() ) ? 'no' : 'yes';
+		}
+
 		$this->form_fields = array(
 			'ga_id' => array(
 				'title'       => __( 'Google Analytics Tracking ID', 'woocommerce-google-analytics-integration' ),
@@ -164,7 +173,7 @@ class WC_Google_Analytics extends WC_Integration {
 				'description'   => sprintf( __( 'Uses Universal Analytics instead of Classic Google Analytics. If you have <strong>not</strong> previously used Google Analytics on this site, check this box. Otherwise, %sfollow step 1 of the Universal Analytics upgrade guide.%s Enabling this setting will take care of step 2. %sRead more about Universal Analytics%s. Universal Analytics or Global Site Tag must be enabled to enable enhanced eCommerce.', 'woocommerce-google-analytics-integration' ), '<a href="https://developers.google.com/analytics/devguides/collection/upgrade/guide" target="_blank">', '</a>', '<a href="https://support.google.com/analytics/answer/2790010?hl=en" target="_blank">', '</a>' ),
 				'type'          => 'checkbox',
 				'checkboxgroup' => '',
-				'default'       => get_option( 'woocommerce_ga_use_universal_analytics' ) ? get_option( 'woocommerce_ga_use_universal_analytics' ) : 'no',  // Backwards compat
+				'default'       => $ua_default_value,
 				'class'         => 'legacy-setting',
 			),
 			'ga_standard_tracking_enabled' => array(

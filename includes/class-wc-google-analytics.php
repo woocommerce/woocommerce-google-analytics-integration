@@ -162,7 +162,7 @@ class WC_Google_Analytics extends WC_Integration {
 			'ga_gtag_enabled' => array(
 				'title'         => __( 'Tracking Options', 'woocommerce-google-analytics-integration' ),
 				'label'         => __( 'Use Global Site Tag', 'woocommerce-google-analytics-integration' ),
-				'description'   => sprintf( __( 'The Global Site Tag provides streamlined tagging across Google’s site measurement, conversion tracking, and remarketing products. This must be enabled to use a Google Analytics 4 Measurement ID (e.g., <code>G-XXXXX</code>). <a href="%s">See here for more information</a>.', 'woocommerce-google-analytics-integration' ), 'https://support.google.com/analytics/answer/7475631?hl=en' ),
+				'description'   => sprintf( __( 'The Global Site Tag provides streamlined tagging across Google’s site measurement, conversion tracking, and remarketing products. This must be enabled to use a Google Analytics 4 Measurement ID (e.g., <code>G-XXXXX</code>). <a href="%s" target="_blank">See here for more information</a>.', 'woocommerce-google-analytics-integration' ), 'https://support.google.com/analytics/answer/7475631?hl=en' ),
 				'type'          => 'checkbox',
 				'checkboxgroup' => '',
 				'default'       => get_option( $this->get_option_key() ) ? 'no' : 'yes', // don't enable on updates, only default on new installs

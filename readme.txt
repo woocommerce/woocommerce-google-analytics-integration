@@ -2,7 +2,7 @@
 Contributors: woocommerce, automattic, claudiosanches, bor0, royho, laurendavissmith001, c-shultz
 Tags: woocommerce, google analytics
 Requires at least: 3.9
-Tested up to: 5.5
+Tested up to: 5.6
 Stable tag: 1.4.25
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
@@ -15,7 +15,7 @@ This plugin provides the integration between Google Analytics and the WooCommerc
 
 Starting WooCommerce 2.1, this integration will no longer be part of WooCommerce and will only be available by using this plugin.
 
-Contributions are welcome via the [GitHub repository](https://github.com/woothemes/woocommerce-google-analytics-integration).
+Contributions are welcome via the [GitHub repository](https://github.com/woocommerce/woocommerce-google-analytics-integration).
 
 == Installation ==
 

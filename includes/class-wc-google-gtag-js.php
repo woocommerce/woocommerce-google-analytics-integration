@@ -204,7 +204,7 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 		echo( "
 			<script>
 			(function($) {
-				$( '.remove' ).on( 'click', function() {
+				$( '.remove' ).off('click', '.remove').on( 'click', function() {
 					" . self::tracker_var() . "( 'event', 'remove_from_cart', {
 						'items': [ {
 							'id': ($(this).data('product_sku')) ? ($(this).data('product_sku')) : ('#' + $(this).data('product_id')),
@@ -248,21 +248,23 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 
 		foreach ( $cart as $cart_item_key => $cart_item ) {
 			$product     = apply_filters( 'woocommerce_cart_item_product', $cart_item['data'], $cart_item, $cart_item_key );
-			$variant     = self::product_get_variant_line( $product );
+
 			$items .= "
 				{
 					'id': '" . esc_js( $product->get_sku() ? $product->get_sku() : ( '#' . $product->get_id() ) ) . "',
 					'name': '" . esc_js( $product->get_title() ) . "',
-					'category': " . self::product_get_category_line( $product ) . '
-				},';
+					'category': " . self::product_get_category_line( $product );
 
+			$variant     = self::product_get_variant_line( $product );
 			if ( '' !== $variant ) {
-				$code .= "'variant': " . $variant;
+				$items .= "
+					'variant': " . $variant;
 			}
 
-			$code .= "'price': '" . esc_js( $product->get_price() ) . "',
-				'quantity': '" . esc_js( $cart_item['quantity'] ) . "'
-			},";
+			$items .= "
+					'price': '" . esc_js( $product->get_price() ) . "',
+					'quantity': '" . esc_js( $cart_item['quantity'] ) . "'
+				},";
 		}
 
 		$items .= '
@@ -289,11 +291,21 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 
 		$parameters = apply_filters( 'woocommerce_gtag_event_tracking_parameters', $parameters );
 
-		$track_event = self::tracker_var() . "( 'event', %s, { 'event_category': %s, 'event_label': %s } );";
+		if ( 'yes' === self::get( 'ga_enhanced_ecommerce_tracking_enabled' ) ) {
+			$track_event = sprintf(
+				self::tracker_var() . "( 'event', %s, { 'event_category': %s, 'event_label': %s, 'items': [ %s ] } );",
+				$parameters['action'], $parameters['category'], $parameters['label'], $parameters['item']
+			);
+		} else {
+			$track_event = sprintf(
+				self::tracker_var() . "( 'event', %s, { 'event_category': %s, 'event_label': %s } );",
+				$parameters['action'], $parameters['category'], $parameters['label']
+			);
+		}
 
 		wc_enqueue_js( "
 			$( '" . $selector . "' ).on( 'click', function() {
-				" . sprintf( $track_event, $parameters['action'], $parameters['category'], $parameters['label'] ) . "
+				" . $track_event . "
 			});
 		" );
 	}

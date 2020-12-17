@@ -420,7 +420,7 @@ class WC_Google_Analytics_JS extends WC_Abstract_Google_Analytics_JS {
 		echo( "
 			<script>
 			(function($) {
-				$( document.body ).on( 'click', '.remove', function() {
+				$( document.body ).off('click', '.remove').on( 'click', '.remove', function() {
 					" . self::tracker_var() . "( 'ec:addProduct', {
 						'id': ($(this).data('product_sku')) ? ($(this).data('product_sku')) : ('#' + $(this).data('product_id')),
 						'quantity': $(this).parent().parent().find( '.qty' ).val() ? $(this).parent().parent().find( '.qty' ).val() : '1',

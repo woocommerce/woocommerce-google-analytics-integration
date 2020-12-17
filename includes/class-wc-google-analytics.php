@@ -134,6 +134,15 @@ class WC_Google_Analytics extends WC_Integration {
 	 * Tells WooCommerce which settings to display under the "integration" tab
 	 */
 	public function init_form_fields() {
+
+		// backwards_compatibility
+		if ( get_option( 'woocommerce_ga_use_universal_analytics' ) ) {
+			 $ua_default_value = get_option( 'woocommerce_ga_use_universal_analytics' );
+		} else {
+			// don't enable for extension updates, only default to enabled on new installs
+			$ua_default_value = get_option( $this->get_option_key() ) ? 'no' : 'yes';
+		}
+
 		$this->form_fields = array(
 			'ga_id' => array(
 				'title'       => __( 'Google Analytics Tracking ID', 'woocommerce-google-analytics-integration' ),
@@ -153,7 +162,7 @@ class WC_Google_Analytics extends WC_Integration {
 			'ga_gtag_enabled' => array(
 				'title'         => __( 'Tracking Options', 'woocommerce-google-analytics-integration' ),
 				'label'         => __( 'Use Global Site Tag', 'woocommerce-google-analytics-integration' ),
-				'description'   => sprintf( __( 'The Global Site Tag provides streamlined tagging across Google’s site measurement, conversion tracking, and remarketing products. This must be enabled to use a Google Analytics 4 Measurement ID (e.g., <code>G-XXXXX</code>). <a href="%s">See here for more information</a>.', 'woocommerce-google-analytics-integration' ), 'https://support.google.com/analytics/answer/7475631?hl=en' ),
+				'description'   => sprintf( __( 'The Global Site Tag provides streamlined tagging across Google’s site measurement, conversion tracking, and remarketing products. This must be enabled to use a Google Analytics 4 Measurement ID (e.g., <code>G-XXXXX</code>). <a href="%s" target="_blank">See here for more information</a>.', 'woocommerce-google-analytics-integration' ), 'https://support.google.com/analytics/answer/7475631?hl=en' ),
 				'type'          => 'checkbox',
 				'checkboxgroup' => '',
 				'default'       => get_option( $this->get_option_key() ) ? 'no' : 'yes', // don't enable on updates, only default on new installs
@@ -164,7 +173,7 @@ class WC_Google_Analytics extends WC_Integration {
 				'description'   => sprintf( __( 'Uses Universal Analytics instead of Classic Google Analytics. If you have <strong>not</strong> previously used Google Analytics on this site, check this box. Otherwise, %sfollow step 1 of the Universal Analytics upgrade guide.%s Enabling this setting will take care of step 2. %sRead more about Universal Analytics%s. Universal Analytics or Global Site Tag must be enabled to enable enhanced eCommerce.', 'woocommerce-google-analytics-integration' ), '<a href="https://developers.google.com/analytics/devguides/collection/upgrade/guide" target="_blank">', '</a>', '<a href="https://support.google.com/analytics/answer/2790010?hl=en" target="_blank">', '</a>' ),
 				'type'          => 'checkbox',
 				'checkboxgroup' => '',
-				'default'       => get_option( 'woocommerce_ga_use_universal_analytics' ) ? get_option( 'woocommerce_ga_use_universal_analytics' ) : 'no',  // Backwards compat
+				'default'       => $ua_default_value,
 				'class'         => 'legacy-setting',
 			),
 			'ga_standard_tracking_enabled' => array(
@@ -284,7 +293,7 @@ class WC_Google_Analytics extends WC_Integration {
 	/**
 	 * Hooks into woocommerce_tracker_data and tracks some of the analytic settings (just enabled|disabled status)
 	 * only if you have opted into WooCommerce tracking
-	 * http://www.woothemes.com/woocommerce/usage-tracking/
+	 * https://woocommerce.com/usage-tracking/
 	 *
 	 * @param  array $data Current WC tracker data.
 	 * @return array       Updated WC Tracker data.
@@ -436,11 +445,14 @@ class WC_Google_Analytics extends WC_Integration {
 		$parameters['label']    = "'" . esc_js( $product->get_sku() ? __( 'ID:', 'woocommerce-google-analytics-integration' ) . ' ' . $product->get_sku() : "#" . $product->get_id() ) . "'";
 
 		if ( ! $this->disable_tracking( $this->ga_enhanced_ecommerce_tracking_enabled ) ) {
-			$code = "" . $this->get_tracking_instance()->tracker_var() . "( 'ec:addProduct', {";
-			$code .= "'id': '" . esc_js( $product->get_sku() ? $product->get_sku() : ( '#' . $product->get_id() ) ) . "',";
-			$code .= "'name': '" . esc_js( $product->get_title() ) . "',";
-			$code .= "'quantity': $( 'input.qty' ).val() ? $( 'input.qty' ).val() : '1'";
-			$code .= "} );";
+			$item = "{";
+			$item .= "'id': '" . esc_js( $product->get_sku() ? $product->get_sku() : ( '#' . $product->get_id() ) ) . "',";
+			$item .= "'name': '" . esc_js( $product->get_title() ) . "',";
+			$item .= "'quantity': $( 'input.qty' ).val() ? $( 'input.qty' ).val() : '1'";
+			$item .= "}";
+			$parameters['item'] = $item;
+
+			$code = "" . $this->get_tracking_instance()->tracker_var() . "( 'ec:addProduct', " . $item . " );";
 			$parameters['enhanced'] = $code;
 		}
 
@@ -501,10 +513,13 @@ class WC_Google_Analytics extends WC_Integration {
 		$parameters['label']    = "($(this).data('product_sku')) ? ($(this).data('product_sku')) : ('#' + $(this).data('product_id'))"; // Product SKU or ID
 
 		if ( ! $this->disable_tracking( $this->ga_enhanced_ecommerce_tracking_enabled ) ) {
-			$code = "" . $this->get_tracking_instance()->tracker_var() . "( 'ec:addProduct', {";
-			$code .= "'id': ($(this).data('product_sku')) ? ($(this).data('product_sku')) : ('#' + $(this).data('product_id')),";
-			$code .= "'quantity': $(this).data('quantity')";
-			$code .= "} );";
+			$item = "{";
+			$item .= "'id': ($(this).data('product_sku')) ? ($(this).data('product_sku')) : ('#' + $(this).data('product_id')),";
+			$item .= "'quantity': $(this).data('quantity')";
+			$item .= "}";
+			$parameters['item'] = $item;
+
+			$code = "" . $this->get_tracking_instance()->tracker_var() . "( 'ec:addProduct', " . $item ." );";
 			$parameters['enhanced'] = $code;
 		}
 

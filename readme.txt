@@ -3,7 +3,7 @@ Contributors: woocommerce, automattic, claudiosanches, bor0, royho, laurendaviss
 Tags: woocommerce, google analytics
 Requires at least: 3.9
 Tested up to: 5.6
-Stable tag: 1.4.25
+Stable tag: 1.5.0
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -60,7 +60,7 @@ Exact wording depends on the national data privacy laws and should be adjusted.
 
 == Changelog ==
 
-= 1.5.0 - 2020-xx-xx =
+= 1.5.0 - 2020-12-17 =
 * Add - Option to use Global Site Tag and the gtag.js library (for Universal Analytics or Google Analytics 4).
 * Add - Several new values added to the Tracker data.
 * Add - Developer ID for gtag.js and analytics.js.

@@ -1,6 +1,6 @@
 *** Changelog ***
 
-= 1.5.0 - 2020-xx-xx =
+= 1.5.0 - 2020-12-17 =
 * Add - Option to use Global Site Tag and the gtag.js library (for Universal Analytics or Google Analytics 4).
 * Add - Several new values added to the Tracker data.
 * Add - Developer ID for gtag.js and analytics.js.

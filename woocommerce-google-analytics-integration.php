@@ -5,7 +5,7 @@
  * Description: Allows Google Analytics tracking code to be inserted into WooCommerce store pages.
  * Author: WooCommerce
  * Author URI: https://woocommerce.com
- * Version: 1.5.0-rc.1
+ * Version: 1.5.0
  * WC requires at least: 3.2
  * WC tested up to: 4.7
  * Tested up to: 5.6
@@ -20,7 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 if ( ! class_exists( 'WC_Google_Analytics_Integration' ) ) {
 
-	define( 'WC_GOOGLE_ANALYTICS_INTEGRATION_VERSION', '1.4.25' ); // WRCS: DEFINED_VERSION.
+	define( 'WC_GOOGLE_ANALYTICS_INTEGRATION_VERSION', '1.5.0' ); // WRCS: DEFINED_VERSION.
 
 	/**
 	 * WooCommerce Google Analytics Integration main class.

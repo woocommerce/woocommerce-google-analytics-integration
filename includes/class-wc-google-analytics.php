@@ -300,17 +300,18 @@ class WC_Google_Analytics extends WC_Integration {
 	 */
 	function track_options( $data ) {
 		$data['wc-google-analytics'] = array(
-			'standard_tracking_enabled'   		=> $this->ga_standard_tracking_enabled,
-			'support_display_advertising' 		=> $this->ga_support_display_advertising,
-			'support_enhanced_link_attribution' => $this->ga_support_enhanced_link_attribution,
-			'use_universal_analytics'     		=> $this->ga_use_universal_analytics,
-			'anonymize_enabled'           		=> $this->ga_anonymize_enabled,
-			'ga_404_tracking_enabled'           => $this->ga_404_tracking_enabled,
-			'ecommerce_tracking_enabled'  		=> $this->ga_ecommerce_tracking_enabled,
-			'event_tracking_enabled'      		=> $this->ga_event_tracking_enabled,
-			'gtag_enabled'                      => $this->ga_gtag_enabled,
-			'set_domain_name'                   => empty( $this->ga_set_domain_name ) ? 'no' : 'yes',
-			'plugin_version'                    => WC_GOOGLE_ANALYTICS_INTEGRATION_VERSION,
+			'standard_tracking_enabled'   		  => $this->ga_standard_tracking_enabled,
+			'support_display_advertising' 		  => $this->ga_support_display_advertising,
+			'support_enhanced_link_attribution'   => $this->ga_support_enhanced_link_attribution,
+			'use_universal_analytics'     		  => $this->ga_use_universal_analytics,
+			'anonymize_enabled'           		  => $this->ga_anonymize_enabled,
+			'ga_404_tracking_enabled'             => $this->ga_404_tracking_enabled,
+			'ecommerce_tracking_enabled'  		  => $this->ga_ecommerce_tracking_enabled,
+			'event_tracking_enabled'      		  => $this->ga_event_tracking_enabled,
+			'gtag_enabled'                        => $this->ga_gtag_enabled,
+			'set_domain_name'                     => empty( $this->ga_set_domain_name ) ? 'no' : 'yes',
+			'plugin_version'                      => WC_GOOGLE_ANALYTICS_INTEGRATION_VERSION,
+			'enhanced_ecommerce_tracking_enabled' => $this->ga_enhanced_ecommerce_tracking_enabled,
 		);
 
 		// ID prefix, blank, or X for unknown

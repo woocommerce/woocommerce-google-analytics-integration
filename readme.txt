@@ -60,6 +60,15 @@ Exact wording depends on the national data privacy laws and should be adjusted.
 
 == Changelog ==
 
+= 1.5.0 - 2020-xx-xx =
+* Add - Option to use Global Site Tag and the gtag.js library (for Universal Analytics or Google Analytics 4).
+* Add - Several new values added to the Tracker data.
+* Add - Developer ID for gtag.js and analytics.js.
+* Tweak - Bump minimum-supported WooCommerce version to 3.2.
+* Tweak - Remove deprecated jQuery .click().
+* Fix - Settings link in plugins table row points directly to plugin settings.
+* Fix - Issue with multiple consecutive "Remove from Cart" events sent from the mini cart.
+
 = 1.4.25 - 2020-11-25 =
 * Tweak - WC 4.7 compatibility.
 * Tweak - WordPress 5.6 compatibility.

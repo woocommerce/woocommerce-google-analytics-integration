@@ -3,7 +3,7 @@
   "title": "WooCommerce Google Analytics Integration",
   "version": "1.4.25",
   "license": "GPL-2.0",
-  "homepage": "http://wordpress.org/plugins/woocommerce-google-analytics-integration/",
+  "homepage": "https://wordpress.org/plugins/woocommerce-google-analytics-integration/",
   "repository": {
     "type": "git",
     "url": "git://github.com/woocommerce/woocommerce-google-analytics-integration.git"

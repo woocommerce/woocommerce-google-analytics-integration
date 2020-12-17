@@ -6,7 +6,7 @@
  * Author: WooCommerce
  * Author URI: https://woocommerce.com
  * Version: 1.5.0-rc.1
- * WC requires at least: 2.1
+ * WC requires at least: 3.2
  * WC tested up to: 4.7
  * Tested up to: 5.6
  * License: GPLv2 or later
@@ -43,7 +43,7 @@ if ( ! class_exists( 'WC_Google_Analytics_Integration' ) ) {
 			add_action( 'init', array( $this, 'show_ga_pro_notices' ) );
 
 			// Checks which WooCommerce is installed.
-			if ( class_exists( 'WC_Integration' ) && defined( 'WOOCOMMERCE_VERSION' ) && version_compare( WOOCOMMERCE_VERSION, '2.1-beta-1', '>=' ) ) {
+			if ( class_exists( 'WC_Integration' ) && defined( 'WOOCOMMERCE_VERSION' ) && version_compare( WOOCOMMERCE_VERSION, '3.2', '>=' ) ) {
 				include_once 'includes/class-wc-google-analytics.php';
 
 				// Register the integration.

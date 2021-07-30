@@ -60,6 +60,10 @@ Exact wording depends on the national data privacy laws and should be adjusted.
 
 == Changelog ==
 
+= 1.5.2 - 2021-07-30 =
+* Fix - Change utm_source and utm_medium in upsell notice link.
+* Fix - add product links to readme.
+
 = 1.5.1 - 2021-02-03 =
 * Tweak - WC 5.0 compatibility.
 

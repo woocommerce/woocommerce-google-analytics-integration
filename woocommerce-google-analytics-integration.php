@@ -134,7 +134,12 @@ if ( ! class_exists( 'WC_Google_Analytics_Integration' ) ) {
 			$completed_orders = wc_orders_count( 'completed' );
 
 			// Only show the notice if there are 10 <= completed orders <= 100.
-			if ( ! ( 10 <= $completed_orders && $completed_orders <= 100 ) ) {
+			$too_few_orders_to_show_the_notice = $completed_orders < 10;
+			$too_many_orders_to_show_the_notice = $completed_orders > 100;
+			if ( $too_many_orders_to_show_the_notice ) {
+				update_option( 'woocommerce_google_analytics_pro_notice_shown', true );
+			}
+			if ( $too_few_orders_to_show_the_notice || $too_many_orders_to_show_the_notice ) {
 				return;
 			}
 

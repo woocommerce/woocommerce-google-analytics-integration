@@ -60,6 +60,11 @@ Exact wording depends on the national data privacy laws and should be adjusted.
 
 == Changelog ==
 
+= 1.5.3 - 2021-09-15 =
+* Tweak - Avoid unnecessary completed orders queries.
+* Tweak - WC 5.7 compatibility.
+* Tweak - WP 5.8 compatibility.
+
 = 1.5.2 - 2021-07-30 =
 * Fix - Change utm_source and utm_medium in upsell notice link.
 * Fix - add product links to readme.

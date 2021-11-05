@@ -22,6 +22,14 @@ if ( ! class_exists( 'WC_Google_Analytics_Integration' ) ) {
 
 	define( 'WC_GOOGLE_ANALYTICS_INTEGRATION_VERSION', '1.5.3' ); // WRCS: DEFINED_VERSION.
 
+	// Maybe show the GA Pro notice on plugin activation.
+	register_activation_hook(
+		__FILE__,
+		function () {
+			WC_Google_Analytics_Integration::get_instance()->maybe_show_ga_pro_notices();
+		}
+	);
+
 	/**
 	 * WooCommerce Google Analytics Integration main class.
 	 */
@@ -40,7 +48,9 @@ if ( ! class_exists( 'WC_Google_Analytics_Integration' ) ) {
 
 			// Load plugin text domain
 			add_action( 'init', array( $this, 'load_plugin_textdomain' ) );
-			add_action( 'admin_init', array( $this, 'show_ga_pro_notices' ) );
+
+			// Track completed orders and determine whether the GA Pro notice should be displayed.
+			add_action( 'woocommerce_order_status_completed', array( $this, 'maybe_show_ga_pro_notices' ) );
 
 			// Checks which WooCommerce is installed.
 			if ( class_exists( 'WC_Integration' ) && defined( 'WOOCOMMERCE_VERSION' ) && version_compare( WOOCOMMERCE_VERSION, '3.2', '>=' ) ) {
@@ -125,7 +135,7 @@ if ( ! class_exists( 'WC_Google_Analytics_Integration' ) ) {
 		/**
 		 * Logic for Google Analytics Pro notices.
 		 */
-		public function show_ga_pro_notices() {
+		public function maybe_show_ga_pro_notices() {
 			// Notice was already shown
 			if ( get_option( 'woocommerce_google_analytics_pro_notice_shown', false ) ) {
 				return;
@@ -134,12 +144,9 @@ if ( ! class_exists( 'WC_Google_Analytics_Integration' ) ) {
 			$completed_orders = wc_orders_count( 'completed' );
 
 			// Only show the notice if there are 10 <= completed orders <= 100.
-			$too_few_orders_to_show_the_notice  = $completed_orders < 10;
-			$too_many_orders_to_show_the_notice = $completed_orders > 100;
-			if ( $too_many_orders_to_show_the_notice ) {
+			if ( $completed_orders < 10 || $completed_orders > 100 ) {
 				update_option( 'woocommerce_google_analytics_pro_notice_shown', true );
-			}
-			if ( $too_few_orders_to_show_the_notice || $too_many_orders_to_show_the_notice ) {
+
 				return;
 			}
 

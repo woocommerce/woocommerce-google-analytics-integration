@@ -146,6 +146,8 @@ if ( ! class_exists( 'WC_Google_Analytics_Integration' ) ) {
 			// Only show the notice if there are 10 <= completed orders <= 100.
 			if ( $completed_orders < 10 || $completed_orders > 100 ) {
 				update_option( 'woocommerce_google_analytics_pro_notice_shown', true );
+
+				return;
 			}
 
 			$notice_html  = '<strong>' . esc_html__( 'Get detailed insights into your sales with Google Analytics Pro', 'woocommerce-google-analytics-integration' ) . '</strong><br><br>';

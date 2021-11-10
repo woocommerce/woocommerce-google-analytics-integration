@@ -1,5 +1,9 @@
 *** Changelog ***
 
+= 1.5.4 - 2021-11-10 =
+* Fix - Remove the slow order counting query from admin init.
+* Tweak - WC 5.9 compatibility.
+
 = 1.5.3 - 2021-09-15 =
 * Tweak - Avoid unnecessary completed orders queries.
 * Tweak - WC 5.7 compatibility.

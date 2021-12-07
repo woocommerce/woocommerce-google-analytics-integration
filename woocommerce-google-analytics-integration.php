@@ -26,6 +26,9 @@ if ( ! class_exists( 'WC_Google_Analytics_Integration' ) ) {
 	register_activation_hook(
 		__FILE__,
 		function () {
+			if ( ! class_exists( 'WooCommerce' ) ) {
+				return;
+			}
 			WC_Google_Analytics_Integration::get_instance()->maybe_show_ga_pro_notices();
 		}
 	);

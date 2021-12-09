@@ -1,6 +1,6 @@
 *** Changelog ***
 
-= 1.5.5 - 2021-xx-xx =
+= 1.5.5 - 2021-12-09 =
 * Tweak - WC 6.0 compatibility.
 * Tweak - WP 5.9 compatibility.
 

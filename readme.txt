@@ -60,6 +60,10 @@ Exact wording depends on the national data privacy laws and should be adjusted.
 
 == Changelog ==
 
+= 1.5.5 - 2021-xx-xx =
+* Tweak - WC 6.0 compatibility.
+* Tweak - WP 5.9 compatibility.
+
 = 1.5.4 - 2021-11-10 =
 * Fix - Remove the slow order counting query from admin init.
 * Tweak - WC 5.9 compatibility.

@@ -401,6 +401,12 @@ class WC_Google_Analytics extends WC_Integration {
 			return '';
 		}
 
+		// Check order key.
+		$order_key = empty( $_GET['key'] ) ? '' : wc_clean( wp_unslash( $_GET['key'] ) );
+		if ( ! hash_equals( $order->get_order_key(), $order_key ) ) {
+			return '';
+		}
+
 		$load = $this->get_tracking_instance()->load_analytics( $order );
 		$code = $this->get_tracking_instance()->add_transaction( $order );
 

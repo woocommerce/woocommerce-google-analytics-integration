@@ -403,7 +403,7 @@ class WC_Google_Analytics extends WC_Integration {
 
 		// Check order key.
 		$order_key = empty( $_GET['key'] ) ? '' : wc_clean( wp_unslash( $_GET['key'] ) );
-		if ( ! hash_equals( $order->get_order_key(), $order_key ) ) {
+		if ( ! $order->key_is_valid( $order_key ) ) {
 			return '';
 		}
 

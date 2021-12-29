@@ -60,6 +60,9 @@ Exact wording depends on the national data privacy laws and should be adjusted.
 
 == Changelog ==
 
+= 1.5.6 - 2021-12-29 =
+* Fix - Confirm order key before displaying transaction tracking code.
+
 = 1.5.5 - 2021-12-09 =
 * Tweak - WC 6.0 compatibility.
 * Tweak - WP 5.9 compatibility.

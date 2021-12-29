@@ -43,6 +43,7 @@ if ( ! class_exists( 'WC_Google_Analytics_Integration' ) ) {
 		 */
 		public function __construct() {
 			if ( ! class_exists( 'WooCommerce' ) ) {
+				add_action( 'admin_notices', array( $this, 'woocommerce_missing_notice' ) );
 				return;
 			}
 
@@ -136,8 +137,9 @@ if ( ! class_exists( 'WC_Google_Analytics_Integration' ) ) {
 		 * Logic for Google Analytics Pro notices.
 		 */
 		public function maybe_show_ga_pro_notices() {
-			// Notice was already shown
-			if ( get_option( 'woocommerce_google_analytics_pro_notice_shown', false ) ) {
+
+			// Notice was already shown or WooCommerce is not installed
+			if ( ! class_exists( 'WooCommerce' ) || get_option( 'woocommerce_google_analytics_pro_notice_shown', false ) ) {
 				return;
 			}
 

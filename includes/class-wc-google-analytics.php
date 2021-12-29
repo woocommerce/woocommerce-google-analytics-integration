@@ -401,16 +401,23 @@ class WC_Google_Analytics extends WC_Integration {
 			return '';
 		}
 
+		// Check order key.
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		$order_key = empty( $_GET['key'] ) ? '' : wc_clean( wp_unslash( $_GET['key'] ) );
+		if ( ! $order->key_is_valid( $order_key ) ) {
+			return '';
+		}
+
 		$load = $this->get_tracking_instance()->load_analytics( $order );
 		$code = $this->get_tracking_instance()->add_transaction( $order );
 
 		// Mark the order as tracked.
 		update_post_meta( $order_id, '_ga_tracked', 1 );
 
-		return "
+		return '
 		<!-- WooCommerce Google Analytics Integration -->
-		" . $this->get_tracking_instance()->header() . "
-		" . $load . "
+		' . $this->get_tracking_instance()->header() . '
+		' . $load . "
 		<script type='text/javascript'>$code</script>
 		<!-- /WooCommerce Google Analytics Integration -->
 		";

@@ -26,9 +26,7 @@ if ( ! class_exists( 'WC_Google_Analytics_Integration' ) ) {
 	register_activation_hook(
 		__FILE__,
 		function () {
-			if ( class_exists( 'WooCommerce' ) ) {
-				WC_Google_Analytics_Integration::get_instance()->maybe_show_ga_pro_notices();
-			}
+			WC_Google_Analytics_Integration::get_instance()->maybe_show_ga_pro_notices();
 		}
 	);
 
@@ -140,7 +138,7 @@ if ( ! class_exists( 'WC_Google_Analytics_Integration' ) ) {
 		 */
 		public function maybe_show_ga_pro_notices() {
 			// Notice was already shown
-			if ( get_option( 'woocommerce_google_analytics_pro_notice_shown', false ) ) {
+			if ( ! class_exists( 'WooCommerce' ) || get_option( 'woocommerce_google_analytics_pro_notice_shown', false ) ) {
 				return;
 			}
 

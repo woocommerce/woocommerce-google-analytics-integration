@@ -26,7 +26,9 @@ if ( ! class_exists( 'WC_Google_Analytics_Integration' ) ) {
 	register_activation_hook(
 		__FILE__,
 		function () {
-			WC_Google_Analytics_Integration::get_instance()->maybe_show_ga_pro_notices();
+			if ( class_exists( 'WooCommerce' ) ) {
+				WC_Google_Analytics_Integration::get_instance()->maybe_show_ga_pro_notices();
+			}
 		}
 	);
 
@@ -43,6 +45,7 @@ if ( ! class_exists( 'WC_Google_Analytics_Integration' ) ) {
 		 */
 		public function __construct() {
 			if ( ! class_exists( 'WooCommerce' ) ) {
+				add_action( 'admin_notices', [ $this, 'woocommerce_missing_notice' ] );
 				return;
 			}
 

@@ -60,6 +60,10 @@ Exact wording depends on the national data privacy laws and should be adjusted.
 
 == Changelog ==
 
+= 1.5.7 - 2022-01-13 =
+* Fix - Activation error when WC was disabled.
+* Tweak - WC 6.1 compatibility.
+
 = 1.5.6 - 2021-12-29 =
 * Fix - Confirm order key before displaying transaction tracking code.
 

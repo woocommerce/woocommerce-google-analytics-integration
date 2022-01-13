@@ -1,14 +1,25 @@
-### Create Bug Reports
+# Contributing
 
-If you found a bug, let us know by creating a new issue. 
+Thanks for your interest in contributing to WooCommerce Google Analytics Integration!
 
-### Write and submit a patch
+## Guidelines
 
-If you'd like to fix a bug, you can submit a Pull Request. If possible, raises an issue first and link the issue in your [commit message](https://help.github.com/articles/closing-issues-via-commit-messages/) or [PR's body](https://github.com/blog/1506-closing-issues-via-pull-requests).
+Like the WooCommerce project, we want to ensure a welcoming environment for everyone. With that in mind, all contributors are expected to follow our [Code of Conduct](./CODE_OF_CONDUCT.md).
 
-When creating Pull Requests, remember:
+If you wish to contribute code, please read the information in the sections below. Then [fork](https://help.github.com/articles/fork-a-repo/) WooCommerce Google Analytics Integration, commit your changes, and [submit a pull request](https://docs.github.com/en/github/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/about-pull-requests) 🎉
 
-- [Check In Early, Check In Often](https://blog.codinghorror.com/check-in-early-check-in-often/).
-- Write [good commit messages](https://tbaggery.com/2008/04/19/a-note-about-git-commit-messages.html).
-- Respect the [Best practices for WordPress development](https://jetpack.com/contribute/#practices).
+WooCommerce Google Analytics Integration is licensed under the GPLv3+, and all contributions to the project will be released under the same license. You maintain copyright over any contribution you make, and by submitting a pull request, you are agreeing to release that contribution under the GPLv3+ license.
 
+## Reporting Security Issues
+
+Please see [SECURITY.md](./SECURITY.md).
+
+## Feature Requests
+
+Feature requests can be submitted to our [ideas board](https://ideas.woocommerce.com/forums/133476-woocommerce?category_id=337630). Be sure to include a good description of the expected behavior and use case, and before submitting a request, please search for similar ones.
+
+## Getting started
+
+- [Check In Early, Check In Often](http://blog.codinghorror.com/check-in-early-check-in-often/).
+- Write [good commit messages](http://tbaggery.com/2008/04/19/a-note-about-git-commit-messages.html).
+- Respect the [Best practices for WordPress development](http://jetpack.com/contribute/#practices).

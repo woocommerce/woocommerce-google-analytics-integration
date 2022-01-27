@@ -331,8 +331,8 @@ class WC_Google_Analytics extends WC_Integration {
 			'set_domain_name'                     => empty( $this->ga_set_domain_name ) ? 'no' : 'yes',
 			'plugin_version'                      => WC_GOOGLE_ANALYTICS_INTEGRATION_VERSION,
 			'enhanced_ecommerce_tracking_enabled' => $this->ga_enhanced_ecommerce_tracking_enabled,
-			'linker_allow_incoming_enabled'       => $this->ga_linker_allow_incoming_enabled,
-			'linker_cross_domains'                => empty( $this->ga_linker_cross_domains ) ? 'no' : 'yes',
+			'linker_allow_incoming_enabled'       => empty( $this->ga_linker_allow_incoming_enabled ) ? 'no' : 'yes',
+			'linker_cross_domains'                => $this->ga_linker_cross_domains,
 		);
 
 		// ID prefix, blank, or X for unknown

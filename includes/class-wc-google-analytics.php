@@ -230,7 +230,8 @@ class WC_Google_Analytics extends WC_Integration {
 			),
 			'ga_linker_cross_domains' => array(
 				'title'       => __( 'Cross Domain Tracking', 'woocommerce-google-analytics-integration' ),
-				'description' => sprintf(__( 'Add a comma separated list of domains for automatic linking. %sRead more about Cross Domain Measurement%s', 'woocommerce-google-analytics-integration' ), '<a href="https://support.google.com/analytics/answer/7476333" target="_blank">', '</a>'),
+				/* translators: Read more link */
+				'description' => sprintf( __( 'Add a comma separated list of domains for automatic linking. %1$sRead more about Cross Domain Measurement%2$s', 'woocommerce-google-analytics-integration' ), '<a href="https://support.google.com/analytics/answer/7476333" target="_blank">', '</a>' ),
 				'type'        => 'text',
 				'placeholder' => 'example.com, example.net',
 				'default'     => '',
@@ -252,7 +253,7 @@ class WC_Google_Analytics extends WC_Integration {
 				'class'         => 'legacy-setting'
 			),
 
-		
+
 			// Enhanced eCommerce Sub-Settings
 
 			'ga_enhanced_remove_from_cart_enabled' => array(

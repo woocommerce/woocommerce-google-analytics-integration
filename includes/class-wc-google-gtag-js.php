@@ -114,9 +114,9 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 			$gtag_developer_id = "gtag('set', 'developer_id." . self::DEVELOPER_ID . "', true);";
 		}
 
-		$gtag_id      = self::get( 'ga_id' );
-		$gtag_cross_domains = ! empty ( self::get( 'ga_linker_cross_domains' ) )  ? array_map( 'esc_js', explode( ',', self::get( 'ga_linker_cross_domains' ) ) ) : [];
-		
+		$gtag_id            = self::get( 'ga_id' );
+		$gtag_cross_domains = ! empty( self::get( 'ga_linker_cross_domains' ) ) ? array_map( 'esc_js', explode( ',', self::get( 'ga_linker_cross_domains' ) ) ) : array();
+
 		$gtag_snippet = '<script async src="https://www.googletagmanager.com/gtag/js?id=' . esc_js( $gtag_id ) . '"></script>';
 		$gtag_snippet .= "
 		<script>

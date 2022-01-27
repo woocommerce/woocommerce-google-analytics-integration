@@ -28,6 +28,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @property $ga_enhanced_checkout_process_enabled
  * @property $ga_enhanced_product_detail_view_enabled
  * @property $ga_event_tracking_enabled
+ * @property $ga_linker_cross_domains
+ * @property $ga_linker_allow_incoming_enabled
  */
 class WC_Google_Analytics extends WC_Integration {
 
@@ -120,6 +122,8 @@ class WC_Google_Analytics extends WC_Integration {
 			'ga_enhanced_checkout_process_enabled',
 			'ga_enhanced_product_detail_view_enabled',
 			'ga_event_tracking_enabled',
+			'ga_linker_cross_domains',
+			'ga_linker_allow_incoming_enabled',
 		);
 
 		$constructor = array();
@@ -224,7 +228,21 @@ class WC_Google_Analytics extends WC_Integration {
 				'checkboxgroup'		=> '',
 				'default' 			=> 'yes',
 			),
-
+			'ga_linker_cross_domains' => array(
+				'title'       => __( 'Cross Domain Tracking', 'woocommerce-google-analytics-integration' ),
+				/* translators: Read more link */
+				'description' => sprintf( __( 'Add a comma separated list of domains for automatic linking. %1$sRead more about Cross Domain Measurement%2$s', 'woocommerce-google-analytics-integration' ), '<a href="https://support.google.com/analytics/answer/7476333" target="_blank">', '</a>' ),
+				'type'        => 'text',
+				'placeholder' => 'example.com, example.net',
+				'default'     => '',
+			),
+			'ga_linker_allow_incoming_enabled' => array(
+				'label'         => __( 'Accept Incoming Linker Parameters', 'woocommerce-google-analytics-integration' ),
+				'description'   => __( 'Enabling this option will allow incoming linker parameters from other websites.', 'woocommerce-google-analytics-integration' ),
+				'type'          => 'checkbox',
+				'checkboxgroup' => '',
+				'default'       => 'no',
+			),
 			'ga_enhanced_ecommerce_tracking_enabled' => array(
 				'title'         => __( 'Enhanced eCommerce', 'woocommerce-google-analytics-integration' ),
 				'label'         => __( 'Enable Enhanced eCommerce ', 'woocommerce-google-analytics-integration' ),
@@ -234,6 +252,7 @@ class WC_Google_Analytics extends WC_Integration {
 				'default'       => 'no',
 				'class'         => 'legacy-setting'
 			),
+
 
 			// Enhanced eCommerce Sub-Settings
 
@@ -312,6 +331,8 @@ class WC_Google_Analytics extends WC_Integration {
 			'set_domain_name'                     => empty( $this->ga_set_domain_name ) ? 'no' : 'yes',
 			'plugin_version'                      => WC_GOOGLE_ANALYTICS_INTEGRATION_VERSION,
 			'enhanced_ecommerce_tracking_enabled' => $this->ga_enhanced_ecommerce_tracking_enabled,
+			'linker_allow_incoming_enabled'       => empty( $this->ga_linker_allow_incoming_enabled ) ? 'no' : 'yes',
+			'linker_cross_domains'                => $this->ga_linker_cross_domains,
 		);
 
 		// ID prefix, blank, or X for unknown

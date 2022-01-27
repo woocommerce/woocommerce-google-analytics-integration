@@ -243,7 +243,12 @@ class WC_Google_Analytics_JS extends WC_Abstract_Google_Analytics_JS {
 		})(window,document,'script', '{$src}','" . self::tracker_var() . "');";
 
 		$ga_id = self::get( 'ga_id' );
-		$ga_snippet_create       = self::tracker_var() . "( 'create', '" . esc_js( $ga_id ) . "', '" . $set_domain_name . "' );";
+
+		if ( 'yes' === self::get( 'ga_linker_allow_incoming_enabled' ) ) {
+			$ga_snippet_create = self::tracker_var() . "( 'create', '" . esc_js( $ga_id ) . "', '" . $set_domain_name . "', { allowLinker: true });";
+		} else {
+			$ga_snippet_create = self::tracker_var() . "( 'create', '" . esc_js( $ga_id ) . "', '" . $set_domain_name . "' );";
+		}
 
 		if ( ! empty( self::DEVELOPER_ID ) ) {
 			$ga_snippet_developer_id = "(window.gaDevIds=window.gaDevIds||[]).push('" . self::DEVELOPER_ID . "');";
@@ -261,6 +266,13 @@ class WC_Google_Analytics_JS extends WC_Abstract_Google_Analytics_JS {
 			$ga_snippet_require .= "" . self::tracker_var() . "( 'require', 'ec' );";
 		} else {
 			$ga_snippet_require .= "" . self::tracker_var() . "( 'require', 'ecommerce', 'ecommerce.js');";
+		}
+
+		$ga_cross_domains = ! empty( self::get( 'ga_linker_cross_domains' ) ) ? array_map( 'esc_js', explode( ',', self::get( 'ga_linker_cross_domains' ) ) ) : false;
+
+		if ( $ga_cross_domains ) {
+			$ga_snippet_require .= '' . self::tracker_var() . "( 'require', 'linker' );";
+			$ga_snippet_require .= '' . self::tracker_var() . "( 'linker:autoLink', " . wp_json_encode( $ga_cross_domains ) . ');';
 		}
 
 		$ga_snippet_head         = apply_filters( 'woocommerce_ga_snippet_head', $ga_snippet_head );

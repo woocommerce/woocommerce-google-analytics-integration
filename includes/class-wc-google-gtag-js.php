@@ -114,7 +114,9 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 			$gtag_developer_id = "gtag('set', 'developer_id." . self::DEVELOPER_ID . "', true);";
 		}
 
-		$gtag_id      = self::get( 'ga_id' );
+		$gtag_id            = self::get( 'ga_id' );
+		$gtag_cross_domains = ! empty( self::get( 'ga_linker_cross_domains' ) ) ? array_map( 'esc_js', explode( ',', self::get( 'ga_linker_cross_domains' ) ) ) : array();
+
 		$gtag_snippet = '<script async src="https://www.googletagmanager.com/gtag/js?id=' . esc_js( $gtag_id ) . '"></script>';
 		$gtag_snippet .= "
 		<script>
@@ -127,6 +129,10 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 			'allow_google_signals': " . ( 'yes' === self::get( 'ga_support_display_advertising' ) ? 'true' : 'false' ) . ",
 			'link_attribution': " . ( 'yes' === self::get( 'ga_support_enhanced_link_attribution' ) ? 'true' : 'false' ) . ",
 			'anonymize_ip': " . ( 'yes' === self::get( 'ga_anonymize_enabled' ) ? 'true' : 'false' ) . ",
+			'linker':{
+				'domains': " . wp_json_encode( $gtag_cross_domains ) . ",
+				'allow_incoming': " . ( 'yes' === self::get( 'ga_linker_allow_incoming_enabled' ) ? 'true' : 'false' ) . ",
+			},
 			'custom_map': {
 				'dimension1': 'logged_in'
 			},

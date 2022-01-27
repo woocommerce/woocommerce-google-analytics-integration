@@ -236,11 +236,11 @@ class WC_Google_Analytics extends WC_Integration {
 				'default'     => '',
 			),
 			'ga_linker_allow_incoming_enabled' => array(
-				'label' 			=> __( 'Accept Incoming Linker Parameters', 'woocommerce-google-analytics-integration' ),
-				'description' 			=> __( 'Enabling this option will allow incoming linker parameters from other websites.', 'woocommerce-google-analytics-integration' ),
-				'type' 				=> 'checkbox',
-				'checkboxgroup'		=> '',
-				'default' 			=> 'no',
+				'label'         => __( 'Accept Incoming Linker Parameters', 'woocommerce-google-analytics-integration' ),
+				'description'   => __( 'Enabling this option will allow incoming linker parameters from other websites.', 'woocommerce-google-analytics-integration' ),
+				'type'          => 'checkbox',
+				'checkboxgroup' => '',
+				'default'       => 'no',
 			),
 			'ga_enhanced_ecommerce_tracking_enabled' => array(
 				'title'         => __( 'Enhanced eCommerce', 'woocommerce-google-analytics-integration' ),
@@ -330,8 +330,8 @@ class WC_Google_Analytics extends WC_Integration {
 			'set_domain_name'                     => empty( $this->ga_set_domain_name ) ? 'no' : 'yes',
 			'plugin_version'                      => WC_GOOGLE_ANALYTICS_INTEGRATION_VERSION,
 			'enhanced_ecommerce_tracking_enabled' => $this->ga_enhanced_ecommerce_tracking_enabled,
-			'linker_allow_incoming_enabled'               => $this->ga_linker_allow_incoming_enabled,
-			'linker_cross_domains'					  => empty( $this->ga_linker_cross_domains ) ? 'no' : 'yes',
+			'linker_allow_incoming_enabled'       => $this->ga_linker_allow_incoming_enabled,
+			'linker_cross_domains'                => empty( $this->ga_linker_cross_domains ) ? 'no' : 'yes',
 		);
 
 		// ID prefix, blank, or X for unknown

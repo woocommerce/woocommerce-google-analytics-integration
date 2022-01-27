@@ -245,9 +245,9 @@ class WC_Google_Analytics_JS extends WC_Abstract_Google_Analytics_JS {
 		$ga_id = self::get( 'ga_id' );
 
 		if( 'yes' === self::get( 'ga_linker_allow_incoming_enabled' ) ) {
-			$ga_snippet_create       = self::tracker_var() . "( 'create', '" . esc_js( $ga_id ) . "', '" . $set_domain_name . "', { allowLinker: true });";
+			$ga_snippet_create = self::tracker_var() . "( 'create', '" . esc_js( $ga_id ) . "', '" . $set_domain_name . "', { allowLinker: true });";
 		} else {
-			$ga_snippet_create       = self::tracker_var() . "( 'create', '" . esc_js( $ga_id ) . "', '" . $set_domain_name . "' );";
+			$ga_snippet_create = self::tracker_var() . "( 'create', '" . esc_js( $ga_id ) . "', '" . $set_domain_name . "' );";
 		}
 
 		if ( ! empty( self::DEVELOPER_ID ) ) {
@@ -268,7 +268,7 @@ class WC_Google_Analytics_JS extends WC_Abstract_Google_Analytics_JS {
 			$ga_snippet_require .= "" . self::tracker_var() . "( 'require', 'ecommerce', 'ecommerce.js');";
 		}
 
-		$ga_cross_domains = !empty(self::get( 'ga_linker_cross_domains' )) ? array_map( 'esc_js', explode( ',', self::get( 'ga_linker_cross_domains' ) )) : false;
+		$ga_cross_domains = ! empty( self::get( 'ga_linker_cross_domains' ) ) ? array_map( 'esc_js', explode( ',', self::get( 'ga_linker_cross_domains' ) ) ) : false;
 
 		if( $ga_cross_domains ) {
 			$ga_snippet_require .= "" . self::tracker_var() . "( 'require', 'linker' );";

@@ -24,4 +24,3 @@ docs export-ignore
 wordpress_org_assets export-ignore
 assets/css/*.scss export-ignore
 node_modules export-ignore
-languages export-ignore

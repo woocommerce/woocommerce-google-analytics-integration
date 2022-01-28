@@ -6,7 +6,8 @@
     "license": "GPL-2.0+",
     "archive": {
         "exclude": [
-            "!/assets"
+            "!/assets",
+            "!/languages"
         ]
     }
 }

@@ -60,6 +60,9 @@ Exact wording depends on the national data privacy laws and should be adjusted.
 
 == Changelog ==
 
+= 1.5.8 - 2022-02-02 =
+* Add - Support for Google Analytics cross domain tracking features.
+
 = 1.5.7 - 2022-01-13 =
 * Fix - Activation error when WC was disabled.
 * Tweak - WC 6.1 compatibility.

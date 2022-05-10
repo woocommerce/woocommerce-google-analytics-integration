@@ -1,5 +1,9 @@
 *** Changelog ***
 
+= 1.5.9 - 2022-05-10 =
+* Tweak - WC 6.5 compatibility.
+* Tweak - WordPress 6.0 compatibility.
+
 = 1.5.8 - 2022-02-02 =
 * Add - Support for Google Analytics cross domain tracking features.
 

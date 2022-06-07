@@ -60,6 +60,9 @@ Exact wording depends on the national data privacy laws and should be adjusted.
 
 == Changelog ==
 
+= 1.5.10 - 2022-06-07 =
+* Tweak - WC 6.6 compatibility.
+
 = 1.5.9 - 2022-05-10 =
 * Tweak - WC 6.5 compatibility.
 * Tweak - WordPress 6.0 compatibility.

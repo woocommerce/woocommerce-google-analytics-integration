@@ -83,7 +83,7 @@ if ( ! class_exists( 'WC_Google_Analytics_Integration' ) ) {
 			);
 
 			$plugin_links = array(
-				'<a href="' . esc_url( $settings_url ) . '">' . __( 'Settings', 'woocommerce-google-analytics-integration' ) . '</a>',
+				'<a href="' . esc_url( $settings_url ) . '">' . __( 'Settings', 'google-analytics-integration' ) . '</a>',
 				'<a href="https://wordpress.org/support/plugin/woocommerce-google-analytics-integration">' . __( 'Support', 'woocommerce-google-analytics-integration' ) . '</a>',
 			);
 
@@ -97,7 +97,7 @@ if ( ! class_exists( 'WC_Google_Analytics_Integration' ) ) {
 		 */
 		public static function get_instance() {
 			// If the single instance hasn't been set, set it now.
-			if ( null == self::$instance ) {
+			if ( null === self::$instance ) {
 				self::$instance = new self;
 			}
 

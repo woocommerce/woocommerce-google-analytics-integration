@@ -16,6 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Run PHPCS to changed lines of code
-        uses: woocommerce/grow/phpcs-diff@actions-v1
+        # uses: woocommerce/grow/phpcs-diff@actions-v1
+        uses: woocommerce/grow/phpcs-diff@actions-v1-pre
         with:
           php-version: 7.4

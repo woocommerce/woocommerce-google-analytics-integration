@@ -31,9 +31,6 @@
 		<exclude name="Squiz.Commenting.FunctionCommentThrowTag.WrongNumber"/>
 	</rule>
 
-	<!-- Disallow Yoda conditions. -->
-	<rule ref="Generic.ControlStructures.DisallowYodaConditions"/>
-
 	<!-- Include some other sniffs we want to enforce. -->
 	<rule ref="Generic.Arrays.DisallowLongArraySyntax"/>
 	<rule ref="Generic.VersionControl.GitMergeConflict"/>

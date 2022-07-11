@@ -1,0 +1,21 @@
+name: PHP Coding Standards - Diff
+
+on:
+  pull_request:
+    paths:
+      - "**.php"
+      - .github/workflows/php-coding-standards-diff.yml
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  CodingStandardsDiff:
+    name: PHP coding standards - diff
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run PHPCS to changed lines of code
+        uses: woocommerce/grow/phpcs-diff@actions-v1
+        with:
+          php-version: 7.4

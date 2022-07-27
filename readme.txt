@@ -60,6 +60,9 @@ Exact wording depends on the national data privacy laws and should be adjusted.
 
 == Changelog ==
 
+= 1.5.12 - 2022-07-27 =
+* Tweak - WC 6.8 compatibility.
+
 = 1.5.11 - 2022-07-06 =
 * Tweak - WC 6.7 compatibility.
 

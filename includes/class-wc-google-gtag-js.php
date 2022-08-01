@@ -180,14 +180,14 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 	/**
 	 * Add Item
 	 *
-	 * @param WC_Order $order WC_Order Object
-	 * @param WC_Order_Item $item    The item to add to a transaction/order
+	 * @param WC_Order      $order WC_Order Object
+	 * @param WC_Order_Item $item  The item to add to a transaction/order
 	 */
 	protected function add_item( $order, $item ) {
 		$_product = $item->get_product();
 		$variant  = self::product_get_variant_line( $_product );
 
-		$code = "{";
+		$code  = '{';
 		$code .= "'id': '" . esc_js( $_product->get_sku() ? $_product->get_sku() : $_product->get_id() ) . "',";
 		$code .= "'name': '" . esc_js( $item['name'] ) . "',";
 		$code .= "'category': " . self::product_get_category_line( $_product );
@@ -198,7 +198,7 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 
 		$code .= "'price': '" . esc_js( $order->get_item_total( $item ) ) . "',";
 		$code .= "'quantity': '" . esc_js( $item['qty'] ) . "'";
-		$code .= "},";
+		$code .= '},';
 
 		return $code;
 	}

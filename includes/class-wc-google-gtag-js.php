@@ -164,14 +164,14 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 		}
 		$items .= "]";
 
-		$code  = "" . self::tracker_var() . "( 'event', 'purchase', {
+		$code = self::tracker_var() . "( 'event', 'purchase', {
 			'transaction_id': '" . esc_js( $order->get_order_number() ) . "',
 			'affiliation': '" . esc_js( get_bloginfo( 'name' ) ) . "',
 			'value': '" . esc_js( $order->get_total() ) . "',
 			'tax': '" . esc_js( $order->get_total_tax() ) . "',
 			'shipping': '" . esc_js( $order->get_total_shipping() ) . "',
-			'currency': '" . esc_js( version_compare( WC_VERSION, '3.0', '<' ) ? $order->get_order_currency() : $order->get_currency() ) . "',  // Currency,
-			'items': " . $items . ",
+			'currency': '" . esc_js( $order->get_currency() ) . "',
+			'items': {$items},
 		} );";
 
 		return $code;
@@ -180,14 +180,14 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 	/**
 	 * Add Item
 	 *
-	 * @param WC_Order $order WC_Order Object
-	 * @param WC_Order_Item $item    The item to add to a transaction/order
+	 * @param WC_Order      $order WC_Order Object
+	 * @param WC_Order_Item $item  The item to add to a transaction/order
 	 */
 	protected function add_item( $order, $item ) {
-		$_product = version_compare( WC_VERSION, '3.0', '<' ) ? $order->get_product_from_item( $item ) : $item->get_product();
+		$_product = $item->get_product();
 		$variant  = self::product_get_variant_line( $_product );
 
-		$code = "{";
+		$code  = '{';
 		$code .= "'id': '" . esc_js( $_product->get_sku() ? $_product->get_sku() : $_product->get_id() ) . "',";
 		$code .= "'name': '" . esc_js( $item['name'] ) . "',";
 		$code .= "'category': " . self::product_get_category_line( $_product );
@@ -198,7 +198,7 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 
 		$code .= "'price': '" . esc_js( $order->get_item_total( $item ) ) . "',";
 		$code .= "'quantity': '" . esc_js( $item['qty'] ) . "'";
-		$code .= "},";
+		$code .= '},';
 
 		return $code;
 	}

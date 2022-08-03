@@ -381,7 +381,8 @@ class WC_Google_Analytics extends WC_Integration {
 		// Check if is order received page and stop when the products and not tracked
 		if ( is_order_received_page() && 'yes' === $this->ga_ecommerce_tracking_enabled ) {
 			$order_id = isset( $wp->query_vars['order-received'] ) ? $wp->query_vars['order-received'] : 0;
-			if ( 0 < $order_id && 1 != get_post_meta( $order_id, '_ga_tracked', true ) ) {
+			$order    = wc_get_order( $order_id );
+			if ( $order && ! (bool) $order->get_meta( '_ga_tracked' ) ) {
 				$display_ecommerce_tracking = true;
 				echo $this->get_ecommerce_tracking_code( $order_id );
 			}
@@ -433,7 +434,8 @@ class WC_Google_Analytics extends WC_Integration {
 		$code = $this->get_tracking_instance()->add_transaction( $order );
 
 		// Mark the order as tracked.
-		update_post_meta( $order_id, '_ga_tracked', 1 );
+		$order->update_meta_data( '_ga_tracked', 1 );
+		$order->save();
 
 		return '
 		<!-- WooCommerce Google Analytics Integration -->

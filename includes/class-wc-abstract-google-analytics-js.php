@@ -160,16 +160,16 @@ abstract class WC_Abstract_Google_Analytics_JS {
 	 * Returns a 'category' JSON line based on $product
 	 *
 	 * @param  WC_Product $_product  Product to pull info for
-	 * @return string               Line of JSON
+	 * @return string                Line of JSON
 	 */
 	protected static function product_get_category_line( $_product ) {
-		$out            = array();
-		$variation_data = version_compare( WC_VERSION, '3.0', '<' ) ? $_product->variation_data : ( $_product->is_type( 'variation' ) ? wc_get_product_variation_attributes( $_product->get_id() ) : '' );
+		$out            = [];
+		$variation_data = $_product->is_type( 'variation' ) ? wc_get_product_variation_attributes( $_product->get_id() ) : false;
 		$categories     = get_the_terms( $_product->get_id(), 'product_cat' );
 
 		if ( is_array( $variation_data ) && ! empty( $variation_data ) ) {
-			$parent_product = wc_get_product( version_compare( WC_VERSION, '3.0', '<' ) ? $_product->parent->id : $_product->get_parent_id() );
-			$categories = get_the_terms( $parent_product->get_id(), 'product_cat' );
+			$parent_product = wc_get_product( $_product->get_parent_id() );
+			$categories     = get_the_terms( $parent_product->get_id(), 'product_cat' );
 		}
 
 		if ( $categories ) {
@@ -178,18 +178,18 @@ abstract class WC_Abstract_Google_Analytics_JS {
 			}
 		}
 
-		return "'" . esc_js( join( "/", $out ) ) . "',";
+		return "'" . esc_js( join( '/', $out ) ) . "',";
 	}
 
 	/**
 	 * Returns a 'variant' JSON line based on $product
 	 *
 	 * @param  WC_Product $_product  Product to pull info for
-	 * @return string               Line of JSON
+	 * @return string                Line of JSON
 	 */
 	protected static function product_get_variant_line( $_product ) {
 		$out            = '';
-		$variation_data = version_compare( WC_VERSION, '3.0', '<' ) ? $_product->variation_data : ( $_product->is_type( 'variation' ) ? wc_get_product_variation_attributes( $_product->get_id() ) : '' );
+		$variation_data = $_product->is_type( 'variation' ) ? wc_get_product_variation_attributes( $_product->get_id() ) : false;
 
 		if ( is_array( $variation_data ) && ! empty( $variation_data ) ) {
 			$out = "'" . esc_js( wc_get_formatted_variation( $variation_data, true ) ) . "',";

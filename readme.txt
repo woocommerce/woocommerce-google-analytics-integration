@@ -60,6 +60,9 @@ Exact wording depends on the national data privacy laws and should be adjusted.
 
 == Changelog ==
 
+= 1.5.13 - 2022-08-03 =
+* Fix - Custom Order table compatibility.
+
 = 1.5.12 - 2022-07-27 =
 * Tweak - WC 6.8 compatibility.
 

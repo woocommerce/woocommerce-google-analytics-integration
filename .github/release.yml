@@ -38,7 +38,7 @@ changelog:
 
     - title: "[Doc] Documentation 📚"
       labels:
-        - "changelog: docs"
+        - "changelog: doc"
 
     - title: Other Changes
       labels:

@@ -60,6 +60,11 @@ Exact wording depends on the national data privacy laws and should be adjusted.
 
 == Changelog ==
 
+= 1.5.14 - 2022-09-02 =
+* Dev - Add branch-labels GH workflow.
+* Dev - GH release config and the new PR template.
+* Tweak - WC 6.9 compatibility.
+
 = 1.5.13 - 2022-08-03 =
 * Fix - Custom Order table compatibility.
 

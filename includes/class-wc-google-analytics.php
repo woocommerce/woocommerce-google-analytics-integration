@@ -336,9 +336,9 @@ class WC_Google_Analytics extends WC_Integration {
 		);
 
 		// ID prefix, blank, or X for unknown
-		$prefix = substr( strtoupper( $this->ga_id ), 0, 2 );
-		if ( 'UA' === $prefix || 'G-' === $prefix || empty( $prefix ) ) {
-			$data['wc-google-analytics']['ga_id'] = str_replace( '-', '', $prefix );
+		$prefix = strstr( strtoupper( $this->ga_id ), '-', true );
+		if ( in_array( $prefix, array( 'UA', 'G', 'GT' ), true ) || empty( $prefix ) ) {
+			$data['wc-google-analytics']['ga_id'] = $prefix;
 		} else {
 			$data['wc-google-analytics']['ga_id'] = 'X';
 		}

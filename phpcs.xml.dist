@@ -32,7 +32,6 @@
 	</rule>
 
 	<!-- Include some other sniffs we want to enforce. -->
-	<rule ref="Generic.Arrays.DisallowLongArraySyntax"/>
 	<rule ref="Generic.VersionControl.GitMergeConflict"/>
 	<rule ref="Generic.WhiteSpace.SpreadOperatorSpacingAfter"/>
 	<rule ref="PSR12.Classes.AnonClassDeclaration"/>

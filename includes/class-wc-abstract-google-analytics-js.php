@@ -108,6 +108,20 @@ abstract class WC_Abstract_Google_Analytics_JS {
 	abstract protected function add_transaction_enhanced( $order );
 
 	/**
+	 * Get item identifier from product data
+	 * 
+	 * @param  WC_Product $product WC_Product Object
+	 * @return stirng
+	 */
+	public static function get_product_identifier( $product ) {
+		if ( ! empty( $product->get_sku() ) ) {
+			return esc_js( $product->get_sku() );
+		} else {
+			return esc_js( '#' . ( $product->is_type('variation') ? $product->get_parent_id() : $product->get_id() ) );
+		}
+	}
+
+	/**
 	 * Generate Universal Analytics add item tracking code
 	 *
 	 * @param  WC_Order $order     WC_Order Object

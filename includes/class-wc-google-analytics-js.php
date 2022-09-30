@@ -409,9 +409,15 @@ class WC_Google_Analytics_JS extends WC_Abstract_Google_Analytics_JS {
 		$_product = version_compare( WC_VERSION, '3.0', '<' ) ? $order->get_product_from_item( $item ) : $item->get_product();
 		$variant  = self::product_get_variant_line( $_product );
 
+		$name = $_product->get_name();
+		if ( $_product->is_type('variation') ) {
+			$parent = $_product->get_parent_data();
+			$name   = $parent['title'];
+		}
+
 		$code = "" . self::tracker_var() . "( 'ec:addProduct', {";
 		$code .= "'id': '" . self::get_product_identifier( $_product ) . "',";
-		$code .= "'name': '" . esc_js( $item['name'] ) . "',";
+		$code .= "'name': '" . esc_js( $name ) . "',";
 		$code .= "'category': " . self::product_get_category_line( $_product );
 
 		if ( '' !== $variant ) {

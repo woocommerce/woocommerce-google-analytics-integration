@@ -482,10 +482,40 @@ class WC_Google_Analytics extends WC_Integration {
 		$parameters['label']    = "'" . esc_js( $product->get_sku() ? __( 'ID:', 'woocommerce-google-analytics-integration' ) . ' ' . $product->get_sku() : "#" . $product->get_id() ) . "'";
 
 		if ( ! $this->disable_tracking( $this->ga_enhanced_ecommerce_tracking_enabled ) ) {
+			// Update SKU and attributes when variation selection changes
+			wc_enqueue_js('
+				var wc_ga_integration_product_sku,
+					wc_ga_integration_variation_sku,
+					wc_ga_integration_variation_attributes;
+
+				wc_ga_integration_product_sku = "'. esc_js( $product->get_sku() ) .'";
+
+				$(document).on( "found_variation", "form.cart", function( e, variation ) {
+					wc_ga_integration_variation_attributes = variation.attributes;
+					if ( "undefined" !== typeof variation.sku && 0 !== variation.sku.length ) {
+						wc_ga_integration_variation_sku = variation.sku;
+					} else {
+						wc_ga_integration_variation_sku = wc_ga_integration_product_sku;
+					}
+				});
+
+				function wc_ga_integration_format_variant() {
+					var variant = "";
+					for ( key in wc_ga_integration_variation_attributes ) {
+						variant += key.replace( "attribute_", "" ) + ": " + wc_ga_integration_variation_attributes[key] + ","
+					}
+					return variant.substring( 0, variant.length -1 )
+				}
+			');
+
 			$item = "{";
-			$item .= "'id': '" . $this->get_tracking_instance()->get_product_identifier( $product ) . "',";
+			$item .= "'id': ( 0 !== wc_ga_integration_variation_sku.length ) ? ( wc_ga_integration_variation_sku ) : ( '#' + $('.woocommerce-variation-add-to-cart input[name=\"product_id\"]').val() ),";
 			$item .= "'name': '" . esc_js( $product->get_title() ) . "',";
 			$item .= "'quantity': $( 'input.qty' ).val() ? $( 'input.qty' ).val() : '1'";
+			
+			if ( $product->is_type('variable') )
+				$item .= ",'variant': wc_ga_integration_format_variant()";
+
 			$item .= "}";
 			$parameters['item'] = $item;
 

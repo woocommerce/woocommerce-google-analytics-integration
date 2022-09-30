@@ -511,6 +511,7 @@ class WC_Google_Analytics extends WC_Integration {
 			$item = "{";
 			$item .= "'id': ( 0 !== wc_ga_integration_variation_sku.length ) ? ( wc_ga_integration_variation_sku ) : ( '#' + $('.woocommerce-variation-add-to-cart input[name=\"product_id\"]').val() ),";
 			$item .= "'name': '" . esc_js( $product->get_title() ) . "',";
+			$item .= "'category': " . $this->get_tracking_instance()->product_get_category_line( $product );
 			$item .= "'quantity': $( 'input.qty' ).val() ? $( 'input.qty' ).val() : '1'";
 			
 			if ( $product->is_type('variable') )

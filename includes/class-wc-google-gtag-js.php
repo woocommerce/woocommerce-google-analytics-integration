@@ -54,7 +54,7 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 
 		wc_enqueue_js( "
 			" . self::tracker_var() . "( 'event', 'view_item_list', { 'items': [ {
-				'id': '" . esc_js( $product->get_id() ) . "',
+				'id': '" . self::get_product_identifier( $product ) . "',
 				'name': '" . esc_js( $product->get_title() ) . "',
 				'category': " . self::product_get_category_line( $product ) . "
 				'list': '" . esc_js( $list ) . "',
@@ -84,7 +84,7 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 				" . self::tracker_var() . "( 'event', 'select_content', {
 					'content_type': 'product',
 					'items': [ {
-						'id': '" . esc_js( $product->get_id() ) . "',
+						'id': '" . self::get_product_identifier( $product ) . "',
 						'name': '" . esc_js( $product->get_title() ) . "',
 						'category': " . self::product_get_category_line( $product ) . "
 						'list_position': '" . esc_js( $position ) . "'
@@ -188,7 +188,7 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 		$variant  = self::product_get_variant_line( $_product );
 
 		$code  = '{';
-		$code .= "'id': '" . esc_js( $_product->get_sku() ? $_product->get_sku() : $_product->get_id() ) . "',";
+		$code .= "'id': '" . self::get_product_identifier( $_product ) . "',";
 		$code .= "'name': '" . esc_js( $item['name'] ) . "',";
 		$code .= "'category': " . self::product_get_category_line( $_product );
 
@@ -236,7 +236,7 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 		wc_enqueue_js( "
 			" . self::tracker_var() . "( 'event', 'view_item', {
 				'items': [ {
-					'id': '" . esc_js( $product->get_sku() ? $product->get_sku() : ( '#' . $product->get_id() ) ) . "',
+					'id': '" . self::get_product_identifier( $product ) . "',
 					'name': '" . esc_js( $product->get_title() ) . "',
 					'category': " . self::product_get_category_line( $product ) . "
 					'price': '" . esc_js( $product->get_price() ) . "',
@@ -257,7 +257,7 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 
 			$items .= "
 				{
-					'id': '" . esc_js( $product->get_sku() ? $product->get_sku() : ( '#' . $product->get_id() ) ) . "',
+					'id': '" . self::get_product_identifier( $product ) . "',
 					'name': '" . esc_js( $product->get_title() ) . "',
 					'category': " . self::product_get_category_line( $product );
 

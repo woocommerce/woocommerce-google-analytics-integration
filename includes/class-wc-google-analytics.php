@@ -483,7 +483,7 @@ class WC_Google_Analytics extends WC_Integration {
 
 		if ( ! $this->disable_tracking( $this->ga_enhanced_ecommerce_tracking_enabled ) ) {
 			$item = "{";
-			$item .= "'id': '" . esc_js( $product->get_sku() ? $product->get_sku() : ( '#' . $product->get_id() ) ) . "',";
+			$item .= "'id': '" . $this->get_tracking_instance()->get_product_identifier( $product ) . "',";
 			$item .= "'name': '" . esc_js( $product->get_title() ) . "',";
 			$item .= "'quantity': $( 'input.qty' ).val() ? $( 'input.qty' ).val() : '1'";
 			$item .= "}";

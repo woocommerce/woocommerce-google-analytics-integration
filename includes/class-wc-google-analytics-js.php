@@ -109,7 +109,7 @@ class WC_Google_Analytics_JS extends WC_Abstract_Google_Analytics_JS {
 	 * Enqueues JavaScript to build the addImpression object
 	 *
 	 * @param WC_Product $product
-	 * @param int $position
+	 * @param int        $position
 	 */
 	public static function listing_impression( $product, $position ) {
 		if ( isset( $_GET['s'] ) ) {
@@ -133,7 +133,7 @@ class WC_Google_Analytics_JS extends WC_Abstract_Google_Analytics_JS {
 	 * Enqueues JavaScript to build an addProduct and click object
 	 *
 	 * @param WC_Product $product
-	 * @param int $position
+	 * @param int        $position
 	 */
 	public static function listing_click( $product, $position ) {
 		if ( isset( $_GET['s'] ) ) {
@@ -401,7 +401,7 @@ class WC_Google_Analytics_JS extends WC_Abstract_Google_Analytics_JS {
 	/**
 	 * Add Item (Enhanced, Universal)
 	 *
-	 * @param  WC_Order $order     WC_Order Object
+	 * @param  WC_Order      $order     WC_Order Object
 	 * @param  WC_Order_Item $item The item to add to a transaction/order
 	 * @return string
 	 */
@@ -410,7 +410,7 @@ class WC_Google_Analytics_JS extends WC_Abstract_Google_Analytics_JS {
 		$variant  = self::product_get_variant_line( $_product );
 
 		$name = $_product->get_name();
-		if ( $_product->is_type('variation') ) {
+		if ( $_product->is_type( 'variation' ) ) {
 			$parent = $_product->get_parent_data();
 			$name   = $parent['title'];
 		}

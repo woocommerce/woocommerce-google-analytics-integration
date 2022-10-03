@@ -43,7 +43,7 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 	 * Enqueues JavaScript to build the addImpression event
 	 *
 	 * @param WC_Product $product
-	 * @param int $position
+	 * @param int        $position
 	 */
 	public static function listing_impression( $product, $position ) {
 		if ( isset( $_GET['s'] ) ) {
@@ -67,7 +67,7 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 	 * Enqueues JavaScript to build an addProduct and click event
 	 *
 	 * @param WC_Product $product
-	 * @param int $position
+	 * @param int        $position
 	 */
 	public static function listing_click( $product, $position ) {
 		if ( isset( $_GET['s'] ) ) {

@@ -109,7 +109,7 @@ abstract class WC_Abstract_Google_Analytics_JS {
 
 	/**
 	 * Get item identifier from product data
-	 * 
+	 *
 	 * @param  WC_Product $product WC_Product Object
 	 * @return stirng
 	 */
@@ -117,7 +117,7 @@ abstract class WC_Abstract_Google_Analytics_JS {
 		if ( ! empty( $product->get_sku() ) ) {
 			return esc_js( $product->get_sku() );
 		} else {
-			return esc_js( '#' . ( $product->is_type('variation') ? $product->get_parent_id() : $product->get_id() ) );
+			return esc_js( '#' . ( $product->is_type( 'variation' ) ? $product->get_parent_id() : $product->get_id() ) );
 		}
 	}
 

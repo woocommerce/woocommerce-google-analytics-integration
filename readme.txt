@@ -60,6 +60,10 @@ Exact wording depends on the national data privacy laws and should be adjusted.
 
 == Changelog ==
 
+= 1.5.15 - 2022-10-04 =
+* Add - Support for a Google Tag ID.
+* Tweak - WC 7.0 compatibility.
+
 = 1.5.14 - 2022-09-02 =
 * Dev - Add branch-labels GH workflow.
 * Dev - GH release config and the new PR template.

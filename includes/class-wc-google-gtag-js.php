@@ -10,6 +10,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 
+	public $script_handle = 'woocommerce-google-analytics-integration';
+
 	/**
 	 * Get the class instance
 	 *
@@ -28,6 +30,28 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 	 */
 	public function __construct( $options = array() ) {
 		self::$options = $options;
+		// Setup frontend scripts
+		add_action( 'wp_enqueue_scripts', array( $this, 'register_scripts' ) );
+		add_action( 'woocommerce_before_single_product', array( $this, 'setup_frontend_scripts' ) );
+	}
+
+	public function setup_frontend_scripts() {
+		global $product;
+
+		if( $product->is_type('variable') ) {
+			// Filter variation data to include formatted strings required for add_to_cart event
+			add_filter( 'woocommerce_available_variation', array( $this, 'variant_data' ), 10, 3 );
+			// Add default inline product data for add to cart tracking
+			wp_enqueue_script( $this->script_handle );
+			wp_add_inline_script( $this->script_handle, $this->default_add_to_cart_data( $product ) );
+		}
+	}
+
+	/**
+	 * Register front end JavaScript
+	 */
+	public function register_scripts() {
+		wp_register_script( $this->script_handle, plugins_url( 'assets/js/ga-integration.js', dirname( __FILE__ ) ), array( 'jquery' ), WC_GOOGLE_ANALYTICS_INTEGRATION_VERSION, true );
 	}
 
 	/**
@@ -37,6 +61,36 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 	 */
 	public static function tracker_var() {
 		return apply_filters( 'woocommerce_gtag_tracker_variable', 'gtag' );
+	}
+
+	/**
+	 * Add formatted id and variant to variable product data
+	 * 
+	 * @param array $data Data accessible via `found_variation` trigger
+	 * @param WC_Product_Variable $product
+	 * @param WC_Product_Variation $variation
+	 * @return array
+	 */
+	public function variant_data( $data, $product, $variation ) {
+		$data['google_analytics_integration'] = array(
+			'id'       => self::get_product_identifier( $variation ),
+			'variant'  => substr( self::product_get_variant_line( $variation ), 1, -2 )
+		);
+
+		return $data;
+	}
+
+	/**
+	 * Output default inline JS used for tracking variation selection during add to cart event
+	 * 
+	 * @param WC_Product_Variable $product
+	 * @return string
+	 */
+	public function default_add_to_cart_data( $product ) {
+		return 'var google_analytics_integration = '. json_encode(array(
+			'id'       => self::get_product_identifier( $product ),
+			'variant'  => false
+		));
 	}
 
 	/**

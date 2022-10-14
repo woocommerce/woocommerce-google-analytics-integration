@@ -484,19 +484,16 @@ class WC_Google_Analytics extends WC_Integration {
 		if ( ! $this->disable_tracking( $this->ga_enhanced_ecommerce_tracking_enabled ) ) {
 
 			$item = "{";
-
-			if ( $product->is_type( 'variable' ) ) {
-				$item .= "'id': google_analytics_integration.id,";
-				$item .= "'variant': google_analytics_integration.variant,";
-			} else {
-				$item .= "'id': '" . $this->get_tracking_instance()->get_product_identifier( $product ) . "',";
-			}
-
+			$item .= "'id': ( 0 !== wc_ga_integration_variation_sku.length ) ? ( wc_ga_integration_variation_sku ) : ( '#' + $('.woocommerce-variation-add-to-cart input[name=\"product_id\"]').val() ),";
 			$item .= "'name': '" . esc_js( $product->get_title() ) . "',";
 			$item .= "'category': " . $this->get_tracking_instance()->product_get_category_line( $product );
 			$item .= "'quantity': $( 'input.qty' ).val() ? $( 'input.qty' ).val() : '1'";
-			$item .= "}";
 
+			if ( $product->is_type( 'variable' ) ) {
+				$item .= ",'variant': wc_ga_integration_format_variant()";
+			}
+
+			$item .= "}";
 			$parameters['item'] = $item;
 
 			$code = "" . $this->get_tracking_instance()->tracker_var() . "( 'ec:addProduct', " . $item . " );";

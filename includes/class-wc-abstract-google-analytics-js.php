@@ -111,7 +111,7 @@ abstract class WC_Abstract_Google_Analytics_JS {
 	 * Get item identifier from product data
 	 *
 	 * @param  WC_Product $product WC_Product Object
-	 * @return stirng
+	 * @return string
 	 */
 	public static function get_product_identifier( $product ) {
 		if ( ! empty( $product->get_sku() ) ) {

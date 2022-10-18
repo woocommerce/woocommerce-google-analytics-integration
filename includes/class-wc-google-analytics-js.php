@@ -109,7 +109,7 @@ class WC_Google_Analytics_JS extends WC_Abstract_Google_Analytics_JS {
 	 * Enqueues JavaScript to build the addImpression object
 	 *
 	 * @param WC_Product $product
-	 * @param int        $position
+	 * @param int $position
 	 */
 	public static function listing_impression( $product, $position ) {
 		if ( isset( $_GET['s'] ) ) {
@@ -120,7 +120,7 @@ class WC_Google_Analytics_JS extends WC_Abstract_Google_Analytics_JS {
 
 		wc_enqueue_js( "
 			" . self::tracker_var() . "( 'ec:addImpression', {
-				'id': '" . self::get_product_identifier( $product ) . "',
+				'id': '" . esc_js( $product->get_id() ) . "',
 				'name': '" . esc_js( $product->get_title() ) . "',
 				'category': " . self::product_get_category_line( $product ) . "
 				'list': '" . esc_js( $list ) . "',
@@ -133,7 +133,7 @@ class WC_Google_Analytics_JS extends WC_Abstract_Google_Analytics_JS {
 	 * Enqueues JavaScript to build an addProduct and click object
 	 *
 	 * @param WC_Product $product
-	 * @param int        $position
+	 * @param int $position
 	 */
 	public static function listing_click( $product, $position ) {
 		if ( isset( $_GET['s'] ) ) {
@@ -149,7 +149,7 @@ class WC_Google_Analytics_JS extends WC_Abstract_Google_Analytics_JS {
 				}
 
 				" . self::tracker_var() . "( 'ec:addProduct', {
-					'id': '" . self::get_product_identifier( $product ) . "',
+					'id': '" . esc_js( $product->get_id() ) . "',
 					'name': '" . esc_js( $product->get_title() ) . "',
 					'category': " . self::product_get_category_line( $product ) . "
 					'position': '" . esc_js( $position ) . "'
@@ -401,7 +401,7 @@ class WC_Google_Analytics_JS extends WC_Abstract_Google_Analytics_JS {
 	/**
 	 * Add Item (Enhanced, Universal)
 	 *
-	 * @param  WC_Order      $order     WC_Order Object
+	 * @param  WC_Order $order     WC_Order Object
 	 * @param  WC_Order_Item $item The item to add to a transaction/order
 	 * @return string
 	 */
@@ -409,15 +409,9 @@ class WC_Google_Analytics_JS extends WC_Abstract_Google_Analytics_JS {
 		$_product = version_compare( WC_VERSION, '3.0', '<' ) ? $order->get_product_from_item( $item ) : $item->get_product();
 		$variant  = self::product_get_variant_line( $_product );
 
-		$name = $_product->get_name();
-		if ( $_product->is_type( 'variation' ) ) {
-			$parent = $_product->get_parent_data();
-			$name   = $parent['title'];
-		}
-
 		$code = "" . self::tracker_var() . "( 'ec:addProduct', {";
-		$code .= "'id': '" . self::get_product_identifier( $_product ) . "',";
-		$code .= "'name': '" . esc_js( $name ) . "',";
+		$code .= "'id': '" . esc_js( $_product->get_sku() ? $_product->get_sku() : $_product->get_id() ) . "',";
+		$code .= "'name': '" . esc_js( $item['name'] ) . "',";
 		$code .= "'category': " . self::product_get_category_line( $_product );
 
 		if ( '' !== $variant ) {
@@ -463,7 +457,7 @@ class WC_Google_Analytics_JS extends WC_Abstract_Google_Analytics_JS {
 
 		wc_enqueue_js( "
 			" . self::tracker_var() . "( 'ec:addProduct', {
-				'id': '" . self::get_product_identifier( $product ) . "',
+				'id': '" . esc_js( $product->get_sku() ? $product->get_sku() : ( '#' . $product->get_id() ) ) . "',
 				'name': '" . esc_js( $product->get_title() ) . "',
 				'category': " . self::product_get_category_line( $product ) . "
 				'price': '" . esc_js( $product->get_price() ) . "',
@@ -484,7 +478,7 @@ class WC_Google_Analytics_JS extends WC_Abstract_Google_Analytics_JS {
 			$product     = apply_filters( 'woocommerce_cart_item_product', $cart_item['data'], $cart_item, $cart_item_key );
 			$variant     = self::product_get_variant_line( $product );
 			$code .= "" . self::tracker_var() . "( 'ec:addProduct', {
-				'id': '" . self::get_product_identifier( $product ) . "',
+				'id': '" . esc_js( $product->get_sku() ? $product->get_sku() : ( '#' . $product->get_id() ) ) . "',
 				'name': '" . esc_js( $product->get_title() ) . "',
 				'category': " . self::product_get_category_line( $product );
 

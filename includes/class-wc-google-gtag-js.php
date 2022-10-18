@@ -10,6 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 
+	/** @var string $script_handle Handle for the front end JavaScript file */
 	public $script_handle = 'woocommerce-google-analytics-integration';
 
 	/**
@@ -35,10 +36,15 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 		add_action( 'woocommerce_before_single_product', array( $this, 'setup_frontend_scripts' ) );
 	}
 
+	/**
+	 * Enqueue the frontend scripts and make formatted variant data available via filter
+	 *
+	 * @return void
+	 */
 	public function setup_frontend_scripts() {
 		global $product;
 
-		if( $product->is_type('variable') ) {
+		if ( $product->is_type( 'variable' ) ) {
 			// Filter variation data to include formatted strings required for add_to_cart event
 			add_filter( 'woocommerce_available_variation', array( $this, 'variant_data' ), 10, 3 );
 			// Add default inline product data for add to cart tracking
@@ -65,16 +71,16 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 
 	/**
 	 * Add formatted id and variant to variable product data
-	 * 
-	 * @param array $data Data accessible via `found_variation` trigger
-	 * @param WC_Product_Variable $product
+	 *
+	 * @param array                $data Data accessible via `found_variation` trigger
+	 * @param WC_Product_Variable  $product
 	 * @param WC_Product_Variation $variation
 	 * @return array
 	 */
 	public function variant_data( $data, $product, $variation ) {
 		$data['google_analytics_integration'] = array(
-			'id'       => self::get_product_identifier( $variation ),
-			'variant'  => substr( self::product_get_variant_line( $variation ), 1, -2 )
+			'id'      => self::get_product_identifier( $variation ),
+			'variant' => substr( self::product_get_variant_line( $variation ), 1, -2 ),
 		);
 
 		return $data;
@@ -82,15 +88,17 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 
 	/**
 	 * Output default inline JS used for tracking variation selection during add to cart event
-	 * 
+	 *
 	 * @param WC_Product_Variable $product
 	 * @return string
 	 */
 	public function default_add_to_cart_data( $product ) {
-		return 'var google_analytics_integration = '. json_encode(array(
-			'id'       => self::get_product_identifier( $product ),
-			'variant'  => false
-		));
+		return 'var google_analytics_integration = ' . json_encode(
+			array(
+				'id'      => self::get_product_identifier( $product ),
+				'variant' => false,
+			)
+		);
 	}
 
 	/**

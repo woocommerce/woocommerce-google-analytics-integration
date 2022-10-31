@@ -684,7 +684,7 @@ class WC_Google_Analytics extends WC_Integration {
 
 		TaskLists::add_task(
 			'extended',
-			new GoogleAnalyticsIntegrationTask(
+			new GoogleAnalyticsTask(
 				TaskLists::get_list( 'extended' )
 			)
 		);

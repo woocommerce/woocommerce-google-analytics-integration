@@ -67,13 +67,14 @@ if ( ! class_exists( 'WC_Google_Analytics_Integration' ) ) {
 		}
 
 		/**
-		 * Add links on the plugins page (Settings & Support)
+		 * Gets the settings page URL.
 		 *
-		 * @param  array $links Default links
-		 * @return array        Default + added links
+		 * @since x.x.x
+		 *
+		 * @return string Settings URL
 		 */
-		public function plugin_links( $links ) {
-			$settings_url = add_query_arg(
+		public function get_settings_url(){
+			return add_query_arg(
 				array(
 					'page'    => 'wc-settings',
 					'tab'     => 'integration',
@@ -81,6 +82,16 @@ if ( ! class_exists( 'WC_Google_Analytics_Integration' ) ) {
 				),
 				admin_url( 'admin.php' )
 			);
+		}
+
+		/**
+		 * Add links on the plugins page (Settings & Support)
+		 *
+		 * @param  array $links Default links
+		 * @return array        Default + added links
+		 */
+		public function plugin_links( $links ) {
+			$settings_url = $this->get_settings_url();
 
 			$plugin_links = array(
 				'<a href="' . esc_url( $settings_url ) . '">' . __( 'Settings', 'woocommerce-google-analytics-integration' ) . '</a>',
@@ -132,6 +143,18 @@ if ( ! class_exists( 'WC_Google_Analytics_Integration' ) ) {
 
 			return $integrations;
 		}
+
+		/**
+		 * Get Google Analytics Integration
+		 *
+		 * @since x.x.x
+		 *
+		 * @return WC_Google_Analytics The Google Analytics integration.
+		 */
+		public static function get_integration() {
+			return \WooCommerce::instance()->integrations->get_integration( 'google_analytics' );
+		}
+
 
 		/**
 		 * Logic for Google Analytics Pro notices.

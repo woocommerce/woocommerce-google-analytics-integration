@@ -73,7 +73,7 @@ if ( ! class_exists( 'WC_Google_Analytics_Integration' ) ) {
 		 *
 		 * @return string Settings URL
 		 */
-		public function get_settings_url(){
+		public function get_settings_url() {
 			return add_query_arg(
 				array(
 					'page'    => 'wc-settings',

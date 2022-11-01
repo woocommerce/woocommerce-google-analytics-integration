@@ -14,6 +14,8 @@
  * Domain Path: languages/
  */
 
+use Automattic\WooCommerce\Utilities\FeaturesUtil;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -27,6 +29,16 @@ if ( ! class_exists( 'WC_Google_Analytics_Integration' ) ) {
 		__FILE__,
 		function () {
 			WC_Google_Analytics_Integration::get_instance()->maybe_show_ga_pro_notices();
+		}
+	);
+
+	// HPOS compatibility declaration.
+	add_action(
+		'before_woocommerce_init',
+		function () {
+			if ( class_exists( FeaturesUtil::class ) ) {
+				FeaturesUtil::declare_compatibility( 'custom_order_tables', __FILE__ );
+			}
 		}
 	);
 

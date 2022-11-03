@@ -3,6 +3,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
 
+use Automattic\WooCommerce\Admin\Features\OnboardingTasks\TaskLists;
+
 /**
  * Google Analytics Integration
  *
@@ -68,12 +70,8 @@ class WC_Google_Analytics extends WC_Integration {
 		include_once( 'class-wc-google-gtag-js.php' );
 		$this->get_tracking_instance( $constructor );
 
-		// Display an info banner on how to configure WooCommerce
-		if ( is_admin() ) {
-			include_once( 'class-wc-google-analytics-info-banner.php' );
-			WC_Google_Analytics_Info_Banner::get_instance( $this->dismissed_info_banner, $this->ga_id );
-		}
-
+		// Display a task on  "Things to do next section"
+		add_action( 'init', array( $this, 'add_wc_setup_task' ), 20 );
 		// Admin Options
 		add_filter( 'woocommerce_tracker_data', array( $this, 'track_options' ) );
 		add_action( 'woocommerce_update_options_integration_google_analytics', array( $this, 'process_admin_options') );
@@ -662,5 +660,34 @@ class WC_Google_Analytics extends WC_Integration {
 		$return_url = add_query_arg( 'utm_nooverride', '1', $return_url );
 
 		return $return_url;
+	}
+
+	/**
+	 * Check if the Google Analytics Tracking ID has been set up.
+	 *
+	 * @since x.x.x
+	 *
+	 * @return bool Whether the Google Analytics setup is completed.
+	 */
+	public function is_setup_complete() {
+		return (bool) $this->get_option( 'ga_id' );
+	}
+
+
+	/**
+	 * Adds the setup task to the Tasklists.
+	 *
+	 * @since x.x.x
+	 */
+	public function add_wc_setup_task() {
+		require_once 'class-wc-google-analytics-task.php';
+
+		TaskLists::add_task(
+			'extended',
+			new WC_Google_Analytics_Task(
+				TaskLists::get_list( 'extended' )
+			)
+		);
+
 	}
 }

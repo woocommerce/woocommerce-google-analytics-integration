@@ -6,7 +6,7 @@
  * Author: WooCommerce
  * Author URI: https://woocommerce.com
  * Version: 1.5.16
- * WC requires at least: 3.2
+ * WC requires at least: 6.8
  * WC tested up to: 7.1
  * Tested up to: 6.1
  * License: GPLv2 or later
@@ -23,6 +23,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 if ( ! class_exists( 'WC_Google_Analytics_Integration' ) ) {
 
 	define( 'WC_GOOGLE_ANALYTICS_INTEGRATION_VERSION', '1.5.16' ); // WRCS: DEFINED_VERSION.
+	define( 'WC_GOOGLE_ANALYTICS_INTEGRATION_MIN_WC_VER', '6.8' );
 
 	// Maybe show the GA Pro notice on plugin activation.
 	register_activation_hook(
@@ -66,7 +67,7 @@ if ( ! class_exists( 'WC_Google_Analytics_Integration' ) ) {
 			add_action( 'woocommerce_order_status_completed', array( $this, 'maybe_show_ga_pro_notices' ) );
 
 			// Checks which WooCommerce is installed.
-			if ( class_exists( 'WC_Integration' ) && defined( 'WOOCOMMERCE_VERSION' ) && version_compare( WOOCOMMERCE_VERSION, '3.2', '>=' ) ) {
+			if ( class_exists( 'WC_Integration' ) && defined( 'WOOCOMMERCE_VERSION' ) && version_compare( WOOCOMMERCE_VERSION, WC_GOOGLE_ANALYTICS_INTEGRATION_MIN_WC_VER, '>=' ) ) {
 				include_once 'includes/class-wc-google-analytics.php';
 
 				// Register the integration.
@@ -79,13 +80,14 @@ if ( ! class_exists( 'WC_Google_Analytics_Integration' ) ) {
 		}
 
 		/**
-		 * Add links on the plugins page (Settings & Support)
+		 * Gets the settings page URL.
 		 *
-		 * @param  array $links Default links
-		 * @return array        Default + added links
+		 * @since x.x.x
+		 *
+		 * @return string Settings URL
 		 */
-		public function plugin_links( $links ) {
-			$settings_url = add_query_arg(
+		public function get_settings_url() {
+			return add_query_arg(
 				array(
 					'page'    => 'wc-settings',
 					'tab'     => 'integration',
@@ -93,6 +95,16 @@ if ( ! class_exists( 'WC_Google_Analytics_Integration' ) ) {
 				),
 				admin_url( 'admin.php' )
 			);
+		}
+
+		/**
+		 * Add links on the plugins page (Settings & Support)
+		 *
+		 * @param  array $links Default links
+		 * @return array        Default + added links
+		 */
+		public function plugin_links( $links ) {
+			$settings_url = $this->get_settings_url();
 
 			$plugin_links = array(
 				'<a href="' . esc_url( $settings_url ) . '">' . __( 'Settings', 'woocommerce-google-analytics-integration' ) . '</a>',
@@ -130,7 +142,9 @@ if ( ! class_exists( 'WC_Google_Analytics_Integration' ) ) {
 		 * WooCommerce fallback notice.
 		 */
 		public function woocommerce_missing_notice() {
-			echo '<div class="error"><p>' . sprintf( __( 'WooCommerce Google Analytics depends on the last version of %s to work!', 'woocommerce-google-analytics-integration' ), '<a href="https://woocommerce.com/" target="_blank">' . __( 'WooCommerce', 'woocommerce-google-analytics-integration' ) . '</a>' ) . '</p></div>';
+			/* translators: 1 is the required component */
+			$error = sprintf( 'WooCommerce Google Analytics requires WooCommerce version %1$s or higher. You are using version %2$s', WC_GOOGLE_ANALYTICS_INTEGRATION_MIN_WC_VER, WOOCOMMERCE_VERSION );
+			echo '<div class="error"><p><strong>' . wp_kses_post( $error ) . '</strong></p></div>';
 		}
 
 		/**
@@ -144,6 +158,18 @@ if ( ! class_exists( 'WC_Google_Analytics_Integration' ) ) {
 
 			return $integrations;
 		}
+
+		/**
+		 * Get Google Analytics Integration
+		 *
+		 * @since x.x.x
+		 *
+		 * @return WC_Google_Analytics The Google Analytics integration.
+		 */
+		public static function get_integration() {
+			return \WooCommerce::instance()->integrations->get_integration( 'google_analytics' );
+		}
+
 
 		/**
 		 * Logic for Google Analytics Pro notices.

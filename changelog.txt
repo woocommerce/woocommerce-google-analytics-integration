@@ -1,5 +1,10 @@
 *** Changelog ***
 
+= 1.5.16 - 2022-11-03 =
+* Add - Declare compatibility for High Performance Order Storage.
+* Tweak - WC 7.1 compatibility.
+* Tweak - WP 6.1 compatibility.
+
 = 1.5.15 - 2022-10-04 =
 * Add - Support for a Google Tag ID.
 * Tweak - WC 7.0 compatibility.

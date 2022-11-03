@@ -5,14 +5,16 @@
  * Description: Allows Google Analytics tracking code to be inserted into WooCommerce store pages.
  * Author: WooCommerce
  * Author URI: https://woocommerce.com
- * Version: 1.5.15
+ * Version: 1.5.16
  * WC requires at least: 6.8
- * WC tested up to: 7.0
- * Tested up to: 6.0
+ * WC tested up to: 7.1
+ * Tested up to: 6.1
  * License: GPLv2 or later
  * Text Domain: woocommerce-google-analytics-integration
  * Domain Path: languages/
  */
+
+use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -20,7 +22,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 if ( ! class_exists( 'WC_Google_Analytics_Integration' ) ) {
 
-	define( 'WC_GOOGLE_ANALYTICS_INTEGRATION_VERSION', '1.5.15' ); // WRCS: DEFINED_VERSION.
+	define( 'WC_GOOGLE_ANALYTICS_INTEGRATION_VERSION', '1.5.16' ); // WRCS: DEFINED_VERSION.
 	define( 'WC_GOOGLE_ANALYTICS_INTEGRATION_MIN_WC_VER', '6.8' );
 
 	// Maybe show the GA Pro notice on plugin activation.
@@ -28,6 +30,16 @@ if ( ! class_exists( 'WC_Google_Analytics_Integration' ) ) {
 		__FILE__,
 		function () {
 			WC_Google_Analytics_Integration::get_instance()->maybe_show_ga_pro_notices();
+		}
+	);
+
+	// HPOS compatibility declaration.
+	add_action(
+		'before_woocommerce_init',
+		function () {
+			if ( class_exists( FeaturesUtil::class ) ) {
+				FeaturesUtil::declare_compatibility( 'custom_order_tables', __FILE__ );
+			}
 		}
 	);
 

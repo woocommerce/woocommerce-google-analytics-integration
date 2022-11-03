@@ -2,8 +2,8 @@
 Contributors: woocommerce, automattic, claudiosanches, bor0, royho, laurendavissmith001, c-shultz
 Tags: woocommerce, google analytics
 Requires at least: 3.9
-Tested up to: 5.9
-Stable tag: 1.5.15
+Tested up to: 6.1
+Stable tag: 1.5.16
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -59,6 +59,11 @@ Exact wording depends on the national data privacy laws and should be adjusted.
 1. Google Analytics Integration Settings.
 
 == Changelog ==
+
+= 1.5.16 - 2022-11-03 =
+* Add - Declare compatibility for High Performance Order Storage.
+* Tweak - WC 7.1 compatibility.
+* Tweak - WP 6.1 compatibility.
 
 = 1.5.15 - 2022-10-04 =
 * Add - Support for a Google Tag ID.

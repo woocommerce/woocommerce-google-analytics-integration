@@ -49,7 +49,6 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 			add_filter( 'woocommerce_available_variation', array( $this, 'variant_data' ), 10, 3 );
 			// Add default inline product data for add to cart tracking
 			wp_enqueue_script( $this->script_handle );
-			wp_add_inline_script( $this->script_handle, $this->default_add_to_cart_data( $product ) );
 		}
 	}
 
@@ -84,21 +83,6 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 		);
 
 		return $data;
-	}
-
-	/**
-	 * Output default inline JS used for tracking variation selection during add to cart event
-	 *
-	 * @param WC_Product_Variable $product
-	 * @return string
-	 */
-	public function default_add_to_cart_data( $product ) {
-		return 'var google_analytics_integration = ' . json_encode(
-			array(
-				'id'      => self::get_product_identifier( $product ),
-				'variant' => false,
-			)
-		);
 	}
 
 	/**

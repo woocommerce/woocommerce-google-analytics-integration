@@ -486,8 +486,8 @@ class WC_Google_Analytics extends WC_Integration {
 			$item = "{";
 
 			if ( $product->is_type( 'variable' ) ) {
-				$item .= "'id': google_analytics_integration.id,";
-				$item .= "'variant': google_analytics_integration.variant,";
+				$item .= "'id': google_analytics_integration_product_data[ $('input[name=\"variation_id\"]').val() ] !== undefined ? google_analytics_integration_product_data[ $('input[name=\"variation_id\"]').val() ].id : false,";
+				$item .= "'variant': google_analytics_integration_product_data[ $('input[name=\"variation_id\"]').val() ] !== undefined ? google_analytics_integration_product_data[ $('input[name=\"variation_id\"]').val() ].variant : false,";
 			} else {
 				$item .= "'id': '" . $this->get_tracking_instance()->get_product_identifier( $product ) . "',";
 			}

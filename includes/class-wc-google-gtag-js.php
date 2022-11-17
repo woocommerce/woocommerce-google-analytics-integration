@@ -10,6 +10,9 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 
+	/** @var string $script_handle Handle for the front end JavaScript file */
+	public $script_handle = 'woocommerce-google-analytics-integration';
+
 	/**
 	 * Get the class instance
 	 *
@@ -28,6 +31,32 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 	 */
 	public function __construct( $options = array() ) {
 		self::$options = $options;
+		// Setup frontend scripts
+		add_action( 'wp_enqueue_scripts', array( $this, 'register_scripts' ) );
+		add_action( 'woocommerce_before_single_product', array( $this, 'setup_frontend_scripts' ) );
+	}
+
+	/**
+	 * Enqueue the frontend scripts and make formatted variant data available via filter
+	 *
+	 * @return void
+	 */
+	public function setup_frontend_scripts() {
+		global $product;
+
+		if ( $product->is_type( 'variable' ) ) {
+			// Filter variation data to include formatted strings required for add_to_cart event
+			add_filter( 'woocommerce_available_variation', array( $this, 'variant_data' ), 10, 3 );
+			// Add default inline product data for add to cart tracking
+			wp_enqueue_script( $this->script_handle );
+		}
+	}
+
+	/**
+	 * Register front end JavaScript
+	 */
+	public function register_scripts() {
+		wp_register_script( $this->script_handle, plugins_url( 'assets/js/ga-integration.js', dirname( __FILE__ ) ), array( 'jquery' ), WC_GOOGLE_ANALYTICS_INTEGRATION_VERSION, true );
 	}
 
 	/**
@@ -40,10 +69,27 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 	}
 
 	/**
+	 * Add formatted id and variant to variable product data
+	 *
+	 * @param array                $data Data accessible via `found_variation` trigger
+	 * @param WC_Product_Variable  $product
+	 * @param WC_Product_Variation $variation
+	 * @return array
+	 */
+	public function variant_data( $data, $product, $variation ) {
+		$data['google_analytics_integration'] = array(
+			'id'      => self::get_product_identifier( $variation ),
+			'variant' => substr( self::product_get_variant_line( $variation ), 1, -2 ),
+		);
+
+		return $data;
+	}
+
+	/**
 	 * Enqueues JavaScript to build the addImpression event
 	 *
 	 * @param WC_Product $product
-	 * @param int $position
+	 * @param int        $position
 	 */
 	public static function listing_impression( $product, $position ) {
 		if ( isset( $_GET['s'] ) ) {
@@ -54,7 +100,7 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 
 		wc_enqueue_js( "
 			" . self::tracker_var() . "( 'event', 'view_item_list', { 'items': [ {
-				'id': '" . esc_js( $product->get_id() ) . "',
+				'id': '" . self::get_product_identifier( $product ) . "',
 				'name': '" . esc_js( $product->get_title() ) . "',
 				'category': " . self::product_get_category_line( $product ) . "
 				'list': '" . esc_js( $list ) . "',
@@ -67,7 +113,7 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 	 * Enqueues JavaScript to build an addProduct and click event
 	 *
 	 * @param WC_Product $product
-	 * @param int $position
+	 * @param int        $position
 	 */
 	public static function listing_click( $product, $position ) {
 		if ( isset( $_GET['s'] ) ) {
@@ -84,7 +130,7 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 				" . self::tracker_var() . "( 'event', 'select_content', {
 					'content_type': 'product',
 					'items': [ {
-						'id': '" . esc_js( $product->get_id() ) . "',
+						'id': '" . self::get_product_identifier( $product ) . "',
 						'name': '" . esc_js( $product->get_title() ) . "',
 						'category': " . self::product_get_category_line( $product ) . "
 						'list_position': '" . esc_js( $position ) . "'
@@ -188,7 +234,7 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 		$variant  = self::product_get_variant_line( $_product );
 
 		$code  = '{';
-		$code .= "'id': '" . esc_js( $_product->get_sku() ? $_product->get_sku() : $_product->get_id() ) . "',";
+		$code .= "'id': '" . self::get_product_identifier( $_product ) . "',";
 		$code .= "'name': '" . esc_js( $item['name'] ) . "',";
 		$code .= "'category': " . self::product_get_category_line( $_product );
 
@@ -236,7 +282,7 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 		wc_enqueue_js( "
 			" . self::tracker_var() . "( 'event', 'view_item', {
 				'items': [ {
-					'id': '" . esc_js( $product->get_sku() ? $product->get_sku() : ( '#' . $product->get_id() ) ) . "',
+					'id': '" . self::get_product_identifier( $product ) . "',
 					'name': '" . esc_js( $product->get_title() ) . "',
 					'category': " . self::product_get_category_line( $product ) . "
 					'price': '" . esc_js( $product->get_price() ) . "',
@@ -257,7 +303,7 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 
 			$items .= "
 				{
-					'id': '" . esc_js( $product->get_sku() ? $product->get_sku() : ( '#' . $product->get_id() ) ) . "',
+					'id': '" . self::get_product_identifier( $product ) . "',
 					'name': '" . esc_js( $product->get_title() ) . "',
 					'category': " . self::product_get_category_line( $product );
 

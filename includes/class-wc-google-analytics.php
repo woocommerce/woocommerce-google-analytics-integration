@@ -482,11 +482,21 @@ class WC_Google_Analytics extends WC_Integration {
 		$parameters['label']    = "'" . esc_js( $product->get_sku() ? __( 'ID:', 'woocommerce-google-analytics-integration' ) . ' ' . $product->get_sku() : "#" . $product->get_id() ) . "'";
 
 		if ( ! $this->disable_tracking( $this->ga_enhanced_ecommerce_tracking_enabled ) ) {
+
 			$item = "{";
-			$item .= "'id': '" . esc_js( $product->get_sku() ? $product->get_sku() : ( '#' . $product->get_id() ) ) . "',";
+
+			if ( $product->is_type( 'variable' ) ) {
+				$item .= "'id': google_analytics_integration_product_data[ $('input[name=\"variation_id\"]').val() ] !== undefined ? google_analytics_integration_product_data[ $('input[name=\"variation_id\"]').val() ].id : false,";
+				$item .= "'variant': google_analytics_integration_product_data[ $('input[name=\"variation_id\"]').val() ] !== undefined ? google_analytics_integration_product_data[ $('input[name=\"variation_id\"]').val() ].variant : false,";
+			} else {
+				$item .= "'id': '" . $this->get_tracking_instance()->get_product_identifier( $product ) . "',";
+			}
+
 			$item .= "'name': '" . esc_js( $product->get_title() ) . "',";
+			$item .= "'category': " . $this->get_tracking_instance()->product_get_category_line( $product );
 			$item .= "'quantity': $( 'input.qty' ).val() ? $( 'input.qty' ).val() : '1'";
 			$item .= "}";
+
 			$parameters['item'] = $item;
 
 			$code = "" . $this->get_tracking_instance()->tracker_var() . "( 'ec:addProduct', " . $item . " );";

@@ -233,26 +233,26 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 	 * @return string
 	 */
 	protected function add_transaction_enhanced( $order ) {
-		// Order items
-		$items = "[";
-		if ( $order->get_items() ) {
-			foreach ( $order->get_items() as $item ) {
-				$items .= self::add_item( $order, $item );
+		$event_items = array();
+		$order_items = $order->get_items();
+		if( ! empty( $order_items ) ) {
+			foreach( $order_items as $item ) {
+				$event_items += self::add_item( $order, $item );
 			}
 		}
-		$items .= "]";
 
-		$code = self::tracker_var() . "( 'event', 'purchase', {
-			'transaction_id': '" . esc_js( $order->get_order_number() ) . "',
-			'affiliation': '" . esc_js( get_bloginfo( 'name' ) ) . "',
-			'value': '" . esc_js( $order->get_total() ) . "',
-			'tax': '" . esc_js( $order->get_total_tax() ) . "',
-			'shipping': '" . esc_js( $order->get_total_shipping() ) . "',
-			'currency': '" . esc_js( $order->get_currency() ) . "',
-			'items': {$items},
-		} );";
-
-		return $code;
+		return self::get_event_code(
+			'purchase',
+			array(
+				'transaction_id' => $order->get_order_number(),
+				'affiliation'    => get_bloginfo( 'name' ),
+				'value'          => $order->get_total(),
+				'tax'            => $order->get_total_tax(),
+				'shipping'       => $order->get_total_shipping(),
+				'currency'       => $order->get_currency(),
+				'items'          => array( $event_items ),
+			)
+		);
 	}
 
 	/**
@@ -265,20 +265,19 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 		$_product = $item->get_product();
 		$variant  = self::product_get_variant_line( $_product );
 
-		$code  = '{';
-		$code .= "'id': '" . self::get_product_identifier( $_product ) . "',";
-		$code .= "'name': '" . esc_js( $item['name'] ) . "',";
-		$code .= "'category': " . self::product_get_category_line( $_product );
+		$event_item = array(
+			'id'       => self::get_product_identifier( $_product ),
+			'name'     => $item['name'],
+			'category' => self::product_get_category_line( $_product ),
+			'price'    => $order->get_item_total( $item ),
+			'quantity' => $item['qty']
+		);
 
 		if ( '' !== $variant ) {
-			$code .= "'variant': " . $variant;
+			$event_item['variant'] = $variant;
 		}
 
-		$code .= "'price': '" . esc_js( $order->get_item_total( $item ) ) . "',";
-		$code .= "'quantity': '" . esc_js( $item['qty'] ) . "'";
-		$code .= '},';
-
-		return $code;
+		return $event_item;
 	}
 
 	/**

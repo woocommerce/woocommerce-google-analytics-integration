@@ -86,6 +86,37 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 	}
 
 	/**
+	 * Returns Javascript string for Google Analytics events
+	 * 
+	 * @param string $event The type of event
+	 * @param array  $data  Event data to be sent
+	 * @return string
+	 */
+	public static function get_event_code( string $event, array $data ): string {
+		return sprintf( "%s('event', '%s', %s)", self::tracker_var(), esc_js( $event ), self::format_event_data( $data ) );
+	}
+	
+	/**
+	 * Escape and encode event data
+	 *
+	 * @param array $data Event data to processed and formatted
+	 * @return string
+	 */
+	public static function format_event_data( array $data ): string {
+		$data = apply_filters( 'woocommerce_gtag_event_data', $data );
+
+		// Recursively walk through $data array and escape all values that will be used in JS.
+		array_walk_recursive(
+			$data,
+			function( &$value, $key ) {
+				$value = esc_js( $value );
+			}
+		);
+
+		return wp_json_encode( $data );
+	}
+
+	/**
 	 * Enqueues JavaScript to build the addImpression event
 	 *
 	 * @param WC_Product $product

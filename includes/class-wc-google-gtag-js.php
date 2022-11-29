@@ -117,6 +117,31 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 	}
 
 	/**
+	 * Returns an array of category names the product is atttributed to
+	 *
+	 * @param  WC_Product $_product  Product to pull info for
+	 * @return array
+	 */
+	public static function product_get_category_line( $_product ) {
+		$out            = [];
+		$variation_data = $_product->is_type( 'variation' ) ? wc_get_product_variation_attributes( $_product->get_id() ) : false;
+		$categories     = get_the_terms( $_product->get_id(), 'product_cat' );
+
+		if ( is_array( $variation_data ) && ! empty( $variation_data ) ) {
+			$parent_product = wc_get_product( $_product->get_parent_id() );
+			$categories     = get_the_terms( $parent_product->get_id(), 'product_cat' );
+		}
+
+		if ( $categories ) {
+			foreach ( $categories as $category ) {
+				$out[] = $category->name;
+			}
+		}
+
+		return join( '/', $out );
+	}
+
+	/**
 	 * Enqueues JavaScript to build the view_item_list event
 	 *
 	 * @param WC_Product $product

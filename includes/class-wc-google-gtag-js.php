@@ -87,7 +87,7 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 
 	/**
 	 * Returns Javascript string for Google Analytics events
-	 * 
+	 *
 	 * @param string $event The type of event
 	 * @param array  $data  Event data to be sent
 	 * @return string
@@ -95,7 +95,7 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 	public static function get_event_code( string $event, array $data ): string {
 		return sprintf( "%s('event', '%s', %s)", self::tracker_var(), esc_js( $event ), self::format_event_data( $data ) );
 	}
-	
+
 	/**
 	 * Escape and encode event data
 	 *
@@ -156,7 +156,9 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 						'id'            => $product->get_id(),
 						'name'          => $product->get_title(),
 						'category'      => self::product_get_category_line( $product ),
+						// @codingStandardsIgnoreStart
 						'list'          => isset( $_GET['s'] ) ? __( 'Search Results', 'woocommerce-google-analytics-integration' ) : __( 'Product List', 'woocommerce-google-analytics-integration' ),
+						// @codingStandardsIgnoreEnd
 						'list_position' => $position,
 					),
 				),
@@ -260,8 +262,8 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 	protected function add_transaction_enhanced( $order ) {
 		$event_items = array();
 		$order_items = $order->get_items();
-		if( ! empty( $order_items ) ) {
-			foreach( $order_items as $item ) {
+		if ( ! empty( $order_items ) ) {
+			foreach ( $order_items as $item ) {
 				$event_items += self::add_item( $order, $item );
 			}
 		}
@@ -295,7 +297,7 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 			'name'     => $item['name'],
 			'category' => self::product_get_category_line( $_product ),
 			'price'    => $order->get_item_total( $item ),
-			'quantity' => $item['qty']
+			'quantity' => $item['qty'],
 		);
 
 		if ( '' !== $variant ) {
@@ -388,7 +390,7 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 		$event_code = self::get_event_code(
 			'begin_checkout',
 			array(
-				'items' => $items
+				'items' => $items,
 			)
 		);
 

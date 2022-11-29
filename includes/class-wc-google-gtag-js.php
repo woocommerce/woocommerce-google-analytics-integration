@@ -148,26 +148,26 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 	 * @param int        $position
 	 */
 	public static function listing_click( $product, $position ) {
-		if ( isset( $_GET['s'] ) ) {
-			$list = "Search Results";
-		} else {
-			$list = "Product List";
-		}
+		$event_code = self::get_event_code(
+			'select_content',
+			array(
+				'items' => array(
+					array(
+						'id'            => self::get_product_identifier( $product ),
+						'name'          => $product->get_title(),
+						'category'      => self::product_get_category_line( $product ),
+						'list_position' => $position,
+					),
+				),
+			)
+		);
 
 		wc_enqueue_js( "
 			$( '.products .post-" . esc_js( $product->get_id() ) . " a' ).on('click', function() {
 				if ( true === $(this).hasClass( 'add_to_cart_button' ) ) {
 					return;
 				}
-				" . self::tracker_var() . "( 'event', 'select_content', {
-					'content_type': 'product',
-					'items': [ {
-						'id': '" . self::get_product_identifier( $product ) . "',
-						'name': '" . esc_js( $product->get_title() ) . "',
-						'category': " . self::product_get_category_line( $product ) . "
-						'list_position': '" . esc_js( $position ) . "'
-					} ],
-				} );
+				$event_code
 			});
 		" );
 	}

@@ -309,16 +309,23 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 	 * Output JavaScript to track an enhanced ecommerce remove from cart action
 	 */
 	public function remove_from_cart() {
+		$event_code = self::get_event_code(
+			'remove_from_cart',
+			array(
+				'items' => array(
+					array(
+						'id'       => "($(this).data('product_sku')) ? ($(this).data('product_sku')) : ('#' + $(this).data('product_id'))",
+						'quantity' => "$(this).parent().parent().find( '.qty' ).val() ? $(this).parent().parent().find( '.qty' ).val() : '1',",
+					),
+				),
+			)
+		);
+
 		echo( "
 			<script>
 			(function($) {
 				$( '.remove' ).off('click', '.remove').on( 'click', function() {
-					" . self::tracker_var() . "( 'event', 'remove_from_cart', {
-						'items': [ {
-							'id': ($(this).data('product_sku')) ? ($(this).data('product_sku')) : ('#' + $(this).data('product_id')),
-							'quantity': $(this).parent().parent().find( '.qty' ).val() ? $(this).parent().parent().find( '.qty' ).val() : '1',
-						} ]
-					} );
+					$event_code
 				});
 			})(jQuery);
 			</script>

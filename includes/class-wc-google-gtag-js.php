@@ -117,27 +117,28 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 	}
 
 	/**
-	 * Enqueues JavaScript to build the addImpression event
+	 * Enqueues JavaScript to build the view_item_list event
 	 *
 	 * @param WC_Product $product
 	 * @param int        $position
 	 */
 	public static function listing_impression( $product, $position ) {
-		if ( isset( $_GET['s'] ) ) {
-			$list = "Search Results";
-		} else {
-			$list = "Product List";
-		}
+		$event_code = self::get_event_code(
+			'view_item_list',
+			array(
+				'items' => array(
+					array(
+						'id'            => $product->get_id(),
+						'name'          => $product->get_title(),
+						'category'      => self::product_get_category_line( $product ),
+						'list'          => isset( $_GET['s'] ) ? __( 'Search Results', 'woocommerce-google-analytics-integration' ) : __( 'Product List', 'woocommerce-google-analytics-integration' ),
+						'list_position' => $position,
+					),
+				),
+			)
+		);
 
-		wc_enqueue_js( "
-			" . self::tracker_var() . "( 'event', 'view_item_list', { 'items': [ {
-				'id': '" . self::get_product_identifier( $product ) . "',
-				'name': '" . esc_js( $product->get_title() ) . "',
-				'category': " . self::product_get_category_line( $product ) . "
-				'list': '" . esc_js( $list ) . "',
-				'list_position': '" . esc_js( $position ) . "'
-			} ] } );
-		" );
+		wc_enqueue_js( $event_code );
 	}
 
 	/**

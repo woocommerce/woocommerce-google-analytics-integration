@@ -60,6 +60,10 @@ Exact wording depends on the national data privacy laws and should be adjusted.
 
 == Changelog ==
 
+= 1.5.18 - 2022-12-14 =
+* Add - .nvmrc file.
+* Tweak - WC 7.2 compatibility.
+
 = 1.5.17 - 2022-11-09 =
 * Add - New Google Analytics task in WC.
 

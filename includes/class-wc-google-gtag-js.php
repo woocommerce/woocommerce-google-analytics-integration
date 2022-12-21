@@ -88,12 +88,12 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 	/**
 	 * Returns Javascript string for Google Analytics events
 	 *
-	 * @param string $event The type of event
-	 * @param array  $data  Event data to be sent
+	 * @param string       $event The type of event
+	 * @param array|string $data  Event data to be sent. If $data is an array then it will be filtered, escaped, and encoded
 	 * @return string
 	 */
-	public static function get_event_code( string $event, array $data ): string {
-		return sprintf( "%s('event', '%s', %s)", self::tracker_var(), esc_js( $event ), self::format_event_data( $data ) );
+	public static function get_event_code( string $event, $data ): string {
+		return sprintf( "%s('event', '%s', %s)", self::tracker_var(), esc_js( $event ), ( is_array( $data ) ? self::format_event_data( $data ) : $data ) );
 	}
 
 	/**
@@ -194,6 +194,48 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 				if ( true === $(this).hasClass( 'add_to_cart_button' ) ) {
 					return;
 				}
+				$event_code
+			});
+		" );
+	}
+
+	/**
+	 * Output Javascript to track add_to_cart event on single product page
+	 * 
+	 * @param WC_Product $product The product currently being viewed
+	 */
+	public static function add_to_cart( WC_Product $product ) {
+		$items = array(
+			'id'       => self::get_product_identifier( $product ),
+			'name'     => $product->get_title(),
+			'category' => self::product_get_category_line( $product ),
+			'quantity' => 1
+		);
+
+		// Set item data as Javascript variable so that quantity, variant, and ID can be updated before sending the event
+		$event_code = "
+			const item_data    = ". self::format_event_data( $items ) .";
+			item_data.quantity = $( 'input.qty' ).val() ? $('input.qty').val() : '1';";
+
+		if ( $product->is_type( 'variable' ) ) {
+			// Check the global google_analytics_integration_product_data Javascript variable contains data
+			// for the current variation selection and if it does update the item_data to be sent for this event
+			$event_code .= "
+			if ( google_analytics_integration_product_data[ $('input[name=\"variation_id\"]').val() ] !== undefined ) {
+				item_data.id       = google_analytics_integration_product_data[ $('input[name=\"variation_id\"]').val() ].id;
+				item_data.variant  = google_analytics_integration_product_data[ $('input[name=\"variation_id\"]').val() ].variant;
+			}
+			";
+		}
+
+		$event_code .= self::get_event_code(
+			'add_to_cart',
+			'{"items": item_data}',
+			false
+		);
+
+		wc_enqueue_js("
+			$( '.single_add_to_cart_button' ).on('click', function() {
 				$event_code
 			});
 		" );

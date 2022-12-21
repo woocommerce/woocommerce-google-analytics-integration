@@ -440,12 +440,15 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 	}
 
 	/**
+	 * @deprecated x.x.x
+	 * 
 	 * Enqueue JavaScript for Add to cart tracking
 	 *
 	 * @param array $parameters associative array of _trackEvent parameters
 	 * @param string $selector jQuery selector for binding click event
 	 */
 	public function event_tracking_code( $parameters, $selector ) {
+		wc_deprecated_function( 'event_tracking_code', '1.6.0', 'get_event_code' );
 
 		// Called with invalid 'Add to Cart' action, update to sync with Default Google Analytics Event 'add_to_cart'
 		$parameters['action']   = '\'add_to_cart\'';

@@ -553,7 +553,7 @@ class WC_Google_Analytics extends WC_Integration {
 	 * Google Analytics event tracking for loop add to cart
 	 */
 	public function loop_add_to_cart() {
-		if ( $this->disable_tracking( $this->ga_event_tracking_enabled ) ) {
+		if ( $this->disable_tracking( $this->ga_event_tracking_enabled ) || 'yes' === $this->ga_gtag_enabled ) {
 			return;
 		}
 

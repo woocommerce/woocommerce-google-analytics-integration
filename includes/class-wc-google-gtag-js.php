@@ -156,9 +156,8 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 						'id'            => $product->get_id(),
 						'name'          => $product->get_title(),
 						'category'      => self::product_get_category_line( $product ),
-						// @codingStandardsIgnoreStart
+						// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 						'list'          => isset( $_GET['s'] ) ? __( 'Search Results', 'woocommerce-google-analytics-integration' ) : __( 'Product List', 'woocommerce-google-analytics-integration' ),
-						// @codingStandardsIgnoreEnd
 						'list_position' => $position,
 					),
 				),

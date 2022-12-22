@@ -178,7 +178,7 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 			'name'          => $product->get_title(),
 			'category'      => self::product_get_category_line( $product ),
 			'list_position' => $position,
-			'quantity'      => 1
+			'quantity'      => 1,
 		);
 
 		$select_content_event_code = self::get_event_code(
@@ -202,13 +202,13 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 				} else {
 					$select_content_event_code
 				}
-			});
-		" );
+			});"
+		);
 	}
 
 	/**
 	 * Output Javascript to track add_to_cart event on single product page
-	 * 
+	 *
 	 * @param WC_Product $product The product currently being viewed
 	 */
 	public static function add_to_cart( WC_Product $product ) {
@@ -216,13 +216,13 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 			'id'       => self::get_product_identifier( $product ),
 			'name'     => $product->get_title(),
 			'category' => self::product_get_category_line( $product ),
-			'quantity' => 1
+			'quantity' => 1,
 		);
 
 		// Set item data as Javascript variable so that quantity, variant, and ID can be updated before sending the event
-		$event_code = "
-			const item_data    = ". self::format_event_data( $items ) .";
-			item_data.quantity = $( 'input.qty' ).val() ? $('input.qty').val() : '1';";
+		$event_code = '
+			const item_data    = ' . self::format_event_data( $items ) . ';
+			item_data.quantity = $("input.qty").val() ? $("input.qty").val() : 1;';
 
 		if ( $product->is_type( 'variable' ) ) {
 			// Check the global google_analytics_integration_product_data Javascript variable contains data
@@ -241,11 +241,11 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 			false
 		);
 
-		wc_enqueue_js("
-			$( '.single_add_to_cart_button' ).on('click', function() {
+		wc_enqueue_js(
+			"$( '.single_add_to_cart_button' ).on('click', function() {
 				$event_code
-			});
-		" );
+			});"
+		);
 	}
 
 	/**
@@ -448,11 +448,11 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 
 	/**
 	 * @deprecated x.x.x
-	 * 
+	 *
 	 * Enqueue JavaScript for Add to cart tracking
 	 *
-	 * @param array $parameters associative array of _trackEvent parameters
-	 * @param string $selector jQuery selector for binding click event
+	 * @param array  $parameters Associative array of _trackEvent parameters
+	 * @param string $selector   jQuery selector for binding click event
 	 */
 	public function event_tracking_code( $parameters, $selector ) {
 		wc_deprecated_function( 'event_tracking_code', '1.6.0', 'get_event_code' );

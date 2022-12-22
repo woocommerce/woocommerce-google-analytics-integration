@@ -314,7 +314,7 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 		$order_items = $order->get_items();
 		if ( ! empty( $order_items ) ) {
 			foreach ( $order_items as $item ) {
-				$event_items += self::add_item( $order, $item );
+				$event_items[] = self::add_item( $order, $item );
 			}
 		}
 
@@ -327,7 +327,7 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 				'tax'            => $order->get_total_tax(),
 				'shipping'       => $order->get_total_shipping(),
 				'currency'       => $order->get_currency(),
-				'items'          => array( $event_items ),
+				'items'          => $event_items,
 			)
 		);
 	}
@@ -434,7 +434,7 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 				$item_data['variant'] = $variant;
 			}
 
-			$items[] += $item_data;
+			$items[] = $item_data;
 		}
 
 		$event_code = self::get_event_code(

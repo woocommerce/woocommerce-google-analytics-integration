@@ -477,37 +477,38 @@ class WC_Google_Analytics extends WC_Integration {
 
 		if ( 'yes' === $this->ga_gtag_enabled ) {
 			$this->get_tracking_instance()->add_to_cart( $product );
-		} else {
-			// Add single quotes to allow jQuery to be substituted into _trackEvent parameters
-			$parameters             = array();
-			$parameters['category'] = "'" . __( 'Products', 'woocommerce-google-analytics-integration' ) . "'";
-			$parameters['action']   = "'" . __( 'Add to Cart', 'woocommerce-google-analytics-integration' ) . "'";
-			$parameters['label']    = "'" . esc_js( $product->get_sku() ? __( 'ID:', 'woocommerce-google-analytics-integration' ) . ' ' . $product->get_sku() : '#' . $product->get_id() ) . "'";
+			return;
+		}
+		
+		// Add single quotes to allow jQuery to be substituted into _trackEvent parameters
+		$parameters             = array();
+		$parameters['category'] = "'" . __( 'Products', 'woocommerce-google-analytics-integration' ) . "'";
+		$parameters['action']   = "'" . __( 'Add to Cart', 'woocommerce-google-analytics-integration' ) . "'";
+		$parameters['label']    = "'" . esc_js( $product->get_sku() ? __( 'ID:', 'woocommerce-google-analytics-integration' ) . ' ' . $product->get_sku() : '#' . $product->get_id() ) . "'";
 
-			if ( ! $this->disable_tracking( $this->ga_enhanced_ecommerce_tracking_enabled ) ) {
+		if ( ! $this->disable_tracking( $this->ga_enhanced_ecommerce_tracking_enabled ) ) {
 
-				$item = '{';
+			$item = '{';
 
-				if ( $product->is_type( 'variable' ) ) {
-					$item .= "'id': google_analytics_integration_product_data[ $('input[name=\"variation_id\"]').val() ] !== undefined ? google_analytics_integration_product_data[ $('input[name=\"variation_id\"]').val() ].id : false,";
-					$item .= "'variant': google_analytics_integration_product_data[ $('input[name=\"variation_id\"]').val() ] !== undefined ? google_analytics_integration_product_data[ $('input[name=\"variation_id\"]').val() ].variant : false,";
-				} else {
-					$item .= "'id': '" . $this->get_tracking_instance()->get_product_identifier( $product ) . "',";
-				}
-
-				$item .= "'name': '" . esc_js( $product->get_title() ) . "',";
-				$item .= "'category': " . $this->get_tracking_instance()->product_get_category_line( $product );
-				$item .= "'quantity': $( 'input.qty' ).val() ? $( 'input.qty' ).val() : '1'";
-				$item .= '}';
-
-				$parameters['item'] = $item;
-
-				$code                   = $this->get_tracking_instance()->tracker_var() . "( 'ec:addProduct', " . $item . ' );';
-				$parameters['enhanced'] = $code;
+			if ( $product->is_type( 'variable' ) ) {
+				$item .= "'id': google_analytics_integration_product_data[ $('input[name=\"variation_id\"]').val() ] !== undefined ? google_analytics_integration_product_data[ $('input[name=\"variation_id\"]').val() ].id : false,";
+				$item .= "'variant': google_analytics_integration_product_data[ $('input[name=\"variation_id\"]').val() ] !== undefined ? google_analytics_integration_product_data[ $('input[name=\"variation_id\"]').val() ].variant : false,";
+			} else {
+				$item .= "'id': '" . $this->get_tracking_instance()->get_product_identifier( $product ) . "',";
 			}
 
-			$this->get_tracking_instance()->event_tracking_code( $parameters, '.single_add_to_cart_button' );
+			$item .= "'name': '" . esc_js( $product->get_title() ) . "',";
+			$item .= "'category': " . $this->get_tracking_instance()->product_get_category_line( $product );
+			$item .= "'quantity': $( 'input.qty' ).val() ? $( 'input.qty' ).val() : '1'";
+			$item .= '}';
+
+			$parameters['item'] = $item;
+
+			$code                   = $this->get_tracking_instance()->tracker_var() . "( 'ec:addProduct', " . $item . ' );';
+			$parameters['enhanced'] = $code;
 		}
+
+		$this->get_tracking_instance()->event_tracking_code( $parameters, '.single_add_to_cart_button' );
 	}
 
 	/**

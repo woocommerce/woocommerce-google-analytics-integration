@@ -339,13 +339,13 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 	 * @param WC_Order_Item $item  The item to add to a transaction/order
 	 */
 	protected function add_item( $order, $item ) {
-		$_product = $item->get_product();
-		$variant  = self::product_get_variant_line( $_product );
+		$product = $item->get_product();
+		$variant  = self::product_get_variant_line( $product );
 
 		$event_item = array(
-			'id'       => self::get_product_identifier( $_product ),
+			'id'       => self::get_product_identifier( $product ),
 			'name'     => $item['name'],
-			'category' => self::product_get_category_line( $_product ),
+			'category' => self::product_get_category_line( $product ),
 			'price'    => $order->get_item_total( $item ),
 			'quantity' => $item['qty'],
 		);

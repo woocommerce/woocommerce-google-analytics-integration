@@ -228,9 +228,10 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 			// Check the global google_analytics_integration_product_data Javascript variable contains data
 			// for the current variation selection and if it does update the item_data to be sent for this event
 			$event_code .= "
-			if ( google_analytics_integration_product_data[ $('input[name=\"variation_id\"]').val() ] !== undefined ) {
-				item_data.id       = google_analytics_integration_product_data[ $('input[name=\"variation_id\"]').val() ].id;
-				item_data.variant  = google_analytics_integration_product_data[ $('input[name=\"variation_id\"]').val() ].variant;
+			const selected_variation = google_analytics_integration_product_data[ $('input[name=\"variation_id\"]').val() ];
+			if ( selected_variation !== undefined ) {
+				item_data.id       = selected_variation.id;
+				item_data.variant  = selected_variation.variant;
 			}
 			";
 		}

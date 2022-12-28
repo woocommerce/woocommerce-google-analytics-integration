@@ -340,7 +340,7 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 	 */
 	protected function add_item( $order, $item ) {
 		$product = $item->get_product();
-		$variant  = self::product_get_variant_line( $product );
+		$variant = self::product_get_variant_line( $product );
 
 		$event_item = array(
 			'id'       => self::get_product_identifier( $product ),

@@ -479,7 +479,7 @@ class WC_Google_Analytics extends WC_Integration {
 			$this->get_tracking_instance()->add_to_cart( $product );
 			return;
 		}
-		
+
 		// Add single quotes to allow jQuery to be substituted into _trackEvent parameters
 		$parameters             = array();
 		$parameters['category'] = "'" . __( 'Products', 'woocommerce-google-analytics-integration' ) . "'";
@@ -504,7 +504,7 @@ class WC_Google_Analytics extends WC_Integration {
 
 			$parameters['item'] = $item;
 
-			$code                   = $this->get_tracking_instance()->tracker_var() . "( 'ec:addProduct', " . $item . ' );';
+			$code                   = $this->get_tracking_instance()->tracker_var() . "( 'ec:addProduct', {$item} );";
 			$parameters['enhanced'] = $code;
 		}
 

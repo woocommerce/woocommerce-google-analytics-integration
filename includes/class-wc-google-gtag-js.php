@@ -238,7 +238,7 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 
 		$event_code .= self::get_event_code(
 			'add_to_cart',
-			'{"items": item_data}',
+			'{"items": [item_data]}',
 			false
 		);
 

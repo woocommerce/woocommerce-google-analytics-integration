@@ -363,25 +363,17 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 	public function remove_from_cart() {
 		$event_code = self::get_event_code(
 			'remove_from_cart',
-			array(
-				'items' => array(
-					array(
-						'id'       => "($(this).data('product_sku')) ? ($(this).data('product_sku')) : ('#' + $(this).data('product_id'))",
-						'quantity' => "$(this).parent().parent().find( '.qty' ).val() ? $(this).parent().parent().find( '.qty' ).val() : '1',",
-					),
-				),
-			)
+			'{"items": {
+				"id": $(this).data("product_sku") ? $(this).data("product_sku") : "#" + $(this).data("product_id"),
+				"quantity": $(this).parent().parent().find(".qty").val() ? $(this).parent().parent().find(".qty").val() : "1"
+			 }}'
 		);
 
-		echo( "
-			<script>
-			(function($) {
-				$( '.remove' ).off('click', '.remove').on( 'click', function() {
-					$event_code
-				});
-			})(jQuery);
-			</script>
-		" );
+		wc_enqueue_js(
+			"$( '.remove' ).off('click', '.remove').on( 'click', function() {
+				$event_code
+			});"
+		);
 	}
 
 	/**

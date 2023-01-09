@@ -144,13 +144,13 @@ if ( ! class_exists( 'WC_Google_Analytics_Integration' ) ) {
 		public function woocommerce_missing_notice() {
 			if ( defined( 'WOOCOMMERCE_VERSION' ) ) {
 				/* translators: 1 is the required component, 2 the Woocommerce version */
-				$error = sprintf( 'WooCommerce Google Analytics requires WooCommerce version %1$s or higher. You are using version %2$s', WC_GOOGLE_ANALYTICS_INTEGRATION_MIN_WC_VER, WOOCOMMERCE_VERSION );
-				echo '<div class="error"><p><strong>' . wp_kses_post( $error ) . '</strong></p></div>';
+				$error = sprintf( __( 'WooCommerce Google Analytics requires WooCommerce version %1$s or higher. You are using version %2$s', 'woocommerce-google-analytics-integration' ), WC_GOOGLE_ANALYTICS_INTEGRATION_MIN_WC_VER, WOOCOMMERCE_VERSION );
 			} else {
 				/* translators: 1 is the required component */
-				$error = sprintf( 'WooCommerce Google Analytics requires WooCommerce version %1$s or higher.', WC_GOOGLE_ANALYTICS_INTEGRATION_MIN_WC_VER );
-				echo '<div class="error"><p><strong>' . wp_kses_post( $error ) . '</strong></p></div>';
+				$error = sprintf( __( 'WooCommerce Google Analytics requires WooCommerce version %1$s or higher.', 'woocommerce-google-analytics-integration' ), WC_GOOGLE_ANALYTICS_INTEGRATION_MIN_WC_VER );
 			}
+
+			echo '<div class="error"><p><strong>' . wp_kses_post( $error ) . '</strong></p></div>';
 
 		}
 

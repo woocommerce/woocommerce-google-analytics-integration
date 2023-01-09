@@ -7,7 +7,7 @@
  * Author URI: https://woocommerce.com
  * Version: 1.5.18
  * WC requires at least: 6.8
- * WC tested up to: 7.2
+ * WC tested up to: 7.3
  * Tested up to: 6.1
  * License: GPLv2 or later
  * Text Domain: woocommerce-google-analytics-integration
@@ -142,9 +142,16 @@ if ( ! class_exists( 'WC_Google_Analytics_Integration' ) ) {
 		 * WooCommerce fallback notice.
 		 */
 		public function woocommerce_missing_notice() {
-			/* translators: 1 is the required component */
-			$error = sprintf( 'WooCommerce Google Analytics requires WooCommerce version %1$s or higher. You are using version %2$s', WC_GOOGLE_ANALYTICS_INTEGRATION_MIN_WC_VER, WOOCOMMERCE_VERSION );
+			if ( defined( 'WOOCOMMERCE_VERSION' ) ) {
+				/* translators: 1 is the required component, 2 the Woocommerce version */
+				$error = sprintf( __( 'WooCommerce Google Analytics requires WooCommerce version %1$s or higher. You are using version %2$s', 'woocommerce-google-analytics-integration' ), WC_GOOGLE_ANALYTICS_INTEGRATION_MIN_WC_VER, WOOCOMMERCE_VERSION );
+			} else {
+				/* translators: 1 is the required component */
+				$error = sprintf( __( 'WooCommerce Google Analytics requires WooCommerce version %1$s or higher.', 'woocommerce-google-analytics-integration' ), WC_GOOGLE_ANALYTICS_INTEGRATION_MIN_WC_VER );
+			}
+
 			echo '<div class="error"><p><strong>' . wp_kses_post( $error ) . '</strong></p></div>';
+
 		}
 
 		/**

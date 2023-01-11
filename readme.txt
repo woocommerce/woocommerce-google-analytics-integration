@@ -60,6 +60,10 @@ Exact wording depends on the national data privacy laws and should be adjusted.
 
 == Changelog ==
 
+= 1.5.19 - 2023-01-11 =
+* Fix - undefined WC constant.
+* Tweak - WC 7.3 compatibility.
+
 = 1.5.18 - 2022-12-14 =
 * Add - .nvmrc file.
 * Tweak - WC 7.2 compatibility.

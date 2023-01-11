@@ -86,58 +86,167 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 	}
 
 	/**
-	 * Enqueues JavaScript to build the addImpression event
+	 * Returns Javascript string for Google Analytics events
+	 *
+	 * @param string       $event The type of event
+	 * @param array|string $data  Event data to be sent. If $data is an array then it will be filtered, escaped, and encoded
+	 * @return string
+	 */
+	public static function get_event_code( string $event, $data ): string {
+		return sprintf( "%s('event', '%s', %s)", self::tracker_var(), esc_js( $event ), ( is_array( $data ) ? self::format_event_data( $data ) : $data ) );
+	}
+
+	/**
+	 * Escape and encode event data
+	 *
+	 * @param array $data Event data to processed and formatted
+	 * @return string
+	 */
+	public static function format_event_data( array $data ): string {
+		$data = apply_filters( 'woocommerce_gtag_event_data', $data );
+
+		// Recursively walk through $data array and escape all values that will be used in JS.
+		array_walk_recursive(
+			$data,
+			function( &$value, $key ) {
+				$value = esc_js( $value );
+			}
+		);
+
+		return wp_json_encode( $data );
+	}
+
+	/**
+	 * Returns a list of category names the product is atttributed to
+	 *
+	 * @param  WC_Product $product Product to generate category line for
+	 * @return string
+	 */
+	public static function product_get_category_line( $product ) {
+		$category_names = array();
+		$categories     = get_the_terms( $product->get_id(), 'product_cat' );
+
+		$variation_data = $product->is_type( 'variation' ) ? wc_get_product_variation_attributes( $product->get_id() ) : false;
+		if ( is_array( $variation_data ) && ! empty( $variation_data ) ) {
+			$categories = get_the_terms( $product->get_parent_id(), 'product_cat' );
+		}
+
+		if ( false !== $categories && ! is_wp_error( $categories ) ) {
+			foreach ( $categories as $category ) {
+				$category_names[] = $category->name;
+			}
+		}
+
+		return join( '/', $category_names );
+	}
+
+	/**
+	 * Enqueues JavaScript to build the view_item_list event
 	 *
 	 * @param WC_Product $product
 	 * @param int        $position
 	 */
 	public static function listing_impression( $product, $position ) {
-		if ( isset( $_GET['s'] ) ) {
-			$list = "Search Results";
-		} else {
-			$list = "Product List";
-		}
+		$event_code = self::get_event_code(
+			'view_item_list',
+			array(
+				'items' => array(
+					array(
+						'id'            => $product->get_id(),
+						'name'          => $product->get_title(),
+						'category'      => self::product_get_category_line( $product ),
+						// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+						'list'          => isset( $_GET['s'] ) ? __( 'Search Results', 'woocommerce-google-analytics-integration' ) : __( 'Product List', 'woocommerce-google-analytics-integration' ),
+						'list_position' => $position,
+					),
+				),
+			)
+		);
 
-		wc_enqueue_js( "
-			" . self::tracker_var() . "( 'event', 'view_item_list', { 'items': [ {
-				'id': '" . self::get_product_identifier( $product ) . "',
-				'name': '" . esc_js( $product->get_title() ) . "',
-				'category': " . self::product_get_category_line( $product ) . "
-				'list': '" . esc_js( $list ) . "',
-				'list_position': '" . esc_js( $position ) . "'
-			} ] } );
-		" );
+		wc_enqueue_js( $event_code );
 	}
 
 	/**
-	 * Enqueues JavaScript to build an addProduct and click event
+	 * Enqueues JavaScript for select_content and add_to_cart events for the product archive
 	 *
 	 * @param WC_Product $product
 	 * @param int        $position
 	 */
 	public static function listing_click( $product, $position ) {
-		if ( isset( $_GET['s'] ) ) {
-			$list = "Search Results";
-		} else {
-			$list = "Product List";
-		}
+		$items = array(
+			'id'            => self::get_product_identifier( $product ),
+			'name'          => $product->get_title(),
+			'category'      => self::product_get_category_line( $product ),
+			'list_position' => $position,
+			'quantity'      => 1,
+		);
+
+		$select_content_event_code = self::get_event_code(
+			'select_content',
+			array(
+				'items' => array( $items ),
+			)
+		);
+
+		$add_to_cart_event_code = self::get_event_code(
+			'add_to_cart',
+			array(
+				'items' => array( $items ),
+			)
+		);
 
 		wc_enqueue_js( "
 			$( '.products .post-" . esc_js( $product->get_id() ) . " a' ).on('click', function() {
 				if ( true === $(this).hasClass( 'add_to_cart_button' ) ) {
-					return;
+					$add_to_cart_event_code
+				} else {
+					$select_content_event_code
 				}
-				" . self::tracker_var() . "( 'event', 'select_content', {
-					'content_type': 'product',
-					'items': [ {
-						'id': '" . self::get_product_identifier( $product ) . "',
-						'name': '" . esc_js( $product->get_title() ) . "',
-						'category': " . self::product_get_category_line( $product ) . "
-						'list_position': '" . esc_js( $position ) . "'
-					} ],
-				} );
-			});
-		" );
+			});"
+		);
+	}
+
+	/**
+	 * Output Javascript to track add_to_cart event on single product page
+	 *
+	 * @param WC_Product $product The product currently being viewed
+	 */
+	public static function add_to_cart( WC_Product $product ) {
+		$items = array(
+			'id'       => self::get_product_identifier( $product ),
+			'name'     => $product->get_title(),
+			'category' => self::product_get_category_line( $product ),
+			'quantity' => 1,
+		);
+
+		// Set item data as Javascript variable so that quantity, variant, and ID can be updated before sending the event
+		$event_code = '
+			const item_data    = ' . self::format_event_data( $items ) . ';
+			item_data.quantity = $("input.qty").val() ? $("input.qty").val() : 1;';
+
+		if ( $product->is_type( 'variable' ) ) {
+			// Check the global google_analytics_integration_product_data Javascript variable contains data
+			// for the current variation selection and if it does update the item_data to be sent for this event
+			$event_code .= "
+			const selected_variation = google_analytics_integration_product_data[ $('input[name=\"variation_id\"]').val() ];
+			if ( selected_variation !== undefined ) {
+				item_data.id       = selected_variation.id;
+				item_data.variant  = selected_variation.variant;
+			}
+			";
+		}
+
+		$event_code .= self::get_event_code(
+			'add_to_cart',
+			'{"items": [item_data]}',
+			false
+		);
+
+		wc_enqueue_js(
+			"$( '.single_add_to_cart_button' ).on('click', function() {
+				$event_code
+			});"
+		);
 	}
 
 	/**
@@ -201,26 +310,26 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 	 * @return string
 	 */
 	protected function add_transaction_enhanced( $order ) {
-		// Order items
-		$items = "[";
-		if ( $order->get_items() ) {
-			foreach ( $order->get_items() as $item ) {
-				$items .= self::add_item( $order, $item );
+		$event_items = array();
+		$order_items = $order->get_items();
+		if ( ! empty( $order_items ) ) {
+			foreach ( $order_items as $item ) {
+				$event_items[] = self::add_item( $order, $item );
 			}
 		}
-		$items .= "]";
 
-		$code = self::tracker_var() . "( 'event', 'purchase', {
-			'transaction_id': '" . esc_js( $order->get_order_number() ) . "',
-			'affiliation': '" . esc_js( get_bloginfo( 'name' ) ) . "',
-			'value': '" . esc_js( $order->get_total() ) . "',
-			'tax': '" . esc_js( $order->get_total_tax() ) . "',
-			'shipping': '" . esc_js( $order->get_total_shipping() ) . "',
-			'currency': '" . esc_js( $order->get_currency() ) . "',
-			'items': {$items},
-		} );";
-
-		return $code;
+		return self::get_event_code(
+			'purchase',
+			array(
+				'transaction_id' => $order->get_order_number(),
+				'affiliation'    => get_bloginfo( 'name' ),
+				'value'          => $order->get_total(),
+				'tax'            => $order->get_total_tax(),
+				'shipping'       => $order->get_total_shipping(),
+				'currency'       => $order->get_currency(),
+				'items'          => $event_items,
+			)
+		);
 	}
 
 	/**
@@ -230,43 +339,41 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 	 * @param WC_Order_Item $item  The item to add to a transaction/order
 	 */
 	protected function add_item( $order, $item ) {
-		$_product = $item->get_product();
-		$variant  = self::product_get_variant_line( $_product );
+		$product = $item->get_product();
+		$variant = self::product_get_variant_line( $product );
 
-		$code  = '{';
-		$code .= "'id': '" . self::get_product_identifier( $_product ) . "',";
-		$code .= "'name': '" . esc_js( $item['name'] ) . "',";
-		$code .= "'category': " . self::product_get_category_line( $_product );
+		$event_item = array(
+			'id'       => self::get_product_identifier( $product ),
+			'name'     => $item['name'],
+			'category' => self::product_get_category_line( $product ),
+			'price'    => $order->get_item_total( $item ),
+			'quantity' => $item['qty'],
+		);
 
 		if ( '' !== $variant ) {
-			$code .= "'variant': " . $variant;
+			$event_item['variant'] = $variant;
 		}
 
-		$code .= "'price': '" . esc_js( $order->get_item_total( $item ) ) . "',";
-		$code .= "'quantity': '" . esc_js( $item['qty'] ) . "'";
-		$code .= '},';
-
-		return $code;
+		return $event_item;
 	}
 
 	/**
 	 * Output JavaScript to track an enhanced ecommerce remove from cart action
 	 */
 	public function remove_from_cart() {
-		echo( "
-			<script>
-			(function($) {
-				$( '.remove' ).off('click', '.remove').on( 'click', function() {
-					" . self::tracker_var() . "( 'event', 'remove_from_cart', {
-						'items': [ {
-							'id': ($(this).data('product_sku')) ? ($(this).data('product_sku')) : ('#' + $(this).data('product_id')),
-							'quantity': $(this).parent().parent().find( '.qty' ).val() ? $(this).parent().parent().find( '.qty' ).val() : '1',
-						} ]
-					} );
-				});
-			})(jQuery);
-			</script>
-		" );
+		$event_code = self::get_event_code(
+			'remove_from_cart',
+			'{"items": [{
+				"id": $(this).data("product_sku") ? $(this).data("product_sku") : "#" + $(this).data("product_id"),
+				"quantity": $(this).parent().parent().find(".qty").val() ? $(this).parent().parent().find(".qty").val() : "1"
+			 }]}'
+		);
+
+		wc_enqueue_js(
+			"$( '.remove' ).off('click', '.remove').on( 'click', function() {
+				$event_code
+			});"
+		);
 	}
 
 	/**
@@ -279,15 +386,21 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 			return;
 		}
 
-		wc_enqueue_js( "
-			" . self::tracker_var() . "( 'event', 'view_item', {
-				'items': [ {
-					'id': '" . self::get_product_identifier( $product ) . "',
-					'name': '" . esc_js( $product->get_title() ) . "',
-					'category': " . self::product_get_category_line( $product ) . "
-					'price': '" . esc_js( $product->get_price() ) . "',
-				} ]
-			} );" );
+		$event_code = self::get_event_code(
+			'view_item',
+			array(
+				'items' => array(
+					array(
+						'id'       => self::get_product_identifier( $product ),
+						'name'     => $product->get_title(),
+						'category' => self::product_get_category_line( $product ),
+						'price'    => $product->get_price(),
+					),
+				),
+			)
+		);
+
+		wc_enqueue_js( $event_code );
 	}
 
 	/**
@@ -296,46 +409,46 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 	 * @param array $cart items/contents of the cart
 	 */
 	public function checkout_process( $cart ) {
-		$items = "[";
-
+		$items = array();
 		foreach ( $cart as $cart_item_key => $cart_item ) {
-			$product     = apply_filters( 'woocommerce_cart_item_product', $cart_item['data'], $cart_item, $cart_item_key );
+			$product = apply_filters( 'woocommerce_cart_item_product', $cart_item['data'], $cart_item, $cart_item_key );
 
-			$items .= "
-				{
-					'id': '" . self::get_product_identifier( $product ) . "',
-					'name': '" . esc_js( $product->get_title() ) . "',
-					'category': " . self::product_get_category_line( $product );
+			$item_data = array(
+				'id'       => self::get_product_identifier( $product ),
+				'name'     => $product->get_title(),
+				'category' => self::product_get_category_line( $product ),
+				'price'    => $product->get_price(),
+				'quantity' => $cart_item['quantity'],
+			);
 
-			$variant     = self::product_get_variant_line( $product );
+			$variant = self::product_get_variant_line( $product );
 			if ( '' !== $variant ) {
-				$items .= "
-					'variant': " . $variant;
+				$item_data['variant'] = $variant;
 			}
 
-			$items .= "
-					'price': '" . esc_js( $product->get_price() ) . "',
-					'quantity': '" . esc_js( $cart_item['quantity'] ) . "'
-				},";
+			$items[] = $item_data;
 		}
 
-		$items .= '
-			]';
+		$event_code = self::get_event_code(
+			'begin_checkout',
+			array(
+				'items' => $items,
+			)
+		);
 
-		$code  = "" . self::tracker_var() . "( 'event', 'begin_checkout', {
-			'items': " . $items . ",
-		} );";
-
-		wc_enqueue_js( $code );
+		wc_enqueue_js( $event_code );
 	}
 
 	/**
+	 * @deprecated x.x.x
+	 *
 	 * Enqueue JavaScript for Add to cart tracking
 	 *
-	 * @param array $parameters associative array of _trackEvent parameters
-	 * @param string $selector jQuery selector for binding click event
+	 * @param array  $parameters Associative array of _trackEvent parameters
+	 * @param string $selector   jQuery selector for binding click event
 	 */
 	public function event_tracking_code( $parameters, $selector ) {
+		wc_deprecated_function( 'event_tracking_code', '1.6.0', 'get_event_code' );
 
 		// Called with invalid 'Add to Cart' action, update to sync with Default Google Analytics Event 'add_to_cart'
 		$parameters['action']   = '\'add_to_cart\'';

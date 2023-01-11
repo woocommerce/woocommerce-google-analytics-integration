@@ -475,15 +475,20 @@ class WC_Google_Analytics extends WC_Integration {
 
 		global $product;
 
+		if ( 'yes' === $this->ga_gtag_enabled ) {
+			$this->get_tracking_instance()->add_to_cart( $product );
+			return;
+		}
+
 		// Add single quotes to allow jQuery to be substituted into _trackEvent parameters
-		$parameters = array();
+		$parameters             = array();
 		$parameters['category'] = "'" . __( 'Products', 'woocommerce-google-analytics-integration' ) . "'";
 		$parameters['action']   = "'" . __( 'Add to Cart', 'woocommerce-google-analytics-integration' ) . "'";
-		$parameters['label']    = "'" . esc_js( $product->get_sku() ? __( 'ID:', 'woocommerce-google-analytics-integration' ) . ' ' . $product->get_sku() : "#" . $product->get_id() ) . "'";
+		$parameters['label']    = "'" . esc_js( $product->get_sku() ? __( 'ID:', 'woocommerce-google-analytics-integration' ) . ' ' . $product->get_sku() : '#' . $product->get_id() ) . "'";
 
 		if ( ! $this->disable_tracking( $this->ga_enhanced_ecommerce_tracking_enabled ) ) {
 
-			$item = "{";
+			$item = '{';
 
 			if ( $product->is_type( 'variable' ) ) {
 				$item .= "'id': google_analytics_integration_product_data[ $('input[name=\"variation_id\"]').val() ] !== undefined ? google_analytics_integration_product_data[ $('input[name=\"variation_id\"]').val() ].id : false,";
@@ -495,11 +500,11 @@ class WC_Google_Analytics extends WC_Integration {
 			$item .= "'name': '" . esc_js( $product->get_title() ) . "',";
 			$item .= "'category': " . $this->get_tracking_instance()->product_get_category_line( $product );
 			$item .= "'quantity': $( 'input.qty' ).val() ? $( 'input.qty' ).val() : '1'";
-			$item .= "}";
+			$item .= '}';
 
 			$parameters['item'] = $item;
 
-			$code = "" . $this->get_tracking_instance()->tracker_var() . "( 'ec:addProduct', " . $item . " );";
+			$code                   = $this->get_tracking_instance()->tracker_var() . "( 'ec:addProduct', {$item} );";
 			$parameters['enhanced'] = $code;
 		}
 
@@ -549,7 +554,7 @@ class WC_Google_Analytics extends WC_Integration {
 	 * Google Analytics event tracking for loop add to cart
 	 */
 	public function loop_add_to_cart() {
-		if ( $this->disable_tracking( $this->ga_event_tracking_enabled ) ) {
+		if ( $this->disable_tracking( $this->ga_event_tracking_enabled ) || 'yes' === $this->ga_gtag_enabled ) {
 			return;
 		}
 

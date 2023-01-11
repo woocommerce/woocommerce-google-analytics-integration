@@ -161,7 +161,7 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 			array(
 				'items' => array(
 					array(
-						'id'            => $product->get_id(),
+						'id'            => self::get_product_identifier( $product ),
 						'name'          => $product->get_title(),
 						'category'      => self::product_get_category_line( $product ),
 						// phpcs:ignore WordPress.Security.NonceVerification.Recommended

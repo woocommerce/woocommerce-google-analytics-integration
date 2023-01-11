@@ -11,10 +11,11 @@
 			<directory suffix=".php">./tests/unit-tests</directory>
 		</testsuite>
 	</testsuites>
-	<filter>
-		<whitelist addUncoveredFilesFromWhitelist="true">
+	<coverage>
+		<include>
 			<directory suffix=".php">./includes</directory>
+			<directory suffix=".php">./admin</directory>
 			<file>woocommerce-google-analytics-integration.php</file>
-		</whitelist>
-	</filter>
+		</include>
+	</coverage>
 </phpunit>

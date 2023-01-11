@@ -141,6 +141,15 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 	}
 
 	/**
+	 * Return list name for event
+	 *
+	 * @return string
+	 */
+	public static function get_list_name(): string {
+		return isset( $_GET['s'] ) ? __( 'Search Results', 'woocommerce-google-analytics-integration' ) : __( 'Product List', 'woocommerce-google-analytics-integration' );
+	}
+
+	/**
 	 * Enqueues JavaScript to build the view_item_list event
 	 *
 	 * @param WC_Product $product
@@ -156,7 +165,7 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 						'name'          => $product->get_title(),
 						'category'      => self::product_get_category_line( $product ),
 						// phpcs:ignore WordPress.Security.NonceVerification.Recommended
-						'list'          => isset( $_GET['s'] ) ? __( 'Search Results', 'woocommerce-google-analytics-integration' ) : __( 'Product List', 'woocommerce-google-analytics-integration' ),
+						'list'          => self::get_list_name(),
 						'list_position' => $position,
 					),
 				),

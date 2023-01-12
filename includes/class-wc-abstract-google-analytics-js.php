@@ -201,7 +201,7 @@ abstract class WC_Abstract_Google_Analytics_JS {
 	 * @param  WC_Product $_product  Product to pull info for
 	 * @return string                Line of JSON
 	 */
-	protected static function product_get_variant_line( $_product ) {
+	public static function product_get_variant_line( $_product ) {
 		$out            = '';
 		$variation_data = $_product->is_type( 'variation' ) ? wc_get_product_variation_attributes( $_product->get_id() ) : false;
 

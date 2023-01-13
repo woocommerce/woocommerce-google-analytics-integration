@@ -476,10 +476,3 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 	}
 
 }
-
-add_filter(
-	'woocommerce_gtag_tracker_variable',
-	function( $tracker_var ) {
-		return 'filteredGtag';
-	}
-);

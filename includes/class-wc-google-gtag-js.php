@@ -273,11 +273,11 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 		$gtag_cross_domains = ! empty( self::get( 'ga_linker_cross_domains' ) ) ? array_map( 'esc_js', explode( ',', self::get( 'ga_linker_cross_domains' ) ) ) : array();
 
 		$gtag_snippet = '<script async src="https://www.googletagmanager.com/gtag/js?id=' . esc_js( $gtag_id ) . '"></script>';
-		$gtag_snippet .= "
+		$gtag_snippet .= '
 		<script>
 		window.dataLayer = window.dataLayer || [];
-		function " . self::tracker_var() . "(){dataLayer.push(arguments);}
-		" . self::tracker_var() . "('js', new Date());
+		function ' . self::tracker_var() . '(){dataLayer.push(arguments);}
+		' . self::tracker_var() . "('js', new Date());
 		$gtag_developer_id
 
 		" . self::tracker_var() . "('config', '" . esc_js( $gtag_id ) . "', {
@@ -476,3 +476,10 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 	}
 
 }
+
+add_filter(
+	'woocommerce_gtag_tracker_variable',
+	function( $tracker_var ) {
+		return 'filteredGtag';
+	}
+);

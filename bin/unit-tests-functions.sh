@@ -119,7 +119,7 @@ install_test_suite() {
     local WP_TESTS_TAG="tags/$LATEST_VERSION"
   fi
 
-  echo "Install test suit ${WP_TESTS_TAG}"
+  echo "Install test suite ${WP_TESTS_TAG}"
 
   # portable in-place argument for both GNU sed and Mac OSX sed
   if [[ $(uname -s) == 'Darwin' ]]; then

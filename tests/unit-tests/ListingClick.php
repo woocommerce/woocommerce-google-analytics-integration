@@ -1,29 +1,33 @@
 <?php
-// phpcs:ignoreFile
 
 namespace GoogleAnalyticsIntegration\Tests;
 
-use MockAction;
-use WP_UnitTestCase;
-use WC_Helper_Product;
 use WC_Google_Gtag_JS;
 
-class ListingClickTest extends WP_UnitTestCase {
+/**
+ * Class ListingClick
+ *
+ * @since x.x.x
+ *
+ * @package GoogleAnalyticsIntegration\Tests
+ */
+class ListingClick extends UnitTest {
 
+	/**
+	 * Run unit test against the `select_content` and `add_to_cart` events
+	 *
+	 * @return void
+	 */
 	public function test_select_content_and_add_to_cart_event() {
-		$product  = WC_Helper_Product::create_simple_product();
+		$product  = parent::get_product();
 		$position = 1;
-
-		// Mock woocommerce_gtag_event_data filter to ensure it is called and the correct data is processed
-		$filter = new MockAction();
-		add_filter( 'woocommerce_gtag_event_data', array( &$filter, 'filter' ) );
 
 		( new WC_Google_Gtag_JS() )->listing_click( $product, $position );
 
-		// Code is generated for two events in listing_click() so we would expect the filter is called twice
-		$this->assertEquals( 2, $filter->get_call_count(), 'woocommerce_gtag_event_data filter was not called for select_content and add_to_cart (listing_click()) events' );
+		// Code is generated for two events in listing_click() so we would expect the filter is called twice.
+		$this->assertEquals( 2, parent::get_event_data_filter_call_count(), 'woocommerce_gtag_event_data filter was not called for select_content and add_to_cart (listing_click()) events' );
 
-		// The expected data structure for this event
+		// The expected data structure for this event.
 		$expected_data = array(
 			'items' => array(
 				array(
@@ -36,12 +40,8 @@ class ListingClickTest extends WP_UnitTestCase {
 			),
 		);
 
-		// Get data passed to woocommerce_gtag_event_data filter
-		$args        = $filter->get_args();
-		$actual_data = $args[0][0];
-
-		// Confirm data structure matches what's expected
-		$this->assertEquals( $expected_data, $actual_data, 'Event data does not match expected data structure for select_content and add_to_cart (listing_click()) events' );
+		// Confirm data structure matches what's expected.
+		$this->assertEquals( $expected_data, parent::get_event_data(), 'Event data does not match expected data structure for select_content and add_to_cart (listing_click()) events' );
 	}
 
 }

@@ -1,28 +1,32 @@
 <?php
-// phpcs:ignoreFile
 
 namespace GoogleAnalyticsIntegration\Tests;
 
-use MockAction;
-use WP_UnitTestCase;
-use WC_Helper_Product;
 use WC_Google_Gtag_JS;
 
-class ProductDetailTest extends WP_UnitTestCase {
+/**
+ * Class ProductDetail
+ *
+ * @since x.x.x
+ *
+ * @package GoogleAnalyticsIntegration\Tests
+ */
+class ProductDetail extends UnitTest {
 
+	/**
+	 * Run unit test against the `view_item` event
+	 *
+	 * @return void
+	 */
 	public function test_view_item_event() {
-		$product  = WC_Helper_Product::create_simple_product();
-
-		// Mock woocommerce_gtag_event_data filter to ensure it is called and the correct data is processed
-		$filter = new MockAction();
-		add_filter( 'woocommerce_gtag_event_data', array( &$filter, 'filter' ) );
+		$product = parent::get_product();
 
 		( new WC_Google_Gtag_JS() )->product_detail( $product );
 
-		// Confirm woocommerce_gtag_event_data is called by product_detail()
-		$this->assertEquals( 1, $filter->get_call_count(), 'woocommerce_gtag_event_data filter was not called for view_item (product_detail()) event' );
+		// Confirm woocommerce_gtag_event_data is called by product_detail().
+		$this->assertEquals( 1, parent::get_event_data_filter_call_count(), 'woocommerce_gtag_event_data filter was not called for view_item (product_detail()) event' );
 
-		// The expected data structure for this event
+		// The expected data structure for this event.
 		$expected_data = array(
 			'items' => array(
 				array(
@@ -34,12 +38,8 @@ class ProductDetailTest extends WP_UnitTestCase {
 			),
 		);
 
-		// Get data passed to woocommerce_gtag_event_data filter
-		$args        = $filter->get_args();
-		$actual_data = $args[0][0];
-
-		// Confirm data structure matches what's expected
-		$this->assertEquals( $expected_data, $actual_data, 'Event data does not match expected data structure for view_item (product_detail()) event' );
+		// Confirm data structure matches what's expected.
+		$this->assertEquals( $expected_data, parent::get_event_data(), 'Event data does not match expected data structure for view_item (product_detail()) event' );
 	}
 
 }

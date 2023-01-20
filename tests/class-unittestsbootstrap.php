@@ -148,6 +148,8 @@ class UnitTestsBootstrap {
 		require_once $wc_tests_dir . '/framework/helpers/class-wc-helper-order.php';
 		require_once $wc_tests_dir . '/framework/helpers/class-wc-helper-shipping.php';
 		require_once $wc_tests_dir . '/framework/helpers/class-wc-helper-customer.php';
+
+		require $this->tests_dir . '/UnitTest.php';
 	}
 
 }

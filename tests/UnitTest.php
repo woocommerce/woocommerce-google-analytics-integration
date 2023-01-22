@@ -82,7 +82,7 @@ abstract class UnitTest extends WP_UnitTestCase {
 	/**
 	 * Get filter
 	 *
-	 * @since x.x.x
+	 * @return MockAction
 	 */
 	public function get_filter() {
 		return $this->filter;

@@ -23,7 +23,7 @@ WooCommerce Google Analytics Integration utilizes npm scripts for task managemen
 4. Run `bin/install-unit-tests.sh <db-name> <db-user> <db-pass> [db-host] [wp-version] [wc-version] [skip-database-creation]` e.g. `bin/install-unit-tests.sh wordpress_test root root localhost latest latest`
 5. Run `vendor/bin/phpunit` to run all unit test
 
-_For more info see: WordPress.org > Plugin Unit Tests and AutomateWoo Wiki > Setting up tests._
+_For more info see: [WordPress.org > Plugin Unit Tests](https://make.wordpress.org/cli/handbook/misc/plugin-unit-tests/#running-tests-locally)._
 
 ## Coding standards checks
 

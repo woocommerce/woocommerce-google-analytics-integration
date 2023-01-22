@@ -15,5 +15,8 @@
         "exussum12/coverage-checker": "^1.0",
         "phpunit/phpunit": "^9.5",
         "yoast/phpunit-polyfills": "^1.0"
+    },
+    "autoload": {
+        "psr-4": { "GoogleAnalyticsIntegration\\Tests\\": "tests/" }
     }
 }

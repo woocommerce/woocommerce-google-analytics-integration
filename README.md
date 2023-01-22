@@ -30,4 +30,4 @@ _For more info see: [WordPress.org > Plugin Unit Tests](https://make.wordpress.o
 1. Run `composer install` (_if you haven't done so already_)
 2. Run `npm run lint:php`
 
-Alternatively, run `npm run lint:php:diff` to run coding standards checks agains the current git diff. An explanation of output can be found here e.g. what are the S's?
+Alternatively, run `npm run lint:php:diff` to run coding standards checks agains the current git diff. An explanation of output can be [found here](https://github.com/squizlabs/PHP_CodeSniffer/wiki/Usage#printing-progress-information) e.g. what are the S's?

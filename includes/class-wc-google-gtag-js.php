@@ -141,6 +141,16 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 	}
 
 	/**
+	 * Return list name for event
+	 *
+	 * @return string
+	 */
+	public static function get_list_name(): string {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		return isset( $_GET['s'] ) ? __( 'Search Results', 'woocommerce-google-analytics-integration' ) : __( 'Product List', 'woocommerce-google-analytics-integration' );
+	}
+
+	/**
 	 * Enqueues JavaScript to build the view_item_list event
 	 *
 	 * @param WC_Product $product
@@ -152,11 +162,10 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 			array(
 				'items' => array(
 					array(
-						'id'            => $product->get_id(),
+						'id'            => self::get_product_identifier( $product ),
 						'name'          => $product->get_title(),
 						'category'      => self::product_get_category_line( $product ),
-						// phpcs:ignore WordPress.Security.NonceVerification.Recommended
-						'list'          => isset( $_GET['s'] ) ? __( 'Search Results', 'woocommerce-google-analytics-integration' ) : __( 'Product List', 'woocommerce-google-analytics-integration' ),
+						'list'          => self::get_list_name(),
 						'list_position' => $position,
 					),
 				),
@@ -309,7 +318,7 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 	 * @param  WC_Order $order
 	 * @return string
 	 */
-	protected function add_transaction_enhanced( $order ) {
+	public function add_transaction_enhanced( $order ) {
 		$event_items = array();
 		$order_items = $order->get_items();
 		if ( ! empty( $order_items ) ) {
@@ -338,7 +347,7 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 	 * @param WC_Order      $order WC_Order Object
 	 * @param WC_Order_Item $item  The item to add to a transaction/order
 	 */
-	protected function add_item( $order, $item ) {
+	public function add_item( $order, $item ) {
 		$product = $item->get_product();
 		$variant = self::product_get_variant_line( $product );
 

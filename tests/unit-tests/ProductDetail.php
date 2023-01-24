@@ -11,7 +11,7 @@ use WC_Google_Gtag_JS;
  *
  * @package GoogleAnalyticsIntegration\Tests
  */
-class ProductDetail extends UnitTest {
+class ProductDetail extends EventsDataTest {
 
 	/**
 	 * Run unit test against the `view_item` event
@@ -19,12 +19,12 @@ class ProductDetail extends UnitTest {
 	 * @return void
 	 */
 	public function test_view_item_event() {
-		$product = parent::get_product();
+		$product = $this->get_product();
 
 		( new WC_Google_Gtag_JS() )->product_detail( $product );
 
 		// Confirm woocommerce_gtag_event_data is called by product_detail().
-		$this->assertEquals( 1, parent::get_event_data_filter_call_count(), 'woocommerce_gtag_event_data filter was not called for view_item (product_detail()) event' );
+		$this->assertEquals( 1, $this->get_event_data_filter_call_count(), 'woocommerce_gtag_event_data filter was not called for view_item (product_detail()) event' );
 
 		// The expected data structure for this event.
 		$expected_data = array(
@@ -39,7 +39,7 @@ class ProductDetail extends UnitTest {
 		);
 
 		// Confirm data structure matches what's expected.
-		$this->assertEquals( $expected_data, parent::get_event_data(), 'Event data does not match expected data structure for view_item (product_detail()) event' );
+		$this->assertEquals( $expected_data, $this->get_event_data(), 'Event data does not match expected data structure for view_item (product_detail()) event' );
 	}
 
 }

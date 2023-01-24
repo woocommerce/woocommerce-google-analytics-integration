@@ -11,7 +11,7 @@ use WC_Google_Gtag_JS;
  *
  * @package GoogleAnalyticsIntegration\Tests
  */
-class AddTransactionEnhanced extends UnitTest {
+class AddTransactionEnhanced extends EventsDataTest {
 
 	/**
 	 * Run unit test against the `purchase` event
@@ -19,13 +19,13 @@ class AddTransactionEnhanced extends UnitTest {
 	 * @return void
 	 */
 	public function test_purchase_event() {
-		$order = parent::get_order();
+		$order = $this->get_order();
 
 		$gtag = new WC_Google_Gtag_JS();
 		$gtag->add_transaction_enhanced( $order );
 
 		// Confirm woocommerce_gtag_event_data is called by add_transaction_enhanced().
-		$this->assertEquals( 1, parent::get_event_data_filter_call_count(), 'woocommerce_gtag_event_data filter was not called for purchase (add_transaction_enhanced()) event' );
+		$this->assertEquals( 1, $this->get_event_data_filter_call_count(), 'woocommerce_gtag_event_data filter was not called for purchase (add_transaction_enhanced()) event' );
 
 		$order_items = $order->get_items();
 		$event_items = array();
@@ -48,7 +48,7 @@ class AddTransactionEnhanced extends UnitTest {
 		);
 
 		// Confirm data structure matches what's expected.
-		$this->assertEquals( $expected_data, parent::get_event_data(), 'Event data does not match expected data structure for purchase (add_transaction_enhanced()) event' );
+		$this->assertEquals( $expected_data, $this->get_event_data(), 'Event data does not match expected data structure for purchase (add_transaction_enhanced()) event' );
 	}
 
 }

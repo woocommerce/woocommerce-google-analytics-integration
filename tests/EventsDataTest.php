@@ -13,7 +13,7 @@ use MockAction;
  *
  * @since x.x.x
  */
-abstract class UnitTest extends WP_UnitTestCase {
+abstract class EventsDataTest extends WP_UnitTestCase {
 
 	/** @var WC_Product */
 	private static $product;

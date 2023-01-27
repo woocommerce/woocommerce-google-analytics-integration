@@ -1,0 +1,76 @@
+name: PHP Unit Tests
+
+on:
+  push:
+    branches:
+      - trunk
+    paths:
+      - "**.php"
+      - composer.json
+      - composer.lock
+      - .github/workflows/php-unit-tests.yml
+  pull_request:
+    paths:
+      - "**.php"
+      - composer.json
+      - composer.lock
+      - .github/workflows/php-unit-tests.yml
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  UnitTests:
+    name: PHP unit tests - PHP ${{ matrix.php }}, WP ${{ matrix.wp-version }}, WC ${{ matrix.wc-versions }}
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        php: [7.4]
+        wp-version: [latest]
+        # Please note that wc-versions is a string contains versions separated by commas.
+        # It will be split and loop within the run unit test step below to reduce the time spent.
+        wc-versions: ["7.0.0, 7.1.0, latest"] # From L-2 to latest.
+        include:
+          # Minimum PHP support and L-2 WP/WC version
+          - php: 7.2
+            wp-version: 5.9
+            wc-versions: 7.0
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Prepare PHP
+        uses: woocommerce/grow/prepare-php@actions-v1
+        with:
+          php-version: "${{ matrix.php }}"
+
+      - name: Set up MySQL
+        uses: woocommerce/grow/prepare-mysql@actions-v1
+
+      - name: Run PHP unit tests
+        run: |
+          WC_VERSIONS=$(echo "${{ matrix.wc-versions }}" | sed -r "s/ *, */ /g")
+          WC_VERSIONS=($WC_VERSIONS)
+
+          URL_CONFIG="url.https://${{ secrets.BOT_GH_TOKEN }}:x-oauth-basic@github.com/.insteadOf git@github.com:"
+          git config --global $URL_CONFIG
+
+          INIT_INSTALL=true
+
+          for WC_VERSION in "${WC_VERSIONS[@]}"; do
+            if [ "$INIT_INSTALL" = true ]; then
+              echo "::group::Install WP ${{ matrix.wp-version }} and WC ${WC_VERSION}"
+              ./bin/install-unit-tests.sh wordpress_test root root localhost ${{ matrix.wp-version }} $WC_VERSION
+              INIT_INSTALL=false
+            else
+              echo "::group::Switch to WP ${{ matrix.wp-version }} and WC ${WC_VERSION}"
+              ./bin/switch-wp-wc-in-unit-tests.sh wordpress_test root root localhost ${{ matrix.wp-version }} $WC_VERSION
+            fi
+            echo "::endgroup::"
+
+            vendor/bin/phpunit
+          done
+
+          git config --global --unset $URL_CONFIG

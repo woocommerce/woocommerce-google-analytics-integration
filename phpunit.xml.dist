@@ -1,0 +1,21 @@
+<phpunit
+	bootstrap="tests/bootstrap.php"
+	backupGlobals="false"
+	colors="true"
+	convertErrorsToExceptions="true"
+	convertNoticesToExceptions="true"
+	convertWarningsToExceptions="true"
+	>
+	<testsuites>
+		<testsuite name="basic">
+			<directory suffix=".php">./tests/unit-tests</directory>
+		</testsuite>
+	</testsuites>
+	<coverage>
+		<include>
+			<directory suffix=".php">./includes</directory>
+			<directory suffix=".php">./admin</directory>
+			<file>woocommerce-google-analytics-integration.php</file>
+		</include>
+	</coverage>
+</phpunit>

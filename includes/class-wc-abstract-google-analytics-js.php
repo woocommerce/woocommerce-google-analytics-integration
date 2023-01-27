@@ -108,6 +108,20 @@ abstract class WC_Abstract_Google_Analytics_JS {
 	abstract protected function add_transaction_enhanced( $order );
 
 	/**
+	 * Get item identifier from product data
+	 *
+	 * @param  WC_Product $product WC_Product Object
+	 * @return string
+	 */
+	public static function get_product_identifier( $product ) {
+		if ( ! empty( $product->get_sku() ) ) {
+			return esc_js( $product->get_sku() );
+		} else {
+			return esc_js( '#' . ( $product->is_type( 'variation' ) ? $product->get_parent_id() : $product->get_id() ) );
+		}
+	}
+
+	/**
 	 * Generate Universal Analytics add item tracking code
 	 *
 	 * @param  WC_Order $order     WC_Order Object
@@ -162,7 +176,7 @@ abstract class WC_Abstract_Google_Analytics_JS {
 	 * @param  WC_Product $_product  Product to pull info for
 	 * @return string                Line of JSON
 	 */
-	protected static function product_get_category_line( $_product ) {
+	public static function product_get_category_line( $_product ) {
 		$out            = [];
 		$variation_data = $_product->is_type( 'variation' ) ? wc_get_product_variation_attributes( $_product->get_id() ) : false;
 		$categories     = get_the_terms( $_product->get_id(), 'product_cat' );
@@ -187,7 +201,7 @@ abstract class WC_Abstract_Google_Analytics_JS {
 	 * @param  WC_Product $_product  Product to pull info for
 	 * @return string                Line of JSON
 	 */
-	protected static function product_get_variant_line( $_product ) {
+	public static function product_get_variant_line( $_product ) {
 		$out            = '';
 		$variation_data = $_product->is_type( 'variation' ) ? wc_get_product_variation_attributes( $_product->get_id() ) : false;
 

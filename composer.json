@@ -16,6 +16,11 @@
         "phpunit/phpunit": "^9.5",
         "yoast/phpunit-polyfills": "^1.0"
     },
+    "config": {
+        "allow-plugins": {
+            "dealerdirect/phpcodesniffer-composer-installer": true
+        }
+    },
     "autoload": {
         "psr-4": { "GoogleAnalyticsIntegration\\Tests\\": "tests/" }
     }

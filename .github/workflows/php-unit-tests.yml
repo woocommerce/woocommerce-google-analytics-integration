@@ -33,7 +33,7 @@ jobs:
         wc-versions: ["7.0.0, 7.1.0, latest"] # From L-2 to latest.
         include:
           # Minimum PHP support and L-2 WP/WC version
-          - php: 7.2
+          - php: 7.4
             wp-version: 5.9
             wc-versions: 7.0
 

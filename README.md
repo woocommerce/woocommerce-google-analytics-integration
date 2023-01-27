@@ -21,7 +21,7 @@ WooCommerce Google Analytics Integration utilizes npm scripts for task managemen
 2. `cd` into the `woocommerce-google-analytics-integration/` plugin directory
 3. Run `composer install`
 4. Run `bin/install-unit-tests.sh <db-name> <db-user> <db-pass> [db-host] [wp-version] [wc-version] [skip-database-creation]` e.g. `bin/install-unit-tests.sh wordpress_test root root localhost latest latest`
-5. Run `vendor/bin/phpunit` to run all unit test
+5. Run `XDEBUG_MODE=coverage vendor/bin/phpunit --coverage-text` to run all unit test
 
 _For more info see: [WordPress.org > Plugin Unit Tests](https://make.wordpress.org/cli/handbook/misc/plugin-unit-tests/#running-tests-locally)._
 

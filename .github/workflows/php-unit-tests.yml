@@ -30,12 +30,12 @@ jobs:
         wp-version: [latest]
         # Please note that wc-versions is a string contains versions separated by commas.
         # It will be split and loop within the run unit test step below to reduce the time spent.
-        wc-versions: ["7.0.0, 7.1.0, latest"] # From L-2 to latest.
+        wc-versions: ["7.1.0, 7.2.0, latest"] # From L-2 to latest.
         include:
           # Minimum PHP support and L-2 WP/WC version
           - php: 7.4
             wp-version: 5.9
-            wc-versions: 7.0
+            wc-versions: 7.1.0
 
     steps:
       - name: Checkout repository

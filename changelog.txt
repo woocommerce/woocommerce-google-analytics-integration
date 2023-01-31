@@ -1,5 +1,13 @@
 *** Changelog ***
 
+= 1.6.0 - 2023-01-31 =
+* Add - Common function for event code.
+* Fix - Add PHP unit tests.
+* Fix - Feature/consistency across gtag implementation.
+* Fix - Fix inconsistencies across item data in events.
+* Fix - Fix usage of tracker_var() in load_analytics().
+* Fix - undefined WC constant.
+
 = 1.5.18 - 2022-12-14 =
 * Add - .nvmrc file.
 * Tweak - WC 7.2 compatibility.

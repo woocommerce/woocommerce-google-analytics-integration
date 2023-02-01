@@ -12,6 +12,7 @@ composer.json export-ignore
 composer.lock export-ignore
 phpunit.xml.dist export-ignore
 phpunit.xml export-ignore
+phpcs.xml.dist export-ignore
 .eslintrc export-ignore
 .eslintignore export-ignore
 .tx export-ignore

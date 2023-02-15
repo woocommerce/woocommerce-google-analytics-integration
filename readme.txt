@@ -60,6 +60,9 @@ Exact wording depends on the national data privacy laws and should be adjusted.
 
 == Changelog ==
 
+= 1.6.1 - 2023-02-15 =
+* Tweak - WC 7.4 compatibility.
+
 = 1.6.0 - 2023-01-31 =
 * Add - Common function for event code.
 * Fix - Add PHP unit tests.

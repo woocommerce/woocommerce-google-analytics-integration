@@ -1,11 +1,13 @@
-name: Add all new issues & PRs to the Automata's board.
+name: Add all new issues and PRs to the Automata board.
 
 on:
   issues:
     types:
       - opened
+      - transferred
   pull_request:
-    types: opened
+    types:
+      - opened
 
 jobs:
   add-to-project:

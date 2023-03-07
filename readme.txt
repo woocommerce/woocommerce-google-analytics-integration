@@ -60,6 +60,10 @@ Exact wording depends on the national data privacy laws and should be adjusted.
 
 == Changelog ==
 
+= 1.6.2 - 2023-03-07 =
+* Tweak - WC 7.5 compatibility.
+* Tweak - WP 6.2 compatibility.
+
 = 1.6.1 - 2023-02-15 =
 * Tweak - WC 7.4 compatibility.
 

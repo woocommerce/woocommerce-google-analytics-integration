@@ -14,6 +14,11 @@
  * Domain Path: languages/
  */
 
+// phpcs:disable Squiz.Classes.ClassDeclaration.SpaceBeforeKeyword
+// phpcs:disable Squiz.Classes.ClassDeclaration.SpaceBeforeCloseBrace
+// phpcs:disable Squiz.Classes.ClassFileName.NoMatch
+// phpcs:disable Squiz.Classes.ValidClassName.NotCamelCaps
+
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -121,8 +126,8 @@ if ( ! class_exists( 'WC_Google_Analytics_Integration' ) ) {
 		 */
 		public static function get_instance() {
 			// If the single instance hasn't been set, set it now.
-			if ( null == self::$instance ) {
-				self::$instance = new self;
+			if ( null === self::$instance ) {
+				self::$instance = new self();
 			}
 
 			return self::$instance;
@@ -196,7 +201,7 @@ if ( ! class_exists( 'WC_Google_Analytics_Integration' ) ) {
 				return;
 			}
 
-			$notice_html  = '<strong>' . esc_html__( 'Get detailed insights into your sales with Google Analytics Pro', 'woocommerce-google-analytics-integration' ) . '</strong><br><br>';
+			$notice_html = '<strong>' . esc_html__( 'Get detailed insights into your sales with Google Analytics Pro', 'woocommerce-google-analytics-integration' ) . '</strong><br><br>';
 
 			/* translators: 1: href link to GA pro */
 			$notice_html .= sprintf( __( 'Add advanced tracking for your sales funnel, coupons and more. [<a href="%s" target="_blank">Learn more</a> &gt;]', 'woocommerce-google-analytics-integration' ), 'https://woocommerce.com/products/woocommerce-google-analytics-pro/?utm_source=woocommerce-google-analytics-integration&utm_medium=product&utm_campaign=google%20analytics%20free%20to%20pro%20extension%20upsell' );

@@ -1,4 +1,8 @@
 <?php
+
+// @phpcs:disable Squiz.Classes.ClassFileName.NoMatch
+// @phpcs:disable Squiz.Classes.ValidClassName.NotCamelCaps
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -17,7 +21,7 @@ abstract class WC_Abstract_Google_Analytics_JS {
 	protected static $options;
 
 	/** @var string Developer ID */
-	const DEVELOPER_ID = 'dOGY3NW';
+	public const DEVELOPER_ID = 'dOGY3NW';
 
 	/**
 	 * Get the class instance
@@ -34,7 +38,7 @@ abstract class WC_Abstract_Google_Analytics_JS {
 	 * @return string         Value of the option
 	 */
 	protected static function get( $option ) {
-		return self::$options[$option];
+		return self::$options[ $option ];
 	}
 
 	/**
@@ -48,7 +52,7 @@ abstract class WC_Abstract_Google_Analytics_JS {
 	 * Generic GA / header snippet for opt out
 	 */
 	public static function header() {
-		return "<script type='text/javascript'>
+		$code = "
 			var gaProperty = '" . esc_js( self::get( 'ga_id' ) ) . "';
 			var disableStr = 'ga-disable-' + gaProperty;
 			if ( document.cookie.indexOf( disableStr + '=true' ) > -1 ) {
@@ -57,15 +61,16 @@ abstract class WC_Abstract_Google_Analytics_JS {
 			function gaOptout() {
 				document.cookie = disableStr + '=true; expires=Thu, 31 Dec 2099 23:59:59 UTC; path=/';
 				window[disableStr] = true;
-			}
-		</script>";
+			}";
+
+		wc_enqueue_js( $code );
 	}
 
 	/**
 	 * Enqueues JavaScript to build the addImpression object
 	 *
 	 * @param WC_Product $product
-	 * @param int $position
+	 * @param int        $position
 	 */
 	abstract public static function listing_impression( $product, $position );
 
@@ -73,15 +78,14 @@ abstract class WC_Abstract_Google_Analytics_JS {
 	 * Enqueues JavaScript to build an addProduct and click object
 	 *
 	 * @param WC_Product $product
-	 * @param int $position
+	 * @param int        $position
 	 */
-	abstract public static function listing_click( $product, $position ) ;
+	abstract public static function listing_click( $product, $position );
 
 	/**
 	 * Loads the correct Google Gtag code (classic or universal)
 	 *
 	 * @param  boolean|WC_Order $order Classic analytics needs order data to set the currency correctly
-	 * @return string                  Analytics loading code
 	 */
 	abstract public static function load_analytics( $order = false );
 
@@ -89,13 +93,12 @@ abstract class WC_Abstract_Google_Analytics_JS {
 	 * Generate code used to pass transaction data to Google Analytics.
 	 *
 	 * @param  WC_Order $order WC_Order Object
-	 * @return string          Add Transaction code
 	 */
 	public function add_transaction( $order ) {
 		if ( 'yes' === self::get( 'ga_enhanced_ecommerce_tracking_enabled' ) || 'yes' === self::get( 'ga_gtag_enabled' ) ) {
-			return static::add_transaction_enhanced( $order );
+			wc_enqueue_js( static::add_transaction_enhanced( $order ) );
 		} else {
-			return self::add_transaction_universal( $order );
+			wc_enqueue_js( self::add_transaction_universal( $order ) );
 		}
 	}
 
@@ -124,21 +127,21 @@ abstract class WC_Abstract_Google_Analytics_JS {
 	/**
 	 * Generate Universal Analytics add item tracking code
 	 *
-	 * @param  WC_Order $order     WC_Order Object
+	 * @param  WC_Order      $order     WC_Order Object
 	 * @param  WC_Order_Item $item The item to add to a transaction/order
 	 * @return string
 	 */
 	protected function add_item_universal( $order, $item ) {
 		$_product = version_compare( WC_VERSION, '3.0', '<' ) ? $order->get_product_from_item( $item ) : $item->get_product();
 
-		$code = "ga('ecommerce:addItem', {";
+		$code  = "ga('ecommerce:addItem', {";
 		$code .= "'id': '" . esc_js( $order->get_order_number() ) . "',";
 		$code .= "'name': '" . esc_js( $item['name'] ) . "',";
 		$code .= "'sku': '" . esc_js( $_product->get_sku() ? $_product->get_sku() : $_product->get_id() ) . "',";
 		$code .= "'category': " . self::product_get_category_line( $_product );
 		$code .= "'price': '" . esc_js( $order->get_item_total( $item ) ) . "',";
 		$code .= "'quantity': '" . esc_js( $item['qty'] ) . "'";
-		$code .= "});";
+		$code .= '});';
 
 		return $code;
 	}
@@ -234,7 +237,7 @@ abstract class WC_Abstract_Google_Analytics_JS {
 	/**
 	 * Enqueue JavaScript for Add to cart tracking
 	 *
-	 * @param array $parameters associative array of _trackEvent parameters
+	 * @param array  $parameters associative array of _trackEvent parameters
 	 * @param string $selector jQuery selector for binding click event
 	 */
 	abstract public function event_tracking_code( $parameters, $selector );

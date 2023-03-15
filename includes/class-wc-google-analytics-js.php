@@ -105,7 +105,7 @@ class WC_Google_Analytics_JS extends WC_Abstract_Google_Analytics_JS {
 
 		$code .= ');';
 
-		wp_add_inline_script( 'google-analytics', apply_filters( 'woocommerce_ga_classic_snippet_output', $code ) );
+		wc_enqueue_js( apply_filters( 'woocommerce_ga_classic_snippet_output', $code ) );
 	}
 
 	/**

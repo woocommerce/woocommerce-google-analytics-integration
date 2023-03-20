@@ -191,7 +191,7 @@ class WC_Google_Analytics_JS extends WC_Abstract_Google_Analytics_JS {
 	 */
 	public static function universal_analytics_footer() {
 		if ( apply_filters( 'wc_google_analytics_send_pageview', true ) ) {
-			wc_enqueue_js( '' . self::tracker_var() . "( 'send', 'pageview' ); " );
+			wc_enqueue_js( self::tracker_var() . "( 'send', 'pageview' ); " );
 		}
 	}
 
@@ -221,23 +221,23 @@ class WC_Google_Analytics_JS extends WC_Abstract_Google_Analytics_JS {
 
 		$support_display_advertising = '';
 		if ( 'yes' === self::get( 'ga_support_display_advertising' ) ) {
-			$support_display_advertising = '' . self::tracker_var() . "( 'require', 'displayfeatures' );";
+			$support_display_advertising = self::tracker_var() . "( 'require', 'displayfeatures' );";
 		}
 
 		$support_enhanced_link_attribution = '';
 		if ( 'yes' === self::get( 'ga_support_enhanced_link_attribution' ) ) {
-			$support_enhanced_link_attribution = '' . self::tracker_var() . "( 'require', 'linkid' );";
+			$support_enhanced_link_attribution = self::tracker_var() . "( 'require', 'linkid' );";
 		}
 
 		$anonymize_enabled = '';
 		if ( 'yes' === self::get( 'ga_anonymize_enabled' ) ) {
-			$anonymize_enabled = '' . self::tracker_var() . "( 'set', 'anonymizeIp', true );";
+			$anonymize_enabled = self::tracker_var() . "( 'set', 'anonymizeIp', true );";
 		}
 
 		$track_404_enabled = '';
 		if ( 'yes' === self::get( 'ga_404_tracking_enabled' ) && is_404() ) {
 			// See https://developers.google.com/analytics/devguides/collection/analyticsjs/events for reference
-			$track_404_enabled = '' . self::tracker_var() . "( 'send', 'event', 'Error', '404 Not Found', 'page: ' + document.location.pathname + document.location.search + ' referrer: ' + document.referrer );";
+			$track_404_enabled = self::tracker_var() . "( 'send', 'event', 'Error', '404 Not Found', 'page: ' + document.location.pathname + document.location.search + ' referrer: ' + document.referrer );";
 		}
 
 		$src = apply_filters( 'woocommerce_google_analytics_script_src', '//www.google-analytics.com/analytics.js' );
@@ -268,16 +268,16 @@ class WC_Google_Analytics_JS extends WC_Abstract_Google_Analytics_JS {
 		' . self::tracker_var() . "( 'set', 'dimension1', '" . $logged_in . "' );\n";
 
 		if ( 'yes' === self::get( 'ga_enhanced_ecommerce_tracking_enabled' ) ) {
-			$ga_snippet_require .= '' . self::tracker_var() . "( 'require', 'ec' );";
+			$ga_snippet_require .= self::tracker_var() . "( 'require', 'ec' );";
 		} else {
-			$ga_snippet_require .= '' . self::tracker_var() . "( 'require', 'ecommerce', 'ecommerce.js');";
+			$ga_snippet_require .= self::tracker_var() . "( 'require', 'ecommerce', 'ecommerce.js');";
 		}
 
 		$ga_cross_domains = ! empty( self::get( 'ga_linker_cross_domains' ) ) ? array_map( 'esc_js', explode( ',', self::get( 'ga_linker_cross_domains' ) ) ) : false;
 
 		if ( $ga_cross_domains ) {
-			$ga_snippet_require .= '' . self::tracker_var() . "( 'require', 'linker' );";
-			$ga_snippet_require .= '' . self::tracker_var() . "( 'linker:autoLink', " . wp_json_encode( $ga_cross_domains ) . ');';
+			$ga_snippet_require .= self::tracker_var() . "( 'require', 'linker' );";
+			$ga_snippet_require .= self::tracker_var() . "( 'linker:autoLink', " . wp_json_encode( $ga_cross_domains ) . ');';
 		}
 
 		$ga_snippet_head         = apply_filters( 'woocommerce_ga_snippet_head', $ga_snippet_head );
@@ -360,7 +360,7 @@ class WC_Google_Analytics_JS extends WC_Abstract_Google_Analytics_JS {
 	 * @return string
 	 */
 	protected function add_transaction_enhanced( $order ) {
-		$code = '' . self::tracker_var() . "( 'set', '&cu', '" . esc_js( version_compare( WC_VERSION, '3.0', '<' ) ? $order->get_order_currency() : $order->get_currency() ) . "' );";
+		$code = self::tracker_var() . "( 'set', '&cu', '" . esc_js( version_compare( WC_VERSION, '3.0', '<' ) ? $order->get_order_currency() : $order->get_currency() ) . "' );";
 
 		// Order items
 		if ( $order->get_items() ) {
@@ -369,7 +369,7 @@ class WC_Google_Analytics_JS extends WC_Abstract_Google_Analytics_JS {
 			}
 		}
 
-		$code .= '' . self::tracker_var() . "( 'ec:setAction', 'purchase', {
+		$code .= self::tracker_var() . "( 'ec:setAction', 'purchase', {
 			'id': '" . esc_js( $order->get_order_number() ) . "',
 			'affiliation': '" . esc_js( get_bloginfo( 'name' ) ) . "',
 			'revenue': '" . esc_js( $order->get_total() ) . "',
@@ -413,7 +413,7 @@ class WC_Google_Analytics_JS extends WC_Abstract_Google_Analytics_JS {
 		$_product = version_compare( WC_VERSION, '3.0', '<' ) ? $order->get_product_from_item( $item ) : $item->get_product();
 		$variant  = self::product_get_variant_line( $_product );
 
-		$code  = '' . self::tracker_var() . "( 'ec:addProduct', {";
+		$code  = self::tracker_var() . "( 'ec:addProduct', {";
 		$code .= "'id': '" . esc_js( $_product->get_sku() ? $_product->get_sku() : $_product->get_id() ) . "',";
 		$code .= "'name': '" . esc_js( $item['name'] ) . "',";
 		$code .= "'category': " . self::product_get_category_line( $_product );
@@ -460,8 +460,7 @@ class WC_Google_Analytics_JS extends WC_Abstract_Google_Analytics_JS {
 		}
 
 		wc_enqueue_js(
-			'
-			' . self::tracker_var() . "( 'ec:addProduct', {
+			self::tracker_var() . "( 'ec:addProduct', {
 				'id': '" . esc_js( $product->get_sku() ? $product->get_sku() : ( '#' . $product->get_id() ) ) . "',
 				'name': '" . esc_js( $product->get_title() ) . "',
 				'category': " . self::product_get_category_line( $product ) . "
@@ -483,7 +482,7 @@ class WC_Google_Analytics_JS extends WC_Abstract_Google_Analytics_JS {
 		foreach ( $cart as $cart_item_key => $cart_item ) {
 			$product = apply_filters( 'woocommerce_cart_item_product', $cart_item['data'], $cart_item, $cart_item_key );
 			$variant = self::product_get_variant_line( $product );
-			$code   .= '' . self::tracker_var() . "( 'ec:addProduct', {
+			$code   .= self::tracker_var() . "( 'ec:addProduct', {
 				'id': '" . esc_js( $product->get_sku() ? $product->get_sku() : ( '#' . $product->get_id() ) ) . "',
 				'name': '" . esc_js( $product->get_title() ) . "',
 				'category': " . self::product_get_category_line( $product );
@@ -497,7 +496,7 @@ class WC_Google_Analytics_JS extends WC_Abstract_Google_Analytics_JS {
 			} );";
 		}
 
-		$code .= '' . self::tracker_var() . "( 'ec:setAction','checkout' );";
+		$code .= self::tracker_var() . "( 'ec:setAction','checkout' );";
 		wc_enqueue_js( $code );
 	}
 
@@ -523,7 +522,7 @@ class WC_Google_Analytics_JS extends WC_Abstract_Google_Analytics_JS {
 				);
 				return;
 			} else {
-				$track_event = '' . self::tracker_var() . "('send', 'event', %s, %s, %s);";
+				$track_event = self::tracker_var() . "('send', 'event', %s, %s, %s);";
 			}
 		} else {
 			$track_event = "_gaq.push(['_trackEvent', %s, %s, %s]);";

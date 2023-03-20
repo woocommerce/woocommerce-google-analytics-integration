@@ -563,7 +563,7 @@ class WC_Google_Analytics extends WC_Integration {
 			$item              .= '}';
 			$parameters['item'] = $item;
 
-			$code                   = '' . $this->get_tracking_instance()->tracker_var() . "( 'ec:addProduct', " . $item . ' );';
+			$code                   = $this->get_tracking_instance()->tracker_var() . "( 'ec:addProduct', " . $item . ' );';
 			$parameters['enhanced'] = $code;
 		}
 

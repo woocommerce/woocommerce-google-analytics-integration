@@ -80,7 +80,7 @@ class WC_Google_Analytics extends WC_Integration {
 		add_action( 'admin_enqueue_scripts', array( $this, 'load_admin_assets' ) );
 
 		// Tracking code
-		add_action( 'wp_enqueue_scripts', array( $this, 'tracking_code_display' ), 9 );
+		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_tracking_code' ), 9 );
 		add_filter( 'script_loader_tag', array( $this, 'async_script_loader_tag' ), 10, 3 );
 
 		// Event tracking code
@@ -379,7 +379,7 @@ class WC_Google_Analytics extends WC_Integration {
 	 * Display the tracking codes
 	 * Acts as a controller to figure out which code to display
 	 */
-	public function tracking_code_display() {
+	public function enqueue_tracking_code() {
 		global $wp;
 		$display_ecommerce_tracking = false;
 
@@ -393,24 +393,24 @@ class WC_Google_Analytics extends WC_Integration {
 			$order    = wc_get_order( $order_id );
 			if ( $order && ! (bool) $order->get_meta( '_ga_tracked' ) ) {
 				$display_ecommerce_tracking = true;
-				$this->get_ecommerce_tracking_code( $order_id );
+				$this->enqueue_ecommerce_tracking_code( $order_id );
 			}
 		}
 
 		if ( is_woocommerce() || is_cart() || ( is_checkout() && ! $display_ecommerce_tracking ) ) {
 			$display_ecommerce_tracking = true;
-			$this->get_standard_tracking_code();
+			$this->enqueue_standard_tracking_code();
 		}
 
 		if ( ! $display_ecommerce_tracking && 'yes' === $this->ga_standard_tracking_enabled ) {
-			$this->get_standard_tracking_code();
+			$this->enqueue_standard_tracking_code();
 		}
 	}
 
 	/**
 	 * Generate Standard Google Analytics tracking
 	 */
-	protected function get_standard_tracking_code() {
+	protected function enqueue_standard_tracking_code() {
 		$this->get_tracking_instance()->header();
 		$this->get_tracking_instance()->load_analytics();
 	}
@@ -420,7 +420,7 @@ class WC_Google_Analytics extends WC_Integration {
 	 *
 	 * @param int $order_id The Order ID for adding a transaction.
 	 */
-	protected function get_ecommerce_tracking_code( $order_id ) {
+	protected function enqueue_ecommerce_tracking_code( $order_id ) {
 		// Get the order and output tracking code.
 		$order = wc_get_order( $order_id );
 

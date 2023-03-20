@@ -37,6 +37,11 @@ use Automattic\WooCommerce\Admin\Features\OnboardingTasks\TaskLists;
 class WC_Google_Analytics extends WC_Integration {
 
 	/**
+	 * Defines the script handles that should be async.
+	 */
+	private const ASYNC_SCRIPT_HANDLES = array( 'google-tag-manager' );
+
+	/**
 	 * Returns the proper class based on Gtag settings.
 	 *
 	 * @param  array $options                  Options
@@ -81,7 +86,7 @@ class WC_Google_Analytics extends WC_Integration {
 
 		// Tracking code
 		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_tracking_code' ), 9 );
-		add_filter( 'script_loader_tag', array( $this, 'async_script_loader_tag' ), 10, 3 );
+		add_filter( 'script_loader_tag', array( $this, 'async_script_loader_tags' ), 10, 3 );
 
 		// Event tracking code
 		add_action( 'woocommerce_after_add_to_cart_button', array( $this, 'add_to_cart' ) );
@@ -699,18 +704,17 @@ class WC_Google_Analytics extends WC_Integration {
 	/**
 	 * Add async to script tags with defined handles.
 	 *
-	 * @see https://github.com/woocommerce/woocommerce-google-analytics-integration/issues/186
-	 *
 	 * @param string $tag HTML for the script tag.
-	 * @param string $handle Handle of script.
-	 * @param string $src Src of script.
+	 * @param string $handle Handle of the script.
+	 * @param string $src Src of the script.
 	 *
 	 * @return string
 	 */
-	public function async_script_loader_tag( $tag, $handle, $src ) {
-		if ( ! in_array( $handle, array( 'google-tag-manager', 'google-analytics' ), true ) ) {
+	public function async_script_loader_tags( $tag, $handle, $src ) {
+		if ( ! in_array( $handle, self::ASYNC_SCRIPT_HANDLES, true ) ) {
 			return $tag;
 		}
-		return str_replace( '<script', '<script async', $tag );
+
+		return str_replace( '<script src', '<script async src', $tag );
 	}
 }

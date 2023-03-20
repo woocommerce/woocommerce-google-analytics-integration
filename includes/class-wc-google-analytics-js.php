@@ -119,8 +119,7 @@ class WC_Google_Analytics_JS extends WC_Abstract_Google_Analytics_JS {
 		}
 
 		wc_enqueue_js(
-			'
-			' . self::tracker_var() . "( 'ec:addImpression', {
+			self::tracker_var() . "( 'ec:addImpression', {
 				'id': '" . esc_js( $product->get_id() ) . "',
 				'name': '" . esc_js( $product->get_title() ) . "',
 				'category': " . self::product_get_category_line( $product ) . "

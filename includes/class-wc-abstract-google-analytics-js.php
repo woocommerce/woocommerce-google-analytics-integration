@@ -46,9 +46,9 @@ abstract class WC_Abstract_Google_Analytics_JS {
 	abstract public static function tracker_var();
 
 	/**
-	 * Generic GA / header snippet for opt out
+	 * Generic GA snippet for opt out
 	 */
-	public static function header() {
+	public static function load_opt_out() {
 		$code = "
 			var gaProperty = '" . esc_js( self::get( 'ga_id' ) ) . "';
 			var disableStr = 'ga-disable-' + gaProperty;

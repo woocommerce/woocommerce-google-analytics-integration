@@ -11,9 +11,6 @@ use Automattic\WooCommerce\Admin\Features\OnboardingTasks\Task;
 
 /**
  * Setup Task class.
- *
- * @phpcs:disable Squiz.Classes.ClassFileName.NoMatch
- * @phpcs:disable Squiz.Classes.ValidClassName.NotCamelCaps
  */
 class WC_Google_Analytics_Task extends Task {
 

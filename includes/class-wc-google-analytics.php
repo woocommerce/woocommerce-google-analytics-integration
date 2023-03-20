@@ -1,8 +1,5 @@
 <?php
 
-// @phpcs:disable Squiz.Classes.ClassFileName.NoMatch
-// @phpcs:disable Squiz.Classes.ValidClassName.NotCamelCaps
-
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }

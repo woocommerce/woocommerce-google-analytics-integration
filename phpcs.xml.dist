@@ -44,6 +44,8 @@
 	<rule ref="Squiz.Classes">
 		<exclude name="Squiz.Classes.ClassDeclaration.OpenBraceNewLine"/>
 		<exclude name="Squiz.Classes.ClassDeclaration.CloseBraceSameLine"/>
+		<exclude name="Squiz.Classes.ClassFileName.NoMatch"/>
+		<exclude name="Squiz.Classes.ValidClassName.NotCamelCaps"/>
 	</rule>
 	<rule ref="Squiz.WhiteSpace.FunctionOpeningBraceSpace"/>
 

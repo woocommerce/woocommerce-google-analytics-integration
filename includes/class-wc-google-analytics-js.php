@@ -54,10 +54,10 @@ class WC_Google_Analytics_JS extends WC_Abstract_Google_Analytics_JS {
 		add_filter( 'wc_google_analytics_send_pageview', array( 'WC_Google_Analytics_JS', 'universal_analytics_footer_filter' ), 10, 1 );
 		if ( 'yes' === self::get( 'ga_use_universal_analytics' ) ) {
 			self::load_analytics_universal( $logged_in );
-			add_action( 'wp_footer', array( 'WC_Google_Analytics_JS', 'universal_analytics_footer' ) );
+			self::load_page_view_footer();
 		} else {
-			self::classic_analytics_footer();
 			self::load_analytics_classic( $logged_in, $order );
+			self::classic_analytics_footer();
 		}
 	}
 
@@ -102,7 +102,7 @@ class WC_Google_Analytics_JS extends WC_Abstract_Google_Analytics_JS {
 
 		$code .= ');';
 
-		wc_enqueue_js( apply_filters( 'woocommerce_ga_classic_snippet_output', $code ) );
+		self::load_analytics_code_in_header( apply_filters( 'woocommerce_ga_classic_snippet_output', $code ) );
 	}
 
 	/**
@@ -188,7 +188,7 @@ class WC_Google_Analytics_JS extends WC_Abstract_Google_Analytics_JS {
 	/**
 	 * Enqueues JavaScript to send the pageview last thing (needed for things like addImpression)
 	 */
-	public static function universal_analytics_footer() {
+	public static function load_page_view_footer() {
 		if ( apply_filters( 'wc_google_analytics_send_pageview', true ) ) {
 			wc_enqueue_js( self::tracker_var() . "( 'send', 'pageview' ); " );
 		}
@@ -286,7 +286,7 @@ class WC_Google_Analytics_JS extends WC_Abstract_Google_Analytics_JS {
 
 		$code = $ga_snippet_head . $ga_snippet_create . $ga_snippet_developer_id . $ga_snippet_require;
 
-		wc_enqueue_js( apply_filters( 'woocommerce_ga_snippet_output', $code ) );
+		self::load_analytics_code_in_header( apply_filters( 'woocommerce_ga_snippet_output', $code ) );
 	}
 
 	/**
@@ -534,6 +534,17 @@ class WC_Google_Analytics_JS extends WC_Abstract_Google_Analytics_JS {
 			});
 		'
 		);
+	}
+
+	/**
+	 * Loads a code using the google-analytics handler in the head.
+	 *
+	 * @param string $code The code to add attached to the google-analytics handler
+	 */
+	protected static function load_analytics_code_in_header( $code ) {
+		wp_register_script( 'google-analytics', '', array(), WC_GOOGLE_ANALYTICS_INTEGRATION_VERSION, false );
+		wp_add_inline_script( 'google-analytics', $code );
+		wp_enqueue_script( 'google-analytics' );
 	}
 
 }

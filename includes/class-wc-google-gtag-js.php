@@ -308,9 +308,9 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 		$track_404_enabled
 		";
 
-		wp_register_script( 'google-tag-manager', 'https://www.googletagmanager.com/gtag/js?id=' . esc_js( $gtag_id ), array(), WC_GOOGLE_ANALYTICS_INTEGRATION_VERSION, false );
+		wp_register_script( 'google-tag-manager', 'https://www.googletagmanager.com/gtag/js?id=' . esc_js( $gtag_id ), array( 'google-analytics-opt-out' ), WC_GOOGLE_ANALYTICS_INTEGRATION_VERSION, false );
 		wp_add_inline_script( 'google-tag-manager', apply_filters( 'woocommerce_gtag_snippet', $gtag_snippet ) );
-
+		wp_enqueue_script( 'google-tag-manager' );
 	}
 
 	/**

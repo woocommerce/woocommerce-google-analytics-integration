@@ -29,6 +29,9 @@
 
 		<!-- Multiple throws tags are fine -->
 		<exclude name="Squiz.Commenting.FunctionCommentThrowTag.WrongNumber"/>
+
+		<!-- Disable this warning since we load Google external scripts  -->
+		<exclude name="WordPress.WP.EnqueuedResourceParameters.MissingVersion"/>
 	</rule>
 
 	<!-- Include some other sniffs we want to enforce. -->
@@ -44,6 +47,8 @@
 	<rule ref="Squiz.Classes">
 		<exclude name="Squiz.Classes.ClassDeclaration.OpenBraceNewLine"/>
 		<exclude name="Squiz.Classes.ClassDeclaration.CloseBraceSameLine"/>
+		<exclude name="Squiz.Classes.ClassDeclaration.SpaceBeforeKeyword"/>
+		<exclude name="Squiz.Classes.ClassDeclaration.SpaceBeforeCloseBrace"/>
 		<exclude name="Squiz.Classes.ClassFileName.NoMatch"/>
 		<exclude name="Squiz.Classes.ValidClassName.NotCamelCaps"/>
 	</rule>

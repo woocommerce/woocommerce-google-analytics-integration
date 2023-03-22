@@ -60,7 +60,7 @@ abstract class WC_Abstract_Google_Analytics_JS {
 				window[disableStr] = true;
 			}";
 
-		wp_register_script( 'google-analytics-opt-out', '', array(), WC_GOOGLE_ANALYTICS_INTEGRATION_VERSION, false );
+		wp_register_script( 'google-analytics-opt-out', '', array(), null, false );
 		wp_add_inline_script( 'google-analytics-opt-out', $code );
 		wp_enqueue_script( 'google-analytics-opt-out' );
 	}

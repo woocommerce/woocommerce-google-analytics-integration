@@ -542,7 +542,7 @@ class WC_Google_Analytics_JS extends WC_Abstract_Google_Analytics_JS {
 	 * @param string $code The code to add attached to the google-analytics handler
 	 */
 	protected static function load_analytics_code_in_header( $code ) {
-		wp_register_script( 'google-analytics', '', array( 'google-analytics-opt-out' ), WC_GOOGLE_ANALYTICS_INTEGRATION_VERSION, false );
+		wp_register_script( 'google-analytics', '', array( 'google-analytics-opt-out' ), null, false );
 		wp_add_inline_script( 'google-analytics', $code );
 		wp_enqueue_script( 'google-analytics' );
 	}

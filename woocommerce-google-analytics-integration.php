@@ -14,11 +14,6 @@
  * Domain Path: languages/
  */
 
-// phpcs:disable Squiz.Classes.ClassDeclaration.SpaceBeforeKeyword
-// phpcs:disable Squiz.Classes.ClassDeclaration.SpaceBeforeCloseBrace
-// phpcs:disable Squiz.Classes.ClassFileName.NoMatch
-// phpcs:disable Squiz.Classes.ValidClassName.NotCamelCaps
-
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 if ( ! defined( 'ABSPATH' ) ) {

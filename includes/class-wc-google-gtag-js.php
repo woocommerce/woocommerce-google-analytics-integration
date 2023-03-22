@@ -1,4 +1,5 @@
 <?php
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -20,7 +21,11 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 	 * @return WC_Abstract_Google_Analytics_JS
 	 */
 	public static function get_instance( $options = array() ) {
-		return null === self::$instance ? ( self::$instance = new self( $options ) ) : self::$instance;
+		if ( null === self::$instance ) {
+			self::$instance = new self( $options );
+		}
+
+		return self::$instance;
 	}
 
 	/**
@@ -204,7 +209,8 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 			)
 		);
 
-		wc_enqueue_js( "
+		wc_enqueue_js(
+			"
 			$( '.products .post-" . esc_js( $product->get_id() ) . " a' ).on('click', function() {
 				if ( true === $(this).hasClass( 'add_to_cart_button' ) ) {
 					$add_to_cart_event_code
@@ -261,8 +267,7 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 	/**
 	 * Loads the standard Gtag code
 	 *
-	 * @param  boolean|WC_Order $order Classic analytics needs order data to set the currency correctly
-	 * @return string                  Gtag loading code
+	 * @param WC_Order $order WC_Order Object (not used in this implementation, but mandatory in the abstract class)
 	 */
 	public static function load_analytics( $order = false ) {
 		$logged_in = is_user_logged_in() ? 'yes' : 'no';
@@ -280,10 +285,7 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 
 		$gtag_id            = self::get( 'ga_id' );
 		$gtag_cross_domains = ! empty( self::get( 'ga_linker_cross_domains' ) ) ? array_map( 'esc_js', explode( ',', self::get( 'ga_linker_cross_domains' ) ) ) : array();
-
-		$gtag_snippet = '<script async src="https://www.googletagmanager.com/gtag/js?id=' . esc_js( $gtag_id ) . '"></script>';
-		$gtag_snippet .= '
-		<script>
+		$gtag_snippet       = '
 		window.dataLayer = window.dataLayer || [];
 		function ' . self::tracker_var() . '(){dataLayer.push(arguments);}
 		' . self::tracker_var() . "('js', new Date());
@@ -304,12 +306,11 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 		} );
 
 		$track_404_enabled
-		</script>
 		";
 
-		$gtag_snippet = apply_filters( 'woocommerce_gtag_snippet' , $gtag_snippet );
-
-		return $gtag_snippet;
+		wp_register_script( 'google-tag-manager', 'https://www.googletagmanager.com/gtag/js?id=' . esc_js( $gtag_id ), array( 'google-analytics-opt-out' ), null, false );
+		wp_add_inline_script( 'google-tag-manager', apply_filters( 'woocommerce_gtag_snippet', $gtag_snippet ) );
+		wp_enqueue_script( 'google-tag-manager' );
 	}
 
 	/**
@@ -468,20 +469,27 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 		if ( 'yes' === self::get( 'ga_enhanced_ecommerce_tracking_enabled' ) ) {
 			$track_event = sprintf(
 				self::tracker_var() . "( 'event', %s, { 'event_category': %s, 'event_label': %s, 'items': [ %s ] } );",
-				$parameters['action'], $parameters['category'], $parameters['label'], $parameters['item']
+				$parameters['action'],
+				$parameters['category'],
+				$parameters['label'],
+				$parameters['item']
 			);
 		} else {
 			$track_event = sprintf(
 				self::tracker_var() . "( 'event', %s, { 'event_category': %s, 'event_label': %s } );",
-				$parameters['action'], $parameters['category'], $parameters['label']
+				$parameters['action'],
+				$parameters['category'],
+				$parameters['label']
 			);
 		}
 
-		wc_enqueue_js( "
+		wc_enqueue_js(
+			"
 			$( '" . $selector . "' ).on( 'click', function() {
-				" . $track_event . "
+				" . $track_event . '
 			});
-		" );
+		'
+		);
 	}
 
 }

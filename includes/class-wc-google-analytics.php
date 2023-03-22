@@ -1,4 +1,5 @@
 <?php
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
@@ -36,6 +37,11 @@ use Automattic\WooCommerce\Admin\Features\OnboardingTasks\TaskLists;
 class WC_Google_Analytics extends WC_Integration {
 
 	/**
+	 * Defines the script handles that should be async.
+	 */
+	private const ASYNC_SCRIPT_HANDLES = array( 'google-tag-manager' );
+
+	/**
 	 * Returns the proper class based on Gtag settings.
 	 *
 	 * @param  array $options                  Options
@@ -65,21 +71,22 @@ class WC_Google_Analytics extends WC_Integration {
 		$constructor = $this->init_options();
 
 		// Contains snippets/JS tracking code
-		include_once( 'class-wc-abstract-google-analytics-js.php' );
-		include_once( 'class-wc-google-analytics-js.php' );
-		include_once( 'class-wc-google-gtag-js.php' );
+		include_once 'class-wc-abstract-google-analytics-js.php';
+		include_once 'class-wc-google-analytics-js.php';
+		include_once 'class-wc-google-gtag-js.php';
 		$this->get_tracking_instance( $constructor );
 
 		// Display a task on  "Things to do next section"
 		add_action( 'init', array( $this, 'add_wc_setup_task' ), 20 );
 		// Admin Options
 		add_filter( 'woocommerce_tracker_data', array( $this, 'track_options' ) );
-		add_action( 'woocommerce_update_options_integration_google_analytics', array( $this, 'process_admin_options') );
-		add_action( 'woocommerce_update_options_integration_google_analytics', array( $this, 'show_options_info') );
-		add_action( 'admin_enqueue_scripts', array( $this, 'load_admin_assets') );
+		add_action( 'woocommerce_update_options_integration_google_analytics', array( $this, 'process_admin_options' ) );
+		add_action( 'woocommerce_update_options_integration_google_analytics', array( $this, 'show_options_info' ) );
+		add_action( 'admin_enqueue_scripts', array( $this, 'load_admin_assets' ) );
 
 		// Tracking code
-		add_action( 'wp_head', array( $this, 'tracking_code_display' ), 999999 );
+		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_tracking_code' ), 9 );
+		add_filter( 'script_loader_tag', array( $this, 'async_script_loader_tags' ), 10, 3 );
 
 		// Event tracking code
 		add_action( 'woocommerce_after_add_to_cart_button', array( $this, 'add_to_cart' ) );
@@ -305,11 +312,12 @@ class WC_Google_Analytics extends WC_Integration {
 	/**
 	 * Shows some additional help text after saving the Google Analytics settings
 	 */
-	function show_options_info() {
-		$this->method_description .= "<div class='notice notice-info'><p>" . __( 'Please allow Google Analytics 24 hours to start displaying results.', 'woocommerce-google-analytics-integration' ) . "</p></div>";
+	public function show_options_info() {
+		$this->method_description .= "<div class='notice notice-info'><p>" . __( 'Please allow Google Analytics 24 hours to start displaying results.', 'woocommerce-google-analytics-integration' ) . '</p></div>';
 
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended
 		if ( isset( $_REQUEST['woocommerce_google_analytics_ga_ecommerce_tracking_enabled'] ) && true === (bool) $_REQUEST['woocommerce_google_analytics_ga_ecommerce_tracking_enabled'] ) {
-			$this->method_description .= "<div class='notice notice-info'><p>" . __( 'Please note, for transaction tracking to work properly, you will need to use a payment gateway that redirects the customer back to a WooCommerce order received/thank you page.', 'woocommerce-google-analytics-integration' ) . "</div>";
+			$this->method_description .= "<div class='notice notice-info'><p>" . __( 'Please note, for transaction tracking to work properly, you will need to use a payment gateway that redirects the customer back to a WooCommerce order received/thank you page.', 'woocommerce-google-analytics-integration' ) . '</div>';
 		}
 	}
 
@@ -353,16 +361,18 @@ class WC_Google_Analytics extends WC_Integration {
 	/**
 	 * Enqueue the admin JavaScript
 	 */
-	function load_admin_assets() {
+	public function load_admin_assets() {
 		$screen = get_current_screen();
 		if ( 'woocommerce_page_wc-settings' !== $screen->id ) {
 			return;
 		}
 
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended
 		if ( empty( $_GET['tab'] ) ) {
 			return;
 		}
 
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended
 		if ( 'integration' !== $_GET['tab'] ) {
 			return;
 		}
@@ -374,7 +384,7 @@ class WC_Google_Analytics extends WC_Integration {
 	 * Display the tracking codes
 	 * Acts as a controller to figure out which code to display
 	 */
-	public function tracking_code_display() {
+	public function enqueue_tracking_code() {
 		global $wp;
 		$display_ecommerce_tracking = false;
 
@@ -388,66 +398,56 @@ class WC_Google_Analytics extends WC_Integration {
 			$order    = wc_get_order( $order_id );
 			if ( $order && ! (bool) $order->get_meta( '_ga_tracked' ) ) {
 				$display_ecommerce_tracking = true;
-				echo $this->get_ecommerce_tracking_code( $order_id );
+				$this->enqueue_ecommerce_tracking_code( $order_id );
 			}
 		}
 
 		if ( is_woocommerce() || is_cart() || ( is_checkout() && ! $display_ecommerce_tracking ) ) {
 			$display_ecommerce_tracking = true;
-			echo $this->get_standard_tracking_code();
+			$this->enqueue_standard_tracking_code();
 		}
 
 		if ( ! $display_ecommerce_tracking && 'yes' === $this->ga_standard_tracking_enabled ) {
-			echo $this->get_standard_tracking_code();
+			$this->enqueue_standard_tracking_code();
 		}
 	}
 
 	/**
 	 * Generate Standard Google Analytics tracking
 	 */
-	protected function get_standard_tracking_code() {
-		return "<!-- WooCommerce Google Analytics Integration -->
-		" . $this->get_tracking_instance()->header() .
-		$this->get_tracking_instance()->load_analytics() . "
-		<!-- /WooCommerce Google Analytics Integration -->";
+	protected function enqueue_standard_tracking_code() {
+		$this->get_tracking_instance()->load_opt_out();
+		$this->get_tracking_instance()->load_analytics();
 	}
 
 	/**
 	 * Generate eCommerce tracking code
 	 *
-	 * @param int $order_id
-	 * @return string
+	 * @param int $order_id The Order ID for adding a transaction.
 	 */
-	protected function get_ecommerce_tracking_code( $order_id ) {
+	protected function enqueue_ecommerce_tracking_code( $order_id ) {
 		// Get the order and output tracking code.
 		$order = wc_get_order( $order_id );
 
 		// Make sure we have a valid order object.
 		if ( ! $order ) {
-			return '';
+			return;
 		}
 
 		// Check order key.
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 		$order_key = empty( $_GET['key'] ) ? '' : wc_clean( wp_unslash( $_GET['key'] ) );
 		if ( ! $order->key_is_valid( $order_key ) ) {
-			return '';
+			return;
 		}
 
-		$load = $this->get_tracking_instance()->load_analytics( $order );
-		$code = $this->get_tracking_instance()->add_transaction( $order );
+		$this->get_tracking_instance()->load_opt_out();
+		$this->get_tracking_instance()->load_analytics();
+		$this->get_tracking_instance()->add_transaction( $order );
 
 		// Mark the order as tracked.
 		$order->update_meta_data( '_ga_tracked', 1 );
 		$order->save();
-
-		return '
-		<!-- WooCommerce Google Analytics Integration -->
-		' . $this->get_tracking_instance()->header() . '
-		' . $load . "
-		<script type='text/javascript'>$code</script>
-		<!-- /WooCommerce Google Analytics Integration -->
-		";
 	}
 
 	/**
@@ -513,7 +513,6 @@ class WC_Google_Analytics extends WC_Integration {
 	 * Enhanced Analytics event tracking for removing a product from the cart
 	 */
 	public function remove_from_cart() {
-
 		if ( ! $this->enhanced_ecommerce_enabled( $this->ga_enhanced_remove_from_cart_enabled ) ) {
 			return;
 		}
@@ -529,7 +528,7 @@ class WC_Google_Analytics extends WC_Integration {
 	 * @return string
 	 */
 	public function remove_from_cart_attributes( $url, $key ) {
-		if ( strpos( $url,'data-product_id' ) !== false ) {
+		if ( strpos( $url, 'data-product_id' ) !== false ) {
 			return $url;
 		}
 
@@ -537,14 +536,14 @@ class WC_Google_Analytics extends WC_Integration {
 			return $url;
 		}
 
-		$item = WC()->cart->get_cart_item( $key );
+		$item    = WC()->cart->get_cart_item( $key );
 		$product = $item['data'];
 
 		if ( ! is_object( $product ) ) {
 			return $url;
 		}
 
-		$url = str_replace( 'href=', 'data-product_id="' . esc_attr( $product->get_id() ) . '" data-product_sku="' . esc_attr( $product->get_sku() )  . '" href=', $url );
+		$url = str_replace( 'href=', 'data-product_id="' . esc_attr( $product->get_id() ) . '" data-product_sku="' . esc_attr( $product->get_sku() ) . '" href=', $url );
 		return $url;
 	}
 
@@ -557,19 +556,19 @@ class WC_Google_Analytics extends WC_Integration {
 		}
 
 		// Add single quotes to allow jQuery to be substituted into _trackEvent parameters
-		$parameters = array();
+		$parameters             = array();
 		$parameters['category'] = "'" . __( 'Products', 'woocommerce-google-analytics-integration' ) . "'";
 		$parameters['action']   = "'" . __( 'Add to Cart', 'woocommerce-google-analytics-integration' ) . "'";
 		$parameters['label']    = "($(this).data('product_sku')) ? ($(this).data('product_sku')) : ('#' + $(this).data('product_id'))"; // Product SKU or ID
 
 		if ( ! $this->disable_tracking( $this->ga_enhanced_ecommerce_tracking_enabled ) ) {
-			$item = "{";
-			$item .= "'id': ($(this).data('product_sku')) ? ($(this).data('product_sku')) : ('#' + $(this).data('product_id')),";
-			$item .= "'quantity': $(this).data('quantity')";
-			$item .= "}";
+			$item               = '{';
+			$item              .= "'id': ($(this).data('product_sku')) ? ($(this).data('product_sku')) : ('#' + $(this).data('product_id')),";
+			$item              .= "'quantity': $(this).data('quantity')";
+			$item              .= '}';
 			$parameters['item'] = $item;
 
-			$code = "" . $this->get_tracking_instance()->tracker_var() . "( 'ec:addProduct', " . $item ." );";
+			$code                   = $this->get_tracking_instance()->tracker_var() . "( 'ec:addProduct', " . $item . ' );';
 			$parameters['enhanced'] = $code;
 		}
 
@@ -584,7 +583,7 @@ class WC_Google_Analytics extends WC_Integration {
 	 * @return bool                Whether enhanced ecommerce transactions can be displayed.
 	 */
 	protected function enhanced_ecommerce_enabled( $extra_checks = [] ) {
-		if ( !is_array( $extra_checks ) ) {
+		if ( ! is_array( $extra_checks ) ) {
 			$extra_checks = [ $extra_checks ];
 		}
 
@@ -612,7 +611,6 @@ class WC_Google_Analytics extends WC_Integration {
 	 * Measures a listing impression (from search results)
 	 */
 	public function listing_impression() {
-
 		if ( ! $this->enhanced_ecommerce_enabled( $this->ga_enhanced_product_impression_enabled ) ) {
 			return;
 		}
@@ -625,7 +623,6 @@ class WC_Google_Analytics extends WC_Integration {
 	 * Measure a product click from a listing page
 	 */
 	public function listing_click() {
-
 		if ( ! $this->enhanced_ecommerce_enabled( $this->ga_enhanced_product_click_enabled ) ) {
 			return;
 		}
@@ -638,7 +635,6 @@ class WC_Google_Analytics extends WC_Integration {
 	 * Measure a product detail view
 	 */
 	public function product_detail() {
-
 		if ( ! $this->enhanced_ecommerce_enabled( $this->ga_enhanced_product_detail_view_enabled ) ) {
 			return;
 		}
@@ -653,7 +649,6 @@ class WC_Google_Analytics extends WC_Integration {
 	 * @param mixed $checkout (unused)
 	 */
 	public function checkout_process( $checkout ) {
-
 		if ( ! $this->enhanced_ecommerce_enabled( $this->ga_enhanced_checkout_process_enabled ) ) {
 			return;
 		}
@@ -704,5 +699,22 @@ class WC_Google_Analytics extends WC_Integration {
 			)
 		);
 
+	}
+
+	/**
+	 * Add async to script tags with defined handles.
+	 *
+	 * @param string $tag HTML for the script tag.
+	 * @param string $handle Handle of the script.
+	 * @param string $src Src of the script.
+	 *
+	 * @return string
+	 */
+	public function async_script_loader_tags( $tag, $handle, $src ) {
+		if ( ! in_array( $handle, self::ASYNC_SCRIPT_HANDLES, true ) ) {
+			return $tag;
+		}
+
+		return str_replace( '<script src', '<script async src', $tag );
 	}
 }

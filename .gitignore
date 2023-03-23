@@ -15,6 +15,7 @@ sftp-config.json
 screenshots/
 /assets/**/*.min.js
 /assets/**/*.css
+build
 
 # Ignore all log files except for .htaccess
 /logs/*

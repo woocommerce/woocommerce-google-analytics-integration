@@ -6,7 +6,7 @@
     "license": "GPL-2.0+",
     "archive": {
         "exclude": [
-            "!/assets"
+            "!/assets/js/build"
         ]
     },
     "require-dev": {

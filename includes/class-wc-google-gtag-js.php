@@ -61,7 +61,8 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 	 * Register front end JavaScript
 	 */
 	public function register_scripts() {
-		wp_register_script( $this->script_handle, plugins_url( 'assets/js/ga-integration.js', dirname( __FILE__ ) ), array( 'jquery' ), WC_GOOGLE_ANALYTICS_INTEGRATION_VERSION, true );
+		wp_register_script( $this->script_handle . '-variable-product-tracking', plugins_url( 'assets/js/build/ga-integration.js', dirname( __FILE__ ) ), array( 'jquery' ), WC_GOOGLE_ANALYTICS_INTEGRATION_VERSION, true );
+		wp_enqueue_script( $this->script_handle . '-tracking', plugins_url( 'assets/js/build/actions.js', dirname( __FILE__ ) ), array(), WC_GOOGLE_ANALYTICS_INTEGRATION_VERSION, true );
 	}
 
 	/**

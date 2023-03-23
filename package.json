@@ -8,9 +8,17 @@
     "type": "git",
     "url": "git://github.com/woocommerce/woocommerce-google-analytics-integration.git"
   },
+  "dependencies": {
+    "@wordpress/hooks": "^3.22.0",
+    "@wordpress/i18n": "3.15.0"
+  },
   "devDependencies": {
     "node-wp-i18n": "~1.2.3",
-    "uglify-js": "^3.6.0"
+    "uglify-js": "^3.6.0",
+    "@wordpress/scripts": "^24.6.0",
+    "@wordpress/eslint-plugin": "^8.0.0",
+    "eslint": "^7.17.0",
+    "eslint-import-resolver-webpack": "^0.13.1"
   },
   "assets": {
     "js": {
@@ -19,16 +27,17 @@
     }
   },
   "scripts": {
-    "prebuild": "rm -rf ./vendor",
-    "build": "npm run uglify && npm run makepot && npm run archive",
-    "build:dev": "npm run uglify && npm run makepot",
+    "dev": "NODE_ENV=development wp-scripts build",
+    "start": "wp-scripts start",
+    "build": "NODE_ENV=production wp-scripts build && npm run makepot &&  npm run archive",
+    "makepot": "wpi18n makepot --domain-path languages --pot-file $npm_package_name.pot --type plugin --main-file $npm_package_name.php --exclude node_modules,tests,docs,assets/js/src",
+    "lint:js": "wp-scripts lint-js",
+    "lint:php": "vendor/bin/phpcs",
+    "lint:php:diff": "./bin/phpcs-diff.sh",
+    "prearchive": "rm -rf vendor && composer install --no-dev && composer dump-autoload -o",
     "archive": "composer archive --file=$npm_package_name --format=zip",
     "postarchive": "rm -rf $npm_package_name && unzip $npm_package_name.zip -d $npm_package_name && rm $npm_package_name.zip && zip -r $npm_package_name.zip $npm_package_name && rm -rf $npm_package_name",
-    "preuglify": "rm -f $npm_package_assets_js_min",
-    "uglify": "for f in $npm_package_assets_js_js; do file=${f%.js}; node_modules/.bin/uglifyjs $f -c -m > $file.min.js; done",
-    "makepot": "wpi18n makepot --domain-path languages --pot-file $npm_package_name.pot --type plugin --main-file $npm_package_name.php --exclude node_modules,tests,docs",
-    "lint:php": "vendor/bin/phpcs",
-    "lint:php:diff": "./bin/phpcs-diff.sh"
+    "prebuild": "rm -rf ./vendor && composer install"
   },
   "engines": {
     "node": ">=8.9.3",

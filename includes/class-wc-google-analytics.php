@@ -377,7 +377,7 @@ class WC_Google_Analytics extends WC_Integration {
 			return;
 		}
 
-		wp_enqueue_script( 'wc-google-analytics-admin-enhanced-settings', plugins_url( '/assets/js/admin-ga-settings.js', dirname( __FILE__ ) ), array(), WC_GOOGLE_ANALYTICS_INTEGRATION_VERSION, true );
+		wp_enqueue_script( 'wc-google-analytics-admin-enhanced-settings', plugins_url( '/assets/js/build/admin-ga-settings.js', dirname( __FILE__ ) ), array(), WC_GOOGLE_ANALYTICS_INTEGRATION_VERSION, true );
 	}
 
 	/**

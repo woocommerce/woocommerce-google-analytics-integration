@@ -60,6 +60,12 @@ Exact wording depends on the national data privacy laws and should be adjusted.
 
 == Changelog ==
 
+= 1.7.0 - 2023-03-28 =
+* Dev - Load scripts via `wp_register_scripts` and `wp_eneuque_js`.
+* Fix - Avoid duplication of Google Tag Manager script.
+* Tweak - WC 7.6 compatibility.
+* Tweak - WP 6.2 compatibility.
+
 = 1.6.2 - 2023-03-07 =
 * Tweak - WC 7.5 compatibility.
 * Tweak - WP 6.2 compatibility.

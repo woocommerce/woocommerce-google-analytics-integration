@@ -13,7 +13,10 @@ const trackListProducts = ( {
 } ) => {
 	trackEvent( 'view_item_list', {
 		event_category: 'engagement',
-		event_label: __( 'Viewing products', 'woocommerce-google-analytics-integration' ),
+		event_label: __(
+			'Viewing products',
+			'woocommerce-google-analytics-integration'
+		),
 		items: products.map( ( product, index ) => ( {
 			...getProductImpressionObject( product, listName ),
 			list_position: index + 1,
@@ -21,10 +24,13 @@ const trackListProducts = ( {
 	} );
 };
 
-const trackAddToCart = ( product, quantity = 1 ) => {
+const trackAddToCart = ( { product, quantity = 1 } ) => {
 	trackEvent( 'add_to_cart', {
 		event_category: 'ecommerce',
-		event_label: __( 'Add to Cart', 'woocommerce-google-analytics-integration' ),
+		event_label: __(
+			'Add to Cart',
+			'woocommerce-google-analytics-integration'
+		),
 		items: [ getProductFieldObject( product, quantity ) ],
 	} );
 };
@@ -32,7 +38,10 @@ const trackAddToCart = ( product, quantity = 1 ) => {
 const trackRemoveCartItem = ( { product, quantity = 1 } ) => {
 	trackEvent( 'remove_from_cart', {
 		event_category: 'ecommerce',
-		event_label: __( 'Remove Cart Item', 'woocommerce-google-analytics-integration' ),
+		event_label: __(
+			'Remove Cart Item',
+			'woocommerce-google-analytics-integration'
+		),
 		items: [ getProductFieldObject( product, quantity ) ],
 	} );
 };

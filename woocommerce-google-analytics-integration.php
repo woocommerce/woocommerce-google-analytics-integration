@@ -243,7 +243,7 @@ if ( ! class_exists( 'WC_Google_Analytics_Integration' ) ) {
 		 * @param string $end End of the path.
 		 * @return string
 		 */
-		public function get_js_asset_path($end = '' ) {
+		public function get_js_asset_path( $end = '' ) {
 			return $this->path( '/assets/js/build/' . $end );
 		}
 
@@ -269,7 +269,7 @@ if ( ! class_exists( 'WC_Google_Analytics_Integration' ) ) {
 		 */
 		public function get_js_asset_dependencies( $asset_name ) {
 			$script_assets = $this->get_js_asset_file( $asset_name );
-			return $script_assets[ 'dependencies' ] ?? [];
+			return $script_assets['dependencies'] ?? [];
 		}
 
 		/**
@@ -280,7 +280,7 @@ if ( ! class_exists( 'WC_Google_Analytics_Integration' ) ) {
 		 */
 		public function get_js_asset_version( $asset_name ) {
 			$script_assets = $this->get_js_asset_file( $asset_name );
-			return $script_assets[ 'version' ] ?? false;
+			return $script_assets['version'] ?? false;
 		}
 	}
 

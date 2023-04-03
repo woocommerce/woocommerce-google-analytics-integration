@@ -68,12 +68,15 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 			Plugin::get_instance()->get_js_asset_url( 'ga-integration.js' ),
 			Plugin::get_instance()->get_js_asset_dependencies( 'ga-integration' ),
 			Plugin::get_instance()->get_js_asset_version( 'ga-integration' ),
-			true );
-		wp_enqueue_script( $this->script_handle . '-actions',
+			true
+		);
+		wp_enqueue_script(
+			$this->script_handle . '-actions',
 			Plugin::get_instance()->get_js_asset_url( 'actions.js' ),
 			Plugin::get_instance()->get_js_asset_dependencies( 'actions' ),
 			Plugin::get_instance()->get_js_asset_version( 'actions' ),
-			true );
+			true
+		);
 	}
 
 	/**

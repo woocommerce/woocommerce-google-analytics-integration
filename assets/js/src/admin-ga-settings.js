@@ -1,4 +1,3 @@
-// eslint-disable-next-line no-undef
 jQuery( document ).ready( function ( $ ) {
 	const ecCheckbox = $(
 		'#woocommerce_google_analytics_ga_enhanced_ecommerce_tracking_enabled'

@@ -27,7 +27,7 @@ module.exports = {
 		'import/resolver': { webpack: webpackResolver },
 	},
 	globals: {
-		getComputedStyle: 'readonly',
+		jQuery: 'readonly',
 	},
 	rules: {
 		'@wordpress/no-unsafe-wp-apis': 1,

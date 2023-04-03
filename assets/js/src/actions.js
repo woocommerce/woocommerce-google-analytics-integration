@@ -9,11 +9,11 @@ import {
 
 const trackListProducts = ( {
 	products,
-	listName = __( 'Product List', 'woo-gutenberg-products-block' ),
+	listName = __( 'Product List', 'woocommerce-google-analytics-integration' ),
 } ) => {
 	trackEvent( 'view_item_list', {
 		event_category: 'engagement',
-		event_label: __( 'Viewing products', 'woo-gutenberg-products-block' ),
+		event_label: __( 'Viewing products', 'woocommerce-google-analytics-integration' ),
 		items: products.map( ( product, index ) => ( {
 			...getProductImpressionObject( product, listName ),
 			list_position: index + 1,
@@ -24,7 +24,7 @@ const trackListProducts = ( {
 const trackAddToCart = ( product, quantity = 1 ) => {
 	trackEvent( 'add_to_cart', {
 		event_category: 'ecommerce',
-		event_label: __( 'Add to Cart', 'woo-gutenberg-products-block' ),
+		event_label: __( 'Add to Cart', 'woocommerce-google-analytics-integration' ),
 		items: [ getProductFieldObject( product, quantity ) ],
 	} );
 };
@@ -32,7 +32,7 @@ const trackAddToCart = ( product, quantity = 1 ) => {
 const trackRemoveCartItem = ( { product, quantity = 1 } ) => {
 	trackEvent( 'remove_from_cart', {
 		event_category: 'ecommerce',
-		event_label: __( 'Remove Cart Item', 'woo-gutenberg-products-block' ),
+		event_label: __( 'Remove Cart Item', 'woocommerce-google-analytics-integration' ),
 		items: [ getProductFieldObject( product, quantity ) ],
 	} );
 };
@@ -42,7 +42,7 @@ const trackChangeCartItemQuantity = ( { product, quantity = 1 } ) => {
 		event_category: 'ecommerce',
 		event_label: __(
 			'Change Cart Item Quantity',
-			'woo-gutenberg-products-block'
+			'woocommerce-google-analytics-integration'
 		),
 		items: [ getProductFieldObject( product, quantity ) ],
 	} );

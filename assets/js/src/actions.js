@@ -57,15 +57,15 @@ const trackChangeCartItemQuantity = ( { product, quantity = 1 } ) => {
 	} );
 };
 
-addAction( `${ ACTION_PREFIX }-list-products`, NAMESPACE, trackListProducts );
-addAction( `${ ACTION_PREFIX }-add-cart-item`, NAMESPACE, trackAddToCart );
+addAction( `${ ACTION_PREFIX }-product-list-render`, NAMESPACE, trackListProducts );
+addAction( `${ ACTION_PREFIX }-cart-add-item`, NAMESPACE, trackAddToCart );
 addAction(
-	`${ ACTION_PREFIX }-set-cart-item-quantity`,
+	`${ ACTION_PREFIX }-cart-set-item-quantity`,
 	NAMESPACE,
 	trackChangeCartItemQuantity
 );
 addAction(
-	`${ ACTION_PREFIX }-remove-cart-item`,
+	`${ ACTION_PREFIX }-cart-remove-item`,
 	NAMESPACE,
 	trackRemoveCartItem
 );

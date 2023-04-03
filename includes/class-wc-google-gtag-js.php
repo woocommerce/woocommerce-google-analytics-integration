@@ -4,6 +4,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+use WC_Google_Analytics_Integration as Plugin;
+
 /**
  * WC_Google_Gtag_JS class
  *
@@ -53,7 +55,7 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 			// Filter variation data to include formatted strings required for add_to_cart event
 			add_filter( 'woocommerce_available_variation', array( $this, 'variant_data' ), 10, 3 );
 			// Add default inline product data for add to cart tracking
-			wp_enqueue_script( $this->script_handle );
+			wp_enqueue_script( $this->script_handle . '-ga-integration' );
 		}
 	}
 
@@ -61,8 +63,17 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 	 * Register front end JavaScript
 	 */
 	public function register_scripts() {
-		wp_register_script( $this->script_handle . '-variable-product-tracking', plugins_url( 'assets/js/build/ga-integration.js', dirname( __FILE__ ) ), array( 'jquery' ), WC_GOOGLE_ANALYTICS_INTEGRATION_VERSION, true );
-		wp_enqueue_script( $this->script_handle . '-tracking', plugins_url( 'assets/js/build/actions.js', dirname( __FILE__ ) ), array(), WC_GOOGLE_ANALYTICS_INTEGRATION_VERSION, true );
+		wp_register_script(
+			$this->script_handle . '-ga-integration',
+			Plugin::get_instance()->get_js_asset_url( 'ga-integration.js' ),
+			Plugin::get_instance()->get_js_asset_dependencies( 'ga-integration' ),
+			Plugin::get_instance()->get_js_asset_version( 'ga-integration' ),
+			true );
+		wp_enqueue_script( $this->script_handle . '-actions',
+			Plugin::get_instance()->get_js_asset_url( 'actions.js' ),
+			Plugin::get_instance()->get_js_asset_dependencies( 'actions' ),
+			Plugin::get_instance()->get_js_asset_version( 'actions' ),
+			true );
 	}
 
 	/**

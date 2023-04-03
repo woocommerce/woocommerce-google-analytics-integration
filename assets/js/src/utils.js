@@ -58,7 +58,7 @@ export const getProductImpressionObject = ( product, listName ) => {
  * @return {string} - The product ID
  */
 const getProductId = ( product ) => {
-	return product?.sku ?? '#' + product.id;
+	return product.sku ? product.sku : '#' + product.id;
 };
 
 /**

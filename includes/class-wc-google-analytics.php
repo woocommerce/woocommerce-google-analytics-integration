@@ -381,7 +381,7 @@ class WC_Google_Analytics extends WC_Integration {
 		wp_enqueue_script(
 			'wc-google-analytics-admin-enhanced-settings',
 			Plugin::get_instance()->get_js_asset_url( 'admin-ga-settings.js' ),
-			Plugin::get_instance()->get_js_asset_dependencies( 'admin-ga-settings' ),
+			Plugin::get_instance()->get_js_asset_dependencies( 'admin-ga-settings', [ 'jquery' ] ),
 			Plugin::get_instance()->get_js_asset_version( 'admin-ga-settings' ),
 			true
 		);

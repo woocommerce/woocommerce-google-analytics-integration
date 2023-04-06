@@ -265,11 +265,14 @@ if ( ! class_exists( 'WC_Google_Analytics_Integration' ) ) {
 		 * Gets the dependencies for an assets based on its asset.php generated file.
 		 *
 		 * @param string $asset_name The name of the asset to get the dependencies from.
-		 * @return array The dependencies array. Empty array if no dependencies are found.
+		 * @param array $extra_dependencies Array containing extra dependencies to include in the dependency array.
+		 *
+		 * @return array The dependencies array. Empty array if no dependencies.
 		 */
-		public function get_js_asset_dependencies( $asset_name ) {
+		public function get_js_asset_dependencies( $asset_name, $extra_dependencies = array() ) {
 			$script_assets = $this->get_js_asset_file( $asset_name );
-			return $script_assets['dependencies'] ?? [];
+			$dependencies = $script_assets['dependencies'] ?? [];
+			return array_unique( array_merge( $dependencies, $extra_dependencies ) );
 		}
 
 		/**

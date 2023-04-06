@@ -227,7 +227,7 @@ if ( ! class_exists( 'WC_Google_Analytics_Integration' ) ) {
 		}
 
 		/**
-		 * Get the URL to something in the plugin admin assets dir.
+		 * Get the URL to something in the plugin JS assets build dir.
 		 *
 		 * @param string $end End of the URL.
 		 *
@@ -238,7 +238,7 @@ if ( ! class_exists( 'WC_Google_Analytics_Integration' ) ) {
 		}
 
 		/**
-		 * Get the path to something in the plugin admin dir.
+		 * Get the path to something in the plugin JS assets build dir.
 		 *
 		 * @param string $end End of the path.
 		 * @return string

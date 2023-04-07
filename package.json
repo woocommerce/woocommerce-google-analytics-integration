@@ -28,15 +28,14 @@
   "scripts": {
     "dev": "NODE_ENV=development wp-scripts build",
     "start": "wp-scripts start",
-    "build": "NODE_ENV=production wp-scripts build && npm run makepot &&  npm run archive",
     "makepot": "wpi18n makepot --domain-path languages --pot-file $npm_package_name.pot --type plugin --main-file $npm_package_name.php --exclude node_modules,tests,docs,assets/js/src",
     "lint:js": "wp-scripts lint-js",
     "lint:php": "vendor/bin/phpcs",
     "lint:php:diff": "./bin/phpcs-diff.sh",
-    "prearchive": "rm -rf vendor && composer install --no-dev && composer dump-autoload -o",
     "archive": "composer archive --file=$npm_package_name --format=zip",
     "postarchive": "rm -rf $npm_package_name && unzip $npm_package_name.zip -d $npm_package_name && rm $npm_package_name.zip && zip -r $npm_package_name.zip $npm_package_name && rm -rf $npm_package_name",
-    "prebuild": "rm -rf ./vendor && composer install"
+		"build": "NODE_ENV=production wp-scripts build && npm run makepot &&  npm run archive",
+		"prebuild": "rm -rf ./vendor"
   },
   "engines": {
     "node": ">=8.9.3",

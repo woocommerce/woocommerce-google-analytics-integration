@@ -1,0 +1,39 @@
+name: JavaScript Linting
+
+on:
+  push:
+    branches:
+      - trunk
+    paths:
+      - "**.js"
+      - .github/workflows/js-linting.yml
+  pull_request:
+    paths:
+      - "**.js"
+      - .github/workflows/js-linting.yml
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  FORCE_COLOR: 2
+
+jobs:
+  JSLintingCheck:
+    name: Lint JavaScript
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Prepare node
+        uses: woocommerce/grow/prepare-node@actions-v1
+        with:
+          node-version-file: ".nvmrc"
+
+      - name: Prepare annotation formatter
+        uses: woocommerce/grow/eslint-annotation@actions-v1
+
+      - name: Lint JavaScript and annotate linting errors
+        run: npm run lint:js -- --quiet --format ./eslintFormatter.cjs

@@ -1,18 +1,4 @@
 /**
- * Track an event using the global gtag function.
- *
- * @param {string} eventName - Name of the event to track
- * @param {Object} eventParams - Props to send within the event
- */
-export const trackEvent = ( eventName, eventParams ) => {
-	if ( typeof gtag !== 'function' ) {
-		throw new Error( 'Function gtag not implemented.' );
-	}
-
-	window.gtag( 'event', eventName, eventParams );
-};
-
-/**
  * Formats data into the productFieldObject shape.
  *
  * @see https://developers.google.com/analytics/devguides/collection/gtagjs/enhanced-ecommerce#product-data
@@ -27,7 +13,10 @@ export const getProductFieldObject = ( product, quantity ) => {
 		name: product.name,
 		quantity,
 		category: getProductCategory( product ),
-		price: getPrice( product ),
+		price: formatPrice(
+			product.prices.price,
+			product.prices.currency_minor_unit
+		),
 	};
 };
 
@@ -46,8 +35,23 @@ export const getProductImpressionObject = ( product, listName ) => {
 		name: product.name,
 		list_name: listName,
 		category: getProductCategory( product ),
-		price: getPrice( product ),
+		price: formatPrice(
+			product.prices.price,
+			product.prices.currency_minor_unit
+		),
 	};
+};
+
+/**
+ * Returns the price of a product formatted as a string.
+ *
+ * @param {string} price - The price to parse
+ * @param {number} [currencyMinorUnit=2] - The number decimals to show in the currency
+ *
+ * @return {string} - The price of the product formatted
+ */
+export const formatPrice = ( price, currencyMinorUnit = 2 ) => {
+	return ( parseInt( price, 10 ) / 10 ** currencyMinorUnit ).toString();
 };
 
 /**
@@ -72,18 +76,4 @@ const getProductCategory = ( product ) => {
 	return 'categories' in product && product.categories.length
 		? product.categories[ 0 ].name
 		: '';
-};
-
-/**
- * Returns the price of a product as a string.
- *
- * @param {Object} product - The product object
- *
- * @return {string} - The price of the product
- */
-const getPrice = ( product ) => {
-	return (
-		parseInt( product.prices.price, 10 ) /
-		10 ** product.prices.currency_minor_unit
-	).toString();
 };

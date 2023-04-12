@@ -60,6 +60,9 @@ Exact wording depends on the national data privacy laws and should be adjusted.
 
 == Changelog ==
 
+= 1.7.1 - 2023-04-12 =
+* Fix - Bug with tracking enhanced ecommerce.
+
 = 1.7.0 - 2023-03-28 =
 * Dev - Load scripts via `wp_register_scripts` and `wp_eneuque_js`.
 * Fix - Avoid duplication of Google Tag Manager script.

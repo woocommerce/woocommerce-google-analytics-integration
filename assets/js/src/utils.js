@@ -1,3 +1,5 @@
+import { addAction, removeAction } from '@wordpress/hooks';
+
 /**
  * Formats data into the productFieldObject shape.
  *
@@ -52,6 +54,18 @@ export const getProductImpressionObject = ( product, listName ) => {
  */
 export const formatPrice = ( price, currencyMinorUnit = 2 ) => {
 	return ( parseInt( price, 10 ) / 10 ** currencyMinorUnit ).toString();
+};
+
+/**
+ * Removes previous actions with the same hookName and namespace and then adds the new action.
+ *
+ * @param {string} hookName The hook name for the action
+ * @param {string} namespace The unique namespace for the action
+ * @param {Function} callback The function to run when the action happens.
+ */
+export const addUniqueAction = ( hookName, namespace, callback ) => {
+	removeAction( hookName, namespace );
+	addAction( hookName, namespace, callback );
 };
 
 /**

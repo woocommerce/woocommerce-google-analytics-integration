@@ -1,4 +1,3 @@
-import { addAction } from '@wordpress/hooks';
 import { __ } from '@wordpress/i18n';
 
 import { NAMESPACE, ACTION_PREFIX } from './constants';
@@ -15,6 +14,7 @@ import {
 	trackViewItem,
 	trackException,
 } from './tracking';
+import { addUniqueAction } from './utils';
 
 /**
  * Track customer progress through steps of the checkout. Triggers the event when the step changes:
@@ -27,27 +27,27 @@ import {
  * @summary Track checkout progress with begin_checkout and checkout_progress
  * @see https://developers.google.com/analytics/devguides/collection/gtagjs/enhanced-ecommerce#1_measure_checkout_steps
  */
-addAction(
+addUniqueAction(
 	`${ ACTION_PREFIX }-checkout-render-checkout-form`,
 	NAMESPACE,
-	trackCheckoutStep( 0 )
+	( { ...storeCart } ) => trackCheckoutStep( 0 )( storeCart )
 );
-addAction(
+addUniqueAction(
 	`${ ACTION_PREFIX }-checkout-set-email-address`,
 	NAMESPACE,
-	trackCheckoutStep( 1 )
+	( { ...storeCart } ) => trackCheckoutStep( 1 )( storeCart )
 );
-addAction(
+addUniqueAction(
 	`${ ACTION_PREFIX }-checkout-set-shipping-address`,
 	NAMESPACE,
-	trackCheckoutStep( 2 )
+	( { ...storeCart } ) => trackCheckoutStep( 2 )( storeCart )
 );
-addAction(
+addUniqueAction(
 	`${ ACTION_PREFIX }-checkout-set-billing-address`,
 	NAMESPACE,
-	trackCheckoutStep( 3 )
+	( { ...storeCart } ) => trackCheckoutStep( 3 )( storeCart )
 );
-addAction(
+addUniqueAction(
 	`${ ACTION_PREFIX }-checkout-set-phone-number`,
 	NAMESPACE,
 	( { step, ...storeCart } ) => {
@@ -61,7 +61,7 @@ addAction(
  * @summary Track the shipping rate being set using set_checkout_option
  * @see https://developers.google.com/analytics/devguides/collection/gtagjs/enhanced-ecommerce#2_measure_checkout_options
  */
-addAction(
+addUniqueAction(
 	`${ ACTION_PREFIX }-checkout-set-selected-shipping-rate`,
 	NAMESPACE,
 	( { shippingRateId } ) => {
@@ -79,7 +79,7 @@ addAction(
  * @summary Track the payment method being set using set_checkout_option
  * @see https://developers.google.com/analytics/devguides/collection/gtagjs/enhanced-ecommerce#2_measure_checkout_options
  */
-addAction(
+addUniqueAction(
 	`${ ACTION_PREFIX }-checkout-set-active-payment-method`,
 	NAMESPACE,
 	( { paymentMethodSlug } ) => {
@@ -97,7 +97,7 @@ addAction(
  * @summary Track the view_item_list event
  * @see https://developers.google.com/gtagjs/reference/ga4-events#view_item_list
  */
-addAction(
+addUniqueAction(
 	`${ ACTION_PREFIX }-product-list-render`,
 	NAMESPACE,
 	trackListProducts
@@ -111,14 +111,18 @@ addAction(
  * @summary Track the add_to_cart event
  * @see https://developers.google.com/gtagjs/reference/ga4-events#add_to_cart
  */
-addAction( `${ ACTION_PREFIX }-cart-add-item`, NAMESPACE, trackAddToCart );
+addUniqueAction(
+	`${ ACTION_PREFIX }-cart-add-item`,
+	NAMESPACE,
+	trackAddToCart
+);
 
 /**
  * Change cart item quantities
  *
  * @summary Custom change_cart_quantity event.
  */
-addAction(
+addUniqueAction(
 	`${ ACTION_PREFIX }-cart-set-item-quantity`,
 	NAMESPACE,
 	trackChangeCartItemQuantity
@@ -130,7 +134,7 @@ addAction(
  * @summary Track the remove_from_cart event
  * @see https://developers.google.com/gtagjs/reference/ga4-events#remove_from_cart
  */
-addAction(
+addUniqueAction(
 	`${ ACTION_PREFIX }-cart-remove-item`,
 	NAMESPACE,
 	trackRemoveCartItem
@@ -145,7 +149,7 @@ addAction(
  * @summary Track the add_payment_info event
  * @see https://developers.google.com/gtagjs/reference/ga4-events#add_payment_info
  */
-addAction( `${ ACTION_PREFIX }-checkout-submit`, NAMESPACE, () => {
+addUniqueAction( `${ ACTION_PREFIX }-checkout-submit`, NAMESPACE, () => {
 	trackEvent( 'add_payment_info' );
 } );
 
@@ -155,7 +159,7 @@ addAction( `${ ACTION_PREFIX }-checkout-submit`, NAMESPACE, () => {
  * @summary Track the select_content event
  * @see https://developers.google.com/gtagjs/reference/ga4-events#select_content
  */
-addAction(
+addUniqueAction(
 	`${ ACTION_PREFIX }-product-view-link`,
 	NAMESPACE,
 	trackSelectContent
@@ -167,7 +171,7 @@ addAction(
  * @summary Track the search event
  * @see https://developers.google.com/gtagjs/reference/ga4-events#search
  */
-addAction( `${ ACTION_PREFIX }-product-search`, NAMESPACE, trackSearch );
+addUniqueAction( `${ ACTION_PREFIX }-product-search`, NAMESPACE, trackSearch );
 
 /**
  * Single Product View
@@ -175,7 +179,11 @@ addAction( `${ ACTION_PREFIX }-product-search`, NAMESPACE, trackSearch );
  * @summary Track the view_item event
  * @see https://developers.google.com/gtagjs/reference/ga4-events#view_item
  */
-addAction( `${ ACTION_PREFIX }-product-render`, NAMESPACE, trackViewItem );
+addUniqueAction(
+	`${ ACTION_PREFIX }-product-render`,
+	NAMESPACE,
+	trackViewItem
+);
 
 /**
  * Track notices as Exception events.
@@ -183,7 +191,7 @@ addAction( `${ ACTION_PREFIX }-product-render`, NAMESPACE, trackViewItem );
  * @summary Track the exception event
  * @see https://developers.google.com/analytics/devguides/collection/gtagjs/exceptions
  */
-addAction(
+addUniqueAction(
 	`${ ACTION_PREFIX }-store-notice-create`,
 	NAMESPACE,
 	trackException

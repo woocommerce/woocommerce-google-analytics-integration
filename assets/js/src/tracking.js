@@ -17,7 +17,7 @@ let currentStep = -1;
  *
  * @param {Object} params The function params
  * @param {Array} params.products The products to track
- * @param {string} params.listName The name of the list in which the item was presented to the user.
+ * @param {string} [params.listName] The name of the list in which the item was presented to the user.
  */
 export const trackListProducts = ( {
 	products,
@@ -41,7 +41,7 @@ export const trackListProducts = ( {
  *
  * @param {Object} params The function params
  * @param {Array} params.product The product to track
- * @param {string} params.quantity The quantity of that product in the cart.
+ * @param {number} [params.quantity=1] The quantity of that product in the cart.
  */
 export const trackAddToCart = ( { product, quantity = 1 } ) => {
 	trackEvent( 'add_to_cart', {
@@ -59,7 +59,7 @@ export const trackAddToCart = ( { product, quantity = 1 } ) => {
  *
  * @param {Object} params The function params
  * @param {Array} params.product The product to track
- * @param {string} params.quantity The quantity of that product in the cart.
+ * @param {number} [params.quantity=1] The quantity of that product in the cart.
  */
 export const trackRemoveCartItem = ( { product, quantity = 1 } ) => {
 	trackEvent( 'remove_from_cart', {
@@ -77,7 +77,7 @@ export const trackRemoveCartItem = ( { product, quantity = 1 } ) => {
  *
  * @param {Object} params The function params
  * @param {Array} params.product The product to track
- * @param {string} params.quantity The quantity of that product in the cart.
+ * @param {number} [params.quantity=1] The quantity of that product in the cart.
  */
 export const trackChangeCartItemQuantity = ( { product, quantity = 1 } ) => {
 	trackEvent( 'change_cart_quantity', {
@@ -95,7 +95,7 @@ export const trackChangeCartItemQuantity = ( { product, quantity = 1 } ) => {
  * Notice calling this will set the current checkout step as the step provided in the parameter.
  *
  * @param {number} step The checkout step for to track
- * @return {(function({storeCart: Object}): void)} A callable receiving the cart to track the checkout event.
+ * @return {(function( { storeCart: Object } ): void)} A callable receiving the cart to track the checkout event.
  */
 export const trackCheckoutStep =
 	( step ) =>
@@ -148,7 +148,10 @@ export const trackCheckoutOption =
  * @param {Object} params.product The product to track
  * @param {string} params.listName The name of the list in which the item was presented to the user.
  */
-export const trackSelectContent = ( { product, listName } ) => {
+export const trackSelectContent = ( {
+	product,
+	listName = __( 'Product List', 'woocommerce-google-analytics-integration' ),
+} ) => {
 	trackEvent( 'select_content', {
 		content_type: 'product',
 		items: [ getProductImpressionObject( product, listName ) ],
@@ -172,9 +175,12 @@ export const trackSearch = ( { searchTerm } ) => {
  *
  * @param {Object} params The function params
  * @param {Object} params.product The product to track
- * @param {string} params.listName The name of the list in which the item was presented to the user.
+ * @param {string} [params.listName] The name of the list in which the item was presented to the user.
  */
-export const trackViewItem = ( { product, listName } ) => {
+export const trackViewItem = ( {
+	product,
+	listName = __( 'Product List', 'woocommerce-google-analytics-integration' ),
+} ) => {
 	if ( product ) {
 		trackEvent( 'view_item', {
 			items: [ getProductImpressionObject( product, listName ) ],

@@ -34,8 +34,8 @@
     "lint:php:diff": "./bin/phpcs-diff.sh",
     "archive": "composer archive --file=$npm_package_name --format=zip",
     "postarchive": "rm -rf $npm_package_name && unzip $npm_package_name.zip -d $npm_package_name && rm $npm_package_name.zip && zip -r $npm_package_name.zip $npm_package_name && rm -rf $npm_package_name",
-		"build": "NODE_ENV=production wp-scripts build && npm run makepot &&  npm run archive",
-		"prebuild": "rm -rf ./vendor"
+    "build": "NODE_ENV=production wp-scripts build && npm run makepot &&  npm run archive",
+    "prebuild": "rm -rf ./vendor"
   },
   "engines": {
     "node": ">=8.9.3",

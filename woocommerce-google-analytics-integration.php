@@ -255,6 +255,8 @@ if ( ! class_exists( 'WC_Google_Analytics_Integration' ) ) {
 		 */
 		public function get_js_asset_file( $asset_name ) {
 			try {
+				// Exclusion reason: No reaching any user input
+				// nosemgrep audit.php.lang.security.file.inclusion-arg
 				return require $this->get_js_asset_path( $asset_name . '.asset.php' );
 			} catch ( Exception $e ) {
 				return [];

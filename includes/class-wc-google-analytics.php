@@ -676,7 +676,7 @@ class WC_Google_Analytics extends WC_Integration {
 		// Now add the utm_nooverride query arg to the URL
 		$return_url = add_query_arg( 'utm_nooverride', '1', $return_url );
 
-		return $return_url;
+		return esc_url( $return_url, null, 'db' );
 	}
 
 	/**

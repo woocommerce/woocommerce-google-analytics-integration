@@ -49,7 +49,7 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 	public function setup_frontend_scripts() {
 		global $product;
 
-		if ( $product->is_type( 'variable' ) ) {
+		if ( $product instanceof WC_Product_Variable ) {
 			// Filter variation data to include formatted strings required for add_to_cart event
 			add_filter( 'woocommerce_available_variation', array( $this, 'variant_data' ), 10, 3 );
 			// Add default inline product data for add to cart tracking

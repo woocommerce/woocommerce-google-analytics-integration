@@ -8,9 +8,16 @@
     "type": "git",
     "url": "git://github.com/woocommerce/woocommerce-google-analytics-integration.git"
   },
+  "dependencies": {
+    "@wordpress/hooks": "^3.22.0",
+    "@wordpress/i18n": "3.15.0"
+  },
   "devDependencies": {
+    "@wordpress/eslint-plugin": "^8.0.0",
+    "@wordpress/scripts": "^24.6.0",
+    "eslint": "^7.17.0",
     "node-wp-i18n": "~1.2.3",
-    "uglify-js": "^3.6.0"
+    "prettier": "npm:wp-prettier@^2.8.5"
   },
   "assets": {
     "js": {
@@ -19,16 +26,16 @@
     }
   },
   "scripts": {
-    "prebuild": "rm -rf ./vendor",
-    "build": "npm run uglify && npm run makepot && npm run archive",
-    "build:dev": "npm run uglify && npm run makepot",
+    "dev": "NODE_ENV=development wp-scripts build",
+    "start": "wp-scripts start",
+    "makepot": "wpi18n makepot --domain-path languages --pot-file $npm_package_name.pot --type plugin --main-file $npm_package_name.php --exclude node_modules,tests,docs,assets/js/src",
+    "lint:js": "wp-scripts lint-js",
+    "lint:php": "vendor/bin/phpcs",
+    "lint:php:diff": "./bin/phpcs-diff.sh",
     "archive": "composer archive --file=$npm_package_name --format=zip",
     "postarchive": "rm -rf $npm_package_name && unzip $npm_package_name.zip -d $npm_package_name && rm $npm_package_name.zip && zip -r $npm_package_name.zip $npm_package_name && rm -rf $npm_package_name",
-    "preuglify": "rm -f $npm_package_assets_js_min",
-    "uglify": "for f in $npm_package_assets_js_js; do file=${f%.js}; node_modules/.bin/uglifyjs $f -c -m > $file.min.js; done",
-    "makepot": "wpi18n makepot --domain-path languages --pot-file $npm_package_name.pot --type plugin --main-file $npm_package_name.php --exclude node_modules,tests,docs",
-    "lint:php": "vendor/bin/phpcs",
-    "lint:php:diff": "./bin/phpcs-diff.sh"
+    "build": "NODE_ENV=production wp-scripts build && npm run makepot &&  npm run archive",
+    "prebuild": "rm -rf ./vendor"
   },
   "engines": {
     "node": ">=8.9.3",

@@ -14,7 +14,7 @@ composer.lock export-ignore
 phpunit.xml.dist export-ignore
 phpunit.xml export-ignore
 phpcs.xml.dist export-ignore
-.eslintrc export-ignore
+.eslintrc.js export-ignore
 .eslintignore export-ignore
 .tx export-ignore
 .editorconfig export-ignore
@@ -28,3 +28,5 @@ wordpress_org_assets export-ignore
 assets/css/*.scss export-ignore
 node_modules export-ignore
 languages export-ignore
+assets/js/src export-ignore
+webpack.config.js export-ignore

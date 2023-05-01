@@ -4,6 +4,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
 
+use WC_Google_Analytics_Integration as Plugin;
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\TaskLists;
 
 /**
@@ -377,7 +378,13 @@ class WC_Google_Analytics extends WC_Integration {
 			return;
 		}
 
-		wp_enqueue_script( 'wc-google-analytics-admin-enhanced-settings', plugins_url( '/assets/js/admin-ga-settings.js', dirname( __FILE__ ) ), array(), WC_GOOGLE_ANALYTICS_INTEGRATION_VERSION, true );
+		wp_enqueue_script(
+			'wc-google-analytics-admin-enhanced-settings',
+			Plugin::get_instance()->get_js_asset_url( 'admin-ga-settings.js' ),
+			Plugin::get_instance()->get_js_asset_dependencies( 'admin-ga-settings', [ 'jquery' ] ),
+			Plugin::get_instance()->get_js_asset_version( 'admin-ga-settings' ),
+			true
+		);
 	}
 
 	/**
@@ -669,7 +676,7 @@ class WC_Google_Analytics extends WC_Integration {
 		// Now add the utm_nooverride query arg to the URL
 		$return_url = add_query_arg( 'utm_nooverride', '1', $return_url );
 
-		return $return_url;
+		return esc_url( $return_url, null, 'db' );
 	}
 
 	/**

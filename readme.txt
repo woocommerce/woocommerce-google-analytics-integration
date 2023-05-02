@@ -60,6 +60,12 @@ Exact wording depends on the national data privacy laws and should be adjusted.
 
 == Changelog ==
 
+= 1.8.0 - 2023-05-02 =
+* Add - Create WordPress Hook Actions for Google Analytics.
+* Add - Implement tracking with Actions Hooks.
+* Dev - Implement JS Build (ES6) and JS Lint.
+* Dev - Implement Javascript Building.
+
 = 1.7.1 - 2023-04-12 =
 * Fix - Bug with tracking enhanced ecommerce.
 

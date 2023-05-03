@@ -54,7 +54,7 @@ class ProductDetail extends EventsDataTest {
 	public function test_variation_scripts_is_registered() {
 		$gtag = new WC_Google_Gtag_JS();
 
-		// Mimic WC action
+		// Mimic WC action.
 		do_action( 'wp_enqueue_scripts' );
 
 		// Assert the handle is regeistered with the correct name, but not yet enqueued.
@@ -78,9 +78,11 @@ class ProductDetail extends EventsDataTest {
 
 		$gtag = new WC_Google_Gtag_JS();
 
-		// Mimic WC action
+		// Mimic WC action.
 		do_action( 'wp_enqueue_scripts' );
+		ob_start(); // Silence output.
 		do_action( 'woocommerce_before_single_product' );
+		ob_get_clean();
 
 		// Assert the handle is regeistered with the correct name, but not yet enqueued.
 		$this->assertEquals( true, wp_script_is( $gtag->script_handle, 'registered' ), '`woocommerce-google-analytics-integration` script was not registered' );
@@ -100,9 +102,11 @@ class ProductDetail extends EventsDataTest {
 
 		$gtag = new WC_Google_Gtag_JS();
 
-		// Mimic WC action
+		// Mimic WC action.
 		do_action( 'wp_enqueue_scripts' );
+		ob_start(); // Silence output.
 		do_action( 'woocommerce_before_single_product' );
+		ob_get_clean();
 
 		// Assert the handle is regeistered with the correct name, but not yet enqueued.
 		$this->assertEquals( true, wp_script_is( $gtag->script_handle, 'registered' ), '`woocommerce-google-analytics-integration` script was not registered' );
@@ -122,9 +126,11 @@ class ProductDetail extends EventsDataTest {
 
 		$gtag = new WC_Google_Gtag_JS();
 
-		// Mimic WC action
+		// Mimic WC action.
 		do_action( 'wp_enqueue_scripts' );
+		ob_start(); // Silence output.
 		do_action( 'woocommerce_before_single_product' );
+		ob_get_clean();
 
 		// Assert the handle is regeistered with the correct name, but not yet enqueued.
 		$this->assertEquals( true, wp_script_is( $gtag->script_handle, 'registered' ), '`woocommerce-google-analytics-integration` script was not registered' );

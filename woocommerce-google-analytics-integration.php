@@ -5,7 +5,7 @@
  * Description: Allows Google Analytics tracking code to be inserted into WooCommerce store pages.
  * Author: WooCommerce
  * Author URI: https://woocommerce.com
- * Version: 1.7.0
+ * Version: 1.8.0
  * WC requires at least: 6.8
  * WC tested up to: 7.6
  * Tested up to: 6.2
@@ -22,7 +22,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 if ( ! class_exists( 'WC_Google_Analytics_Integration' ) ) {
 
-	define( 'WC_GOOGLE_ANALYTICS_INTEGRATION_VERSION', '1.7.0' ); // WRCS: DEFINED_VERSION.
+	define( 'WC_GOOGLE_ANALYTICS_INTEGRATION_VERSION', '1.8.0' ); // WRCS: DEFINED_VERSION.
 	define( 'WC_GOOGLE_ANALYTICS_INTEGRATION_MIN_WC_VER', '6.8' );
 
 	// Maybe show the GA Pro notice on plugin activation.
@@ -203,6 +203,89 @@ if ( ! class_exists( 'WC_Google_Analytics_Integration' ) ) {
 
 			WC_Admin_Notices::add_custom_notice( 'woocommerce_google_analytics_pro_notice', $notice_html );
 			update_option( 'woocommerce_google_analytics_pro_notice_shown', true );
+		}
+
+		/**
+		 * Get the path to something in the plugin dir.
+		 *
+		 * @param string $end End of the path.
+		 * @return string
+		 */
+		public function path( $end = '' ) {
+			return untrailingslashit( dirname( __FILE__ ) ) . $end;
+		}
+
+		/**
+		 * Get the URL to something in the plugin dir.
+		 *
+		 * @param string $end End of the URL.
+		 *
+		 * @return string
+		 */
+		public function url( $end = '' ) {
+			return untrailingslashit( plugin_dir_url( plugin_basename( __FILE__ ) ) ) . $end;
+		}
+
+		/**
+		 * Get the URL to something in the plugin JS assets build dir.
+		 *
+		 * @param string $end End of the URL.
+		 *
+		 * @return string
+		 */
+		public function get_js_asset_url( $end = '' ) {
+			return $this->url( '/assets/js/build/' . $end );
+		}
+
+		/**
+		 * Get the path to something in the plugin JS assets build dir.
+		 *
+		 * @param string $end End of the path.
+		 * @return string
+		 */
+		public function get_js_asset_path( $end = '' ) {
+			return $this->path( '/assets/js/build/' . $end );
+		}
+
+		/**
+		 * Gets the asset.php generated file for an asset name.
+		 *
+		 * @param string $asset_name The name of the asset to get the file from.
+		 * @return array The asset file. Or an empty array if the file doesn't exist.
+		 */
+		public function get_js_asset_file( $asset_name ) {
+			try {
+				// Exclusion reason: No reaching any user input
+				// nosemgrep audit.php.lang.security.file.inclusion-arg
+				return require $this->get_js_asset_path( $asset_name . '.asset.php' );
+			} catch ( Exception $e ) {
+				return [];
+			}
+		}
+
+		/**
+		 * Gets the dependencies for an assets based on its asset.php generated file.
+		 *
+		 * @param string $asset_name The name of the asset to get the dependencies from.
+		 * @param array  $extra_dependencies Array containing extra dependencies to include in the dependency array.
+		 *
+		 * @return array The dependencies array. Empty array if no dependencies.
+		 */
+		public function get_js_asset_dependencies( $asset_name, $extra_dependencies = array() ) {
+			$script_assets = $this->get_js_asset_file( $asset_name );
+			$dependencies  = $script_assets['dependencies'] ?? [];
+			return array_unique( array_merge( $dependencies, $extra_dependencies ) );
+		}
+
+		/**
+		 * Gets the version for an assets based on its asset.php generated file.
+		 *
+		 * @param string $asset_name The name of the asset to get the version from.
+		 * @return string|false The version. False in case no version is found.
+		 */
+		public function get_js_asset_version( $asset_name ) {
+			$script_assets = $this->get_js_asset_file( $asset_name );
+			return $script_assets['version'] ?? false;
 		}
 	}
 

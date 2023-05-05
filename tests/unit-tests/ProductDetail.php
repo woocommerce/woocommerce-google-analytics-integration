@@ -57,11 +57,13 @@ class ProductDetail extends EventsDataTest {
 		// Mimic WC action.
 		do_action( 'wp_enqueue_scripts' );
 
+		$script_handle = $gtag->script_handle . '-ga-integration';
+
 		// Assert the handle is regeistered with the correct name, but not yet enqueued.
-		$this->assertEquals( 'woocommerce-google-analytics-integration', $gtag->script_handle, '`WC_Google_Gtag_JS->script_handle` is not equal `woocommerce-google-analytics-integration`' );
-		$this->assertEquals( true, wp_script_is( $gtag->script_handle, 'registered' ), '`woocommerce-google-analytics-integration` script was not registered' );
-		$this->assertEquals( false, wp_script_is( $gtag->script_handle, 'enqueued' ), 'the script is enqueued too early' );
-		$registered_url = wp_scripts()->registered[ $gtag->script_handle ]->src;
+		$this->assertEquals( 'woocommerce-google-analytics-integration', $script_handle, '`WC_Google_Gtag_JS->script_handle` is not equal `woocommerce-google-analytics-integration`' );
+		$this->assertEquals( true, wp_script_is( $script_handle, 'registered' ), '`woocommerce-google-analytics-integration` script was not registered' );
+		$this->assertEquals( false, wp_script_is( $script_handle, 'enqueued' ), 'the script is enqueued too early' );
+		$registered_url = wp_scripts()->registered[ $script_handle ]->src;
 		$this->assertStringContainsString( 'assets/js/ga-integration.js', $registered_url, 'The script does not point to the correct URL' );
 	}
 
@@ -78,6 +80,8 @@ class ProductDetail extends EventsDataTest {
 
 		$gtag = new WC_Google_Gtag_JS();
 
+		$script_handle = $gtag->script_handle . '-ga-integration';
+
 		// Mimic WC action.
 		do_action( 'wp_enqueue_scripts' );
 		ob_start(); // Silence output.
@@ -85,8 +89,8 @@ class ProductDetail extends EventsDataTest {
 		ob_get_clean();
 
 		// Assert the handle is regeistered with the correct name, but not yet enqueued.
-		$this->assertEquals( true, wp_script_is( $gtag->script_handle, 'registered' ), '`woocommerce-google-analytics-integration` script was not registered' );
-		$this->assertEquals( false, wp_script_is( $gtag->script_handle, 'enqueued' ), 'the script is enqueued' );
+		$this->assertEquals( true, wp_script_is( $script_handle, 'registered' ), '`woocommerce-google-analytics-integration` script was not registered' );
+		$this->assertEquals( false, wp_script_is( $script_handle, 'enqueued' ), 'the script is enqueued' );
 	}
 
 	/**
@@ -102,6 +106,8 @@ class ProductDetail extends EventsDataTest {
 
 		$gtag = new WC_Google_Gtag_JS();
 
+		$script_handle = $gtag->script_handle . '-ga-integration';
+
 		// Mimic WC action.
 		do_action( 'wp_enqueue_scripts' );
 		ob_start(); // Silence output.
@@ -109,8 +115,8 @@ class ProductDetail extends EventsDataTest {
 		ob_get_clean();
 
 		// Assert the handle is regeistered with the correct name, but not yet enqueued.
-		$this->assertEquals( true, wp_script_is( $gtag->script_handle, 'registered' ), '`woocommerce-google-analytics-integration` script was not registered' );
-		$this->assertEquals( false, wp_script_is( $gtag->script_handle, 'enqueued' ), 'the script is enqueued' );
+		$this->assertEquals( true, wp_script_is( $script_handle, 'registered' ), '`woocommerce-google-analytics-integration` script was not registered' );
+		$this->assertEquals( false, wp_script_is( $script_handle, 'enqueued' ), 'the script is enqueued' );
 	}
 
 	/**
@@ -126,6 +132,8 @@ class ProductDetail extends EventsDataTest {
 
 		$gtag = new WC_Google_Gtag_JS();
 
+		$script_handle = $gtag->script_handle . '-ga-integration';
+
 		// Mimic WC action.
 		do_action( 'wp_enqueue_scripts' );
 		ob_start(); // Silence output.
@@ -133,8 +141,8 @@ class ProductDetail extends EventsDataTest {
 		ob_get_clean();
 
 		// Assert the handle is regeistered with the correct name, but not yet enqueued.
-		$this->assertEquals( true, wp_script_is( $gtag->script_handle, 'registered' ), '`woocommerce-google-analytics-integration` script was not registered' );
-		$this->assertEquals( true, wp_script_is( $gtag->script_handle, 'enqueued' ), 'the script is not enqueued' );
+		$this->assertEquals( true, wp_script_is( $script_handle, 'registered' ), '`woocommerce-google-analytics-integration` script was not registered' );
+		$this->assertEquals( true, wp_script_is( $script_handle, 'enqueued' ), 'the script is not enqueued' );
 	}
 
 }

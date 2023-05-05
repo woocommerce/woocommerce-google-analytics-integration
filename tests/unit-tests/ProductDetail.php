@@ -64,7 +64,7 @@ class ProductDetail extends EventsDataTest {
 		$this->assertEquals( true, wp_script_is( $script_handle, 'registered' ), '`woocommerce-google-analytics-integration` script was not registered' );
 		$this->assertEquals( false, wp_script_is( $script_handle, 'enqueued' ), 'the script is enqueued too early' );
 		$registered_url = wp_scripts()->registered[ $script_handle ]->src;
-		$this->assertStringContainsString( 'assets/js/ga-integration.js', $registered_url, 'The script does not point to the correct URL' );
+		$this->assertStringContainsString( 'assets/js/build/ga-integration.js', $registered_url, 'The script does not point to the correct URL' );
 	}
 
 	/**

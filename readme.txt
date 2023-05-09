@@ -3,7 +3,7 @@ Contributors: woocommerce, automattic, claudiosanches, bor0, royho, laurendaviss
 Tags: woocommerce, google analytics
 Requires at least: 3.9
 Tested up to: 6.2
-Stable tag: 1.8.0
+Stable tag: 1.8.1
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -59,6 +59,10 @@ Exact wording depends on the national data privacy laws and should be adjusted.
 1. Google Analytics Integration Settings.
 
 == Changelog ==
+
+= 1.8.1 - 2023-05-09 =
+* Fix - Fatal error when running with Elementor.
+* Tweak - WC 7.7 compatibility.
 
 = 1.8.0 - 2023-05-02 =
 * Add - Create WordPress Hook Actions for Google Analytics.

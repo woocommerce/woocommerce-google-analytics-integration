@@ -60,6 +60,9 @@ Exact wording depends on the national data privacy laws and should be adjusted.
 
 == Changelog ==
 
+= 1.8.2 - 2023-06-13 =
+* Tweak - WC 7.8 compatibility.
+
 = 1.8.1 - 2023-05-09 =
 * Fix - Fatal error when running with Elementor.
 * Tweak - WC 7.7 compatibility.

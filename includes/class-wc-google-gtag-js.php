@@ -394,8 +394,12 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 			 }]}'
 		);
 
+		// To track all the consecutive removals,
+		// we listen for clicks on `.woocommerce` container(s),
+		// as `.woocommerce-cart-form` and its items are re-rendered on each removal.
 		wc_enqueue_js(
-			"$( '.remove' ).off('click', '.remove').on( 'click', function() {
+			"const selector = '.woocommerce-cart-form__cart-item .remove';
+			$( '.woocommerce' ).off('click', selector).on( 'click', selector, function() {
 				$event_code
 			});"
 		);

@@ -60,6 +60,11 @@ Exact wording depends on the national data privacy laws and should be adjusted.
 
 == Changelog ==
 
+= 1.8.3 - 2023-07-11 =
+* Dev - Set engines for the repository.
+* Fix - Record consecutive cart removals.
+* Tweak - WC 7.9 compatibility.
+
 = 1.8.2 - 2023-06-13 =
 * Tweak - WC 7.8 compatibility.
 

@@ -37,3 +37,5 @@ jobs:
           wp-version: ${{ github.event.inputs.wp-version }}
           wc-version: ${{ github.event.inputs.wc-version }}
           main-branch: 'trunk'
+          pre-steps: |
+            1. [ ] Remove older changelog entries from `readme.txt` (keep the last two versions, since we will be adding a third during the release), commit changes.

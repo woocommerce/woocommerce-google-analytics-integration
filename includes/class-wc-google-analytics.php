@@ -722,6 +722,6 @@ class WC_Google_Analytics extends WC_Integration {
 			return $tag;
 		}
 
-		return str_replace( '<script src', '<script async src', $tag );
+		return str_replace( ' src', ' async src', $tag );
 	}
 }

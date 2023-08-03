@@ -722,6 +722,13 @@ class WC_Google_Analytics extends WC_Integration {
 			return $tag;
 		}
 
+		// Check if the script has the async attribute already. If so, don't add it again.
+		$has_async_tag = preg_match('/^.*async.*$/', $tag);
+		if ( ! empty( $has_async_tag ) ) {
+			return $tag;
+		}
+
+		// Add the async attribute
 		return str_replace( ' src', ' async src', $tag );
 	}
 }

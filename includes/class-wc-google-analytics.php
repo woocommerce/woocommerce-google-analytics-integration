@@ -723,7 +723,7 @@ class WC_Google_Analytics extends WC_Integration {
 		}
 
 		// Check if the script has the async attribute already. If so, don't add it again.
-		$has_async_tag = preg_match('/^.*async.*$/', $tag);
+		$has_async_tag = preg_match( '/^.*async.*$/', $tag );
 		if ( ! empty( $has_async_tag ) ) {
 			return $tag;
 		}

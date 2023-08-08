@@ -41,6 +41,7 @@ jobs:
   UnitTests:
     name: PHP unit tests - PHP ${{ matrix.php }}, WP ${{ matrix.wp-version || 'latest' }}, WC ${{ matrix.wc-versions || 'latest' }}
     runs-on: ubuntu-latest
+    needs: GetMatrix
     strategy:
       matrix:
         php: [7.4]

@@ -60,6 +60,12 @@ Exact wording depends on the national data privacy laws and should be adjusted.
 
 == Changelog ==
 
+= 1.8.4 - 2023-08-08 =
+* Dev - Add release preparation GH workflow.
+* Fix - Add async attribute in `google-tag-manager` script.
+* Tweak - WC 8.0 compatibility.
+* Tweak - WP 6.3 compatibility.
+
 = 1.8.3 - 2023-07-11 =
 * Dev - Set engines for the repository.
 * Fix - Record consecutive cart removals.

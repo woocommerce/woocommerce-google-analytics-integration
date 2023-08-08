@@ -2,8 +2,8 @@
 Contributors: woocommerce, automattic, claudiosanches, bor0, royho, laurendavissmith001, c-shultz
 Tags: woocommerce, google analytics
 Requires at least: 3.9
-Tested up to: 6.2
-Stable tag: 1.8.3
+Tested up to: 6.3
+Stable tag: 1.8.4
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -60,6 +60,12 @@ Exact wording depends on the national data privacy laws and should be adjusted.
 
 == Changelog ==
 
+= 1.8.4 - 2023-08-08 =
+* Dev - Add release preparation GH workflow.
+* Fix - Add async attribute in `google-tag-manager` script.
+* Tweak - WC 8.0 compatibility.
+* Tweak - WP 6.3 compatibility.
+
 = 1.8.3 - 2023-07-11 =
 * Dev - Set engines for the repository.
 * Fix - Record consecutive cart removals.
@@ -68,41 +74,5 @@ Exact wording depends on the national data privacy laws and should be adjusted.
 = 1.8.2 - 2023-06-13 =
 * Tweak - WC 7.8 compatibility.
 
-= 1.8.1 - 2023-05-09 =
-* Fix - Fatal error when running with Elementor.
-* Tweak - WC 7.7 compatibility.
-
-= 1.8.0 - 2023-05-02 =
-* Add - Create WordPress Hook Actions for Google Analytics.
-* Add - Implement tracking with Actions Hooks.
-* Dev - Implement JS Build (ES6) and JS Lint.
-* Dev - Implement Javascript Building.
-
-= 1.7.1 - 2023-04-12 =
-* Fix - Bug with tracking enhanced ecommerce.
-
-= 1.7.0 - 2023-03-28 =
-* Dev - Load scripts via `wp_register_scripts` and `wp_eneuque_js`.
-* Fix - Avoid duplication of Google Tag Manager script.
-* Tweak - WC 7.6 compatibility.
-* Tweak - WP 6.2 compatibility.
-
-= 1.6.2 - 2023-03-07 =
-* Tweak - WC 7.5 compatibility.
-* Tweak - WP 6.2 compatibility.
-
-= 1.6.1 - 2023-02-15 =
-* Tweak - WC 7.4 compatibility.
-
-= 1.6.0 - 2023-01-31 =
-* Add - Common function for event code.
-* Fix - Add PHP unit tests.
-* Fix - Feature/consistency across gtag implementation.
-* Fix - Fix inconsistencies across item data in events.
-* Fix - Fix usage of tracker_var() in load_analytics().
-
-= 1.5.19 - 2023-01-11 =
-* Fix - undefined WC constant.
-* Tweak - WC 7.3 compatibility.
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce-google-analytics-integration/trunk/changelog.txt).

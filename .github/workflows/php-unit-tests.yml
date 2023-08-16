@@ -21,24 +21,25 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  GetMatrix:
+ GetMatrix:
     name: Get WP and WC version Matrix
     runs-on: ubuntu-latest
     outputs:
         wp-versions: ${{ steps.wp.outputs.versions }}
         wc-versions: ${{ steps.wc.outputs.versions }}
     steps:
-        -   name: Get Release versions from Wordpress
-            id: wp
-            uses: woocommerce/grow/get-plugin-releases@actions-v1
-            with:
-                slug: wordpress
-        -   name: Get Release versions from WooCommerce
-            id: wc
-            uses: woocommerce/grow/get-plugin-releases@actions-v1
-            with:
-                slug: woocommerce
-  UnitTests:
+      - name: Get Release versions from Wordpress
+        id: wp
+        uses: woocommerce/grow/get-plugin-releases@actions-v1
+        with:
+            slug: wordpress
+      - name: Get Release versions from WooCommerce
+        id: wc
+        uses: woocommerce/grow/get-plugin-releases@actions-v1
+        with:
+            slug: woocommerce
+
+ UnitTests:
     name: PHP unit tests - PHP ${{ matrix.php }}, WP ${{ matrix.wp-version || 'latest' }}, WC ${{ matrix.wc-versions || 'latest' }}
     runs-on: ubuntu-latest
     needs: GetMatrix
@@ -46,7 +47,9 @@ jobs:
       matrix:
         php: [7.4]
         wp-version: [latest]
-        wc-versions: ${{ fromJson(needs.GetMatrix.outputs.wc-versions) }}
+        # Please note that wc-versions is a string containing versions separated by commas.
+        # It will be split and loop within the run unit test step below to reduce the time spent.
+        wc-versions: [ '${{ join(fromJson(needs.GetMatrix.outputs.wc-versions)) }}' ]
         include:
           - php: 7.4
             wp-version: ${{ fromJson(needs.GetMatrix.outputs.wp-versions)[2] }} # L-2 WP Version support

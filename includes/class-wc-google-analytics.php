@@ -74,6 +74,9 @@ class WC_Google_Analytics extends WC_Integration {
 	/** @var string $ga_linker_allow_incoming_enabled Accept incoming linker (yes|no) */
 	public $ga_linker_allow_incoming_enabled;
 
+
+	protected $dismissed_info_banner;
+
 	/**
 	 * Defines the script handles that should be async.
 	 */
@@ -98,10 +101,9 @@ class WC_Google_Analytics extends WC_Integration {
 	 * Init and hook in the integration.
 	 */
 	public function __construct() {
-		$this->id                    = 'google_analytics';
-		$this->method_title          = __( 'Google Analytics', 'woocommerce-google-analytics-integration' );
-		$this->method_description    = __( 'Google Analytics is a free service offered by Google that generates detailed statistics about the visitors to a website.', 'woocommerce-google-analytics-integration' );
-		$this->dismissed_info_banner = get_option( 'woocommerce_dismissed_info_banner' );
+		$this->id                 = 'google_analytics';
+		$this->method_title       = __( 'Google Analytics', 'woocommerce-google-analytics-integration' );
+		$this->method_description = __( 'Google Analytics is a free service offered by Google that generates detailed statistics about the visitors to a website.', 'woocommerce-google-analytics-integration' );
 
 		// Load the settings
 		$this->init_form_fields();

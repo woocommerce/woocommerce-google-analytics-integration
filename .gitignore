@@ -22,6 +22,7 @@ build
 !/logs/.htaccess
 
 tests/e2e/config/local-*
+.phpunit.result.cache
 .eslintcache
 
 /vendor/

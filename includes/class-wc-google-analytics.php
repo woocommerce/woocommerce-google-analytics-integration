@@ -74,9 +74,6 @@ class WC_Google_Analytics extends WC_Integration {
 	/** @var string $ga_linker_allow_incoming_enabled Accept incoming linker (yes|no) */
 	public $ga_linker_allow_incoming_enabled;
 
-
-	protected $dismissed_info_banner;
-
 	/**
 	 * Defines the script handles that should be async.
 	 */

@@ -45,7 +45,7 @@ jobs:
     needs: GetMatrix
     strategy:
       matrix:
-        php: [7.4]
+        php: [8.1]
         wp-version: [latest]
         # Please note that wc-versions is a string containing versions separated by commas.
         # It will be split and loop within the run unit test step below to reduce the time spent.
@@ -54,6 +54,9 @@ jobs:
           - php: 7.4
             wp-version: ${{ fromJson(needs.GetMatrix.outputs.wp-versions)[2] }} # L-2 WP Version support
             wc-versions: ${{ fromJson(needs.GetMatrix.outputs.wc-versions)[2] }} # L-2 WC Version support
+          - php: 8.2
+            wp-version: latest
+            wc-versions: latest
 
     steps:
       - name: Checkout repository

@@ -1,6 +1,5 @@
 *** Changelog ***
 
-
 = 1.8.4 - 2023-08-08 =
 * Dev - Add release preparation GH workflow.
 * Fix - Add async attribute in `google-tag-manager` script.

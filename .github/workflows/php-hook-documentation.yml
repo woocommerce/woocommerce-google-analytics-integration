@@ -5,16 +5,7 @@ on:
     branches:
       - "release/**"
     paths:
-      - "**.php"
-      - .github/workflows/php-hook-documentation.yml
-  pull_request:
-    types:
-      - opened
-    branches:
-      - "release/**"
-    paths:
-      - "**.php"
-      - .github/workflows/php-hook-documentation.yml
+      - changelog.txt # Run the workflow only after the last commit of Woo Release. When it updates the changelog.
   workflow_dispatch:
 
 concurrency:
@@ -37,7 +28,6 @@ jobs:
         id: generate-hook-docs
         uses: woocommerce/grow/hook-documentation@actions-v1
         with:
-          debug-output: yes
           source-directories: includes/ woocommerce-google-analytics-integration.php
 
       - name: Commit hook documentation

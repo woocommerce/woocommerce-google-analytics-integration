@@ -28,6 +28,7 @@ jobs:
         id: generate-hook-docs
         uses: woocommerce/grow/hook-documentation@actions-v1
         with:
+          debug-output: yes
           source-directories: includes/ woocommerce-google-analytics-integration.php
 
       - name: Commit hook documentation

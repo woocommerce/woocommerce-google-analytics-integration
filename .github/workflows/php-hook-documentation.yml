@@ -1,0 +1,48 @@
+name: PHP Hook Documentation Generator
+
+on:
+  push:
+    branches:
+      - "release/**"
+    paths:
+      - changelog.txt # Run the workflow only after the last commit of Woo Release. When it updates the changelog.
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  HookDocumentation:
+    name: Hook Documentation Generator
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v3
+        with:
+          # Checks out a branch instead of a commit in detached HEAD state
+          ref: ${{ github.head_ref }}
+
+        # This generates the documentation string. The `id` property is used to reference the output in the next step.
+      - name: Generate hook documentation
+        id: generate-hook-docs
+        uses: woocommerce/grow/hook-documentation@actions-v1
+        with:
+          source-directories: includes/ woocommerce-google-analytics-integration.php
+
+      - name: Commit hook documentation
+        shell: bash
+        # Use the github-actions bot account to commit.
+        # https://api.github.com/users/github-actions%5Bbot%5D
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          echo "${{ steps.generate-hook-docs.outputs.hook-docs }}" > docs/Hooks.md
+          git add docs/Hooks.md
+          if git diff --cached --quiet; then
+            echo "*No documentation changes to commit.*" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "*Committing documentation changes.*" >> $GITHUB_STEP_SUMMARY
+            git commit -q -m "Update hooks documentation from ${{ github.head_ref }} branch."
+            git push
+          fi

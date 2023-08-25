@@ -31,3 +31,7 @@ _For more info see: [WordPress.org > Plugin Unit Tests](https://make.wordpress.o
 2. Run `npm run lint:php`
 
 Alternatively, run `npm run lint:php:diff` to run coding standards checks agains the current git diff. An explanation of output can be [found here](https://github.com/squizlabs/PHP_CodeSniffer/wiki/Usage#printing-progress-information) e.g. what are the S's?
+
+## Docs
+
+- [Hooks defined or used in WooCommerce Google Analytics Integration](./docs/Hooks.md)

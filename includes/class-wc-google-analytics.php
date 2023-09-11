@@ -131,8 +131,8 @@ class WC_Google_Analytics extends WC_Integration {
 		add_action( 'woocommerce_after_cart', array( $this, 'remove_from_cart' ) );
 		add_action( 'woocommerce_after_mini_cart', array( $this, 'remove_from_cart' ) );
 		add_filter( 'woocommerce_cart_item_remove_link', array( $this, 'remove_from_cart_attributes' ), 10, 2 );
-		add_action( 'woocommerce_after_shop_loop_item', array( $this, 'listing_impression' ) );
-		add_action( 'woocommerce_after_shop_loop_item', array( $this, 'listing_click' ) );
+		add_action( 'woocommerce_after_shop_loop_item_title', array( $this, 'listing_click' ) );
+		add_action( 'woocommerce_after_shop_loop_item_title', array( $this, 'listing_impression' ) );
 		add_action( 'woocommerce_after_single_product', array( $this, 'product_detail' ) );
 		add_action( 'woocommerce_after_checkout_form', array( $this, 'checkout_process' ) );
 

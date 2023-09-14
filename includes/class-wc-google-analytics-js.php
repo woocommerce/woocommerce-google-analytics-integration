@@ -142,17 +142,14 @@ class WC_Google_Analytics_JS extends WC_Abstract_Google_Analytics_JS {
 
 		wc_enqueue_js(
 			"
-			$( '.products .post-" . esc_js( $product->get_id() ) . " a' ).on( 'click', function() {
-				if ( true === $(this).hasClass( 'add_to_cart_button' ) ) {
-					return;
+			$( '.product.post-" . esc_js( $product->get_id() ) . ' a , .product.post-' . esc_js( $product->get_id() ) . " button' ).on('click', function() {
+				if ( false === $(this).hasClass( 'product_type_variable' ) && false === $(this).hasClass( 'product_type_grouped' ) ) {
+					" . self::tracker_var() . "( 'ec:addProduct', {
+						'id': '" . esc_js( $product->get_id() ) . "',
+						'name': '" . esc_js( $product->get_title() ) . "',
+						'category': " . self::product_get_category_line( $product ) . '
+					});
 				}
-
-				" . self::tracker_var() . "( 'ec:addProduct', {
-					'id': '" . esc_js( $product->get_id() ) . "',
-					'name': '" . esc_js( $product->get_title() ) . "',
-					'category': " . self::product_get_category_line( $product ) . '
-				});
-
 				' . self::tracker_var() . "( 'ec:setAction', 'click', { list: '" . esc_js( $list ) . "' });
 				" . self::tracker_var() . "( 'send', 'event', 'UX', 'click', ' " . esc_js( $list ) . "' );
 			});

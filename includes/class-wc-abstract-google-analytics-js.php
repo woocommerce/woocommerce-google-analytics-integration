@@ -69,17 +69,15 @@ abstract class WC_Abstract_Google_Analytics_JS {
 	 * Enqueues JavaScript to build the addImpression object
 	 *
 	 * @param WC_Product $product
-	 * @param int        $position
 	 */
-	abstract public static function listing_impression( $product, $position );
+	abstract public static function listing_impression( $product );
 
 	/**
 	 * Enqueues JavaScript to build an addProduct and click object
 	 *
 	 * @param WC_Product $product
-	 * @param int        $position
 	 */
-	abstract public static function listing_click( $product, $position );
+	abstract public static function listing_click( $product );
 
 	/**
 	 * Loads the correct Google Gtag code (classic or universal)

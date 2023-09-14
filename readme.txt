@@ -3,7 +3,7 @@ Contributors: woocommerce, automattic, claudiosanches, bor0, royho, laurendaviss
 Tags: woocommerce, google analytics
 Requires at least: 3.9
 Tested up to: 6.3
-Stable tag: 1.8.4
+Stable tag: 1.8.5
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -59,6 +59,13 @@ Exact wording depends on the national data privacy laws and should be adjusted.
 1. Google Analytics Integration Settings.
 
 == Changelog ==
+
+= 1.8.5 - 2023-09-14 =
+* Dev - Add Workflow for generation Hooks documentation.
+* Dev - Fetch WooCommerce and WordPress versions for our tests.
+* Fix - Add To Cart and Impression events when using Blocks.
+* Fix - Compat - Add PHP 8.2 support.
+* Tweak - WC 8.1.0 compatibility.
 
 = 1.8.4 - 2023-08-08 =
 * Dev - Add release preparation GH workflow.

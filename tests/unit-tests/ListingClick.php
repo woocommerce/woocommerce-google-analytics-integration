@@ -19,7 +19,7 @@ class ListingClick extends EventsDataTest {
 	 * @return void
 	 */
 	public function test_select_content_and_add_to_cart_event() {
-		$product  = $this->get_product();
+		$product = $this->get_product();
 
 		( new WC_Google_Gtag_JS() )->listing_click( $product );
 
@@ -30,10 +30,10 @@ class ListingClick extends EventsDataTest {
 		$expected_data = array(
 			'items' => array(
 				array(
-					'id'            => WC_Google_Gtag_JS::get_product_identifier( $product ),
-					'name'          => $product->get_title(),
-					'category'      => WC_Google_Gtag_JS::product_get_category_line( $product ),
-					'quantity'      => 1,
+					'id'       => WC_Google_Gtag_JS::get_product_identifier( $product ),
+					'name'     => $product->get_title(),
+					'category' => WC_Google_Gtag_JS::product_get_category_line( $product ),
+					'quantity' => 1,
 				),
 			),
 		);

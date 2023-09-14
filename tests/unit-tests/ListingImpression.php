@@ -19,7 +19,7 @@ class ListingImpression extends EventsDataTest {
 	 * @return void
 	 */
 	public function test_view_item_list_event() {
-		$product  = $this->get_product();
+		$product = $this->get_product();
 
 		( new WC_Google_Gtag_JS() )->listing_impression( $product );
 
@@ -30,10 +30,10 @@ class ListingImpression extends EventsDataTest {
 		$expected_data = array(
 			'items' => array(
 				array(
-					'id'            => WC_Google_Gtag_JS::get_product_identifier( $product ),
-					'name'          => $product->get_title(),
-					'category'      => WC_Google_Gtag_JS::product_get_category_line( $product ),
-					'list'          => WC_Google_Gtag_JS::get_list_name()
+					'id'       => WC_Google_Gtag_JS::get_product_identifier( $product ),
+					'name'     => $product->get_title(),
+					'category' => WC_Google_Gtag_JS::product_get_category_line( $product ),
+					'list'     => WC_Google_Gtag_JS::get_list_name(),
 				),
 			),
 		);

@@ -174,19 +174,17 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 	 * Enqueues JavaScript to build the view_item_list event
 	 *
 	 * @param WC_Product $product
-	 * @param int        $position
 	 */
-	public static function listing_impression( $product, $position ) {
+	public static function listing_impression( $product ) {
 		$event_code = self::get_event_code(
 			'view_item_list',
 			array(
 				'items' => array(
 					array(
-						'id'            => self::get_product_identifier( $product ),
-						'name'          => $product->get_title(),
-						'category'      => self::product_get_category_line( $product ),
-						'list'          => self::get_list_name(),
-						'list_position' => $position,
+						'id'       => self::get_product_identifier( $product ),
+						'name'     => $product->get_title(),
+						'category' => self::product_get_category_line( $product ),
+						'list'     => self::get_list_name(),
 					),
 				),
 			)
@@ -199,35 +197,33 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 	 * Enqueues JavaScript for select_content and add_to_cart events for the product archive
 	 *
 	 * @param WC_Product $product
-	 * @param int        $position
 	 */
-	public static function listing_click( $product, $position ) {
-		$items = array(
-			'id'            => self::get_product_identifier( $product ),
-			'name'          => $product->get_title(),
-			'category'      => self::product_get_category_line( $product ),
-			'list_position' => $position,
-			'quantity'      => 1,
+	public static function listing_click( $product ) {
+		$item = array(
+			'id'       => self::get_product_identifier( $product ),
+			'name'     => $product->get_title(),
+			'category' => self::product_get_category_line( $product ),
+			'quantity' => 1,
 		);
 
 		$select_content_event_code = self::get_event_code(
 			'select_content',
 			array(
-				'items' => array( $items ),
+				'items' => array( $item ),
 			)
 		);
 
 		$add_to_cart_event_code = self::get_event_code(
 			'add_to_cart',
 			array(
-				'items' => array( $items ),
+				'items' => array( $item ),
 			)
 		);
 
 		wc_enqueue_js(
 			"
 			$( '.product.post-" . esc_js( $product->get_id() ) . ' a , .product.post-' . esc_js( $product->get_id() ) . " button' ).on('click', function() {
-				if ( true === $(this).hasClass( 'add_to_cart_button' ) ) {
+				if ( false === $(this).hasClass( 'product_type_variable' ) && false === $(this).hasClass( 'product_type_grouped' ) ) {
 					$add_to_cart_event_code
 				} else {
 					$select_content_event_code

@@ -131,8 +131,7 @@ class WC_Google_Analytics extends WC_Integration {
 		add_action( 'woocommerce_after_cart', array( $this, 'remove_from_cart' ) );
 		add_action( 'woocommerce_after_mini_cart', array( $this, 'remove_from_cart' ) );
 		add_filter( 'woocommerce_cart_item_remove_link', array( $this, 'remove_from_cart_attributes' ), 10, 2 );
-		add_action( 'woocommerce_after_shop_loop_item_title', array( $this, 'listing_click' ) );
-		add_action( 'woocommerce_after_shop_loop_item_title', array( $this, 'listing_impression' ) );
+		add_filter( 'woocommerce_loop_add_to_cart_link', array( $this, 'track_product' ), 10, 2 );
 		add_action( 'woocommerce_after_single_product', array( $this, 'product_detail' ) );
 		add_action( 'woocommerce_after_checkout_form', array( $this, 'checkout_process' ) );
 
@@ -651,27 +650,18 @@ class WC_Google_Analytics extends WC_Integration {
 	}
 
 	/**
-	 * Measures a listing impression (from search results)
+	 * Measure a product click and impression from a Product list
+	 *
+	 * @param string     $link The Add To Cart Link
+	 * @param WC_Product $product The Product
 	 */
-	public function listing_impression() {
-		if ( ! $this->enhanced_ecommerce_enabled( $this->ga_enhanced_product_impression_enabled ) ) {
-			return;
+	public function track_product( $link, $product ) {
+		if ( $this->enhanced_ecommerce_enabled( $this->ga_enhanced_product_click_enabled ) ) {
+			$this->get_tracking_instance()->listing_impression( $product );
+			$this->get_tracking_instance()->listing_click( $product );
 		}
 
-		global $product, $woocommerce_loop;
-		$this->get_tracking_instance()->listing_impression( $product, $woocommerce_loop['loop'] );
-	}
-
-	/**
-	 * Measure a product click from a listing page
-	 */
-	public function listing_click() {
-		if ( ! $this->enhanced_ecommerce_enabled( $this->ga_enhanced_product_click_enabled ) ) {
-			return;
-		}
-
-		global $product, $woocommerce_loop;
-		$this->get_tracking_instance()->listing_click( $product, $woocommerce_loop['loop'] );
+		return $link;
 	}
 
 	/**

@@ -109,9 +109,8 @@ class WC_Google_Analytics_JS extends WC_Abstract_Google_Analytics_JS {
 	 * Enqueues JavaScript to build the addImpression object
 	 *
 	 * @param WC_Product $product
-	 * @param int        $position
 	 */
-	public static function listing_impression( $product, $position ) {
+	public static function listing_impression( $product ) {
 		if ( is_search() ) {
 			$list = 'Search Results';
 		} else {
@@ -123,8 +122,7 @@ class WC_Google_Analytics_JS extends WC_Abstract_Google_Analytics_JS {
 				'id': '" . esc_js( $product->get_id() ) . "',
 				'name': '" . esc_js( $product->get_title() ) . "',
 				'category': " . self::product_get_category_line( $product ) . "
-				'list': '" . esc_js( $list ) . "',
-				'position': '" . esc_js( $position ) . "'
+				'list': '" . esc_js( $list ) . "'
 			} );
 		"
 		);
@@ -134,9 +132,8 @@ class WC_Google_Analytics_JS extends WC_Abstract_Google_Analytics_JS {
 	 * Enqueues JavaScript to build an addProduct and click object
 	 *
 	 * @param WC_Product $product
-	 * @param int        $position
 	 */
-	public static function listing_click( $product, $position ) {
+	public static function listing_click( $product ) {
 		if ( is_search() ) {
 			$list = 'Search Results';
 		} else {
@@ -145,19 +142,15 @@ class WC_Google_Analytics_JS extends WC_Abstract_Google_Analytics_JS {
 
 		wc_enqueue_js(
 			"
-			$( '.products .post-" . esc_js( $product->get_id() ) . " a' ).on( 'click', function() {
-				if ( true === $(this).hasClass( 'add_to_cart_button' ) ) {
-					return;
+			$( '.product.post-" . esc_js( $product->get_id() ) . ' a , .product.post-' . esc_js( $product->get_id() ) . " button' ).on('click', function() {
+				if ( false === $(this).hasClass( 'product_type_variable' ) && false === $(this).hasClass( 'product_type_grouped' ) ) {
+					" . self::tracker_var() . "( 'ec:addProduct', {
+						'id': '" . esc_js( $product->get_id() ) . "',
+						'name': '" . esc_js( $product->get_title() ) . "',
+						'category': " . self::product_get_category_line( $product ) . '
+					});
 				}
-
-				" . self::tracker_var() . "( 'ec:addProduct', {
-					'id': '" . esc_js( $product->get_id() ) . "',
-					'name': '" . esc_js( $product->get_title() ) . "',
-					'category': " . self::product_get_category_line( $product ) . "
-					'position': '" . esc_js( $position ) . "'
-				});
-
-				" . self::tracker_var() . "( 'ec:setAction', 'click', { list: '" . esc_js( $list ) . "' });
+				' . self::tracker_var() . "( 'ec:setAction', 'click', { list: '" . esc_js( $list ) . "' });
 				" . self::tracker_var() . "( 'send', 'event', 'UX', 'click', ' " . esc_js( $list ) . "' );
 			});
 		"

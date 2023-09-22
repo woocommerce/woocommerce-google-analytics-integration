@@ -105,10 +105,13 @@ if ( ! class_exists( 'WC_Google_Analytics_Integration' ) ) {
 		 */
 		public function plugin_links( $links ) {
 			$settings_url = $this->get_settings_url();
+			$support_url  = 'https://wordpress.org/support/plugin/woocommerce-google-analytics-integration';
+			$docs_url     = 'https://woocommerce.com/document/google-analytics-integration/?utm_source=wordpress&utm_medium=all-plugins-page&utm_campaign=doc-link&utm_content=woocommerce-google-analytics-integration';
 
 			$plugin_links = array(
-				'<a href="' . esc_url( $settings_url ) . '">' . __( 'Settings', 'woocommerce-google-analytics-integration' ) . '</a>',
-				'<a href="https://wordpress.org/support/plugin/woocommerce-google-analytics-integration">' . __( 'Support', 'woocommerce-google-analytics-integration' ) . '</a>',
+				'<a href="' . esc_url( $settings_url ) . '">' . esc_html__( 'Settings', 'woocommerce-google-analytics-integration' ) . '</a>',
+				'<a href="' . esc_url( $support_url ) . '">' . esc_html__( 'Support', 'woocommerce-google-analytics-integration' ) . '</a>',
+				'<a href="' . esc_url( $docs_url ) . '">' . esc_html__( 'Documentation', 'woocommerce-google-analytics-integration' ) . '</a>',
 			);
 
 			return array_merge( $plugin_links, $links );

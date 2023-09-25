@@ -120,6 +120,7 @@ class WC_Google_Analytics extends WC_Integration {
 		add_action( 'woocommerce_update_options_integration_google_analytics', array( $this, 'process_admin_options' ) );
 		add_action( 'woocommerce_update_options_integration_google_analytics', array( $this, 'show_options_info' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'load_admin_assets' ) );
+		add_action( 'admin_init', array( $this, 'privacy_policy' ) );
 
 		// Tracking code
 		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_tracking_code' ), 9 );
@@ -420,6 +421,27 @@ class WC_Google_Analytics extends WC_Integration {
 			Plugin::get_instance()->get_js_asset_version( 'admin-ga-settings' ),
 			true
 		);
+	}
+
+	/**
+	 * Add suggested privacy policy content
+	 *
+	 * @return void
+	 */
+	public function privacy_policy() {
+		$policy_text = sprintf(
+			/* translators: 1) HTML anchor open tag 2) HTML anchor closing tag */
+			esc_html__( 'By using this extension, you may be storing personal data or sharing data with an external service. %1$sLearn more about what data is collected by Google and what you may want to include in your privacy policy%2$s.', 'woocommerce-google-analytics-integration' ),
+			'<a href="https://support.google.com/analytics/answer/7318509" target="_blank">',
+			'</a>'
+		);
+
+		// As the extension doesn't offer suggested privacy policy text, the button to copy it is hidden.
+		$content = '
+			<p class="privacy-policy-tutorial">' . $policy_text . '</p>
+			<style>#privacy-settings-accordion-block-woocommerce-google-analytics-integration .privacy-settings-accordion-actions { display: none }</style>';
+
+		wp_add_privacy_policy_content( 'WooCommerce Google Analytics Integration', wpautop( $content, false ) );
 	}
 
 	/**

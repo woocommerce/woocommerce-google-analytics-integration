@@ -42,6 +42,12 @@
     "npm": ">=6"
   },
   "config": {
-    "wp_org_slug": "woocommerce-google-analytics-integration"
+    "wp_org_slug": "woocommerce-google-analytics-integration",
+    "version_replace_paths": [
+      "src",
+      "tests",
+      "bin",
+      "woocommerce-google-analytics-integration.php"
+		]
   }
 }

@@ -8,7 +8,7 @@ use WC_Helper_Product;
 /**
  * Unit tests for `WC_Google_Gtag_JS` class.
  *
- * @since x.x.x
+ * @since 1.8.1
  *
  * @package GoogleAnalyticsIntegration\Tests
  */

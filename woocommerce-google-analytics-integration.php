@@ -82,7 +82,7 @@ if ( ! class_exists( 'WC_Google_Analytics_Integration' ) ) {
 		/**
 		 * Gets the settings page URL.
 		 *
-		 * @since x.x.x
+		 * @since 1.5.17
 		 *
 		 * @return string Settings URL
 		 */
@@ -172,7 +172,7 @@ if ( ! class_exists( 'WC_Google_Analytics_Integration' ) ) {
 		/**
 		 * Get Google Analytics Integration
 		 *
-		 * @since x.x.x
+		 * @since 1.5.17
 		 *
 		 * @return WC_Google_Analytics The Google Analytics integration.
 		 */

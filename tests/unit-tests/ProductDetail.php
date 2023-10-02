@@ -7,7 +7,7 @@ use WC_Google_Gtag_JS;
 /**
  * Class ProductDetail
  *
- * @since x.x.x
+ * @since 1.6.0
  *
  * @package GoogleAnalyticsIntegration\Tests
  */

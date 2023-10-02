@@ -708,7 +708,7 @@ class WC_Google_Analytics extends WC_Integration {
 	/**
 	 * Check if the Google Analytics Tracking ID has been set up.
 	 *
-	 * @since x.x.x
+	 * @since 1.5.17
 	 *
 	 * @return bool Whether the Google Analytics setup is completed.
 	 */
@@ -720,7 +720,7 @@ class WC_Google_Analytics extends WC_Integration {
 	/**
 	 * Adds the setup task to the Tasklists.
 	 *
-	 * @since x.x.x
+	 * @since 1.5.17
 	 */
 	public function add_wc_setup_task() {
 		require_once 'class-wc-google-analytics-task.php';

@@ -465,7 +465,7 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 	}
 
 	/**
-	 * @deprecated x.x.x
+	 * @deprecated 1.6.0
 	 *
 	 * Enqueue JavaScript for Add to cart tracking
 	 *

@@ -60,6 +60,14 @@ Exact wording depends on the national data privacy laws and should be adjusted.
 
 == Changelog ==
 
+= 1.8.6 - 2023-10-03 =
+* Add - Privacy policy guide section.
+* Dev - Enable since tag replacement.
+* Fix - Track select_content instead of add_to_cart for variations.
+* Tweak - Add documentation link with UTM parameters.
+* Tweak - Tracking for Products ( Add To Cart and Impression) when using Products (Beta) Block.
+* Tweak - WC 8.2 compatibility.
+
 = 1.8.5 - 2023-09-14 =
 * Dev - Add Workflow for generation Hooks documentation.
 * Dev - Fetch WooCommerce and WordPress versions for our tests.

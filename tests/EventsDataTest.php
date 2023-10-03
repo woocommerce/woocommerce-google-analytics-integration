@@ -9,9 +9,9 @@ use WC_Helper_Order;
 use MockAction;
 
 /**
- * Class UnitTest
+ * Class EventsDataTest
  *
- * @since x.x.x
+ * @since 1.6.0
  */
 abstract class EventsDataTest extends WP_UnitTestCase {
 

@@ -147,30 +147,31 @@ class WC_Google_Analytics extends WC_Integration {
 	 */
 	public function init_options() {
 		$options = array(
-			'ga_id',
-			'ga_set_domain_name',
-			'ga_gtag_enabled',
-			'ga_standard_tracking_enabled',
-			'ga_support_display_advertising',
-			'ga_support_enhanced_link_attribution',
-			'ga_use_universal_analytics',
-			'ga_anonymize_enabled',
-			'ga_404_tracking_enabled',
-			'ga_ecommerce_tracking_enabled',
-			'ga_enhanced_ecommerce_tracking_enabled',
-			'ga_enhanced_remove_from_cart_enabled',
-			'ga_enhanced_product_impression_enabled',
-			'ga_enhanced_product_click_enabled',
-			'ga_enhanced_checkout_process_enabled',
-			'ga_enhanced_product_detail_view_enabled',
-			'ga_event_tracking_enabled',
-			'ga_linker_cross_domains',
-			'ga_linker_allow_incoming_enabled',
+			'ga_product_identifier'                   => 'product_sku',
+			'ga_id'                                   => null,
+			'ga_set_domain_name'                      => null,
+			'ga_gtag_enabled'                         => null,
+			'ga_standard_tracking_enabled'            => null,
+			'ga_support_display_advertising'          => null,
+			'ga_support_enhanced_link_attribution'    => null,
+			'ga_use_universal_analytics'              => null,
+			'ga_anonymize_enabled'                    => null,
+			'ga_404_tracking_enabled'                 => null,
+			'ga_ecommerce_tracking_enabled'           => null,
+			'ga_enhanced_ecommerce_tracking_enabled'  => null,
+			'ga_enhanced_remove_from_cart_enabled'    => null,
+			'ga_enhanced_product_impression_enabled'  => null,
+			'ga_enhanced_product_click_enabled'       => null,
+			'ga_enhanced_checkout_process_enabled'    => null,
+			'ga_enhanced_product_detail_view_enabled' => null,
+			'ga_event_tracking_enabled'               => null,
+			'ga_linker_cross_domains'                 => null,
+			'ga_linker_allow_incoming_enabled'        => null,
 		);
 
 		$constructor = array();
-		foreach ( $options as $option ) {
-			$constructor[ $option ] = $this->$option = $this->get_option( $option );
+		foreach ( $options as $option => $default ) {
+			$constructor[ $option ] = $this->$option = $this->get_option( $option, $default );
 		}
 
 		return $constructor;

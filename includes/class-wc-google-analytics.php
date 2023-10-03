@@ -189,6 +189,17 @@ class WC_Google_Analytics extends WC_Integration {
 		}
 
 		$this->form_fields = array(
+			'ga_product_identifier'                   => array(
+				'title'       => __( 'Product Identification', 'woocommerce-google-analytics-integration' ),
+				'description' => __( 'Specify how your products will be identified to Google Analytics. Changing this setting may cause issues with historical data if a product was previously identified using a different structure.', 'woocommerce-google-analytics-integration' ),
+				'type'        => 'select',
+				'options'     => array(
+					'product_id'  => __( 'Product ID', 'woocommerce-google-analytics-integration' ),
+					'product_sku' => __( 'Product SKU with prefixed (#) ID as fallback', 'woocommerce-google-analytics-integration' )
+				),
+				// If the option is not set then the product SKU is used as default for existing installations
+				'default'     => get_option( 'woocommerce_ga_product_identifier', 'product_sku' )
+			),
 			'ga_id'                                   => array(
 				'title'       => __( 'Google Analytics Tracking ID', 'woocommerce-google-analytics-integration' ),
 				'description' => __( 'Log into your Google Analytics account to find your ID. e.g. <code>GT-XXXXX</code> or <code>G-XXXXX</code>', 'woocommerce-google-analytics-integration' ),

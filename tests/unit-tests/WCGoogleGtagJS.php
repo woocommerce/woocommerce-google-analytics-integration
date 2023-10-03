@@ -144,9 +144,12 @@ class WCGoogleGtagJS extends EventsDataTest {
 
 		$this->assertEquals( $this->get_product()->get_id(), $mock_id::get_product_identifier( $this->get_product() ) );
 
-		add_filter( 'woocommerce_ga_product_identifier', function( $product ) {
-			return 'filtered';
-		} );
+		add_filter(
+			'woocommerce_ga_product_identifier',
+			function( $product ) {
+				return 'filtered';
+			}
+		);
 
 		$this->assertEquals( 'filtered', $mock_id::get_product_identifier( $this->get_product() ) );
 	}

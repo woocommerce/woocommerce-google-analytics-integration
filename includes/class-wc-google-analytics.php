@@ -196,10 +196,10 @@ class WC_Google_Analytics extends WC_Integration {
 				'type'        => 'select',
 				'options'     => array(
 					'product_id'  => __( 'Product ID', 'woocommerce-google-analytics-integration' ),
-					'product_sku' => __( 'Product SKU with prefixed (#) ID as fallback', 'woocommerce-google-analytics-integration' )
+					'product_sku' => __( 'Product SKU with prefixed (#) ID as fallback', 'woocommerce-google-analytics-integration' ),
 				),
 				// If the option is not set then the product SKU is used as default for existing installations
-				'default'     => 'product_sku'
+				'default'     => 'product_sku',
 			),
 			'ga_id'                                   => array(
 				'title'       => __( 'Google Analytics Tracking ID', 'woocommerce-google-analytics-integration' ),

@@ -30,6 +30,7 @@ if ( ! class_exists( 'WC_Google_Analytics_Integration' ) ) {
 		__FILE__,
 		function () {
 			WC_Google_Analytics_Integration::get_instance()->maybe_show_ga_pro_notices();
+			WC_Google_Analytics_Integration::get_instance()->maybe_set_defaults();
 		}
 	);
 
@@ -206,6 +207,23 @@ if ( ! class_exists( 'WC_Google_Analytics_Integration' ) ) {
 
 			WC_Admin_Notices::add_custom_notice( 'woocommerce_google_analytics_pro_notice', $notice_html );
 			update_option( 'woocommerce_google_analytics_pro_notice_shown', true );
+		}
+
+		/**
+		 * Set default options during activation if no settings exist
+		 * 
+		 * @since x.x.x
+		 *
+		 * @return void
+		 */
+		public function maybe_set_defaults() {
+			$settings_key = 'woocommerce_google_analytics_settings';
+
+			if ( false === get_option( $settings_key, false ) ) {
+				update_option( $settings_key, array(
+					'ga_product_identifier' => 'product_id'
+				) );
+			}
 		}
 
 		/**

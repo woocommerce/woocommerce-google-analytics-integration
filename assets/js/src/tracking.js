@@ -45,11 +45,6 @@ export const trackListProducts = ( {
  */
 export const trackAddToCart = ( { product, quantity = 1 } ) => {
 	trackEvent( 'add_to_cart', {
-		event_category: 'ecommerce',
-		event_label: __(
-			'Add to Cart',
-			'woocommerce-google-analytics-integration'
-		),
 		items: [ getProductFieldObject( product, quantity ) ],
 	} );
 };

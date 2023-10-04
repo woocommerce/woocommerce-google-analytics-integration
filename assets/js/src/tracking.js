@@ -24,14 +24,14 @@ export const trackListProducts = ( {
 	listName = __( 'Product List', 'woocommerce-google-analytics-integration' ),
 } ) => {
 	trackEvent( 'view_item_list', {
-		event_category: 'engagement',
-		event_label: __(
+		item_list_id: 'engagement',
+		item_list_name: __(
 			'Viewing products',
 			'woocommerce-google-analytics-integration'
 		),
 		items: products.map( ( product, index ) => ( {
 			...getProductImpressionObject( product, listName ),
-			list_position: index + 1,
+			index: index + 1,
 		} ) ),
 	} );
 };

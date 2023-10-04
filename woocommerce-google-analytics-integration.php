@@ -211,7 +211,7 @@ if ( ! class_exists( 'WC_Google_Analytics_Integration' ) ) {
 
 		/**
 		 * Set default options during activation if no settings exist
-		 * 
+		 *
 		 * @since x.x.x
 		 *
 		 * @return void
@@ -220,9 +220,12 @@ if ( ! class_exists( 'WC_Google_Analytics_Integration' ) ) {
 			$settings_key = 'woocommerce_google_analytics_settings';
 
 			if ( false === get_option( $settings_key, false ) ) {
-				update_option( $settings_key, array(
-					'ga_product_identifier' => 'product_id'
-				) );
+				update_option(
+					$settings_key,
+					array(
+						'ga_product_identifier' => 'product_id',
+					)
+				);
 			}
 		}
 

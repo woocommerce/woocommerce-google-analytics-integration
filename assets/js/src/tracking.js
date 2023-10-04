@@ -58,11 +58,6 @@ export const trackAddToCart = ( { product, quantity = 1 } ) => {
  */
 export const trackRemoveCartItem = ( { product, quantity = 1 } ) => {
 	trackEvent( 'remove_from_cart', {
-		event_category: 'ecommerce',
-		event_label: __(
-			'Remove Cart Item',
-			'woocommerce-google-analytics-integration'
-		),
 		items: [ getProductFieldObject( product, quantity ) ],
 	} );
 };

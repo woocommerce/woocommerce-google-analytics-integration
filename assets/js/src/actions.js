@@ -3,7 +3,8 @@ import { removeAction } from '@wordpress/hooks';
 import { NAMESPACE, ACTION_PREFIX } from './constants';
 import {
 	trackBeginCheckout,
-	trackShippingInfo,
+	trackShippingTier,
+	trackPaymentMethod,
 	trackListProducts,
 	trackAddToCart,
 	trackChangeCartItemQuantity,
@@ -18,15 +19,10 @@ import {
 import { addUniqueAction } from './utils';
 
 /**
- * Track customer progress through steps of the checkout. Triggers the event when the step changes:
- * 	1 - Contact information
- * 	2 - Shipping address
- * 	3 - Billing address
- * 	4 - Shipping options
- * 	5 - Payment options
+ * Track begin_checkout
  *
- * @summary Track checkout progress with begin_checkout and checkout_progress
- * @see https://developers.google.com/analytics/devguides/collection/gtagjs/enhanced-ecommerce#1_measure_checkout_steps
+ * @summary Track the customer has started the checkout process
+ * @see https://developers.google.com/analytics/devguides/collection/ga4/reference/events?client_type=gtag#begin_checkout
  */
 addUniqueAction(
 	`${ ACTION_PREFIX }-checkout-render-checkout-form`,
@@ -34,33 +30,25 @@ addUniqueAction(
 	trackBeginCheckout
 );
 
+/**
+ * Track add_shipping_info
+ *
+ * @summary Track the selected shipping tier when the checkout form is submitted
+ * @see https://developers.google.com/analytics/devguides/collection/ga4/reference/events?client_type=gtag#add_shipping_info
+ */
 addUniqueAction(
-	`${ ACTION_PREFIX }-checkout-set-shipping-address`,
+	`${ ACTION_PREFIX }-checkout-submit`,
 	NAMESPACE,
-	trackShippingInfo
+	trackShippingTier
 );
 
+/**
+ * The following actions were previously tracked using]checkout_progress
+ * in UA but there is no comparable event in GA4.
+ */
 removeAction( `${ ACTION_PREFIX }-checkout-set-email-address`, NAMESPACE );
 removeAction( `${ ACTION_PREFIX }-checkout-set-phone-number`, NAMESPACE );
 removeAction( `${ ACTION_PREFIX }-checkout-set-billing-address`, NAMESPACE );
-
-/**
- * Choose a shipping rate
- *
- * @summary Track the shipping rate being set using set_checkout_option
- * @see https://developers.google.com/analytics/devguides/collection/gtagjs/enhanced-ecommerce#2_measure_checkout_options
- */
-addUniqueAction(
-	`${ ACTION_PREFIX }-checkout-set-selected-shipping-rate`,
-	NAMESPACE,
-	( { shippingRateId } ) => {
-		trackCheckoutOption( {
-			step: 4,
-			option: __( 'Shipping Method', 'woo-gutenberg-products-block' ),
-			value: shippingRateId,
-		} )();
-	}
-);
 
 /**
  * Choose a payment method
@@ -138,9 +126,10 @@ addUniqueAction(
  * @summary Track the add_payment_info event
  * @see https://developers.google.com/gtagjs/reference/ga4-events#add_payment_info
  */
-addUniqueAction( `${ ACTION_PREFIX }-checkout-submit`, NAMESPACE, () => {
-	trackEvent( 'add_payment_info' );
-} );
+// addUniqueAction( `${ ACTION_PREFIX }-checkout-submit`, NAMESPACE, ( c ) => {
+// 	console.log( c );
+// 	trackEvent( 'add_payment_info' );
+// } );
 
 /**
  * Product View Link Clicked

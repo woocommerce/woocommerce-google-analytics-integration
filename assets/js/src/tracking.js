@@ -102,7 +102,7 @@ export const trackBeginCheckout = ( { storeCart } ) => {
  * 
  * @param { storeCart: Object } param The cart object
  */
-export const trackShippingInfo = ( { storeCart } ) => {
+export const trackShippingTier = ( storeCart ) => {
 	trackEvent( 'add_shipping_info', {
 		currency: storeCart.totals.currency_code,
 		value: formatPrice(
@@ -110,6 +110,7 @@ export const trackShippingInfo = ( { storeCart } ) => {
 			storeCart.totals.currency_minor_unit
 		),
 		coupon: storeCart.coupons[ 0 ]?.code || '',
+		shipping_tier: storeCart.shippingRates[ 0 ]?.shipping_rates?.find( rate => rate.selected )?.name || '',
 		items: storeCart.items.map( getProductFieldObject ),
 	});
 };

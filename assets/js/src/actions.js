@@ -1,4 +1,3 @@
-import { __ } from '@wordpress/i18n';
 import { removeAction } from '@wordpress/hooks';
 import { NAMESPACE, ACTION_PREFIX } from './constants';
 import {

@@ -83,10 +83,27 @@ export const trackChangeCartItemQuantity = ( { product, quantity = 1 } ) => {
 /**
  * Track begin_checkout event
  * 
- * @param { storeCart: Object } param The cart object received from the store.
+ * @param { storeCart: Object } param The cart object
  */
 export const trackBeginCheckout = ( { storeCart } ) => {
 	trackEvent( 'begin_checkout', {
+		currency: storeCart.totals.currency_code,
+		value: formatPrice(
+			storeCart.totals.total_price,
+			storeCart.totals.currency_minor_unit
+		),
+		coupon: storeCart.coupons[ 0 ]?.code || '',
+		items: storeCart.items.map( getProductFieldObject ),
+	});
+};
+
+/**
+ * Track add_shipping_info event
+ * 
+ * @param { storeCart: Object } param The cart object
+ */
+export const trackShippingInfo = ( { storeCart } ) => {
+	trackEvent( 'add_shipping_info', {
 		currency: storeCart.totals.currency_code,
 		value: formatPrice(
 			storeCart.totals.total_price,

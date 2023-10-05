@@ -3,6 +3,7 @@ import { removeAction } from '@wordpress/hooks';
 import { NAMESPACE, ACTION_PREFIX } from './constants';
 import {
 	trackBeginCheckout,
+	trackShippingInfo,
 	trackListProducts,
 	trackAddToCart,
 	trackChangeCartItemQuantity,
@@ -37,7 +38,7 @@ addUniqueAction(
 addUniqueAction(
 	`${ ACTION_PREFIX }-checkout-set-shipping-address`,
 	NAMESPACE,
-	( { ...storeCart } ) => trackCheckoutStep( 2 )( storeCart )
+	trackShippingInfo
 );
 
 removeAction( `${ ACTION_PREFIX }-checkout-set-email-address`, NAMESPACE );

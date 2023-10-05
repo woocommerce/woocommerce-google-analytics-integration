@@ -81,6 +81,23 @@ export const trackChangeCartItemQuantity = ( { product, quantity = 1 } ) => {
 };
 
 /**
+ * Track begin_checkout event
+ * 
+ * @param { storeCart: Object } param The cart object received from the store.
+ */
+export const trackBeginCheckout = ( { storeCart } ) => {
+	trackEvent( 'begin_checkout', {
+		currency: storeCart.totals.currency_code,
+		value: formatPrice(
+			storeCart.totals.total_price,
+			storeCart.totals.currency_minor_unit
+		),
+		coupon: storeCart.coupons[ 0 ]?.code || '',
+		items: storeCart.items.map( getProductFieldObject ),
+	});
+};
+
+/**
  * Track a begin_checkout and checkout_progress event
  * Notice calling this will set the current checkout step as the step provided in the parameter.
  *

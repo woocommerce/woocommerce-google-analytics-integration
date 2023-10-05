@@ -2,6 +2,7 @@ import { __ } from '@wordpress/i18n';
 
 import { NAMESPACE, ACTION_PREFIX } from './constants';
 import {
+	trackBeginCheckout,
 	trackListProducts,
 	trackAddToCart,
 	trackChangeCartItemQuantity,
@@ -30,8 +31,9 @@ import { addUniqueAction } from './utils';
 addUniqueAction(
 	`${ ACTION_PREFIX }-checkout-render-checkout-form`,
 	NAMESPACE,
-	( { ...storeCart } ) => trackCheckoutStep( 0 )( storeCart )
+	trackBeginCheckout
 );
+
 addUniqueAction(
 	`${ ACTION_PREFIX }-checkout-set-email-address`,
 	NAMESPACE,

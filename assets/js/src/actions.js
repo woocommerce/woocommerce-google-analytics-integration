@@ -1,5 +1,5 @@
 import { __ } from '@wordpress/i18n';
-
+import { removeAction } from '@wordpress/hooks';
 import { NAMESPACE, ACTION_PREFIX } from './constants';
 import {
 	trackBeginCheckout,
@@ -35,27 +35,14 @@ addUniqueAction(
 );
 
 addUniqueAction(
-	`${ ACTION_PREFIX }-checkout-set-email-address`,
-	NAMESPACE,
-	( { ...storeCart } ) => trackCheckoutStep( 1 )( storeCart )
-);
-addUniqueAction(
 	`${ ACTION_PREFIX }-checkout-set-shipping-address`,
 	NAMESPACE,
 	( { ...storeCart } ) => trackCheckoutStep( 2 )( storeCart )
 );
-addUniqueAction(
-	`${ ACTION_PREFIX }-checkout-set-billing-address`,
-	NAMESPACE,
-	( { ...storeCart } ) => trackCheckoutStep( 3 )( storeCart )
-);
-addUniqueAction(
-	`${ ACTION_PREFIX }-checkout-set-phone-number`,
-	NAMESPACE,
-	( { step, ...storeCart } ) => {
-		trackCheckoutStep( step === 'shipping' ? 2 : 3 )( storeCart );
-	}
-);
+
+removeAction( `${ ACTION_PREFIX }-checkout-set-email-address`, NAMESPACE );
+removeAction( `${ ACTION_PREFIX }-checkout-set-phone-number`, NAMESPACE );
+removeAction( `${ ACTION_PREFIX }-checkout-set-billing-address`, NAMESPACE );
 
 /**
  * Choose a shipping rate

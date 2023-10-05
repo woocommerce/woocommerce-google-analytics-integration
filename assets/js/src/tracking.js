@@ -6,13 +6,6 @@ import {
 } from './utils';
 
 /**
- * Variable holding the current checkout step. It will be modified by trackCheckoutOption and trackCheckoutStep methods.
- *
- * @type {number}
- */
-let currentStep = -1;
-
-/**
  * Tracks view_item_list event
  *
  * @param {Object} params The function params

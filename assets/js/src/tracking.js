@@ -120,15 +120,11 @@ export const trackShippingTier = ( storeCart ) => {
  *
  * @param {Object} params The function params
  * @param {Object} params.product The product to track
- * @param {string} params.listName The name of the list in which the item was presented to the user.
  */
-export const trackSelectContent = ( {
-	product,
-	listName = __( 'Product List', 'woocommerce-google-analytics-integration' ),
-} ) => {
+export const trackSelectContent = ( { product } ) => {
 	trackEvent( 'select_content', {
 		content_type: 'product',
-		items: [ getProductImpressionObject( product, listName ) ],
+		content_id: getProductId( product ),
 	} );
 };
 

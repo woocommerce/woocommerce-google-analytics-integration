@@ -394,10 +394,12 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 		// we listen for clicks on `.woocommerce` container(s),
 		// as `.woocommerce-cart-form` and its items are re-rendered on each removal.
 		wc_enqueue_js(
-			"const selector = '.woocommerce-cart-form__cart-item .remove';
-			$( '.woocommerce' ).off('click', selector).on( 'click', selector, function() {
-				$event_code
-			});"
+			"(function(){
+				const selector = '.woocommerce-cart-form__cart-item .remove';
+				$( '.woocommerce' ).off('click', selector).on( 'click', selector, function() {
+					$event_code
+				});
+			})();"
 		);
 	}
 

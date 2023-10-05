@@ -97,20 +97,6 @@ addUniqueAction(
 );
 
 /**
- * Add Payment Information
- *
- * This event signifies a user has submitted their payment information. Note, this is used to indicate checkout
- * submission, not `purchase` which is triggered on the thanks page.
- *
- * @summary Track the add_payment_info event
- * @see https://developers.google.com/gtagjs/reference/ga4-events#add_payment_info
- */
-// addUniqueAction( `${ ACTION_PREFIX }-checkout-submit`, NAMESPACE, ( c ) => {
-// 	console.log( c );
-// 	trackEvent( 'add_payment_info' );
-// } );
-
-/**
  * Product View Link Clicked
  *
  * @summary Track the select_content event

@@ -4,13 +4,10 @@ import { NAMESPACE, ACTION_PREFIX } from './constants';
 import {
 	trackBeginCheckout,
 	trackShippingTier,
-	trackPaymentMethod,
 	trackListProducts,
 	trackAddToCart,
 	trackChangeCartItemQuantity,
 	trackRemoveCartItem,
-	trackCheckoutOption,
-	trackEvent,
 	trackSelectContent,
 	trackSearch,
 	trackViewItem,
@@ -49,24 +46,6 @@ addUniqueAction(
 removeAction( `${ ACTION_PREFIX }-checkout-set-email-address`, NAMESPACE );
 removeAction( `${ ACTION_PREFIX }-checkout-set-phone-number`, NAMESPACE );
 removeAction( `${ ACTION_PREFIX }-checkout-set-billing-address`, NAMESPACE );
-
-/**
- * Choose a payment method
- *
- * @summary Track the payment method being set using set_checkout_option
- * @see https://developers.google.com/analytics/devguides/collection/gtagjs/enhanced-ecommerce#2_measure_checkout_options
- */
-addUniqueAction(
-	`${ ACTION_PREFIX }-checkout-set-active-payment-method`,
-	NAMESPACE,
-	( { paymentMethodSlug } ) => {
-		trackCheckoutOption( {
-			step: 5,
-			option: __( 'Payment Method', 'woo-gutenberg-products-block' ),
-			value: paymentMethodSlug,
-		} )();
-	}
-);
 
 /**
  * Product List View

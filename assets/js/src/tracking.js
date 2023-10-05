@@ -116,29 +116,6 @@ export const trackShippingTier = ( storeCart ) => {
 };
 
 /**
- * Track a set_checkout_option event
- * Notice calling this will set the current checkout step as the step provided in the parameter.
- *
- * @param {Object} params The params from the option.
- * @param {number} params.step The step to track
- * @param {string} params.option The option to set in checkout
- * @param {string} params.value The value for the option
- *
- * @return {(function() : void)} A callable to track the checkout event.
- */
-export const trackCheckoutOption =
-	( { step, option, value } ) =>
-	() => {
-		trackEvent( 'set_checkout_option', {
-			checkout_step: step,
-			checkout_option: option,
-			value,
-		} );
-
-		currentStep = step;
-	};
-
-/**
  * Tracks select_content event.
  *
  * @param {Object} params The function params

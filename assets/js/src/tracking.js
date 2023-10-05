@@ -2,6 +2,7 @@ import { __ } from '@wordpress/i18n';
 import {
 	getProductFieldObject,
 	getProductImpressionObject,
+	getProductId,
 	formatPrice,
 } from './utils';
 
@@ -75,8 +76,9 @@ export const trackChangeCartItemQuantity = ( { product, quantity = 1 } ) => {
 
 /**
  * Track begin_checkout event
- * 
- * @param { storeCart: Object } param The cart object
+ *
+ * @param {Object} params The function params
+ * @param {Object} params.storeCart The cart object
  */
 export const trackBeginCheckout = ( { storeCart } ) => {
 	trackEvent( 'begin_checkout', {
@@ -87,15 +89,16 @@ export const trackBeginCheckout = ( { storeCart } ) => {
 		),
 		coupon: storeCart.coupons[ 0 ]?.code || '',
 		items: storeCart.items.map( getProductFieldObject ),
-	});
+	} );
 };
 
 /**
  * Track add_shipping_info event
- * 
- * @param { storeCart: Object } param The cart object
+ *
+ * @param {Object} params The function params
+ * @param {Object} params.storeCart The cart object
  */
-export const trackShippingTier = ( storeCart ) => {
+export const trackShippingTier = ( { storeCart } ) => {
 	trackEvent( 'add_shipping_info', {
 		currency: storeCart.totals.currency_code,
 		value: formatPrice(
@@ -103,9 +106,12 @@ export const trackShippingTier = ( storeCart ) => {
 			storeCart.totals.currency_minor_unit
 		),
 		coupon: storeCart.coupons[ 0 ]?.code || '',
-		shipping_tier: storeCart.shippingRates[ 0 ]?.shipping_rates?.find( rate => rate.selected )?.name || '',
+		shipping_tier:
+			storeCart.shippingRates[ 0 ]?.shipping_rates?.find(
+				( rate ) => rate.selected
+			)?.name || '',
 		items: storeCart.items.map( getProductFieldObject ),
-	});
+	} );
 };
 
 /**

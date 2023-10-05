@@ -75,7 +75,7 @@ export const addUniqueAction = ( hookName, namespace, callback ) => {
  *
  * @return {string} - The product ID
  */
-const getProductId = ( product ) => {
+export const getProductId = ( product ) => {
 	return product.sku ? product.sku : '#' + product.id;
 };
 

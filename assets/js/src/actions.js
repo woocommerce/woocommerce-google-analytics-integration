@@ -8,7 +8,6 @@ import {
 	trackAddToCart,
 	trackChangeCartItemQuantity,
 	trackRemoveCartItem,
-	trackCheckoutStep,
 	trackCheckoutOption,
 	trackEvent,
 	trackSelectContent,

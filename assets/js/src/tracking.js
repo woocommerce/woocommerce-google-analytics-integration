@@ -115,34 +115,6 @@ export const trackShippingInfo = ( { storeCart } ) => {
 };
 
 /**
- * Track a begin_checkout and checkout_progress event
- * Notice calling this will set the current checkout step as the step provided in the parameter.
- *
- * @param {number} step The checkout step for to track
- * @return {(function( { storeCart: Object } ): void)} A callable receiving the cart to track the checkout event.
- */
-export const trackCheckoutStep =
-	( step ) =>
-	( { storeCart } ) => {
-		if ( currentStep === step ) {
-			return;
-		}
-
-		trackEvent( step === 0 ? 'begin_checkout' : 'checkout_progress', {
-			items: storeCart.cartItems.map( getProductFieldObject ),
-			coupon: storeCart.cartCoupons[ 0 ]?.code || '',
-			currency: storeCart.cartTotals.currency_code,
-			value: formatPrice(
-				storeCart.cartTotals.total_price,
-				storeCart.cartTotals.currency_minor_unit
-			),
-			checkout_step: step,
-		} );
-
-		currentStep = step;
-	};
-
-/**
  * Track a set_checkout_option event
  * Notice calling this will set the current checkout step as the step provided in the parameter.
  *

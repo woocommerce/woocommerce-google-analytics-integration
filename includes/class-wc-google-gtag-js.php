@@ -41,6 +41,9 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 		// Setup frontend scripts
 		add_action( 'wp_enqueue_scripts', array( $this, 'register_scripts' ) );
 		add_action( 'woocommerce_before_single_product', array( $this, 'setup_frontend_scripts' ) );
+
+		// Setup custom events
+		add_action( 'woocommerce_add_to_cart', array( $this, 'add_to_cart_event' ), 10, 6 );
 	}
 
 	/**
@@ -86,6 +89,70 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 	 */
 	public static function tracker_var() {
 		return apply_filters( 'woocommerce_gtag_tracker_variable', 'gtag' );
+	}
+
+	/**
+	 * Trigger custom event when a product is added to the cart
+	 *
+	 * @param string $cart_item_key The key for the cart item
+	 * @param int    $product_id contains the id of the product to add to the cart.
+	 * @param int    $quantity contains the quantity of the item to add.
+	 * @param int    $variation_id ID of the variation being added to the cart.
+	 * @param array  $variation attribute values.
+	 * @param array  $cart_item_data extra cart item data we want to pass into the item.
+	 *
+	 * @return void
+
+	 * @return void
+	 */
+	public function add_to_cart_event( $cart_item_key, $product_id, $quantity, $variation_id, $variation, $cart_item_data ) {
+		$this->trigger_event(
+			'add_to_cart',
+			array(
+				'quantity' => $quantity,
+				...$this->get_item_data( wc_get_product( $product_id ) ),
+			)
+		);
+	}
+
+	/**
+	 * Builds an array in the format required for gtag events
+	 *
+	 * @param WC_Product $product The product to build an item data array for
+	 *
+	 * @return array
+	 */
+	public function get_item_data( $product ): array {
+		return array(
+			'id' 		 => $product->get_id(),
+			'sku' 		 => $product->get_sku(),
+			'name' 		 => $product->get_name(),
+			'categories' => $this->get_product_categories( $product->get_id() ),
+			'prices'	 => array(
+				'price' 			  => wc_get_price_including_tax( $product ),
+				'currency_minor_unit' => wc_get_price_decimals()
+			),
+		);
+	}
+
+	/**
+	 * Get array containing up to 5 categories for a given product
+	 *
+	 * @param int $product_id The product ID to get the categories for
+	 *
+	 * @return array
+	 */
+	public function get_product_categories( $product_id ): array {
+		return array_map(
+			function( $category ) {
+				return [ 'name' => $category->name ];
+			},
+			array_slice(
+				get_the_terms( $product_id, 'product_cat' ),
+				0,
+				5
+			)
+		);
 	}
 
 	/**
@@ -505,6 +572,22 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 			});
 		'
 		);
+	}
+
+	/**
+	 * Enqueue inline Javascript to trigger a custom jQuery event
+	 *
+	 * @param string $event_name Name of the event which will be prefixed with `google_analytics-`
+	 * @param array  $event_data Data to include with the event
+	 *
+	 * @return void
+	 */
+	public function trigger_event( $event_name, $event_data ) {
+		wc_enqueue_js( sprintf(
+			"$( document.body ).trigger( 'google_analytics-%s', '%s' )",
+			esc_js( $event_name ),
+			wp_json_encode( $event_data )	
+		) );
 	}
 
 }

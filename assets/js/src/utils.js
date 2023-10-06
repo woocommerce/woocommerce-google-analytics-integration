@@ -13,7 +13,7 @@ export const getProductFieldObject = ( product, quantity ) => {
 	return {
 		item_id: getProductId( product ),
 		item_name: product.name,
-		quantity,
+		quantity: product.quantity ?? quantity,
 		...getProductCategories( product ),
 		price: formatPrice(
 			product.prices.price,
@@ -66,6 +66,18 @@ export const formatPrice = ( price, currencyMinorUnit = 2 ) => {
 export const addUniqueAction = ( hookName, namespace, callback ) => {
 	removeAction( hookName, namespace );
 	addAction( hookName, namespace, callback );
+};
+
+/**
+ * Listens for jQuery events and triggers a callback
+ *
+ * @param {string} eventName The event name
+ * @param {Function} callback The function to run when the event happens
+ */
+export const eventListener = ( eventName, callback ) => {
+	jQuery( document.body ).on( eventName, function ( event, item ) {
+		callback( { product: JSON.parse( item ) } );
+	} );
 };
 
 /**

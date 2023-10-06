@@ -1,5 +1,5 @@
 import { removeAction } from '@wordpress/hooks';
-import { NAMESPACE, ACTION_PREFIX } from './constants';
+import { NAMESPACE, ACTION_PREFIX, EVENT_PREFIX } from './constants';
 import {
 	trackBeginCheckout,
 	trackShippingTier,
@@ -12,7 +12,7 @@ import {
 	trackViewItem,
 	trackException,
 } from './tracking';
-import { addUniqueAction } from './utils';
+import { addUniqueAction, eventListener } from './utils';
 
 /**
  * Track begin_checkout
@@ -71,6 +71,8 @@ addUniqueAction(
 	NAMESPACE,
 	trackAddToCart
 );
+
+eventListener( `${ EVENT_PREFIX }-add_to_cart`, trackAddToCart );
 
 /**
  * Change cart item quantities

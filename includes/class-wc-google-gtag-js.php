@@ -102,8 +102,6 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 	 * @param array  $cart_item_data extra cart item data we want to pass into the item.
 	 *
 	 * @return void
-
-	 * @return void
 	 */
 	public function add_to_cart_event( $cart_item_key, $product_id, $quantity, $variation_id, $variation, $cart_item_data ) {
 		$this->trigger_event(
@@ -124,13 +122,13 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 	 */
 	public function get_item_data( $product ): array {
 		return array(
-			'id' 		 => $product->get_id(),
-			'sku' 		 => $product->get_sku(),
-			'name' 		 => $product->get_name(),
+			'id'         => $product->get_id(),
+			'sku'        => $product->get_sku(),
+			'name'       => $product->get_name(),
 			'categories' => $this->get_product_categories( $product->get_id() ),
-			'prices'	 => array(
-				'price' 			  => wc_get_price_including_tax( $product ),
-				'currency_minor_unit' => wc_get_price_decimals()
+			'prices'     => array(
+				'price'               => wc_get_price_including_tax( $product ),
+				'currency_minor_unit' => wc_get_price_decimals(),
 			),
 		);
 	}
@@ -583,11 +581,13 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 	 * @return void
 	 */
 	public function trigger_event( $event_name, $event_data ) {
-		wc_enqueue_js( sprintf(
-			"$( document.body ).trigger( 'google_analytics-%s', '%s' )",
-			esc_js( $event_name ),
-			wp_json_encode( $event_data )	
-		) );
+		wc_enqueue_js(
+			sprintf(
+				"$( document.body ).trigger( 'google_analytics-%s', '%s' )",
+				esc_js( $event_name ),
+				wp_json_encode( $event_data )
+			)
+		);
 	}
 
 }

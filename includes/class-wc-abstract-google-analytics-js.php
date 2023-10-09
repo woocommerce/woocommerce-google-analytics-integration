@@ -31,8 +31,9 @@ abstract class WC_Abstract_Google_Analytics_JS {
 	/**
 	 * Return one of our options
 	 *
-	 * @param  string $option Key/name for the option
-	 * @return string         Value of the option
+	 * @param string $option Key/name for the option
+	 *
+	 * @return string|null Value of the option or null if not found
 	 */
 	protected static function get( $option ) {
 		return self::$options[ $option ] ?? null;

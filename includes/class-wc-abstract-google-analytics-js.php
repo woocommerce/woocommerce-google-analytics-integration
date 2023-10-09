@@ -31,11 +31,12 @@ abstract class WC_Abstract_Google_Analytics_JS {
 	/**
 	 * Return one of our options
 	 *
-	 * @param  string $option Key/name for the option
-	 * @return string         Value of the option
+	 * @param string $option Key/name for the option
+	 *
+	 * @return string|null Value of the option or null if not found
 	 */
 	protected static function get( $option ) {
-		return self::$options[ $option ];
+		return self::$options[ $option ] ?? null;
 	}
 
 	/**
@@ -114,11 +115,17 @@ abstract class WC_Abstract_Google_Analytics_JS {
 	 * @return string
 	 */
 	public static function get_product_identifier( $product ) {
-		if ( ! empty( $product->get_sku() ) ) {
-			return esc_js( $product->get_sku() );
-		} else {
-			return esc_js( '#' . ( $product->is_type( 'variation' ) ? $product->get_parent_id() : $product->get_id() ) );
+		$identifier = $product->get_id();
+
+		if ( 'product_sku' === self::get( 'ga_product_identifier' ) ) {
+			if ( ! empty( $product->get_sku() ) ) {
+				$identifier = $product->get_sku();
+			} else {
+				$identifier = '#' . ( $product->is_type( 'variation' ) ? $product->get_parent_id() : $product->get_id() );
+			}
 		}
+
+		return apply_filters( 'woocommerce_ga_product_identifier', $identifier, $product );
 	}
 
 	/**

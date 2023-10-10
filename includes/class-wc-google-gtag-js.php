@@ -205,7 +205,7 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 				'name'     => $product->get_title(),
 				'category' => self::product_get_category_line( $product ),
 				'quantity' => 1,
-			]
+			],
 		];
 
 		wc_enqueue_js(
@@ -278,23 +278,26 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 		$track_404_enabled = '';
 		if ( 'yes' === self::get( 'ga_404_tracking_enabled' ) && is_404() ) {
 			// See https://developers.google.com/analytics/devguides/collection/gtagjs/events for reference
-			$track_404_enabled = self::tracker_var() . "( 'event', '404_not_found', { 'event_category':'error', 'event_label':'page: ' + document.location.pathname + document.location.search + ' referrer: ' + document.referrer });";
+			$track_404_enabled = "gtag( 'event', '404_not_found', { 'event_category':'error', 'event_label':'page: ' + document.location.pathname + document.location.search + ' referrer: ' + document.referrer });";
 		}
 
 		$gtag_developer_id = '';
 		if ( ! empty( self::DEVELOPER_ID ) ) {
-			$gtag_developer_id = self::tracker_var() . "('set', 'developer_id." . self::DEVELOPER_ID . "', true);";
+			$gtag_developer_id = "gtag('set', 'developer_id." . self::DEVELOPER_ID . "', true);";
 		}
 
+		$gtag_name          = self::tracker_var();
 		$gtag_id            = self::get( 'ga_id' );
 		$gtag_cross_domains = ! empty( self::get( 'ga_linker_cross_domains' ) ) ? array_map( 'esc_js', explode( ',', self::get( 'ga_linker_cross_domains' ) ) ) : array();
-		$gtag_snippet       = '
-		window.dataLayer = window.dataLayer || [];
-		function ' . self::tracker_var() . '(){dataLayer.push(arguments);}
-		' . self::tracker_var() . "('js', new Date());
-		$gtag_developer_id
 
-		" . self::tracker_var() . "('config', '" . esc_js( $gtag_id ) . "', {
+		$gtag_snippet = "(()=>{
+		window.dataLayer = window.dataLayer || [];
+		// Publish gtag under custom name to the global scope.
+		// Preserve the custom `arguments.callee.name`, for backward compatibility (not sure if even needed).
+		const gtag = window.$gtag_name = function $gtag_name(){dataLayer.push(arguments);}
+		gtag('js', new Date());
+		$gtag_developer_id
+		gtag('config', '" . esc_js( $gtag_id ) . "', {
 			'allow_google_signals': " . ( 'yes' === self::get( 'ga_support_display_advertising' ) ? 'true' : 'false' ) . ",
 			'link_attribution': " . ( 'yes' === self::get( 'ga_support_enhanced_link_attribution' ) ? 'true' : 'false' ) . ",
 			'anonymize_ip': " . ( 'yes' === self::get( 'ga_anonymize_enabled' ) ? 'true' : 'false' ) . ",
@@ -309,7 +312,7 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 		} );
 
 		$track_404_enabled
-		";
+		})();";
 
 		wp_register_script( 'google-tag-manager', 'https://www.googletagmanager.com/gtag/js?id=' . esc_js( $gtag_id ), array( 'google-analytics-opt-out' ), null, false );
 		wp_add_inline_script( 'google-tag-manager', apply_filters( 'woocommerce_gtag_snippet', $gtag_snippet ) );

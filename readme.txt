@@ -3,7 +3,7 @@ Contributors: woocommerce, automattic, claudiosanches, bor0, royho, laurendaviss
 Tags: woocommerce, google analytics
 Requires at least: 3.9
 Tested up to: 6.3
-Stable tag: 1.8.6
+Stable tag: 1.8.7
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -60,6 +60,9 @@ Exact wording depends on the national data privacy laws and should be adjusted.
 
 == Changelog ==
 
+= 1.8.7 - 2023-10-10 =
+* Fix - JS syntax error on pages with cart and mini-cart rendered, which was causing purchases and cart removals not to be tracked.
+
 = 1.8.6 - 2023-10-03 =
 * Add - Privacy policy guide section.
 * Dev - Enable since tag replacement.
@@ -74,11 +77,5 @@ Exact wording depends on the national data privacy laws and should be adjusted.
 * Fix - Add To Cart and Impression events when using Blocks.
 * Fix - Compat - Add PHP 8.2 support.
 * Tweak - WC 8.1.0 compatibility.
-
-= 1.8.4 - 2023-08-08 =
-* Dev - Add release preparation GH workflow.
-* Fix - Add async attribute in `google-tag-manager` script.
-* Tweak - WC 8.0 compatibility.
-* Tweak - WP 6.3 compatibility.
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce-google-analytics-integration/trunk/changelog.txt).

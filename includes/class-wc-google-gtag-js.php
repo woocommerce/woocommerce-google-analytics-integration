@@ -199,36 +199,28 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 	 * @param WC_Product $product
 	 */
 	public static function listing_click( $product ) {
-		$item = array(
-			'id'       => self::get_product_identifier( $product ),
-			'name'     => $product->get_title(),
-			'category' => self::product_get_category_line( $product ),
-			'quantity' => 1,
-		);
-
-		$select_content_event_code = self::get_event_code(
-			'select_content',
-			array(
-				'items' => array( $item ),
-			)
-		);
-
-		$add_to_cart_event_code = self::get_event_code(
-			'add_to_cart',
-			array(
-				'items' => array( $item ),
-			)
-		);
+		$items = [
+			'items' => [
+				'id'       => self::get_product_identifier( $product ),
+				'name'     => $product->get_title(),
+				'category' => self::product_get_category_line( $product ),
+				'quantity' => 1,
+			]
+		];
 
 		wc_enqueue_js(
-			"
-			$( '.product.post-" . esc_js( $product->get_id() ) . ' a , .product.post-' . esc_js( $product->get_id() ) . " button' ).on('click', function() {
-				if ( false === $(this).hasClass( 'product_type_variable' ) && false === $(this).hasClass( 'product_type_grouped' ) ) {
-					$add_to_cart_event_code
-				} else {
-					$select_content_event_code
-				}
-			});"
+			sprintf(
+				"$( '.product.post-%s a , .product.post-%1\$s button' ).on('click', function() {
+					if ( false === $(this).hasClass( 'product_type_variable' ) && false === $(this).hasClass( 'product_type_grouped' ) ) {
+						%s
+					} else {
+						%s
+					}
+				});",
+				esc_js( $product->get_id() ),
+				self::get_event_code( 'add_to_cart', $items ),
+				self::get_event_code( 'select_content', $items ),
+			)
 		);
 	}
 

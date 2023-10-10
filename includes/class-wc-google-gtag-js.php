@@ -199,12 +199,14 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 	 * @param WC_Product $product
 	 */
 	public static function listing_click( $product ) {
-		$items = [
+		$event_data = [
 			'items' => [
-				'id'       => self::get_product_identifier( $product ),
-				'name'     => $product->get_title(),
-				'category' => self::product_get_category_line( $product ),
-				'quantity' => 1,
+				[
+					'id'       => self::get_product_identifier( $product ),
+					'name'     => $product->get_title(),
+					'category' => self::product_get_category_line( $product ),
+					'quantity' => 1,
+				],
 			],
 		];
 
@@ -218,8 +220,8 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 					}
 				});",
 				esc_js( $product->get_id() ),
-				self::get_event_code( 'add_to_cart', $items ),
-				self::get_event_code( 'select_content', $items ),
+				self::get_event_code( 'add_to_cart', $event_data ),
+				self::get_event_code( 'select_content', $event_data ),
 			)
 		);
 	}

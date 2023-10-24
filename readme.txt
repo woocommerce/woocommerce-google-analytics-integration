@@ -71,11 +71,4 @@ Exact wording depends on the national data privacy laws and should be adjusted.
 * Tweak - Tracking for Products ( Add To Cart and Impression) when using Products (Beta) Block.
 * Tweak - WC 8.2 compatibility.
 
-= 1.8.5 - 2023-09-14 =
-* Dev - Add Workflow for generation Hooks documentation.
-* Dev - Fetch WooCommerce and WordPress versions for our tests.
-* Fix - Add To Cart and Impression events when using Blocks.
-* Fix - Compat - Add PHP 8.2 support.
-* Tweak - WC 8.1.0 compatibility.
-
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce-google-analytics-integration/trunk/changelog.txt).

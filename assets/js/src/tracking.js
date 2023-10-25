@@ -17,17 +17,19 @@ export const trackListProducts = ( {
 	products,
 	listName = __( 'Product List', 'woocommerce-google-analytics-integration' ),
 } ) => {
-	trackEvent( 'view_item_list', {
-		item_list_id: 'engagement',
-		item_list_name: __(
-			'Viewing products',
-			'woocommerce-google-analytics-integration'
-		),
-		items: products.map( ( product, index ) => ( {
-			...getProductImpressionObject( product, listName ),
-			index: index + 1,
-		} ) ),
-	} );
+	if ( products.length > 0 ) {
+		trackEvent( 'view_item_list', {
+			item_list_id: 'engagement',
+			item_list_name: __(
+				'Viewing products',
+				'woocommerce-google-analytics-integration'
+			),
+			items: products.map( ( product, index ) => ( {
+				...getProductImpressionObject( product, listName ),
+				index: index + 1,
+			} ) ),
+		} );
+	}
 };
 
 /**

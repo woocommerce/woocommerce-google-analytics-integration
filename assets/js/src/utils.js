@@ -13,7 +13,7 @@ export const getProductFieldObject = ( product, quantity ) => {
 	return {
 		item_id: getProductId( product ),
 		item_name: product.name,
-		quantity,
+		quantity: product.quantity ?? quantity,
 		...getProductCategories( product ),
 		price: formatPrice(
 			product.prices.price,

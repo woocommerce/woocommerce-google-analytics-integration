@@ -93,7 +93,6 @@ class WC_Google_Analytics extends WC_Integration {
 
 		// Contains snippets/JS tracking code
 		include_once 'class-wc-abstract-google-analytics-js.php';
-		include_once 'class-wc-google-analytics-js.php';
 		include_once 'class-wc-google-gtag-js.php';
 		$this->get_tracking_instance( $constructor );
 

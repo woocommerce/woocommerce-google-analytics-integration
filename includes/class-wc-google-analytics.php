@@ -90,6 +90,8 @@ class WC_Google_Analytics extends WC_Integration {
 		$this->init_settings();
 		$constructor = $this->init_options();
 
+		add_action( 'admin_notices', array( $this, 'universal_analytics_upgrade_notice' ) );
+
 		// Contains snippets/JS tracking code
 		include_once 'class-wc-abstract-google-analytics-js.php';
 		include_once 'class-wc-google-gtag-js.php';
@@ -109,6 +111,26 @@ class WC_Google_Analytics extends WC_Integration {
 
 		// utm_nooverride parameter for Google AdWords
 		add_filter( 'woocommerce_get_return_url', array( $this, 'utm_nooverride' ) );
+	}
+
+	/**
+	 * Conditionally display an error notice to the merchant if the stored property ID starts with "UA"
+	 *
+	 * @return void
+	 */
+	public function universal_analytics_upgrade_notice () {
+		if ( 'ua' === substr( strtolower( $this->get_option( 'ga_id' ) ), 0, 2 ) ) {
+			printf(
+				'<div class="%1$s"><p>%2$s</p></div>',
+				'notice notice-error',
+				sprintf(
+					/* translators: 1) URL for Google documentation on upgrading from UA to GA4 2) URL to WooCommerce Google Analytics settings page */
+					__( 'Your website is configured to use Universal Analytics which Google retired in July of 2023. Update your account using the <a href="%s" target="_blank">setup assistant</a> and then update your <a href="%s">WooCommerce settings</a>.', 'woocommerce-google-analytics-integration' ),
+					'https://support.google.com/analytics/answer/9744165?sjid=9632005471070882766-EU#zippy=%2Cin-this-article',
+					'/wp-admin/admin.php?page=wc-settings&tab=integration&section=google_analytics'
+				)
+			);
+		}
 	}
 
 	/**

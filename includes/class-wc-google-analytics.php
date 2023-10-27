@@ -4,7 +4,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
 
-use WC_Google_Analytics_Integration as Plugin;
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\TaskLists;
 
 /**

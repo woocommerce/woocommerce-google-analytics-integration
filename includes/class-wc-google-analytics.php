@@ -102,7 +102,6 @@ class WC_Google_Analytics extends WC_Integration {
 		add_filter( 'woocommerce_tracker_data', array( $this, 'track_options' ) );
 		add_action( 'woocommerce_update_options_integration_google_analytics', array( $this, 'process_admin_options' ) );
 		add_action( 'woocommerce_update_options_integration_google_analytics', array( $this, 'show_options_info' ) );
-		add_action( 'admin_enqueue_scripts', array( $this, 'load_admin_assets' ) );
 		add_action( 'admin_init', array( $this, 'privacy_policy' ) );
 
 		// Tracking code
@@ -321,34 +320,6 @@ class WC_Google_Analytics extends WC_Integration {
 		}
 
 		return $data;
-	}
-
-	/**
-	 * Enqueue the admin JavaScript
-	 */
-	public function load_admin_assets() {
-		$screen = get_current_screen();
-		if ( 'woocommerce_page_wc-settings' !== $screen->id ) {
-			return;
-		}
-
-		// phpcs:disable WordPress.Security.NonceVerification.Recommended
-		if ( empty( $_GET['tab'] ) ) {
-			return;
-		}
-
-		// phpcs:disable WordPress.Security.NonceVerification.Recommended
-		if ( 'integration' !== $_GET['tab'] ) {
-			return;
-		}
-
-		wp_enqueue_script(
-			'wc-google-analytics-admin-enhanced-settings',
-			Plugin::get_instance()->get_js_asset_url( 'admin-ga-settings.js' ),
-			Plugin::get_instance()->get_js_asset_dependencies( 'admin-ga-settings', [ 'jquery' ] ),
-			Plugin::get_instance()->get_js_asset_version( 'admin-ga-settings' ),
-			true
-		);
 	}
 
 	/**

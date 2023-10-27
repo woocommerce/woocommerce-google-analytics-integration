@@ -25,7 +25,13 @@ class CheckoutProcess extends EventsDataTest {
 		$cart    = WC()->cart;
 
 		$add_to = $cart->add_to_cart( $product->get_id() );
-		( new WC_Google_Gtag_JS() )->checkout_process( $cart->get_cart() );
+
+		$mock = $this->getMockBuilder( WC_Google_Gtag_JS::class )
+					 ->setMethods( array( '__construct' ) )
+					 ->setConstructorArgs( array( array( 'ga_enhanced_checkout_process_enabled' => 'yes' ) ) )
+					 ->getMock();
+
+		$mock->checkout_process( $cart->get_cart() );
 
 		// Confirm woocommerce_gtag_event_data is called by checkout_process().
 		$this->assertEquals( 1, $this->get_event_data_filter_call_count(), 'woocommerce_gtag_event_data filter was not called for begin_checkout (checkout_process()) event' );

@@ -173,17 +173,13 @@ abstract class WC_Abstract_Google_Analytics_JS {
 
 	/**
 	 * Enqueue JavaScript to track a product detail view
-	 *
-	 * @param WC_Product $product
 	 */
-	abstract public function product_detail( $product );
+	abstract public function product_detail();
 
 	/**
 	 * Enqueue JS to track when the checkout process is started
-	 *
-	 * @param array $cart items/contents of the cart
 	 */
-	abstract public function checkout_process( $cart );
+	abstract public function checkout_process();
 
 	/**
 	 * Enqueue JavaScript for Add to cart tracking

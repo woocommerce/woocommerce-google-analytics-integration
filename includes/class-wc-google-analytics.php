@@ -293,16 +293,16 @@ class WC_Google_Analytics extends WC_Integration {
 	 */
 	public function track_options( $data ) {
 		$data['wc-google-analytics'] = array(
-			'standard_tracking_enabled'           => $this->ga_standard_tracking_enabled,
-			'support_display_advertising'         => $this->ga_support_display_advertising,
-			'support_enhanced_link_attribution'   => $this->ga_support_enhanced_link_attribution,
-			'anonymize_enabled'                   => $this->ga_anonymize_enabled,
-			'ga_404_tracking_enabled'             => $this->ga_404_tracking_enabled,
-			'ecommerce_tracking_enabled'          => $this->ga_ecommerce_tracking_enabled,
-			'event_tracking_enabled'              => $this->ga_event_tracking_enabled,
-			'plugin_version'                      => WC_GOOGLE_ANALYTICS_INTEGRATION_VERSION,
-			'linker_allow_incoming_enabled'       => empty( $this->ga_linker_allow_incoming_enabled ) ? 'no' : 'yes',
-			'linker_cross_domains'                => $this->ga_linker_cross_domains,
+			'standard_tracking_enabled'         => $this->ga_standard_tracking_enabled,
+			'support_display_advertising'       => $this->ga_support_display_advertising,
+			'support_enhanced_link_attribution' => $this->ga_support_enhanced_link_attribution,
+			'anonymize_enabled'                 => $this->ga_anonymize_enabled,
+			'ga_404_tracking_enabled'           => $this->ga_404_tracking_enabled,
+			'ecommerce_tracking_enabled'        => $this->ga_ecommerce_tracking_enabled,
+			'event_tracking_enabled'            => $this->ga_event_tracking_enabled,
+			'plugin_version'                    => WC_GOOGLE_ANALYTICS_INTEGRATION_VERSION,
+			'linker_allow_incoming_enabled'     => empty( $this->ga_linker_allow_incoming_enabled ) ? 'no' : 'yes',
+			'linker_cross_domains'              => $this->ga_linker_cross_domains,
 		);
 
 		// ID prefix, blank, or X for unknown

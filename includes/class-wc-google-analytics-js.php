@@ -539,5 +539,4 @@ class WC_Google_Analytics_JS extends WC_Abstract_Google_Analytics_JS {
 		wp_add_inline_script( 'google-analytics', $code );
 		wp_enqueue_script( 'google-analytics' );
 	}
-
 }

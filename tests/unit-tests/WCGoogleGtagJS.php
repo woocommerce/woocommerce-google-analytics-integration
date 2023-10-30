@@ -115,5 +115,4 @@ class WCGoogleGtagJS extends EventsDataTest {
 		// Assert the handle is enqueued.
 		$this->assertEquals( true, wp_script_is( $gtag->script_handle . '-ga-integration', 'enqueued' ), 'the script is enqueued' );
 	}
-
 }

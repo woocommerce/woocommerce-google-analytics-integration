@@ -128,7 +128,7 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 		// Recursively walk through $data array and escape all values that will be used in JS.
 		array_walk_recursive(
 			$data,
-			function( &$value, $key ) {
+			function ( &$value, $key ) {
 				$value = esc_js( $value );
 			}
 		);
@@ -508,5 +508,4 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 		'
 		);
 	}
-
 }

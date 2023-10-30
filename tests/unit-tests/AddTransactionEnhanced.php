@@ -50,5 +50,4 @@ class AddTransactionEnhanced extends EventsDataTest {
 		// Confirm data structure matches what's expected.
 		$this->assertEquals( $expected_data, $this->get_event_data(), 'Event data does not match expected data structure for purchase (add_transaction_enhanced()) event' );
 	}
-
 }

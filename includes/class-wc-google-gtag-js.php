@@ -41,6 +41,15 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 		// Setup frontend scripts
 		add_action( 'wp_enqueue_scripts', array( $this, 'register_scripts' ) );
 		add_action( 'woocommerce_before_single_product', array( $this, 'setup_frontend_scripts' ) );
+
+		// Event tracking code
+		add_action( 'woocommerce_after_add_to_cart_button', array( $this, 'add_to_cart' ) );
+		add_action( 'woocommerce_after_cart', array( $this, 'remove_from_cart' ) );
+		add_action( 'woocommerce_after_mini_cart', array( $this, 'remove_from_cart' ) );
+		add_filter( 'woocommerce_cart_item_remove_link', array( $this, 'remove_from_cart_attributes' ), 10, 2 );
+		add_filter( 'woocommerce_loop_add_to_cart_link', array( $this, 'track_product' ), 10, 2 );
+		add_action( 'woocommerce_after_single_product', array( $this, 'product_detail' ) );
+		add_action( 'woocommerce_after_checkout_form', array( $this, 'checkout_process' ) );
 	}
 
 	/**
@@ -234,10 +243,14 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 
 	/**
 	 * Output Javascript to track add_to_cart event on single product page
-	 *
-	 * @param WC_Product $product The product currently being viewed
 	 */
-	public static function add_to_cart( WC_Product $product ) {
+	public static function add_to_cart() {
+		if ( 'yes' !== self::get( 'ga_event_tracking_enabled' ) || ! is_single() ) {
+			return;
+		}
+
+		global $product;
+
 		$items = array(
 			'id'       => self::get_product_identifier( $product ),
 			'name'     => $product->get_title(),
@@ -382,6 +395,10 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 	 * Output JavaScript to track an enhanced ecommerce remove from cart action
 	 */
 	public function remove_from_cart() {
+		if ( 'yes' !== self::get( 'ga_enhanced_remove_from_cart_enabled' ) ) {
+			return;
+		}
+
 		$event_code = self::get_event_code(
 			'remove_from_cart',
 			'{"items": [{
@@ -401,15 +418,61 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 		);
 	}
 
+
+	/**
+	 * Adds the product ID and SKU to the remove product link if not present
+	 *
+	 * @param  string $url
+	 * @param  string $key
+	 * @return string
+	 */
+	public function remove_from_cart_attributes( $url, $key ) {
+		if ( strpos( $url, 'data-product_id' ) !== false ) {
+			return $url;
+		}
+
+		if ( ! is_object( WC()->cart ) ) {
+			return $url;
+		}
+
+		$item    = WC()->cart->get_cart_item( $key );
+		$product = $item['data'];
+
+		if ( ! is_object( $product ) ) {
+			return $url;
+		}
+
+		$url = str_replace( 'href=', 'data-product_id="' . esc_attr( $product->get_id() ) . '" data-product_sku="' . esc_attr( $product->get_sku() ) . '" href=', $url );
+		return $url;
+	}
+
+	/**
+	 * Measure a product click and impression from a Product list
+	 *
+	 * @param string     $link The Add To Cart Link
+	 * @param WC_Product $product The Product
+	 */
+	public function track_product( $link, $product ) {
+		if ( 'yes' === self::get( 'ga_enhanced_product_impression_enabled' ) ) {
+			self::listing_impression( $product );
+		}
+
+		if ( 'yes' === self::get( 'ga_enhanced_product_click_enabled' ) ) {
+			self::listing_click( $product );
+		}
+
+		return $link;
+	}
+
 	/**
 	 * Enqueue JavaScript to track a product detail view
-	 *
-	 * @param WC_Product $product
 	 */
-	public function product_detail( $product ) {
-		if ( empty( $product ) ) {
+	public function product_detail() {
+		if ( 'yes' !== self::get( 'ga_enhanced_product_detail_view_enabled' ) ) {
 			return;
 		}
+
+		global $product;
 
 		$event_code = self::get_event_code(
 			'view_item',
@@ -430,10 +493,14 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 
 	/**
 	 * Enqueue JS to track when the checkout process is started
-	 *
-	 * @param array $cart items/contents of the cart
 	 */
-	public function checkout_process( $cart ) {
+	public function checkout_process() {
+		if ( 'yes' !== self::get( 'ga_enhanced_checkout_process_enabled' ) ) {
+			return;
+		}
+
+		$cart = WC()->cart->get_cart();
+
 		$items = array();
 		foreach ( $cart as $cart_item_key => $cart_item ) {
 			$product = apply_filters( 'woocommerce_cart_item_product', $cart_item['data'], $cart_item, $cart_item_key );
@@ -462,49 +529,6 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 		);
 
 		wc_enqueue_js( $event_code );
-	}
-
-	/**
-	 * @deprecated 1.6.0
-	 *
-	 * Enqueue JavaScript for Add to cart tracking
-	 *
-	 * @param array  $parameters Associative array of _trackEvent parameters
-	 * @param string $selector   jQuery selector for binding click event
-	 */
-	public function event_tracking_code( $parameters, $selector ) {
-		wc_deprecated_function( 'event_tracking_code', '1.6.0', 'get_event_code' );
-
-		// Called with invalid 'Add to Cart' action, update to sync with Default Google Analytics Event 'add_to_cart'
-		$parameters['action']   = '\'add_to_cart\'';
-		$parameters['category'] = '\'ecommerce\'';
-
-		$parameters = apply_filters( 'woocommerce_gtag_event_tracking_parameters', $parameters );
-
-		if ( 'yes' === self::get( 'ga_enhanced_ecommerce_tracking_enabled' ) ) {
-			$track_event = sprintf(
-				self::tracker_var() . "( 'event', %s, { 'event_category': %s, 'event_label': %s, 'items': [ %s ] } );",
-				$parameters['action'],
-				$parameters['category'],
-				$parameters['label'],
-				$parameters['item']
-			);
-		} else {
-			$track_event = sprintf(
-				self::tracker_var() . "( 'event', %s, { 'event_category': %s, 'event_label': %s } );",
-				$parameters['action'],
-				$parameters['category'],
-				$parameters['label']
-			);
-		}
-
-		wc_enqueue_js(
-			"
-			$( '" . $selector . "' ).on( 'click', function() {
-				" . $track_event . '
-			});
-		'
-		);
 	}
 
 }

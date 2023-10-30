@@ -205,7 +205,15 @@ class WC_Google_Analytics extends WC_Integration {
 				'checkboxgroup' => '',
 				'default'       => 'yes',
 			),
+			'ga_linker_allow_incoming_enabled'        => array(
+				'label'         => __( 'Accept Incoming Linker Parameters', 'woocommerce-google-analytics-integration' ),
+				'description'   => __( 'Enabling this option will allow incoming linker parameters from other websites.', 'woocommerce-google-analytics-integration' ),
+				'type'          => 'checkbox',
+				'checkboxgroup' => '',
+				'default'       => 'no',
+			),
 			'ga_ecommerce_tracking_enabled'           => array(
+				'title'         => __( 'Event Tracking', 'woocommerce-google-analytics-integration' ),
 				'label'         => __( 'Purchase Transactions', 'woocommerce-google-analytics-integration' ),
 				'description'   => __( 'This requires a payment gateway that redirects to the thank you/order received page after payment. Orders paid with gateways which do not do this will not be tracked.', 'woocommerce-google-analytics-integration' ),
 				'type'          => 'checkbox',
@@ -218,27 +226,11 @@ class WC_Google_Analytics extends WC_Integration {
 				'checkboxgroup' => '',
 				'default'       => 'yes',
 			),
-			'ga_linker_cross_domains'                 => array(
-				'title'       => __( 'Cross Domain Tracking', 'woocommerce-google-analytics-integration' ),
-				/* translators: Read more link */
-				'description' => sprintf( __( 'Add a comma separated list of domains for automatic linking. %1$sRead more about Cross Domain Measurement%2$s', 'woocommerce-google-analytics-integration' ), '<a href="https://support.google.com/analytics/answer/7476333" target="_blank">', '</a>' ),
-				'type'        => 'text',
-				'placeholder' => 'example.com, example.net',
-				'default'     => '',
-			),
-			'ga_linker_allow_incoming_enabled'        => array(
-				'label'         => __( 'Accept Incoming Linker Parameters', 'woocommerce-google-analytics-integration' ),
-				'description'   => __( 'Enabling this option will allow incoming linker parameters from other websites.', 'woocommerce-google-analytics-integration' ),
-				'type'          => 'checkbox',
-				'checkboxgroup' => '',
-				'default'       => 'no',
-			),
 			'ga_enhanced_remove_from_cart_enabled'    => array(
 				'label'         => __( 'Remove from Cart Events', 'woocommerce-google-analytics-integration' ),
 				'type'          => 'checkbox',
 				'checkboxgroup' => '',
 				'default'       => 'yes',
-				'class'         => 'enhanced-setting',
 			),
 
 			'ga_enhanced_product_impression_enabled'  => array(
@@ -246,7 +238,6 @@ class WC_Google_Analytics extends WC_Integration {
 				'type'          => 'checkbox',
 				'checkboxgroup' => '',
 				'default'       => 'yes',
-				'class'         => 'enhanced-setting',
 			),
 
 			'ga_enhanced_product_click_enabled'       => array(
@@ -254,7 +245,6 @@ class WC_Google_Analytics extends WC_Integration {
 				'type'          => 'checkbox',
 				'checkboxgroup' => '',
 				'default'       => 'yes',
-				'class'         => 'enhanced-setting',
 			),
 
 			'ga_enhanced_product_detail_view_enabled' => array(
@@ -262,7 +252,6 @@ class WC_Google_Analytics extends WC_Integration {
 				'type'          => 'checkbox',
 				'checkboxgroup' => '',
 				'default'       => 'yes',
-				'class'         => 'enhanced-setting',
 			),
 
 			'ga_enhanced_checkout_process_enabled'    => array(
@@ -270,7 +259,14 @@ class WC_Google_Analytics extends WC_Integration {
 				'type'          => 'checkbox',
 				'checkboxgroup' => '',
 				'default'       => 'yes',
-				'class'         => 'enhanced-setting',
+			),
+			'ga_linker_cross_domains'                 => array(
+				'title'       => __( 'Cross Domain Tracking', 'woocommerce-google-analytics-integration' ),
+				/* translators: Read more link */
+				'description' => sprintf( __( 'Add a comma separated list of domains for automatic linking. %1$sRead more about Cross Domain Measurement%2$s', 'woocommerce-google-analytics-integration' ), '<a href="https://support.google.com/analytics/answer/7476333" target="_blank">', '</a>' ),
+				'type'        => 'text',
+				'placeholder' => 'example.com, example.net',
+				'default'     => '',
 			),
 		);
 	}
@@ -305,7 +301,6 @@ class WC_Google_Analytics extends WC_Integration {
 			'ecommerce_tracking_enabled'          => $this->ga_ecommerce_tracking_enabled,
 			'event_tracking_enabled'              => $this->ga_event_tracking_enabled,
 			'plugin_version'                      => WC_GOOGLE_ANALYTICS_INTEGRATION_VERSION,
-			'enhanced_ecommerce_tracking_enabled' => $this->ga_enhanced_ecommerce_tracking_enabled,
 			'linker_allow_incoming_enabled'       => empty( $this->ga_linker_allow_incoming_enabled ) ? 'no' : 'yes',
 			'linker_cross_domains'                => $this->ga_linker_cross_domains,
 		);

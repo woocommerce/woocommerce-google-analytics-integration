@@ -180,12 +180,4 @@ abstract class WC_Abstract_Google_Analytics_JS {
 	 * Enqueue JS to track when the checkout process is started
 	 */
 	abstract public function checkout_process();
-
-	/**
-	 * Enqueue JavaScript for Add to cart tracking
-	 *
-	 * @param array  $parameters associative array of _trackEvent parameters
-	 * @param string $selector jQuery selector for binding click event
-	 */
-	abstract public function event_tracking_code( $parameters, $selector );
 }

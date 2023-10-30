@@ -531,47 +531,4 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 		wc_enqueue_js( $event_code );
 	}
 
-	/**
-	 * @deprecated 1.6.0
-	 *
-	 * Enqueue JavaScript for Add to cart tracking
-	 *
-	 * @param array  $parameters Associative array of _trackEvent parameters
-	 * @param string $selector   jQuery selector for binding click event
-	 */
-	public function event_tracking_code( $parameters, $selector ) {
-		wc_deprecated_function( 'event_tracking_code', '1.6.0', 'get_event_code' );
-
-		// Called with invalid 'Add to Cart' action, update to sync with Default Google Analytics Event 'add_to_cart'
-		$parameters['action']   = '\'add_to_cart\'';
-		$parameters['category'] = '\'ecommerce\'';
-
-		$parameters = apply_filters( 'woocommerce_gtag_event_tracking_parameters', $parameters );
-
-		if ( 'yes' === self::get( 'ga_enhanced_ecommerce_tracking_enabled' ) ) {
-			$track_event = sprintf(
-				self::tracker_var() . "( 'event', %s, { 'event_category': %s, 'event_label': %s, 'items': [ %s ] } );",
-				$parameters['action'],
-				$parameters['category'],
-				$parameters['label'],
-				$parameters['item']
-			);
-		} else {
-			$track_event = sprintf(
-				self::tracker_var() . "( 'event', %s, { 'event_category': %s, 'event_label': %s } );",
-				$parameters['action'],
-				$parameters['category'],
-				$parameters['label']
-			);
-		}
-
-		wc_enqueue_js(
-			"
-			$( '" . $selector . "' ).on( 'click', function() {
-				" . $track_event . '
-			});
-		'
-		);
-	}
-
 }

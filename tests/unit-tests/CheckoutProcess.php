@@ -56,5 +56,4 @@ class CheckoutProcess extends EventsDataTest {
 		// Confirm data structure matches what's expected.
 		$this->assertEquals( $expected_data, $this->get_event_data(), 'Event data does not match expected data structure for begin_checkout (checkout_process()) event' );
 	}
-
 }

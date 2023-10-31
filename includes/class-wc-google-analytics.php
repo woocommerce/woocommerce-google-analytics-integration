@@ -753,7 +753,6 @@ class WC_Google_Analytics extends WC_Integration {
 				TaskLists::get_list( 'extended' )
 			)
 		);
-
 	}
 
 	/**

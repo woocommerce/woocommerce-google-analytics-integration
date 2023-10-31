@@ -155,7 +155,6 @@ if ( ! class_exists( 'WC_Google_Analytics_Integration' ) ) {
 			}
 
 			echo '<div class="error"><p><strong>' . wp_kses_post( $error ) . '</strong></p></div>';
-
 		}
 
 		/**
@@ -216,7 +215,7 @@ if ( ! class_exists( 'WC_Google_Analytics_Integration' ) ) {
 		 * @return string
 		 */
 		public function path( $end = '' ) {
-			return untrailingslashit( dirname( __FILE__ ) ) . $end;
+			return untrailingslashit( __DIR__ ) . $end;
 		}
 
 		/**

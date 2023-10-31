@@ -125,9 +125,11 @@ class WC_Google_Analytics extends WC_Integration {
 				'notice notice-error',
 				sprintf(
 					/* translators: 1) URL for Google documentation on upgrading from UA to GA4 2) URL to WooCommerce Google Analytics settings page */
-					__( 'Your website is configured to use Universal Analytics which Google retired in July of 2023. Update your account using the <a href="%1$s" target="_blank">setup assistant</a> and then update your <a href="%2$s">WooCommerce settings</a>.', 'woocommerce-google-analytics-integration' ), // phpcs:ignore WordPress.Security.EscapeOutput
-					'https://support.google.com/analytics/answer/9744165?sjid=9632005471070882766-EU#zippy=%2Cin-this-article',
-					'/wp-admin/admin.php?page=wc-settings&tab=integration&section=google_analytics'
+					esc_html__( 'Your website is configured to use Universal Analytics which Google retired in July of 2023. Update your account using the %1$ssetup assistant%2$s and then update your %3$sWooCommerce settings%4$s.', 'woocommerce-google-analytics-integration' ),
+					'<a href="https://support.google.com/analytics/answer/9744165" target="_blank">',
+					'</a>',
+					'<a href="/wp-admin/admin.php?page=wc-settings&tab=integration&section=google_analytics">',
+					'</a>'
 				)
 			);
 		}

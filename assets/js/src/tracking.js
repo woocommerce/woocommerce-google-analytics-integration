@@ -89,8 +89,8 @@ export const trackBeginCheckout = ( { storeCart } ) => {
 			storeCart.totals.total_price,
 			storeCart.totals.currency_minor_unit
 		),
-		coupon: storeCart.coupons[ 0 ]?.code || '',
 		items: storeCart.items.map( getProductFieldObject ),
+		...( storeCart.coupons[ 0 ]?.code ? { coupon: storeCart.coupons[ 0 ]?.code } : {} ),
 	} );
 };
 
@@ -107,12 +107,12 @@ export const trackShippingTier = ( { storeCart } ) => {
 			storeCart.totals.total_price,
 			storeCart.totals.currency_minor_unit
 		),
-		coupon: storeCart.coupons[ 0 ]?.code || '',
 		shipping_tier:
 			storeCart.shippingRates[ 0 ]?.shipping_rates?.find(
 				( rate ) => rate.selected
 			)?.name || '',
 		items: storeCart.items.map( getProductFieldObject ),
+		...( storeCart.coupons[ 0 ]?.code ? { coupon: storeCart.coupons[ 0 ]?.code } : {} ),
 	} );
 };
 

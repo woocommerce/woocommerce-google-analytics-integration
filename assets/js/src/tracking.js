@@ -4,6 +4,7 @@ import {
 	getProductImpressionObject,
 	getProductId,
 	formatPrice,
+	getCartCoupon,
 } from './utils';
 
 /**
@@ -89,8 +90,8 @@ export const trackBeginCheckout = ( { storeCart } ) => {
 			storeCart.totals.total_price,
 			storeCart.totals.currency_minor_unit
 		),
+		...getCartCoupon( storeCart ),
 		items: storeCart.items.map( getProductFieldObject ),
-		...( storeCart.coupons[ 0 ]?.code ? { coupon: storeCart.coupons[ 0 ]?.code } : {} ),
 	} );
 };
 
@@ -111,8 +112,8 @@ export const trackShippingTier = ( { storeCart } ) => {
 			storeCart.shippingRates[ 0 ]?.shipping_rates?.find(
 				( rate ) => rate.selected
 			)?.name || '',
+		...getCartCoupon( storeCart ),
 		items: storeCart.items.map( getProductFieldObject ),
-		...( storeCart.coupons[ 0 ]?.code ? { coupon: storeCart.coupons[ 0 ]?.code } : {} ),
 	} );
 };
 

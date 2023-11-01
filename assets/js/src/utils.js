@@ -80,6 +80,21 @@ export const getProductId = ( product ) => {
 };
 
 /**
+ * Returns an Object containing the cart coupon if one has been applied
+ *
+ * @param {Object} storeCart - The cart to check for coupons
+ *
+ * @return {Object} - Either an empty Object or one containing the coupon
+ */
+export const getCartCoupon = ( storeCart ) => {
+	return storeCart.coupons[ 0 ]?.code
+		? {
+				coupon: storeCart.coupons[ 0 ]?.code,
+		  }
+		: {};
+};
+
+/**
  * Returns the name of the first category of a product, or an empty string if the product has no categories.
  *
  * @param {Object} product - The product object

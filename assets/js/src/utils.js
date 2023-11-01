@@ -50,10 +50,10 @@ export const getProductImpressionObject = ( product, listName ) => {
  * @param {string} price - The price to parse
  * @param {number} [currencyMinorUnit=2] - The number decimals to show in the currency
  *
- * @return {string} - The price of the product formatted
+ * @return {number} - The price of the product formatted
  */
 export const formatPrice = ( price, currencyMinorUnit = 2 ) => {
-	return ( parseInt( price, 10 ) / 10 ** currencyMinorUnit ).toString();
+	return parseInt( price, 10 ) / 10 ** currencyMinorUnit;
 };
 
 /**

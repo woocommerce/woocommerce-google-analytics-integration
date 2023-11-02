@@ -11,10 +11,10 @@ import { addAction, removeAction } from '@wordpress/hooks';
  */
 export const getProductFieldObject = ( product, quantity ) => {
 	return {
-		id: getProductId( product ),
-		name: product.name,
-		quantity,
-		category: getProductCategory( product ),
+		item_id: getProductId( product ),
+		item_name: product.name,
+		quantity: product.quantity ?? quantity,
+		...getProductCategories( product ),
 		price: formatPrice(
 			product.prices.price,
 			product.prices.currency_minor_unit
@@ -33,10 +33,10 @@ export const getProductFieldObject = ( product, quantity ) => {
  */
 export const getProductImpressionObject = ( product, listName ) => {
 	return {
-		id: getProductId( product ),
-		name: product.name,
-		list_name: listName,
-		category: getProductCategory( product ),
+		item_id: getProductId( product ),
+		item_name: product.name,
+		item_list_name: listName,
+		...getProductCategories( product ),
 		price: formatPrice(
 			product.prices.price,
 			product.prices.currency_minor_unit
@@ -50,10 +50,10 @@ export const getProductImpressionObject = ( product, listName ) => {
  * @param {string} price - The price to parse
  * @param {number} [currencyMinorUnit=2] - The number decimals to show in the currency
  *
- * @return {string} - The price of the product formatted
+ * @return {number} - The price of the product formatted
  */
 export const formatPrice = ( price, currencyMinorUnit = 2 ) => {
-	return ( parseInt( price, 10 ) / 10 ** currencyMinorUnit ).toString();
+	return parseInt( price, 10 ) / 10 ** currencyMinorUnit;
 };
 
 /**
@@ -75,8 +75,23 @@ export const addUniqueAction = ( hookName, namespace, callback ) => {
  *
  * @return {string} - The product ID
  */
-const getProductId = ( product ) => {
+export const getProductId = ( product ) => {
 	return product.sku ? product.sku : '#' + product.id;
+};
+
+/**
+ * Returns an Object containing the cart coupon if one has been applied
+ *
+ * @param {Object} storeCart - The cart to check for coupons
+ *
+ * @return {Object} - Either an empty Object or one containing the coupon
+ */
+export const getCartCoupon = ( storeCart ) => {
+	return storeCart.coupons[ 0 ]?.code
+		? {
+				coupon: storeCart.coupons[ 0 ]?.code,
+		  }
+		: {};
 };
 
 /**
@@ -86,8 +101,34 @@ const getProductId = ( product ) => {
  *
  * @return {string} - The name of the first category of the product or an empty string if the product has no categories.
  */
-const getProductCategory = ( product ) => {
+const getProductCategories = ( product ) => {
 	return 'categories' in product && product.categories.length
-		? product.categories[ 0 ].name
-		: '';
+		? getCategoryObject( product.categories )
+		: {};
+};
+
+/**
+ * Returns an object containing up to 5 categories for the product.
+ *
+ * @param {Object} categories - An array of product categories
+ *
+ * @return {Object} - An categories object
+ */
+const getCategoryObject = ( categories ) => {
+	return Object.fromEntries(
+		categories.slice( 0, 5 ).map( ( category, index ) => {
+			return [ formatCategoryKey( index ), category.name ];
+		} )
+	);
+};
+
+/**
+ * Returns the correctly formatted key for the category object.
+ *
+ * @param {number} index Index of the current category
+ *
+ * @return {string} - A formatted key for the category object
+ */
+const formatCategoryKey = ( index ) => {
+	return 'item_category' + ( index > 0 ? index + 1 : '' );
 };

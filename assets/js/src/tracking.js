@@ -2,15 +2,10 @@ import { __ } from '@wordpress/i18n';
 import {
 	getProductFieldObject,
 	getProductImpressionObject,
+	getProductId,
 	formatPrice,
+	getCartCoupon,
 } from './utils';
-
-/**
- * Variable holding the current checkout step. It will be modified by trackCheckoutOption and trackCheckoutStep methods.
- *
- * @type {number}
- */
-let currentStep = -1;
 
 /**
  * Tracks view_item_list event
@@ -23,17 +18,19 @@ export const trackListProducts = ( {
 	products,
 	listName = __( 'Product List', 'woocommerce-google-analytics-integration' ),
 } ) => {
-	trackEvent( 'view_item_list', {
-		event_category: 'engagement',
-		event_label: __(
-			'Viewing products',
-			'woocommerce-google-analytics-integration'
-		),
-		items: products.map( ( product, index ) => ( {
-			...getProductImpressionObject( product, listName ),
-			list_position: index + 1,
-		} ) ),
-	} );
+	if ( products.length > 0 ) {
+		trackEvent( 'view_item_list', {
+			item_list_id: 'engagement',
+			item_list_name: __(
+				'Viewing products',
+				'woocommerce-google-analytics-integration'
+			),
+			items: products.map( ( product, index ) => ( {
+				...getProductImpressionObject( product, listName ),
+				index: index + 1,
+			} ) ),
+		} );
+	}
 };
 
 /**
@@ -45,11 +42,6 @@ export const trackListProducts = ( {
  */
 export const trackAddToCart = ( { product, quantity = 1 } ) => {
 	trackEvent( 'add_to_cart', {
-		event_category: 'ecommerce',
-		event_label: __(
-			'Add to Cart',
-			'woocommerce-google-analytics-integration'
-		),
 		items: [ getProductFieldObject( product, quantity ) ],
 	} );
 };
@@ -63,11 +55,6 @@ export const trackAddToCart = ( { product, quantity = 1 } ) => {
  */
 export const trackRemoveCartItem = ( { product, quantity = 1 } ) => {
 	trackEvent( 'remove_from_cart', {
-		event_category: 'ecommerce',
-		event_label: __(
-			'Remove Cart Item',
-			'woocommerce-google-analytics-integration'
-		),
 		items: [ getProductFieldObject( product, quantity ) ],
 	} );
 };
@@ -91,70 +78,55 @@ export const trackChangeCartItemQuantity = ( { product, quantity = 1 } ) => {
 };
 
 /**
- * Track a begin_checkout and checkout_progress event
- * Notice calling this will set the current checkout step as the step provided in the parameter.
+ * Track begin_checkout event
  *
- * @param {number} step The checkout step for to track
- * @return {(function( { storeCart: Object } ): void)} A callable receiving the cart to track the checkout event.
+ * @param {Object} params The function params
+ * @param {Object} params.storeCart The cart object
  */
-export const trackCheckoutStep =
-	( step ) =>
-	( { storeCart } ) => {
-		if ( currentStep === step ) {
-			return;
-		}
-
-		trackEvent( step === 0 ? 'begin_checkout' : 'checkout_progress', {
-			items: storeCart.cartItems.map( getProductFieldObject ),
-			coupon: storeCart.cartCoupons[ 0 ]?.code || '',
-			currency: storeCart.cartTotals.currency_code,
-			value: formatPrice(
-				storeCart.cartTotals.total_price,
-				storeCart.cartTotals.currency_minor_unit
-			),
-			checkout_step: step,
-		} );
-
-		currentStep = step;
-	};
+export const trackBeginCheckout = ( { storeCart } ) => {
+	trackEvent( 'begin_checkout', {
+		currency: storeCart.totals.currency_code,
+		value: formatPrice(
+			storeCart.totals.total_price,
+			storeCart.totals.currency_minor_unit
+		),
+		...getCartCoupon( storeCart ),
+		items: storeCart.items.map( getProductFieldObject ),
+	} );
+};
 
 /**
- * Track a set_checkout_option event
- * Notice calling this will set the current checkout step as the step provided in the parameter.
+ * Track add_shipping_info event
  *
- * @param {Object} params The params from the option.
- * @param {number} params.step The step to track
- * @param {string} params.option The option to set in checkout
- * @param {string} params.value The value for the option
- *
- * @return {(function() : void)} A callable to track the checkout event.
+ * @param {Object} params The function params
+ * @param {Object} params.storeCart The cart object
  */
-export const trackCheckoutOption =
-	( { step, option, value } ) =>
-	() => {
-		trackEvent( 'set_checkout_option', {
-			checkout_step: step,
-			checkout_option: option,
-			value,
-		} );
-
-		currentStep = step;
-	};
+export const trackShippingTier = ( { storeCart } ) => {
+	trackEvent( 'add_shipping_info', {
+		currency: storeCart.totals.currency_code,
+		value: formatPrice(
+			storeCart.totals.total_price,
+			storeCart.totals.currency_minor_unit
+		),
+		shipping_tier:
+			storeCart.shippingRates[ 0 ]?.shipping_rates?.find(
+				( rate ) => rate.selected
+			)?.name || '',
+		...getCartCoupon( storeCart ),
+		items: storeCart.items.map( getProductFieldObject ),
+	} );
+};
 
 /**
  * Tracks select_content event.
  *
  * @param {Object} params The function params
  * @param {Object} params.product The product to track
- * @param {string} params.listName The name of the list in which the item was presented to the user.
  */
-export const trackSelectContent = ( {
-	product,
-	listName = __( 'Product List', 'woocommerce-google-analytics-integration' ),
-} ) => {
+export const trackSelectContent = ( { product } ) => {
 	trackEvent( 'select_content', {
 		content_type: 'product',
-		items: [ getProductImpressionObject( product, listName ) ],
+		content_id: getProductId( product ),
 	} );
 };
 

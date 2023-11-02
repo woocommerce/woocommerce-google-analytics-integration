@@ -1,14 +1,12 @@
-import { __ } from '@wordpress/i18n';
-
+import { removeAction } from '@wordpress/hooks';
 import { NAMESPACE, ACTION_PREFIX } from './constants';
 import {
+	trackBeginCheckout,
+	trackShippingTier,
 	trackListProducts,
 	trackAddToCart,
 	trackChangeCartItemQuantity,
 	trackRemoveCartItem,
-	trackCheckoutStep,
-	trackCheckoutOption,
-	trackEvent,
 	trackSelectContent,
 	trackSearch,
 	trackViewItem,
@@ -17,79 +15,36 @@ import {
 import { addUniqueAction } from './utils';
 
 /**
- * Track customer progress through steps of the checkout. Triggers the event when the step changes:
- * 	1 - Contact information
- * 	2 - Shipping address
- * 	3 - Billing address
- * 	4 - Shipping options
- * 	5 - Payment options
+ * Track begin_checkout
  *
- * @summary Track checkout progress with begin_checkout and checkout_progress
- * @see https://developers.google.com/analytics/devguides/collection/gtagjs/enhanced-ecommerce#1_measure_checkout_steps
+ * @summary Track the customer has started the checkout process
+ * @see https://developers.google.com/analytics/devguides/collection/ga4/reference/events?client_type=gtag#begin_checkout
  */
 addUniqueAction(
 	`${ ACTION_PREFIX }-checkout-render-checkout-form`,
 	NAMESPACE,
-	( { ...storeCart } ) => trackCheckoutStep( 0 )( storeCart )
-);
-addUniqueAction(
-	`${ ACTION_PREFIX }-checkout-set-email-address`,
-	NAMESPACE,
-	( { ...storeCart } ) => trackCheckoutStep( 1 )( storeCart )
-);
-addUniqueAction(
-	`${ ACTION_PREFIX }-checkout-set-shipping-address`,
-	NAMESPACE,
-	( { ...storeCart } ) => trackCheckoutStep( 2 )( storeCart )
-);
-addUniqueAction(
-	`${ ACTION_PREFIX }-checkout-set-billing-address`,
-	NAMESPACE,
-	( { ...storeCart } ) => trackCheckoutStep( 3 )( storeCart )
-);
-addUniqueAction(
-	`${ ACTION_PREFIX }-checkout-set-phone-number`,
-	NAMESPACE,
-	( { step, ...storeCart } ) => {
-		trackCheckoutStep( step === 'shipping' ? 2 : 3 )( storeCart );
-	}
+	trackBeginCheckout
 );
 
 /**
- * Choose a shipping rate
+ * Track add_shipping_info
  *
- * @summary Track the shipping rate being set using set_checkout_option
- * @see https://developers.google.com/analytics/devguides/collection/gtagjs/enhanced-ecommerce#2_measure_checkout_options
+ * @summary Track the selected shipping tier when the checkout form is submitted
+ * @see https://developers.google.com/analytics/devguides/collection/ga4/reference/events?client_type=gtag#add_shipping_info
  */
 addUniqueAction(
-	`${ ACTION_PREFIX }-checkout-set-selected-shipping-rate`,
+	`${ ACTION_PREFIX }-checkout-submit`,
 	NAMESPACE,
-	( { shippingRateId } ) => {
-		trackCheckoutOption( {
-			step: 4,
-			option: __( 'Shipping Method', 'woo-gutenberg-products-block' ),
-			value: shippingRateId,
-		} )();
-	}
+	trackShippingTier
 );
 
 /**
- * Choose a payment method
- *
- * @summary Track the payment method being set using set_checkout_option
- * @see https://developers.google.com/analytics/devguides/collection/gtagjs/enhanced-ecommerce#2_measure_checkout_options
+ * The following actions were previously tracked using]checkout_progress
+ * in UA but there is no comparable event in GA4.
  */
-addUniqueAction(
-	`${ ACTION_PREFIX }-checkout-set-active-payment-method`,
-	NAMESPACE,
-	( { paymentMethodSlug } ) => {
-		trackCheckoutOption( {
-			step: 5,
-			option: __( 'Payment Method', 'woo-gutenberg-products-block' ),
-			value: paymentMethodSlug,
-		} )();
-	}
-);
+removeAction( `${ ACTION_PREFIX }-checkout-set-email-address`, NAMESPACE );
+removeAction( `${ ACTION_PREFIX }-checkout-set-phone-number`, NAMESPACE );
+removeAction( `${ ACTION_PREFIX }-checkout-set-billing-address`, NAMESPACE );
 
 /**
  * Product List View
@@ -139,19 +94,6 @@ addUniqueAction(
 	NAMESPACE,
 	trackRemoveCartItem
 );
-
-/**
- * Add Payment Information
- *
- * This event signifies a user has submitted their payment information. Note, this is used to indicate checkout
- * submission, not `purchase` which is triggered on the thanks page.
- *
- * @summary Track the add_payment_info event
- * @see https://developers.google.com/gtagjs/reference/ga4-events#add_payment_info
- */
-addUniqueAction( `${ ACTION_PREFIX }-checkout-submit`, NAMESPACE, () => {
-	trackEvent( 'add_payment_info' );
-} );
 
 /**
  * Product View Link Clicked

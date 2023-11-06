@@ -5,7 +5,7 @@ WordPress plugin: Provides the integration between WooCommerce and Google Analyt
 Will be required for WooCommerce shops using the integration from WooCommerce 2.1 and up.
 
 - [WordPress.org plugin page](https://wordpress.org/plugins/woocommerce-google-analytics-integration/)
-- [WooCommerce.com product page (free)](https://woocommerce.com/products/woocommerce-google-analytics/)
+- [Woo.com product page (free)](https://woo.com/products/woocommerce-google-analytics/)
 - [User documentation](https://woo.com/document/google-analytics-integration/)
 
 ## NPM Scripts

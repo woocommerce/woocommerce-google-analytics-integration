@@ -6,7 +6,7 @@ Will be required for WooCommerce shops using the integration from WooCommerce 2.
 
 - [WordPress.org plugin page](https://wordpress.org/plugins/woocommerce-google-analytics-integration/)
 - [WooCommerce.com product page (free)](https://woocommerce.com/products/woocommerce-google-analytics/)
-- [User documentation](https://docs.woocommerce.com/document/google-analytics-integration/)
+- [User documentation](https://woo.com/document/google-analytics-integration/)
 
 ## NPM Scripts
 

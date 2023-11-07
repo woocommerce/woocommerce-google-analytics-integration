@@ -60,6 +60,12 @@ Exact wording depends on the national data privacy laws and should be adjusted.
 
 == Changelog ==
 
+= 1.8.9 - 2023-11-07 =
+* Tweak - WC 8.3 compatibility.
+* Tweak - WP 6.4 compatibility.
+* Update - Use new Woo.com domain.
+* Update - WordPressCS to version 3.0.
+
 = 1.8.8 - 2023-10-24 =
 * Tweak - Declare cart_checkout_blocks feature compatibility.
 

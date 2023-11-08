@@ -67,44 +67,6 @@ abstract class WC_Abstract_Google_Analytics_JS {
 	}
 
 	/**
-	 * Enqueues JavaScript to build the addImpression object
-	 *
-	 * @param WC_Product $product
-	 */
-	abstract public static function listing_impression( $product );
-
-	/**
-	 * Enqueues JavaScript to build an addProduct and click object
-	 *
-	 * @param WC_Product $product
-	 */
-	abstract public static function listing_click( $product );
-
-	/**
-	 * Loads the correct Google Gtag code (classic or universal)
-	 *
-	 * @param  boolean|WC_Order $order Classic analytics needs order data to set the currency correctly
-	 */
-	abstract public static function load_analytics( $order = false );
-
-	/**
-	 * Generate code used to pass transaction data to Google Analytics.
-	 *
-	 * @param  WC_Order $order WC_Order Object
-	 */
-	public function add_transaction( $order ) {
-		wc_enqueue_js( static::add_transaction_enhanced( $order ) );
-	}
-
-	/**
-	 * Generate Enhanced eCommerce transaction tracking code
-	 *
-	 * @param  WC_Order $order WC_Order object
-	 * @return string          Add Transaction Code
-	 */
-	abstract protected function add_transaction_enhanced( $order );
-
-	/**
 	 * Get item identifier from product data
 	 *
 	 * @param  WC_Product $product WC_Product Object
@@ -165,19 +127,4 @@ abstract class WC_Abstract_Google_Analytics_JS {
 
 		return $out;
 	}
-
-	/**
-	 * Echo JavaScript to track an enhanced ecommerce remove from cart action
-	 */
-	abstract public function remove_from_cart();
-
-	/**
-	 * Enqueue JavaScript to track a product detail view
-	 */
-	abstract public function product_detail();
-
-	/**
-	 * Enqueue JS to track when the checkout process is started
-	 */
-	abstract public function checkout_process();
 }

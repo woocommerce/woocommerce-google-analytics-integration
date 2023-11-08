@@ -16,6 +16,9 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 	/** @var string $script_handle Handle for the front end JavaScript file */
 	public $script_handle = 'woocommerce-google-analytics-integration';
 
+	/** @var string $script_data Data required for frontend event tracking */
+	private $script_data = array();
+
 	/**
 	 * Constructor
 	 * Takes our options from the parent class so we can later use them in the JS snippets
@@ -24,21 +27,54 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 	 */
 	public function __construct( $options = array() ) {
 		self::$options = $options;
+
+		$this->load_analytics_config();
+
 		// Setup frontend scripts
 		add_action( 'wp_enqueue_scripts', array( $this, 'register_scripts' ) );
 	}
 
 	/**
-	 * Register front end JavaScript
+	 * Register front end scripts and inline script data
+	 *
+	 * @return void
 	 */
 	public function register_scripts() {
 		wp_enqueue_script(
+			'google-tag-manager',
+			'https://www.googletagmanager.com/gtag/js?id=' . self::get( 'ga_id' ),
+			array(),
+			null,
+			false
+		);
+
+		wp_enqueue_script(
 			$this->script_handle,
 			Plugin::get_instance()->get_js_asset_url( 'actions.js' ),
-			Plugin::get_instance()->get_js_asset_dependencies( 'actions' ),
+			array(
+				...Plugin::get_instance()->get_js_asset_dependencies( 'actions' ),
+				'google-tag-manager',
+			),
 			Plugin::get_instance()->get_js_asset_version( 'actions' ),
 			true
 		);
+
+		wp_add_inline_script(
+			$this->script_handle,
+			sprintf(
+				'const wcgaiData = %s;',
+				$this->get_script_data()
+			)
+		);
+	}
+
+	/**
+	 * Return a JSON encoded string of all script data for the current page load
+	 *
+	 * @return string
+	 */
+	public function get_script_data(): string {
+		return wp_json_encode( $this->script_data );
 	}
 
 	/**
@@ -46,57 +82,33 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 	 *
 	 * @return string
 	 */
-	public static function tracker_var() {
+	public static function tracker_var(): string {
 		return apply_filters( 'woocommerce_gtag_tracker_variable', 'gtag' );
 	}
 
 	/**
-	 * Loads the standard Gtag code
+	 * Add Google Analytics configuration data to the script data
 	 *
-	 * @param WC_Order $order WC_Order Object (not used in this implementation, but mandatory in the abstract class)
+	 * @return void
 	 */
-	public static function load_analytics( $order = false ) {
-		$logged_in = is_user_logged_in() ? 'yes' : 'no';
-
-		$track_404_enabled = '';
-		if ( 'yes' === self::get( 'ga_404_tracking_enabled' ) && is_404() ) {
-			// See https://developers.google.com/analytics/devguides/collection/gtagjs/events for reference
-			$track_404_enabled = self::tracker_var() . "( 'event', '404_not_found', { 'event_category':'error', 'event_label':'page: ' + document.location.pathname + document.location.search + ' referrer: ' + document.referrer });";
-		}
-
-		$gtag_developer_id = '';
-		if ( ! empty( self::DEVELOPER_ID ) ) {
-			$gtag_developer_id = self::tracker_var() . "('set', 'developer_id." . self::DEVELOPER_ID . "', true);";
-		}
-
-		$gtag_id            = self::get( 'ga_id' );
-		$gtag_cross_domains = ! empty( self::get( 'ga_linker_cross_domains' ) ) ? array_map( 'esc_js', explode( ',', self::get( 'ga_linker_cross_domains' ) ) ) : array();
-		$gtag_snippet       = '
-		window.dataLayer = window.dataLayer || [];
-		function ' . self::tracker_var() . '(){dataLayer.push(arguments);}
-		' . self::tracker_var() . "('js', new Date());
-		$gtag_developer_id
-
-		" . self::tracker_var() . "('config', '" . esc_js( $gtag_id ) . "', {
-			'allow_google_signals': " . ( 'yes' === self::get( 'ga_support_display_advertising' ) ? 'true' : 'false' ) . ",
-			'link_attribution': " . ( 'yes' === self::get( 'ga_support_enhanced_link_attribution' ) ? 'true' : 'false' ) . ",
-			'anonymize_ip': " . ( 'yes' === self::get( 'ga_anonymize_enabled' ) ? 'true' : 'false' ) . ",
-			'linker':{
-				'domains': " . wp_json_encode( $gtag_cross_domains ) . ",
-				'allow_incoming': " . ( 'yes' === self::get( 'ga_linker_allow_incoming_enabled' ) ? 'true' : 'false' ) . ",
-			},
-			'custom_map': {
-				'dimension1': 'logged_in'
-			},
-			'logged_in': '$logged_in'
-		} );
-
-		$track_404_enabled
-		";
-
-		wp_register_script( 'google-tag-manager', 'https://www.googletagmanager.com/gtag/js?id=' . esc_js( $gtag_id ), array( 'google-analytics-opt-out' ), null, false );
-		wp_add_inline_script( 'google-tag-manager', apply_filters( 'woocommerce_gtag_snippet', $gtag_snippet ) );
-		wp_enqueue_script( 'google-tag-manager' );
+	public function load_analytics_config() {
+		$this->script_data['config'] = array(
+			'developer_id'         => self::DEVELOPER_ID,
+			'gtag_id'              => self::get( 'ga_id' ),
+			'tracker_var'          => self::tracker_var(),
+			'track_404'            => 'yes' === self::get( 'ga_404_tracking_enabled' ),
+			'allow_google_signals' => 'yes' === self::get( 'ga_support_display_advertising' ),
+			'link_attribution'     => 'yes' === self::get( 'ga_support_enhanced_link_attribution' ),
+			'anonymize_ip'         => 'yes' === self::get( 'ga_anonymize_enabled' ),
+			'logged_in'            => is_user_logged_in(),
+			'linker'               => array(
+				'domains'        => ! empty( self::get( 'ga_linker_cross_domains' ) ) ? array_map( 'esc_js', explode( ',', self::get( 'ga_linker_cross_domains' ) ) ) : array(),
+				'allow_incoming' => 'yes' === self::get( 'ga_linker_allow_incoming_enabled' ),
+			),
+			'custom_map'           => array(
+				'dimension1' => 'logged_in',
+			),
+		);
 	}
 
 	/**

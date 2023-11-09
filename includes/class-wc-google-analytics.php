@@ -369,6 +369,8 @@ class WC_Google_Analytics extends WC_Integration {
 		global $wp;
 		$display_ecommerce_tracking = false;
 
+		$this->get_tracking_instance()->load_opt_out();
+
 		if ( $this->disable_tracking( 'all' ) ) {
 			return;
 		}
@@ -397,7 +399,6 @@ class WC_Google_Analytics extends WC_Integration {
 	 * Generate Standard Google Analytics tracking
 	 */
 	protected function enqueue_standard_tracking_code() {
-		$this->get_tracking_instance()->load_opt_out();
 		$this->get_tracking_instance()->load_analytics();
 	}
 

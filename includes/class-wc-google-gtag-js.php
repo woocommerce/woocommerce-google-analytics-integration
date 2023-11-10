@@ -19,6 +19,18 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 	/** @var string $script_data Data required for frontend event tracking */
 	private $script_data = array();
 
+	/** @var array $mappings A map of Blocks Actions to classic WooCommerce hooks to use for events */
+	private $mappings = array(
+		'checkout-render-checkout-form' => 'woocommerce_before_checkout_form',
+		'checkout-submit'               => 'woocommerce_thankyou',
+		'product-list-render'           => 'woocommerce_shop_loop',
+		'cart-add-item'                 => 'woocommerce_add_to_cart',
+		'cart-set-item-quantity'        => 'woocommerce_after_cart_item_quantity_update',
+		'cart-remove-item'              => 'woocommerce_cart_item_removed',
+		'product-view-link'             => 'woocommerce_after_single_product',
+		'product-render'                => 'woocommerce_after_single_product',
+	);
+
 	/**
 	 * Constructor
 	 * Takes our options from the parent class so we can later use them in the JS snippets
@@ -26,12 +38,15 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 	 * @param array $options Options
 	 */
 	public function __construct( $options = array() ) {
+		parent::__construct();
 		self::$options = $options;
 
 		$this->load_analytics_config();
+		$this->map_actions();
 
 		// Setup frontend scripts
 		add_action( 'wp_enqueue_scripts', array( $this, 'register_scripts' ) );
+		add_action( 'wp_footer', array( $this, 'inline_script_data' ) );
 	}
 
 	/**
@@ -58,14 +73,58 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 			Plugin::get_instance()->get_js_asset_version( 'actions' ),
 			true
 		);
+	}
 
+	/**
+	 * Add inline script data to the front end
+	 *
+	 * @return void
+	 */
+	public function inline_script_data() {
 		wp_add_inline_script(
 			$this->script_handle,
 			sprintf(
 				'const wcgaiData = %s;',
 				$this->get_script_data()
-			)
+			),
+			'before'
 		);
+	}
+
+	/**
+	 * Hook into WooCommerce and add corresponding Blocks Actions to our event data
+	 *
+	 * @return void
+	 */
+	public function map_actions() {
+		array_walk(
+			$this->mappings,
+			function( $hook, $block_action ) {
+				add_action(
+					$hook,
+					function() use ( $block_action ) {
+						$this->set_script_data( 'events', $block_action );
+					}
+				);
+			}
+		);
+	}
+
+	/**
+	 * Add an event to the script data
+	 *
+	 * @param string $type The type of event this data is related to.
+	 * @param mixed  $data The event data to add.
+	 * @param mixed  $key  If not false then the $data will be added as a new array item with this key.
+	 *
+	 * @return void
+	 */
+	public function set_script_data( string $type, $data, $key = false ) {
+		if ( ! $key ) {
+			$this->script_data[ $type ] = $data;
+		} else {
+			$this->script_data[ $type ][ $key ] = $data;
+		}
 	}
 
 	/**
@@ -117,7 +176,7 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 	 * @param array $options Options
 	 * @return WC_Abstract_Google_Analytics_JS
 	 */
-	public static function get_instance( $options = array() ) {
+	public static function get_instance( $options = array() ): WC_Abstract_Google_Analytics_JS {
 		if ( null === self::$instance ) {
 			self::$instance = new self( $options );
 		}

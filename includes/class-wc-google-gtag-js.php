@@ -19,16 +19,16 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 	/** @var string $script_data Data required for frontend event tracking */
 	private $script_data = array();
 
-	/** @var array $mappings A map of Blocks Actions to classic WooCommerce hooks to use for events */
+	/** @var array $mappings A map of the GA4 events and the classic WooCommerce hooks that trigger them */
 	private $mappings = array(
-		'checkout-render-checkout-form' => 'woocommerce_before_checkout_form',
-		'checkout-submit'               => 'woocommerce_thankyou',
-		'product-list-render'           => 'woocommerce_shop_loop',
-		'cart-add-item'                 => 'woocommerce_add_to_cart',
-		'cart-set-item-quantity'        => 'woocommerce_after_cart_item_quantity_update',
-		'cart-remove-item'              => 'woocommerce_cart_item_removed',
-		'product-view-link'             => 'woocommerce_after_single_product',
-		'product-render'                => 'woocommerce_after_single_product',
+		'begin_checkout'         => 'woocommerce_before_checkout_form',
+		'add_shipping_info'      => 'woocommerce_thankyou',
+		'view_item_list'         => 'woocommerce_shop_loop',
+		'add_to_cart'            => 'woocommerce_add_to_cart',
+		// 'cart-set-item-quantity' => 'woocommerce_after_cart_item_quantity_update',
+		'remove_from_cart'       => 'woocommerce_cart_item_removed',
+		'view_item'              => 'woocommerce_after_single_product',
+		'select_content'         => 'woocommerce_after_single_product',
 	);
 
 	/**
@@ -54,7 +54,7 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 	 *
 	 * @return void
 	 */
-	public function register_scripts() {
+	public function register_scripts(): void {
 		wp_enqueue_script(
 			'google-tag-manager',
 			'https://www.googletagmanager.com/gtag/js?id=' . self::get( 'ga_id' ),
@@ -80,7 +80,7 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 	 *
 	 * @return void
 	 */
-	public function inline_script_data() {
+	public function inline_script_data(): void {
 		wp_add_inline_script(
 			$this->script_handle,
 			sprintf(
@@ -96,14 +96,14 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 	 *
 	 * @return void
 	 */
-	public function map_actions() {
+	public function map_actions(): void {
 		array_walk(
 			$this->mappings,
-			function( $hook, $block_action ) {
+			function( $hook, $gtag_event ) {
 				add_action(
 					$hook,
-					function() use ( $block_action ) {
-						$this->set_script_data( 'events', $block_action );
+					function() use ( $gtag_event ) {
+						$this->set_script_data( 'events', $gtag_event, true );
 					}
 				);
 			}
@@ -113,18 +113,23 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 	/**
 	 * Add an event to the script data
 	 *
-	 * @param string $type The type of event this data is related to.
-	 * @param mixed  $data The event data to add.
-	 * @param mixed  $key  If not false then the $data will be added as a new array item with this key.
+	 * @param string       $type The type of event this data is related to.
+	 * @param string|array $data The event data to add.
+	 * @param string       $key  If not null then the $data will be added as a new array item with this key.
 	 *
 	 * @return void
 	 */
-	public function set_script_data( string $type, $data, $key = false ) {
-		if ( ! $key ) {
-			$this->script_data[ $type ] = $data;
-		} else {
-			$this->script_data[ $type ][ $key ] = $data;
+	public function set_script_data( string $type, string|array $data, ?string $key = null ): void {
+		if ( ! isset( $this->script_data[ $type ] ) ) {
+			$this->script_data[ $type ] = array();
 		}
+
+		if ( ! is_null( $key ) ) {
+			$this->script_data[ $type ][ $key ] = $data;
+		} else {
+			$this->script_data[ $type ][] = $data;
+		}
+
 	}
 
 	/**
@@ -150,7 +155,7 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 	 *
 	 * @return void
 	 */
-	public function load_analytics_config() {
+	public function load_analytics_config(): void {
 		$this->script_data['config'] = array(
 			'developer_id'         => self::DEVELOPER_ID,
 			'gtag_id'              => self::get( 'ga_id' ),

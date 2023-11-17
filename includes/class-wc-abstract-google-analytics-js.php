@@ -56,7 +56,7 @@ abstract class WC_Abstract_Google_Analytics_JS {
 			'woocommerce_shop_loop_item_title',
 			function() {
 				global $product;
-				$this->set_script_data( 'products', $this->get_formatted_product( $product ), $product->get_id() );
+				$this->set_script_data( 'products', $this->get_formatted_product( $product ) );
 			}
 		);
 	}

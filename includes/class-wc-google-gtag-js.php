@@ -65,12 +65,12 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 
 		wp_enqueue_script(
 			$this->script_handle,
-			Plugin::get_instance()->get_js_asset_url( 'actions.js' ),
+			Plugin::get_instance()->get_js_asset_url( 'main.js' ),
 			array(
-				...Plugin::get_instance()->get_js_asset_dependencies( 'actions' ),
+				...Plugin::get_instance()->get_js_asset_dependencies( 'main' ),
 				'google-tag-manager',
 			),
-			Plugin::get_instance()->get_js_asset_version( 'actions' ),
+			Plugin::get_instance()->get_js_asset_version( 'main' ),
 			true
 		);
 	}

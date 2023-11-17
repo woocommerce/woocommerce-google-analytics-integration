@@ -4,12 +4,7 @@ const path = require( 'path' );
 const webpackConfig = {
 	...defaultConfig,
 	entry: {
-		actions: path.resolve( process.cwd(), 'assets/js/src', 'actions.js' ),
-		'ga-integration': path.resolve(
-			process.cwd(),
-			'assets/js/src',
-			'ga-integration.js'
-		),
+		main: path.resolve( process.cwd(), 'assets/js/src', 'index.js' ),
 	},
 	output: {
 		...defaultConfig.output,

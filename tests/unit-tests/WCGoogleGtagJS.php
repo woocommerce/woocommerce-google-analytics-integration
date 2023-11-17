@@ -18,8 +18,8 @@ class WCGoogleGtagJS extends EventsDataTest {
 	 * Check that `WC_Google_Gtag_JS` registers
 	 * the `assets/js/ga-integration.js` script
 	 * as `woocommerce-google-analytics-integration-ga-integration` (`->script_handle . '-ga-integration'`)
-	 * and enqueues the `assets/js/actions.js` script
-	 * as `woocommerce-google-analytics-integration--actions` (`->script_handle . '--actions'`)
+	 * and enqueues the `assets/js/build/main.js` script
+	 * as `woocommerce-google-analytics-integration--main` (`->script_handle . '--main'`)
 	 * on `wp_enqueue_scripts` action.
 	 *
 	 * @return void
@@ -40,11 +40,11 @@ class WCGoogleGtagJS extends EventsDataTest {
 		$registered_url = wp_scripts()->registered[ $integration_handle ]->src;
 		$this->assertStringContainsString( 'assets/js/build/ga-integration.js', $registered_url, 'The script does not point to the correct URL' );
 
-		// Assert assert `-actions` is enqueued with the correct name.
-		$actions_handle = $gtag->script_handle . '-actions';
-		$this->assertEquals( true, wp_script_is( $actions_handle, 'enqueued' ), '`…-actions` script was not enqueued' );
+		// Assert assert `-main` is enqueued with the correct name.
+		$actions_handle = $gtag->script_handle . '-main';
+		$this->assertEquals( true, wp_script_is( $actions_handle, 'enqueued' ), '`…-main` script was not enqueued' );
 		$registered_url = wp_scripts()->registered[ $actions_handle ]->src;
-		$this->assertStringContainsString( 'assets/js/build/actions.js', $registered_url, 'The script does not point to the correct URL' );
+		$this->assertStringContainsString( 'assets/js/build/main.js', $registered_url, 'The script does not point to the correct URL' );
 	}
 
 	/**

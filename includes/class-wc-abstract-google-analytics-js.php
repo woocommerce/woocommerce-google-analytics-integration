@@ -36,7 +36,7 @@ abstract class WC_Abstract_Google_Analytics_JS {
 	 *
 	 * @return void
 	 */
-	public function attach_event_data() {
+	public function attach_event_data(): void {
 		add_action(
 			'woocommerce_before_checkout_form',
 			function() {
@@ -48,7 +48,7 @@ abstract class WC_Abstract_Google_Analytics_JS {
 			'woocommerce_before_single_product',
 			function() {
 				global $product;
-				$this->set_script_data( 'single', $this->get_formatted_product( $product ) );
+				$this->set_script_data( 'product', $this->get_formatted_product( $product ) );
 			}
 		);
 
@@ -68,14 +68,14 @@ abstract class WC_Abstract_Google_Analytics_JS {
 	 *
 	 * @return string|null Value of the option or null if not found
 	 */
-	protected static function get( $option ) {
+	protected static function get( $option ): ?string {
 		return self::$options[ $option ] ?? null;
 	}
 
 	/**
 	 * Generic GA snippet for opt out
 	 */
-	public static function load_opt_out() {
+	public static function load_opt_out(): void {
 		$code = "
 			var gaProperty = '" . esc_js( self::get( 'ga_id' ) ) . "';
 			var disableStr = 'ga-disable-' + gaProperty;
@@ -98,7 +98,7 @@ abstract class WC_Abstract_Google_Analytics_JS {
 	 * @param  WC_Product $product WC_Product Object.
 	 * @return string
 	 */
-	public static function get_product_identifier( $product ) {
+	public static function get_product_identifier( $product ): string {
 		$identifier = $product->get_id();
 
 		if ( 'product_sku' === self::get( 'ga_product_identifier' ) ) {
@@ -152,7 +152,7 @@ abstract class WC_Abstract_Google_Analytics_JS {
 	public function get_formatted_product( WC_Product $product ): array {
 		return array(
 			'item_id'    => $this->get_product_identifier( $product ),
-			'item_name'  => $product->get_name(),
+			'name'  => $product->get_name(),
 			'categories' => wc_get_product_terms( $product->get_id(), 'product_cat', array( 'fields' => 'names' ) ),
 			'prices'     => array(
 				'price'               => $product->get_price(),

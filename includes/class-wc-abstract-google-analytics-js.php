@@ -95,10 +95,11 @@ abstract class WC_Abstract_Google_Analytics_JS {
 	/**
 	 * Get item identifier from product data
 	 *
-	 * @param  WC_Product $product WC_Product Object.
+	 * @param WC_Product $product WC_Product Object.
+	 *
 	 * @return string
 	 */
-	public static function get_product_identifier( $product ): string {
+	public static function get_product_identifier( WC_Product $product ): string {
 		$identifier = $product->get_id();
 
 		if ( 'product_sku' === self::get( 'ga_product_identifier' ) ) {
@@ -151,9 +152,9 @@ abstract class WC_Abstract_Google_Analytics_JS {
 	 */
 	public function get_formatted_product( WC_Product $product ): array {
 		return array(
-			'item_id'    => $this->get_product_identifier( $product ),
-			'name'  => $product->get_name(),
-			'categories' => wc_get_product_terms( $product->get_id(), 'product_cat', array( 'fields' => 'names' ) ),
+			'id'         => $this->get_product_identifier( $product ),
+			'name'       => $product->get_name(),
+			'categories' => wc_get_product_terms( $product->get_id(), 'product_cat', array( 'number' => 5 ) ),
 			'prices'     => array(
 				'price'               => $product->get_price(),
 				'currency_minor_unit' => wc_get_price_decimals(),
@@ -171,13 +172,13 @@ abstract class WC_Abstract_Google_Analytics_JS {
 	/**
 	 * Add an event to the script data
 	 *
-	 * @param string $type The type of event being added.
-	 * @param string $data Event to add.
-	 * @param mixed  $key  Key to use for the data.
+	 * @param string       $type The type of event this data is related to.
+	 * @param string|array $data The event data to add.
+	 * @param string       $key  If not null then the $data will be added as a new array item with this key.
 	 *
 	 * @return void
 	 */
-	abstract public function set_script_data( string $type, $data, $key = false );
+	abstract public function set_script_data( string $type, string|array $data, ?string $key = null ): void;
 
 	/**
 	 * Get the class instance

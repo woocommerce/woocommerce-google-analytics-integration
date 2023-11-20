@@ -384,22 +384,6 @@ class WC_Google_Analytics extends WC_Integration {
 				$this->enqueue_ecommerce_tracking_code( $order_id );
 			}
 		}
-
-		if ( is_woocommerce() || is_cart() || ( is_checkout() && ! $display_ecommerce_tracking ) ) {
-			$display_ecommerce_tracking = true;
-			$this->enqueue_standard_tracking_code();
-		}
-
-		if ( ! $display_ecommerce_tracking && 'yes' === $this->ga_standard_tracking_enabled ) {
-			$this->enqueue_standard_tracking_code();
-		}
-	}
-
-	/**
-	 * Generate Standard Google Analytics tracking
-	 */
-	protected function enqueue_standard_tracking_code() {
-		$this->get_tracking_instance()->load_analytics();
 	}
 
 	/**

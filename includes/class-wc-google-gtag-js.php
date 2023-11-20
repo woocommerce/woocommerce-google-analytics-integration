@@ -119,7 +119,7 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 	 *
 	 * @return void
 	 */
-	public function set_script_data( string $type, string|array $data, ?string $key = null ): void {
+	public function set_script_data( string $type, $data, ?string $key = null ): void {
 		if ( ! isset( $this->script_data[ $type ] ) ) {
 			$this->script_data[ $type ] = array();
 		}

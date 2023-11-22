@@ -1,0 +1,42 @@
+name: Build
+
+on:
+  push:
+    branches:
+      - trunk
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  BuildExtensionBundle:
+    name: Build extension bundle
+    runs-on: ubuntu-latest
+    env:
+      FORCE_COLOR: 2
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Prepare PHP
+        uses: woocommerce/grow/prepare-php@actions-v1
+        with:
+          install-deps: "no"
+
+      - name: Prepare node
+        uses: woocommerce/grow/prepare-node@actions-v1
+        with:
+          node-version-file: ".nvmrc"
+          ignore-scripts: "no"
+
+      - name: Build production bundle
+        run: |
+          echo "::group::Build log"
+          npm run build
+          echo "::endgroup::"
+
+      - name: Publish dev build to GitHub
+        uses: woocommerce/grow/publish-extension-dev-build@actions-v1
+        with:
+          extension-asset-path: woocommerce-google-analytics-integration.zip

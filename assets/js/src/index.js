@@ -16,70 +16,70 @@ import {
 /**
  * Register all Google Analytics 4 events that can be tracked
  */
-tracker.setupEvents( [
-	{
+tracker.eventsMap = new Map( [
+	[
 		/**
 		 * @see https://developers.google.com/analytics/devguides/collection/ga4/reference/events?client_type=gtag#begin_checkout
 		 */
-		name: 'begin_checkout',
-		callback: trackBeginCheckout,
-	},
-	{
+		'begin_checkout',
+		trackBeginCheckout,
+	],
+	[
 		/**
 		 * @see https://developers.google.com/analytics/devguides/collection/ga4/reference/events?client_type=gtag#add_shipping_info
 		 */
-		name: 'add_shipping_info',
-		callback: trackShippingTier,
-	},
-	{
+		'add_shipping_info',
+		trackShippingTier,
+	],
+	[
 		/**
 		 * @see https://developers.google.com/gtagjs/reference/ga4-events#view_item_list
 		 */
-		name: 'view_item_list',
-		callback: trackListProducts,
-	},
-	{
+		'view_item_list',
+		trackListProducts,
+	],
+	[
 		/**
 		 * @see https://developers.google.com/gtagjs/reference/ga4-events#add_to_cart
 		 */
-		name: 'add_to_cart',
-		callback: trackAddToCart,
-	},
-	{
+		'add_to_cart',
+		trackAddToCart,
+	],
+	[
 		/**
 		 * @see https://developers.google.com/gtagjs/reference/ga4-events#remove_from_cart
 		 */
-		name: 'remove_from_cart',
-		callback: trackRemoveCartItem,
-	},
-	{
+		'remove_from_cart',
+		trackRemoveCartItem,
+	],
+	[
 		/**
 		 * @see https://developers.google.com/gtagjs/reference/ga4-events#select_content
 		 */
-		name: 'select_content',
-		callback: trackSelectContent,
-	},
-	{
+		'select_content',
+		trackSelectContent,
+	],
+	[
 		/**
 		 * @see https://developers.google.com/gtagjs/reference/ga4-events#search
 		 */
-		name: 'search',
-		callback: trackSearch,
-	},
-	{
+		'search',
+		trackSearch,
+	],
+	[
 		/**
 		 * @see https://developers.google.com/gtagjs/reference/ga4-events#view_item
 		 */
-		name: 'view_item',
-		callback: trackViewItem,
-	},
-	{
+		'view_item',
+		trackViewItem,
+	],
+	[
 		/**
 		 * @see https://developers.google.com/analytics/devguides/collection/ga4/reference/events?client_type=gtag#exception
 		 */
-		name: 'exception',
-		callback: trackException,
-	},
+		'exception',
+		trackException,
+	],
 ] );
 
 // Initialize tracking for classic WooCommerce pages

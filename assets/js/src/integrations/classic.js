@@ -17,13 +17,11 @@ export const trackClassicIntegration = () => {
 		product,
 	};
 
-	Object.values( events ?? {} ).forEach( ( event ) => {
-		switch ( event ) {
-			// If the queued event name matches an event that has been registered with the
-			// tracker then automatically attach the event using the default data structures.
-			case tracker.event( event ).get()?.name:
-				tracker.event( event ).attach( eventData );
-				break;
+	Object.values( events ?? {} ).forEach( ( eventName ) => {
+		// If the queued event name was registered
+		// then automatically attach the event using the default data structures.
+		if ( tracker.eventsMap.has( eventName ) ) {
+			tracker.attachEvent( eventName )( eventData );
 		}
 	} );
 };

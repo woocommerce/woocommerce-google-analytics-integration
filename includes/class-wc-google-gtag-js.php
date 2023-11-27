@@ -113,7 +113,7 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 	 * @return string
 	 */
 	public static function get_event_code( string $event, $data ): string {
-		return sprintf( "%s('event', '%s', %s)", self::tracker_var(), esc_js( $event ), ( is_array( $data ) ? self::format_event_data( $data ) : $data ) );
+		return sprintf( "%s('event', '%s', %s);", self::tracker_var(), esc_js( $event ), ( is_array( $data ) ? self::format_event_data( $data ) : $data ) );
 	}
 
 	/**
@@ -222,7 +222,7 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 
 		wc_enqueue_js(
 			"
-			$( '.product.post-" . esc_js( $product->get_id() ) . ' a , .product.post-' . esc_js( $product->get_id() ) . " button' ).on('click', function() {
+			$( '.product.post-" . esc_js( $product->get_id() ) . ' a.button , .product.post-' . esc_js( $product->get_id() ) . " button' ).on('click', function() {
 				if ( false === $(this).hasClass( 'product_type_variable' ) && false === $(this).hasClass( 'product_type_grouped' ) ) {
 					$add_to_cart_event_code
 				} else {

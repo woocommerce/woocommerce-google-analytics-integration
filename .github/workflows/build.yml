@@ -4,8 +4,6 @@ on:
   push:
     branches:
       - trunk
-      # For temporary testing
-      - dev/gh-actions-build
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}

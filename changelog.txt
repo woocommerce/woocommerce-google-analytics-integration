@@ -1,5 +1,11 @@
 *** Changelog ***
 
+= 1.8.10 - 2023-11-28 =
+* Dev - Update phpunit polyfills to 1.1 for WP 6.4.
+* Fix - Add semicolon after `gtag` calls.
+* Fix - Prevent firing up the add_to_cart event when clicking in product image.
+* Tweak - Test environment setup to resolve notice.
+
 = 1.8.9 - 2023-11-07 =
 * Tweak - WC 8.3 compatibility.
 * Tweak - WP 6.4 compatibility.

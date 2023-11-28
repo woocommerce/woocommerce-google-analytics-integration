@@ -69,7 +69,4 @@ Exact wording depends on the national data privacy laws and should be adjusted.
 = 1.8.8 - 2023-10-24 =
 * Tweak - Declare cart_checkout_blocks feature compatibility.
 
-= 1.8.7 - 2023-10-10 =
-* Fix - JS syntax error on pages with cart and mini-cart rendered, which was causing purchases and cart removals not to be tracked.
-
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce-google-analytics-integration/trunk/changelog.txt).

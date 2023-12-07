@@ -21,14 +21,13 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 
 	/** @var array $mappings A map of the GA4 events and the classic WooCommerce hooks that trigger them */
 	private $mappings = array(
-		'begin_checkout'         => 'woocommerce_before_checkout_form',
-		'add_shipping_info'      => 'woocommerce_thankyou',
-		'view_item_list'         => 'woocommerce_shop_loop',
-		'add_to_cart'            => 'woocommerce_add_to_cart',
-		// 'cart-set-item-quantity' => 'woocommerce_after_cart_item_quantity_update',
-		'remove_from_cart'       => 'woocommerce_cart_item_removed',
-		'view_item'              => 'woocommerce_after_single_product',
-		'select_content'         => 'woocommerce_after_single_product',
+		'begin_checkout'    => 'woocommerce_before_checkout_form',
+		'add_shipping_info' => 'woocommerce_thankyou',
+		'view_item_list'    => 'woocommerce_before_shop_loop_item',
+		'add_to_cart'       => 'woocommerce_add_to_cart',
+		'remove_from_cart'  => 'woocommerce_cart_item_removed',
+		'view_item'         => 'woocommerce_after_single_product',
+		'select_content'    => 'woocommerce_after_single_product',
 	);
 
 	/**
@@ -103,7 +102,7 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 				add_action(
 					$hook,
 					function() use ( $gtag_event ) {
-						$this->set_script_data( 'events', $gtag_event, true );
+						$this->set_script_data( 'events', $gtag_event, $gtag_event );
 					}
 				);
 			}
@@ -123,7 +122,7 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 		if ( ! isset( $this->script_data[ $type ] ) ) {
 			$this->script_data[ $type ] = array();
 		}
-
+		
 		if ( ! is_null( $key ) ) {
 			$this->script_data[ $type ][ $key ] = $data;
 		} else {

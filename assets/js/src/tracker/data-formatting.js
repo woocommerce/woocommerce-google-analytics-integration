@@ -8,13 +8,13 @@ import {
 } from '../utils';
 
 /**
- * Tracks view_item_list event
+ * Formats data for the view_item_list event
  *
  * @param {Object} params The function params
  * @param {Array} params.products The products to track
  * @param {string} [params.listName] The name of the list in which the item was presented to the user.
  */
-export const trackListProducts = ( {
+export const view_item_list = ( {
 	products,
 	listName = __( 'Product List', 'woocommerce-google-analytics-integration' ),
 } ) => {
@@ -36,29 +36,29 @@ export const trackListProducts = ( {
 };
 
 /**
- * Tracks add_to_cart event
+ * Formats data for the add_to_cart event
  *
  * @param {Object} params The function params
  * @param {Array} params.product The product to track
  * @param {number} [params.quantity=1] The quantity of that product in the cart.
  */
-export const trackAddToCart = ( { product, quantity = 1 } ) => {
-	trackEvent( 'add_to_cart', {
+export const add_to_cart = ( { product, quantity = 1 } ) => {
+	return {
 		items: [ getProductFieldObject( product, quantity ) ],
-	} );
+	};
 };
 
 /**
- * Tracks remove_from_cart event
+ * Formats data for the remove_from_cart event
  *
  * @param {Object} params The function params
  * @param {Array} params.product The product to track
  * @param {number} [params.quantity=1] The quantity of that product in the cart.
  */
-export const trackRemoveCartItem = ( { product, quantity = 1 } ) => {
-	trackEvent( 'remove_from_cart', {
+export const remove_from_cart = ( { product, quantity = 1 } ) => {
+	return {
 		items: [ getProductFieldObject( product, quantity ) ],
-	} );
+	};
 };
 
 /**
@@ -80,12 +80,12 @@ export const trackChangeCartItemQuantity = ( { product, quantity = 1 } ) => {
 };
 
 /**
- * Track begin_checkout event
+ * Formats data for the begin_checkout event
  *
  * @param {Object} params The function params
  * @param {Object} params.storeCart The cart object
  */
-export const trackBeginCheckout = ( { storeCart } ) => {
+export const begin_checkout = ( { storeCart } ) => {
 	return {
 		currency: storeCart.totals.currency_code,
 		value: formatPrice(
@@ -98,13 +98,13 @@ export const trackBeginCheckout = ( { storeCart } ) => {
 };
 
 /**
- * Track add_shipping_info event
+ * Formats data for the add_shipping_info event
  *
  * @param {Object} params The function params
  * @param {Object} params.storeCart The cart object
  */
-export const trackShippingTier = ( { storeCart } ) => {
-	trackEvent( 'add_shipping_info', {
+export const add_shipping_info = ( { storeCart } ) => {
+	return {
 		currency: storeCart.totals.currency_code,
 		value: formatPrice(
 			storeCart.totals.total_price,
@@ -116,54 +116,56 @@ export const trackShippingTier = ( { storeCart } ) => {
 			)?.name || '',
 		...getCartCoupon( storeCart ),
 		items: storeCart.items.map( getProductFieldObject ),
-	} );
+	};
 };
 
 /**
- * Tracks select_content event.
+ * Formats data for the select_content event.
  *
  * @param {Object} params The function params
  * @param {Object} params.product The product to track
  */
-export const trackSelectContent = ( { product } ) => {
-	trackEvent( 'select_content', {
+export const select_content = ( { product } ) => {
+	return {
 		content_type: 'product',
 		content_id: getProductId( product ),
-	} );
+	};
 };
 
 /**
- * Tracks search event.
+ * Formats data for the search event.
  *
  * @param {Object} params The function params
  * @param {string} params.searchTerm The search term to track
  */
-export const trackSearch = ( { searchTerm } ) => {
-	trackEvent( 'search', {
+export const search = ( { searchTerm } ) => {
+	return {
 		search_term: searchTerm,
-	} );
+	};
 };
 
 /**
- * Tracks view_item event
+ * Formats data for the view_item event
  *
  * @param {Object} params The function params
  * @param {Object} params.product The product to track
  * @param {string} [params.listName] The name of the list in which the item was presented to the user.
  */
-export const trackViewItem = ( {
+export const view_item = ( {
 	product,
 	listName = __( 'Product List', 'woocommerce-google-analytics-integration' ),
 } ) => {
-	if ( product ) {
-		return {
-			items: [ getProductImpressionObject( product, listName ) ],
-		};
+	if ( ! product ) {
+		return false;
 	}
+
+	return {
+		items: [ getProductImpressionObject( product, listName ) ],
+	};
 };
 
 /**
- * Track exception event
+ * Formats data for the exception event
  *
  * @param {Object} params The function params
  * @param {string} params.status The status of the exception. It should be "error" for tracking it.
@@ -171,10 +173,10 @@ export const trackViewItem = ( {
  */
 export const trackException = ( { status, content } ) => {
 	if ( status === 'error' ) {
-		trackEvent( 'exception', {
+		return {
 			description: content,
 			fatal: false,
-		} );
+		};
 	}
 };
 

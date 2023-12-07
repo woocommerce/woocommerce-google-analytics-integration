@@ -154,7 +154,10 @@ abstract class WC_Abstract_Google_Analytics_JS {
 		return array(
 			'id'         => $this->get_product_identifier( $product ),
 			'name'       => $product->get_name(),
-			'categories' => wc_get_product_terms( $product->get_id(), 'product_cat', array( 'number' => 5 ) ),
+			'categories' => array_map(
+				fn( $category ) => array( 'name' => $category->name ),
+				wc_get_product_terms( $product->get_id(), 'product_cat', array( 'number' => 5 ) )
+			),
 			'prices'     => array(
 				'price'               => $product->get_price(),
 				'currency_minor_unit' => wc_get_price_decimals(),

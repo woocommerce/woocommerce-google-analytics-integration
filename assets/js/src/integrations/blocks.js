@@ -6,7 +6,7 @@ import { ACTION_PREFIX, NAMESPACE } from '../constants';
 addUniqueAction(
 	`${ ACTION_PREFIX }-product-list-render`,
 	NAMESPACE,
-	tracker.event( 'view_item_list' ).attach
+	tracker.event( 'view_item_list' ).handler
 );
 
 /**

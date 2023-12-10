@@ -115,15 +115,18 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 	 * @param string       $type The type of event this data is related to.
 	 * @param string|array $data The event data to add.
 	 * @param string       $key  If not null then the $data will be added as a new array item with this key.
+	 * @param bool         $single If true then no other data will be added for this type.
 	 *
 	 * @return void
 	 */
-	public function set_script_data( string $type, $data, ?string $key = null ): void {
+	public function set_script_data( string $type, $data, ?string $key = null, bool $single = false ): void {
 		if ( ! isset( $this->script_data[ $type ] ) ) {
 			$this->script_data[ $type ] = array();
 		}
 		
-		if ( ! is_null( $key ) ) {
+		if ( $single ) {
+			$this->script_data[ $type ] = $data;
+		} elseif ( ! is_null( $key ) ) {
 			$this->script_data[ $type ][ $key ] = $data;
 		} else {
 			$this->script_data[ $type ][] = $data;

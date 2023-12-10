@@ -48,7 +48,7 @@ abstract class WC_Abstract_Google_Analytics_JS {
 			'woocommerce_before_single_product',
 			function() {
 				global $product;
-				$this->set_script_data( 'product', $this->get_formatted_product( $product ) );
+				$this->set_script_data( 'product', $this->get_formatted_product( $product ), null, true );
 			}
 		);
 
@@ -152,6 +152,7 @@ abstract class WC_Abstract_Google_Analytics_JS {
 	 */
 	public function get_formatted_product( WC_Product $product ): array {
 		return array(
+			'product_id' => $product->get_id(),
 			'id'         => $this->get_product_identifier( $product ),
 			'name'       => $product->get_name(),
 			'categories' => array_map(

@@ -66,7 +66,7 @@ class Tracker {
 		if( ! formatters[ name ] ) {
 			throw new Error( `Event ${ name } is not supported.` );
 		}
-		
+
 		return {
 			handler: ( data ) => {
 				window[ config.tracker_var ](

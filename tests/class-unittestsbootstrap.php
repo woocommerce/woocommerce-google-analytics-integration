@@ -31,6 +31,9 @@ class UnitTestsBootstrap {
 		// load test function so tests_add_filter() is available
 		require_once $this->wp_tests_dir . '/includes/functions.php';
 
+		// Filter doing it wrong errors while bootstrapping.
+		tests_add_filter( 'doing_it_wrong_trigger_error', [ $this, 'filter_doing_it_wrong' ], 10, 2 );
+
 		// load WC
 		tests_add_filter( 'muplugins_loaded', array( $this, 'load_plugins' ) );
 		tests_add_filter( 'init', array( $this, 'install_wc' ) );
@@ -85,7 +88,7 @@ class UnitTestsBootstrap {
 	public function load_plugins() {
 		require_once $this->plugins_dir . '/woocommerce/woocommerce.php';
 		require_once $this->plugin_dir . '/woocommerce-google-analytics-integration.php';
-		
+
 		update_option( 'woocommerce_db_version', WC()->version );
 		update_option( 'gmt_offset', -4 );
 	}
@@ -148,5 +151,26 @@ class UnitTestsBootstrap {
 		require_once $wc_tests_dir . '/framework/helpers/class-wc-helper-order.php';
 		require_once $wc_tests_dir . '/framework/helpers/class-wc-helper-shipping.php';
 		require_once $wc_tests_dir . '/framework/helpers/class-wc-helper-customer.php';
+	}
+
+	/**
+	 * Filter unwanted doing it wrong messages when installing WooCommerce.
+	 *
+	 * @since x.x.x
+	 *
+	 * @param bool $trigger Trigger error.
+	 * @param string $function_name Calling function name.
+	 * @return bool
+	 */
+	public function filter_doing_it_wrong( $trigger, $function_name ) {
+		// WooCommerce requires the FeaturesController to be used after a call to `woocommerce_init`,
+		// which is triggered by the WC_Install::install call. We are unable to call install later as
+		// that would prevent others early hooks into the `init` call from running, so instead we ignore
+		// this warning to preserve the same load order.
+		if ( 'FeaturesController::get_compatible_plugins_for_feature' === $function_name ) {
+			return false;
+		}
+
+		return $trigger;
 	}
 }

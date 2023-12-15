@@ -59,7 +59,7 @@ class UnitTestsBootstrap {
 	 * Set directory paths.
 	 */
 	public function set_path_props() {
-		$this->tests_dir    = dirname( __FILE__ );
+		$this->tests_dir    = __DIR__;
 		$this->plugin_dir   = dirname( $this->tests_dir );
 		$this->plugins_dir  = sys_get_temp_dir() . '/wordpress/wp-content/plugins';
 		$this->wp_tests_dir = sys_get_temp_dir() . '/wordpress-tests-lib';
@@ -140,7 +140,7 @@ class UnitTestsBootstrap {
 	 *
 	 * @since x.x.x
 	 *
-	 * @param bool $trigger Trigger error.
+	 * @param bool   $trigger Trigger error.
 	 * @param string $function_name Calling function name.
 	 * @return bool
 	 */

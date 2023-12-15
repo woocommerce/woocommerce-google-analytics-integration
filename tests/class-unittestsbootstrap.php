@@ -36,7 +36,7 @@ class UnitTestsBootstrap {
 
 		// load WC
 		tests_add_filter( 'muplugins_loaded', array( $this, 'load_plugins' ) );
-		tests_add_filter( 'init', array( $this, 'install_wc' ) );
+		tests_add_filter( 'setup_theme', array( $this, 'install_wc' ) );
 		tests_add_filter( 'option_active_plugins', [ $this, 'filter_active_plugins' ] );
 
 		// load the WP testing environment

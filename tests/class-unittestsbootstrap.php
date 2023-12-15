@@ -102,33 +102,15 @@ class UnitTestsBootstrap {
 		echo 'Installing WooCommerce...' . PHP_EOL;
 
 		define( 'WP_UNINSTALL_PLUGIN', true );
+		define( 'WC_REMOVE_ALL_DATA', true );
 
 		include $this->plugins_dir . '/woocommerce/uninstall.php';
 
-		global $wpdb;
-		$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}woocommerce_attribute_taxonomies" );
-		$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}woocommerce_order_items" );
-		$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}woocommerce_order_itemmeta" );
-
 		\WC_Install::install();
-
-		// Ensure wc_category_lookup table exists (WC 6.5+)
-		add_action(
-			'init',
-			function() {
-				if ( class_exists( \Automattic\WooCommerce\Internal\Admin\CategoryLookup::class ) ) {
-					\Automattic\WooCommerce\Internal\Admin\CategoryLookup::instance()->regenerate();
-				}
-			},
-			11
-		);
-
 		new \WP_Roles();
-
 		WC()->init();
 
 		echo 'WooCommerce Finished Installing...' . PHP_EOL;
-
 	}
 
 	/**

@@ -72,7 +72,4 @@ Exact wording depends on the national data privacy laws and should be adjusted.
 * Update - Use new Woo.com domain.
 * Update - WordPressCS to version 3.0.
 
-= 1.8.8 - 2023-10-24 =
-* Tweak - Declare cart_checkout_blocks feature compatibility.
-
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce-google-analytics-integration/trunk/changelog.txt).

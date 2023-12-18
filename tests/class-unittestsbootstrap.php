@@ -31,9 +31,12 @@ class UnitTestsBootstrap {
 		// load test function so tests_add_filter() is available
 		require_once $this->wp_tests_dir . '/includes/functions.php';
 
+		// Filter doing it wrong errors while bootstrapping.
+		tests_add_filter( 'doing_it_wrong_trigger_error', [ $this, 'filter_doing_it_wrong' ], 10, 2 );
+
 		// load WC
 		tests_add_filter( 'muplugins_loaded', array( $this, 'load_plugins' ) );
-		tests_add_filter( 'init', array( $this, 'install_wc' ) );
+		tests_add_filter( 'setup_theme', array( $this, 'install_wc' ) );
 		tests_add_filter( 'option_active_plugins', [ $this, 'filter_active_plugins' ] );
 
 		// load the WP testing environment
@@ -56,7 +59,7 @@ class UnitTestsBootstrap {
 	 * Set directory paths.
 	 */
 	public function set_path_props() {
-		$this->tests_dir    = dirname( __FILE__ );
+		$this->tests_dir    = __DIR__;
 		$this->plugin_dir   = dirname( $this->tests_dir );
 		$this->plugins_dir  = sys_get_temp_dir() . '/wordpress/wp-content/plugins';
 		$this->wp_tests_dir = sys_get_temp_dir() . '/wordpress-tests-lib';
@@ -85,7 +88,7 @@ class UnitTestsBootstrap {
 	public function load_plugins() {
 		require_once $this->plugins_dir . '/woocommerce/woocommerce.php';
 		require_once $this->plugin_dir . '/woocommerce-google-analytics-integration.php';
-		
+
 		update_option( 'woocommerce_db_version', WC()->version );
 		update_option( 'gmt_offset', -4 );
 	}
@@ -99,33 +102,15 @@ class UnitTestsBootstrap {
 		echo 'Installing WooCommerce...' . PHP_EOL;
 
 		define( 'WP_UNINSTALL_PLUGIN', true );
+		define( 'WC_REMOVE_ALL_DATA', true );
 
 		include $this->plugins_dir . '/woocommerce/uninstall.php';
 
-		global $wpdb;
-		$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}woocommerce_attribute_taxonomies" );
-		$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}woocommerce_order_items" );
-		$wpdb->query( "DROP TABLE IF EXISTS {$wpdb->prefix}woocommerce_order_itemmeta" );
-
 		\WC_Install::install();
-
-		// Ensure wc_category_lookup table exists (WC 6.5+)
-		add_action(
-			'init',
-			function() {
-				if ( class_exists( \Automattic\WooCommerce\Internal\Admin\CategoryLookup::class ) ) {
-					\Automattic\WooCommerce\Internal\Admin\CategoryLookup::instance()->regenerate();
-				}
-			},
-			11
-		);
-
 		new \WP_Roles();
-
 		WC()->init();
 
 		echo 'WooCommerce Finished Installing...' . PHP_EOL;
-
 	}
 
 	/**
@@ -148,5 +133,26 @@ class UnitTestsBootstrap {
 		require_once $wc_tests_dir . '/framework/helpers/class-wc-helper-order.php';
 		require_once $wc_tests_dir . '/framework/helpers/class-wc-helper-shipping.php';
 		require_once $wc_tests_dir . '/framework/helpers/class-wc-helper-customer.php';
+	}
+
+	/**
+	 * Filter unwanted doing it wrong messages when installing WooCommerce.
+	 *
+	 * @since x.x.x
+	 *
+	 * @param bool   $trigger Trigger error.
+	 * @param string $function_name Calling function name.
+	 * @return bool
+	 */
+	public function filter_doing_it_wrong( $trigger, $function_name ) {
+		// WooCommerce requires the FeaturesController to be used after a call to `woocommerce_init`,
+		// which is triggered by the WC_Install::install call. We are unable to call install later as
+		// that would prevent others early hooks into the `init` call from running, so instead we ignore
+		// this warning to preserve the same load order.
+		if ( 'FeaturesController::get_compatible_plugins_for_feature' === $function_name ) {
+			return false;
+		}
+
+		return $trigger;
 	}
 }

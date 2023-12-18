@@ -60,6 +60,10 @@ Exact wording depends on the national data privacy laws and should be adjusted.
 
 == Changelog ==
 
+= 1.8.11 - 2023-12-18 =
+* Dev - Prevent DB warnings in unit tests.
+* Tweak - WC 8.4 compatibility.
+
 = 1.8.10 - 2023-11-28 =
 * Dev - Update phpunit polyfills to 1.1 for WP 6.4.
 * Fix - Add semicolon after `gtag` calls.

@@ -138,7 +138,7 @@ class UnitTestsBootstrap {
 	/**
 	 * Filter unwanted doing it wrong messages when installing WooCommerce.
 	 *
-	 * @since x.x.x
+	 * @since 1.8.11
 	 *
 	 * @param bool   $trigger Trigger error.
 	 * @param string $function_name Calling function name.

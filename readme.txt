@@ -3,7 +3,7 @@ Contributors: woocommerce, automattic, claudiosanches, bor0, royho, laurendaviss
 Tags: woocommerce, google analytics
 Requires at least: 3.9
 Tested up to: 6.4
-Stable tag: 1.8.10
+Stable tag: 1.8.11
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -60,6 +60,10 @@ Exact wording depends on the national data privacy laws and should be adjusted.
 
 == Changelog ==
 
+= 1.8.11 - 2023-12-18 =
+* Dev - Prevent DB warnings in unit tests.
+* Tweak - WC 8.4 compatibility.
+
 = 1.8.10 - 2023-11-28 =
 * Dev - Update phpunit polyfills to 1.1 for WP 6.4.
 * Fix - Add semicolon after `gtag` calls.
@@ -71,8 +75,5 @@ Exact wording depends on the national data privacy laws and should be adjusted.
 * Tweak - WP 6.4 compatibility.
 * Update - Use new Woo.com domain.
 * Update - WordPressCS to version 3.0.
-
-= 1.8.8 - 2023-10-24 =
-* Tweak - Declare cart_checkout_blocks feature compatibility.
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce-google-analytics-integration/trunk/changelog.txt).

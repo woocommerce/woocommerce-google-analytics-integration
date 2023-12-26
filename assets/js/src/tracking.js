@@ -114,7 +114,9 @@ export const trackCheckoutStep =
 		}
 
 		trackEvent( step === 0 ? 'begin_checkout' : 'checkout_progress', {
-			items: storeCart.cartItems.map( getProductFieldObject ),
+			items: storeCart.cartItems.map( ( item ) =>
+				getProductFieldObject( item, item.quantity )
+			),
 			coupon: storeCart.cartCoupons[ 0 ]?.code || '',
 			currency: storeCart.cartTotals.currency_code,
 			value: formatPrice(

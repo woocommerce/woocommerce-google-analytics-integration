@@ -104,6 +104,15 @@ export const trackCheckoutStep =
 			return;
 		}
 
+		// compatibility-code "WC >= 8.1" -- The data structure of `storeCart` was (accidentally) changed.
+		if ( ! storeCart.hasOwnProperty( 'cartTotals' ) ) {
+			storeCart = {
+				cartCoupons: storeCart.coupons,
+				cartItems: storeCart.items,
+				cartTotals: storeCart.totals,
+			};
+		}
+
 		trackEvent( step === 0 ? 'begin_checkout' : 'checkout_progress', {
 			items: storeCart.cartItems.map( getProductFieldObject ),
 			coupon: storeCart.cartCoupons[ 0 ]?.code || '',

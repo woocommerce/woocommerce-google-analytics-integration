@@ -70,10 +70,4 @@ Exact wording depends on the national data privacy laws and should be adjusted.
 * Fix - Prevent firing up the add_to_cart event when clicking in product image.
 * Tweak - Test environment setup to resolve notice.
 
-= 1.8.9 - 2023-11-07 =
-* Tweak - WC 8.3 compatibility.
-* Tweak - WP 6.4 compatibility.
-* Update - Use new Woo.com domain.
-* Update - WordPressCS to version 3.0.
-
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce-google-analytics-integration/trunk/changelog.txt).

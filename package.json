@@ -38,8 +38,8 @@
     "prebuild": "rm -rf ./vendor"
   },
   "engines": {
-    "node": ">=12",
-    "npm": ">=6"
+    "node": ">=18",
+    "npm": ">=9"
   },
   "config": {
     "wp_org_slug": "woocommerce-google-analytics-integration",
@@ -47,6 +47,6 @@
       "includes",
       "tests",
       "woocommerce-google-analytics-integration.php"
-		]
+    ]
   }
 }

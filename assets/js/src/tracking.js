@@ -4,7 +4,6 @@ import {
 	getProductImpressionObject,
 	formatPrice,
 } from './utils';
-import { trackAddToCartEvent } from '../../../../google-listings-and-ads/js/src/gtag-events/utils';
 
 /**
  * Variable holding the current checkout step. It will be modified by trackCheckoutOption and trackCheckoutStep methods.
@@ -53,7 +52,6 @@ export const trackAddToCart = ( data ) => {
 		// WC < 8.5
 		product = data.product;
 		quantity = data.quantity;
-		trackAddToCartEvent( data.product, data.quantity );
 	} else {
 		product = data;
 		quantity = 1;

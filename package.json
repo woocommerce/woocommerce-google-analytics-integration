@@ -13,11 +13,11 @@
     "@wordpress/i18n": "3.15.0"
   },
   "devDependencies": {
-    "@wordpress/eslint-plugin": "^8.0.0",
-    "@wordpress/scripts": "^24.6.0",
-    "eslint": "^7.17.0",
+    "@wordpress/eslint-plugin": "^17.5.0",
+    "@wordpress/scripts": "^26.19.0",
+    "eslint": "^8.0.0",
     "node-wp-i18n": "~1.2.3",
-    "prettier": "npm:wp-prettier@^2.8.5"
+    "prettier": "npm:wp-prettier@^3.0.3"
   },
   "assets": {
     "js": {
@@ -38,8 +38,8 @@
     "prebuild": "rm -rf ./vendor"
   },
   "engines": {
-    "node": ">=12",
-    "npm": ">=6"
+    "node": ">=18",
+    "npm": ">=9"
   },
   "config": {
     "wp_org_slug": "woocommerce-google-analytics-integration",
@@ -47,6 +47,6 @@
       "includes",
       "tests",
       "woocommerce-google-analytics-integration.php"
-		]
+    ]
   }
 }

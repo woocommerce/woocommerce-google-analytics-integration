@@ -3,7 +3,7 @@ Contributors: woocommerce, automattic, claudiosanches, bor0, royho, laurendaviss
 Tags: woocommerce, google analytics
 Requires at least: 3.9
 Tested up to: 6.4
-Stable tag: 1.8.12
+Stable tag: 1.8.13
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -60,6 +60,11 @@ Exact wording depends on the national data privacy laws and should be adjusted.
 
 == Changelog ==
 
+= 1.8.13 - 2024-01-09 =
+* Dev - Upgrade all NPM dev dependencies.
+* Dev - Upgrade to Node.js 18.
+* Tweak - WC 8.5 compatibility.
+
 = 1.8.12 - 2023-12-28 =
 * Fix - Avoid JavaScript exceptions when sending checkout event tracking due to incompatible data structure.
 * Fix - Correct misplaced each product index value as its quantity when sending checkout event tracking.
@@ -67,11 +72,5 @@ Exact wording depends on the national data privacy laws and should be adjusted.
 = 1.8.11 - 2023-12-18 =
 * Dev - Prevent DB warnings in unit tests.
 * Tweak - WC 8.4 compatibility.
-
-= 1.8.10 - 2023-11-28 =
-* Dev - Update phpunit polyfills to 1.1 for WP 6.4.
-* Fix - Add semicolon after `gtag` calls.
-* Fix - Prevent firing up the add_to_cart event when clicking in product image.
-* Tweak - Test environment setup to resolve notice.
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce-google-analytics-integration/trunk/changelog.txt).

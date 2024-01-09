@@ -1,5 +1,10 @@
 *** Changelog ***
 
+= 1.8.13 - 2024-01-09 =
+* Dev - Upgrade all NPM dev dependencies.
+* Dev - Upgrade to Node.js 18.
+* Tweak - WC 8.5 compatibility.
+
 = 1.8.12 - 2023-12-28 =
 * Fix - Avoid JavaScript exceptions when sending checkout event tracking due to incompatible data structure.
 * Fix - Correct misplaced each product index value as its quantity when sending checkout event tracking.

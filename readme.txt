@@ -68,10 +68,4 @@ Exact wording depends on the national data privacy laws and should be adjusted.
 * Dev - Prevent DB warnings in unit tests.
 * Tweak - WC 8.4 compatibility.
 
-= 1.8.10 - 2023-11-28 =
-* Dev - Update phpunit polyfills to 1.1 for WP 6.4.
-* Fix - Add semicolon after `gtag` calls.
-* Fix - Prevent firing up the add_to_cart event when clicking in product image.
-* Tweak - Test environment setup to resolve notice.
-
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce-google-analytics-integration/trunk/changelog.txt).

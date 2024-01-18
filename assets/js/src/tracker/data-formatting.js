@@ -7,6 +7,8 @@ import {
 	getCartCoupon,
 } from '../utils';
 
+/* eslint-disable camelcase */
+
 /**
  * Formats data for the view_item_list event
  *
@@ -163,6 +165,8 @@ export const view_item = ( {
 		items: [ getProductImpressionObject( product, listName ) ],
 	};
 };
+
+/* eslint-enable camelcase */
 
 /**
  * Formats data for the exception event

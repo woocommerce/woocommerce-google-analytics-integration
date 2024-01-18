@@ -137,9 +137,10 @@ const formatCategoryKey = ( index ) => {
 /**
  * Searches through the global wcgaiData.products object to find a single product by its ID
  *
- * @param {*number} id The ID of the product to search for
- * @returns {Object|undefined} The product object or undefined if not found
+ * @param {number} id The ID of the product to search for
+ * @return {Object|undefined} The product object or undefined if not found
  */
 export const getProductFromID = ( id ) => {
+	/* eslint-disable-next-line camelcase */
 	return products.find( ( { product_id } ) => product_id === id );
-}
+};

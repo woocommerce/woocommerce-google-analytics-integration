@@ -11,11 +11,11 @@ let instance;
 class Tracker {
 	/**
 	 * Constructs a new instance of the Tracker class.
-	 * 
+	 *
 	 * @throws {Error} If an instance of the Tracker already exists.
 	 */
 	constructor() {
-		if( instance ) {
+		if ( instance ) {
 			throw new Error( 'Cannot instantiate more than one Tracker' );
 		}
 		instance = this;
@@ -32,19 +32,15 @@ class Tracker {
 		}
 
 		window.dataLayer = window.dataLayer || [];
-		
+
 		function gtag() {
 			window.dataLayer.push( arguments );
 		}
-		
+
 		window[ config.tracker_var ] = gtag;
 
 		gtag( 'js', new Date() );
-		gtag(
-			'set',
-			`developer_id.${ config.developer_id }`,
-			true
-		);
+		gtag( 'set', `developer_id.${ config.developer_id }`, true );
 		gtag( 'config', config.gtag_id, {
 			allow_google_signals: config.allow_google_signals,
 			link_attribution: config.link_attribution,
@@ -59,11 +55,12 @@ class Tracker {
 	 * Creates and returns an event handler object for a specified event name.
 	 *
 	 * @param {string} name The name of the event.
-	 * @returns {{handler: function(*): void}} An object with a `handler` method for processing and tracking the event.
+	 * @return {{handler: function(*): void}} An object with a `handler` method for processing and tracking the event.
 	 * @throws {Error} If the event name is not supported.
 	 */
 	event( name ) {
-		if( ! formatters[ name ] ) {
+		/* eslint import/namespace: [ 'error', { allowComputed: true } ] */
+		if ( ! formatters[ name ] ) {
 			throw new Error( `Event ${ name } is not supported.` );
 		}
 

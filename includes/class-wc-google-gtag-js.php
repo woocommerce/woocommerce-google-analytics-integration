@@ -123,7 +123,7 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 		if ( ! isset( $this->script_data[ $type ] ) ) {
 			$this->script_data[ $type ] = array();
 		}
-		
+
 		if ( $single ) {
 			$this->script_data[ $type ] = $data;
 		} elseif ( ! is_null( $key ) ) {

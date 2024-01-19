@@ -407,10 +407,6 @@ class WC_Google_Analytics extends WC_Integration {
 			return;
 		}
 
-		$this->get_tracking_instance()->add_transaction( $order );
-		$this->get_tracking_instance()->load_opt_out();
-		$this->get_tracking_instance()->load_analytics();
-
 		// Mark the order as tracked.
 		$order->update_meta_data( '_ga_tracked', 1 );
 		$order->save();

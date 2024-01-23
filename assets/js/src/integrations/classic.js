@@ -37,4 +37,28 @@ export const trackClassicIntegration = () => {
 			),
 		} );
 	};
+
+	/**
+	 * Attach click event listeners to all remove from cart links on page load and when the cart is updated.
+	 */
+	const removeFromCartListener = () => {
+		document.querySelector( '.woocommerce-cart-form' )?.addEventListener( 'click', e => {
+			const item = e.target.closest( '.woocommerce-cart-form__cart-item .remove' );
+
+			if ( ! item || ! item.dataset.product_id ) {
+				return;
+			}
+
+			tracker.event( 'remove_from_cart' ).handler( {
+				product: getProductFromID(
+					parseInt( item.dataset.product_id ),
+					true
+				),
+			} );
+		} );
+	};
+
+	removeFromCartListener();
+
+	document.body.onupdated_wc_div = () => removeFromCartListener();
 };

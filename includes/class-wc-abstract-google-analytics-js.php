@@ -38,6 +38,13 @@ abstract class WC_Abstract_Google_Analytics_JS {
 	 */
 	public function attach_event_data(): void {
 		add_action(
+			'woocommerce_before_cart',
+			function() {
+				$this->set_script_data( 'cart', $this->get_formatted_cart(), null, true );
+			}
+		);
+
+		add_action(
 			'woocommerce_before_checkout_form',
 			function() {
 				$this->set_script_data( 'cart', $this->get_formatted_cart(), null, true );
@@ -123,13 +130,8 @@ abstract class WC_Abstract_Google_Analytics_JS {
 			'items'   => array_map(
 				function( $item ) {
 					return array(
-						'id'       => $this->get_product_identifier( $item['data'] ),
-						'name'     => $item['data']->get_name(),
-						'quantity' => $item['quantity'],
-						'prices'   => array(
-							'price'               => $item['data']->get_price(),
-							'currency_minor_unit' => wc_get_price_decimals(),
-						),
+						...$this->get_formatted_product( $item['data'] ),
+						'quantity' => $item['quantity']
 					);
 				},
 				array_values( WC()->cart->get_cart() )

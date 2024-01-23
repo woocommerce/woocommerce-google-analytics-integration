@@ -1,5 +1,5 @@
 import { addAction, removeAction } from '@wordpress/hooks';
-import { products } from '../config.js';
+import { products, cart } from '../config.js';
 
 /**
  * Formats data into the productFieldObject shape.
@@ -140,7 +140,8 @@ const formatCategoryKey = ( index ) => {
  * @param {number} id The ID of the product to search for
  * @return {Object|undefined} The product object or undefined if not found
  */
-export const getProductFromID = ( id ) => {
+export const getProductFromID = ( id, fromCart = false ) => {
+	const list = fromCart ? cart.items : products;
 	/* eslint-disable-next-line camelcase */
-	return products.find( ( { product_id } ) => product_id === id );
+	return list.find( ( { product_id } ) => product_id === id );
 };

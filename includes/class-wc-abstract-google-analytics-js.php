@@ -40,7 +40,7 @@ abstract class WC_Abstract_Google_Analytics_JS {
 		add_action(
 			'woocommerce_before_checkout_form',
 			function() {
-				$this->set_script_data( 'cart', $this->get_formatted_cart() );
+				$this->set_script_data( 'cart', $this->get_formatted_cart(), null, true );
 			}
 		);
 
@@ -132,7 +132,7 @@ abstract class WC_Abstract_Google_Analytics_JS {
 						),
 					);
 				},
-				WC()->cart->get_cart()
+				array_values( WC()->cart->get_cart() )
 			),
 			'coupons' => WC()->cart->get_coupons(),
 			'totals'  => array(

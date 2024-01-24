@@ -27,11 +27,15 @@ addUniqueAction(
 	tracker.event( 'remove_from_cart' ).handler
 );
 
+addUniqueAction(
+	`${ ACTION_PREFIX }-checkout-render-checkout-form`,
+	NAMESPACE,
+	tracker.event( 'begin_checkout' ).handler
+);
+
 /**
  * Temporarily remove all actions for demo purposes.
  */
-
-removeAction( `${ ACTION_PREFIX }-checkout-render-checkout-form`, NAMESPACE );
 removeAction( `${ ACTION_PREFIX }-checkout-submit`, NAMESPACE );
 removeAction( `${ ACTION_PREFIX }-checkout-set-email-address`, NAMESPACE );
 removeAction( `${ ACTION_PREFIX }-checkout-set-phone-number`, NAMESPACE );

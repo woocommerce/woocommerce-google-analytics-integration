@@ -138,6 +138,7 @@ const formatCategoryKey = ( index ) => {
  * Searches through the global wcgaiData.products object to find a single product by its ID
  *
  * @param {number} id The ID of the product to search for
+ * @param {boolean} fromCart If true then product will be retreived from wcgaiData.cart.items
  * @return {Object|undefined} The product object or undefined if not found
  */
 export const getProductFromID = ( id, fromCart = false ) => {

@@ -33,6 +33,12 @@ addUniqueAction(
 	tracker.event( 'begin_checkout' ).handler
 );
 
+addUniqueAction(
+	`${ ACTION_PREFIX }-product-view-link`,
+	NAMESPACE,
+	tracker.event( 'select_content' ).handler
+);
+
 /**
  * Temporarily remove all actions for demo purposes.
  */
@@ -41,6 +47,5 @@ removeAction( `${ ACTION_PREFIX }-checkout-set-email-address`, NAMESPACE );
 removeAction( `${ ACTION_PREFIX }-checkout-set-phone-number`, NAMESPACE );
 removeAction( `${ ACTION_PREFIX }-checkout-set-billing-address`, NAMESPACE );
 removeAction( `${ ACTION_PREFIX }-cart-set-item-quantity`, NAMESPACE );
-removeAction( `${ ACTION_PREFIX }-product-view-link`, NAMESPACE );
 removeAction( `${ ACTION_PREFIX }-product-search`, NAMESPACE );
 removeAction( `${ ACTION_PREFIX }-store-notice-create`, NAMESPACE );

@@ -42,23 +42,53 @@ export const trackClassicIntegration = () => {
 	 * Attach click event listeners to all remove from cart links on page load and when the cart is updated.
 	 */
 	const removeFromCartListener = () => {
-		document.querySelector( '.woocommerce-cart-form' )?.addEventListener( 'click', e => {
-			const item = e.target.closest( '.woocommerce-cart-form__cart-item .remove' );
+		document
+			.querySelector( '.woocommerce-cart-form' )
+			?.addEventListener( 'click', ( e ) => {
+				const item = e.target.closest(
+					'.woocommerce-cart-form__cart-item .remove'
+				);
 
-			if ( ! item || ! item.dataset.product_id ) {
-				return;
-			}
+				if ( ! item || ! item.dataset.product_id ) {
+					return;
+				}
 
-			tracker.event( 'remove_from_cart' ).handler( {
-				product: getProductFromID(
-					parseInt( item.dataset.product_id ),
-					true
-				),
+				tracker.event( 'remove_from_cart' ).handler( {
+					product: getProductFromID(
+						parseInt( item.dataset.product_id ),
+						true
+					),
+				} );
 			} );
-		} );
 	};
 
 	removeFromCartListener();
 
 	document.body.onupdated_wc_div = () => removeFromCartListener();
+
+	/**
+	 * Attach click event listeners to all product listings and send select_content events for specific targets.
+	 */
+	document
+		.querySelectorAll( '.product a[data-product_id]' )
+		?.forEach( ( button ) => {
+			const productId = button.dataset.product_id;
+
+			button.parentNode.addEventListener( 'click', ( listing ) => {
+				const targetLink = listing.target.closest(
+					'.woocommerce-loop-product__link'
+				);
+				const isAddToCartButton =
+					button.classList.contains( 'add_to_cart_button' ) &&
+					! button.classList.contains( 'product_type_variable' );
+
+				if ( ! targetLink && isAddToCartButton ) {
+					return;
+				}
+
+				tracker.event( 'select_content' ).handler( {
+					product: getProductFromID( parseInt( productId ) ),
+				} );
+			} );
+		} );
 };

@@ -27,7 +27,6 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 		'add_to_cart'       => 'woocommerce_add_to_cart',
 		'remove_from_cart'  => 'woocommerce_cart_item_removed',
 		'view_item'         => 'woocommerce_after_single_product',
-		'select_content'    => 'woocommerce_after_single_product',
 	);
 
 	/**

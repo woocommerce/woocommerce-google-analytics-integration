@@ -170,7 +170,7 @@ export const view_item = ( {
  * Formats order data for the purchase event
  *
  * @param {Object} params The function params
- * @param {Object} params.storeCart The cart object
+ * @param {Object} params.order The order object
  */
 export const purchase = ( { order } ) => {
 	return {

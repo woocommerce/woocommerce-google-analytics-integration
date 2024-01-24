@@ -66,6 +66,13 @@ abstract class WC_Abstract_Google_Analytics_JS {
 				$this->set_script_data( 'products', $this->get_formatted_product( $product ) );
 			}
 		);
+
+		add_action(
+			'woocommerce_thankyou',
+			function( $order_id ) {
+				$this->set_script_data( 'order', $this->get_formatted_order( $order_id ), null, true );
+			}
+		);
 	}
 
 	/**
@@ -162,9 +169,43 @@ abstract class WC_Abstract_Google_Analytics_JS {
 				wc_get_product_terms( $product->get_id(), 'product_cat', array( 'number' => 5 ) )
 			),
 			'prices'     => array(
-				'price'               => $product->get_price(),
+				'price'               => $this->get_formatted_price( $product->get_price() ),
 				'currency_minor_unit' => wc_get_price_decimals(),
 			),
+		);
+	}
+
+	/**
+	 * Returns an array of order data in the required format
+	 *
+	 * @param string $order_id The ID of the order
+	 *
+	 * @return array
+	 */
+	public function get_formatted_order( int $order_id ): array {
+		$order = wc_get_order( $order_id );
+
+		return array(
+			'currency' => $order->get_currency(),
+			'value'    => $order->get_total(),
+			'items'    => array_map(
+				function( $item ) {
+					return array(
+						...$this->get_formatted_product( $item->get_product() ),
+						'quantity' => $item->get_quantity(),
+					);
+				},
+				array_values( $order->get_items() ),
+			),
+		);
+	}
+
+	public function get_formatted_price( $value ) {
+		return intval(
+			round(
+				( (float) wc_format_decimal( $value ) ) * ( 10 ** absint( wc_get_price_decimals() ) ),
+				0
+			)
 		);
 	}
 

@@ -22,7 +22,7 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 	/** @var array $mappings A map of the GA4 events and the classic WooCommerce hooks that trigger them */
 	private $mappings = array(
 		'begin_checkout'    => 'woocommerce_before_checkout_form',
-		'add_shipping_info' => 'woocommerce_thankyou',
+		'purchase'          => 'woocommerce_thankyou',
 		'view_item_list'    => 'woocommerce_before_shop_loop_item',
 		'add_to_cart'       => 'woocommerce_add_to_cart',
 		'remove_from_cart'  => 'woocommerce_cart_item_removed',

@@ -166,6 +166,20 @@ export const view_item = ( {
 	};
 };
 
+/**
+ * Formats order data for the purchase event
+ *
+ * @param {Object} params The function params
+ * @param {Object} params.storeCart The cart object
+ */
+export const purchase = ( { order } ) => {
+	return {
+		currency: order.currency,
+		value: parseInt( order.value ),
+		items: order.items.map( getProductFieldObject ),
+	};
+};
+
 /* eslint-enable camelcase */
 
 /**

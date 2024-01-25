@@ -174,6 +174,7 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 				'dimension1' => 'logged_in',
 			),
 			'events'               => self::get_enabled_events(),
+			'identifier'           => self::get( 'ga_product_identifier' ),
 		);
 	}
 

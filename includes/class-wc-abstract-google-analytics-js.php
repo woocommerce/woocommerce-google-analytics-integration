@@ -4,6 +4,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+use Automattic\WooCommerce\StoreApi\Schemas\V1\ProductSchema;
+
 /**
  * WC_Abstract_Google_Analytics_JS class
  *
@@ -28,6 +30,18 @@ abstract class WC_Abstract_Google_Analytics_JS {
 	 */
 	public function __construct() {
 		$this->attach_event_data();
+
+		if ( did_action( 'woocommerce_blocks_loaded' ) ) {
+			woocommerce_store_api_register_endpoint_data(
+				array(
+					'endpoint'        => ProductSchema::IDENTIFIER,
+					'namespace'       => 'woocommerce_google_analytics_integration',
+					'data_callback'   => array( $this, 'data_callback' ),
+					'schema_callback' => array( $this, 'schema_callback' ),
+					'schema_type'     => ARRAY_A,
+				)
+			);
+		}
 	}
 
 	/**
@@ -161,8 +175,7 @@ abstract class WC_Abstract_Google_Analytics_JS {
 	 */
 	public function get_formatted_product( WC_Product $product ): array {
 		return array(
-			'product_id' => $product->get_id(),
-			'id'         => $this->get_product_identifier( $product ),
+			'id'         => $product->get_id(),
 			'name'       => $product->get_name(),
 			'categories' => array_map(
 				fn( $category ) => array( 'name' => $category->name ),
@@ -171,6 +184,11 @@ abstract class WC_Abstract_Google_Analytics_JS {
 			'prices'     => array(
 				'price'               => $this->get_formatted_price( $product->get_price() ),
 				'currency_minor_unit' => wc_get_price_decimals(),
+			),
+			'extensions' => array(
+				'woocommerce_google_analytics_integration' => array(
+					'identifier' => $this->get_product_identifier( $product ),
+				),
 			),
 		);
 	}
@@ -210,6 +228,32 @@ abstract class WC_Abstract_Google_Analytics_JS {
 			round(
 				( (float) wc_format_decimal( $value ) ) * ( 10 ** absint( wc_get_price_decimals() ) ),
 				0
+			)
+		);
+	}
+
+	/**
+	 * Add product identifier to StoreAPI
+	 *
+	 * @return array
+	 */
+	public function data_callback( WC_Product $product ): array {
+		return array(
+			'identifier' => (string) $this->get_product_identifier( $product ),
+		);
+	}
+
+	/**
+	 * Schema for the extended StoreAPI data
+	 *
+	 * @return array
+	 */
+	public function schema_callback(): array {
+		return array(
+			'identifier' => array(
+				'description' => __( 'The formatted product identifier to use in Google Analytics events.', 'woocommerce-google-analytics-integration' ),
+				'type'        => 'string',
+				'readonly'    => true,
 			)
 		);
 	}

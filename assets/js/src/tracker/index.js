@@ -66,11 +66,13 @@ class Tracker {
 
 		return {
 			handler: ( data ) => {
-				window[ config.tracker_var ](
-					'event',
-					name,
-					formatters[ name ]( data )
-				);
+				if ( config.events.includes( name ) ) {
+					window[ config.tracker_var ](
+						'event',
+						name,
+						formatters[ name ]( data )
+					);
+				}
 			},
 		};
 	}

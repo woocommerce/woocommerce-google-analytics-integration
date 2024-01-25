@@ -5,6 +5,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 use Automattic\WooCommerce\StoreApi\Schemas\V1\ProductSchema;
+use Automattic\WooCommerce\StoreApi\Schemas\V1\CartItemSchema;
 
 /**
  * WC_Abstract_Google_Analytics_JS class
@@ -35,6 +36,16 @@ abstract class WC_Abstract_Google_Analytics_JS {
 			woocommerce_store_api_register_endpoint_data(
 				array(
 					'endpoint'        => ProductSchema::IDENTIFIER,
+					'namespace'       => 'woocommerce_google_analytics_integration',
+					'data_callback'   => array( $this, 'data_callback' ),
+					'schema_callback' => array( $this, 'schema_callback' ),
+					'schema_type'     => ARRAY_A,
+				)
+			);
+
+			woocommerce_store_api_register_endpoint_data(
+				array(
+					'endpoint'        => CartItemSchema::IDENTIFIER,
 					'namespace'       => 'woocommerce_google_analytics_integration',
 					'data_callback'   => array( $this, 'data_callback' ),
 					'schema_callback' => array( $this, 'schema_callback' ),
@@ -235,9 +246,13 @@ abstract class WC_Abstract_Google_Analytics_JS {
 	/**
 	 * Add product identifier to StoreAPI
 	 *
+	 * @param WC_Product|array $product Either an instance of WC_Product or a cart item array depending on the endpoint
+	 *
 	 * @return array
 	 */
-	public function data_callback( WC_Product $product ): array {
+	public function data_callback( $product ): array {
+		$product = is_a( $product, 'WC_Product' ) ? $product : $product['data'];
+
 		return array(
 			'identifier' => (string) $this->get_product_identifier( $product ),
 		);

@@ -121,30 +121,36 @@ class WCGoogleGtagJS extends EventsDataTest {
 		$gtag->set_script_data( 'test', 'value' );
 		$script_data = json_decode( $gtag->get_script_data(), true );
 
-		$this->assertEquals( $script_data, array(
-			...$default,
-			'test' => array(
-				'value'
+		$this->assertEquals( $script_data, array_merge(
+			$default,
+			array(
+				'test' => array(
+					'value'
+				),
 			)
 		) );
 		
 		$gtag->set_script_data( 'test', 'value2', 'key' );
 		$script_data = json_decode( $gtag->get_script_data(), true );
 
-		$this->assertEquals( $script_data, array(
-			...$default,
-			'test' => array(
-				0     => 'value',
-				'key' => 'value2',
+		$this->assertEquals( $script_data, array_merge(
+			$default,
+			array(
+				'test' => array(
+					0     => 'value',
+					'key' => 'value2',
+				),
 			)
 		) );
 		
 		$gtag->set_script_data( 'test', 'value', null, true );
 		$script_data = json_decode( $gtag->get_script_data(), true );
 
-		$this->assertEquals( $script_data, array(
-			...$default,
-			'test' => 'value'
+		$this->assertEquals( $script_data, array_merge(
+			$default,
+			array(
+				'test' => 'value',
+			)
 		) );
 	}
 

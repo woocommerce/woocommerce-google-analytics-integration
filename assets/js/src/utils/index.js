@@ -11,15 +11,21 @@ import { config, products, cart } from '../config.js';
  * @return {Object} The product data
  */
 export const getProductFieldObject = ( product, quantity ) => {
+	const variantData = {};
+	if ( product.variation ) {
+		variantData.item_variant = product.variation;
+	}
+
 	return {
 		item_id: getProductId( product ),
 		item_name: product.name,
-		quantity: product.quantity ?? quantity,
 		...getProductCategories( product ),
+		quantity: product.quantity ?? quantity,
 		price: formatPrice(
 			product.prices.price,
 			product.prices.currency_minor_unit
 		),
+		...variantData,
 	};
 };
 

@@ -85,6 +85,15 @@ abstract class WC_Abstract_Google_Analytics_JS {
 		);
 
 		add_action(
+			'woocommerce_add_to_cart',
+			function( $cart_item_key, $product_id, $quantity, $variation_id, $variation ) {
+				$this->set_script_data( 'added_to_cart', $this->get_formatted_product( wc_get_product( $product_id ), $variation ), null, true );
+			},
+			10,
+			5
+		);
+
+		add_action(
 			'woocommerce_shop_loop_item_title',
 			function() {
 				global $product;
@@ -180,12 +189,13 @@ abstract class WC_Abstract_Google_Analytics_JS {
 	/**
 	 * Returns an array of product data in the required format
 	 *
-	 * @param WC_Product $product The product to format.
+	 * @param WC_Product $product   The product to format.
+	 * @param array|bool $variation An array containing product variation attributes to include in the product data.
 	 *
 	 * @return array
 	 */
-	public function get_formatted_product( WC_Product $product ): array {
-		return array(
+	public function get_formatted_product( WC_Product $product, $variation = false ): array {
+		$formatted = array(
 			'id'         => $product->get_id(),
 			'name'       => $product->get_name(),
 			'categories' => array_map(
@@ -202,6 +212,25 @@ abstract class WC_Abstract_Google_Analytics_JS {
 				),
 			),
 		);
+
+		if ( false !== $variation ) {
+			$formatted['variation'] = implode(
+				', ',
+				array_map(
+					function( $attribute, $value ) {
+						return sprintf(
+							'%s: %s',
+							$attribute,
+							$value
+						);
+					},
+					array_keys( $variation ),
+					array_values( $variation )
+				)
+			);
+		}
+
+		return $formatted;
 	}
 
 	/**

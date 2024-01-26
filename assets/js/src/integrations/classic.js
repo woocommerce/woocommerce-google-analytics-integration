@@ -1,6 +1,13 @@
 import { tracker } from '../tracker';
 import { getProductFromID } from '../utils';
-import { events, cart, products, product, order } from '../config.js';
+import {
+	events,
+	cart,
+	products,
+	product,
+	addedToCart,
+	order,
+} from '../config.js';
 
 /**
  * The Google Analytics integration for classic WooCommerce pages
@@ -20,7 +27,11 @@ export const trackClassicIntegration = () => {
 	};
 
 	Object.values( events ?? {} ).forEach( ( eventName ) => {
-		tracker.event( eventName ).handler( eventData );
+		if ( eventName === 'add_to_cart' ) {
+			tracker.event( eventName ).handler( { product: addedToCart } );
+		} else {
+			tracker.event( eventName ).handler( eventData );
+		}
 	} );
 
 	/**

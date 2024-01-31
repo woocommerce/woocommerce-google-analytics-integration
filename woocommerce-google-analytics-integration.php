@@ -45,7 +45,7 @@ if ( ! class_exists( 'WC_Google_Analytics_Integration' ) ) {
 	);
 
 	/**
-	 * WooCommerce Google Analytics Integration main class.
+	 * Google Analytics for WooCommerce main class.
 	 */
 	class WC_Google_Analytics_Integration {
 
@@ -162,7 +162,7 @@ if ( ! class_exists( 'WC_Google_Analytics_Integration' ) ) {
 		 * Add a new integration to WooCommerce.
 		 *
 		 * @param  array $integrations WooCommerce integrations.
-		 * @return array               Google Analytics integration added.
+		 * @return array               Google Analytics for WooCommerce added.
 		 */
 		public function add_integration( $integrations ) {
 			$integrations[] = 'WC_Google_Analytics';

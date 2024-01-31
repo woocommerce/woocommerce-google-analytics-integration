@@ -7,7 +7,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\TaskLists;
 
 /**
- * Google Analytics Integration
+ * Google Analytics for WooCommerce
  *
  * Allows tracking code to be inserted into store pages.
  *
@@ -358,7 +358,7 @@ class WC_Google_Analytics extends WC_Integration {
 			<p class="privacy-policy-tutorial">' . $policy_text . '</p>
 			<style>#privacy-settings-accordion-block-woocommerce-google-analytics-integration .privacy-settings-accordion-actions { display: none }</style>';
 
-		wp_add_privacy_policy_content( 'WooCommerce Google Analytics Integration', wpautop( $content, false ) );
+		wp_add_privacy_policy_content( 'Google Analytics for WooCommerce', wpautop( $content, false ) );
 	}
 
 	/**

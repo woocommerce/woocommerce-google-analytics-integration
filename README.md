@@ -1,4 +1,4 @@
-# WooCommerce Google Analytics Integration
+# Google Analytics for WooCommerce
 
 WordPress plugin: Provides the integration between WooCommerce and Google Analytics.
 
@@ -10,7 +10,7 @@ Will be required for WooCommerce shops using the integration from WooCommerce 2.
 
 ## NPM Scripts
 
-WooCommerce Google Analytics Integration utilizes npm scripts for task management utilities.
+Google Analytics for WooCommerce utilizes npm scripts for task management utilities.
 
 `npm run build` - Runs the tasks necessary for a release. These may include building JavaScript, SASS, CSS minification, and language files.
 
@@ -34,4 +34,4 @@ Alternatively, run `npm run lint:php:diff` to run coding standards checks agains
 
 ## Docs
 
-- [Hooks defined or used in WooCommerce Google Analytics Integration](./docs/Hooks.md)
+- [Hooks defined or used in Google Analytics for WooCommerce](./docs/Hooks.md)

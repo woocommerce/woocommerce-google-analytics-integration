@@ -40,6 +40,7 @@ if ( ! class_exists( 'WC_Google_Analytics_Integration' ) ) {
 			if ( class_exists( FeaturesUtil::class ) ) {
 				FeaturesUtil::declare_compatibility( 'custom_order_tables', __FILE__ );
 				FeaturesUtil::declare_compatibility( 'cart_checkout_blocks', __FILE__ );
+				FeaturesUtil::declare_compatibility( 'product_block_editor', __FILE__ );
 			}
 		}
 	);

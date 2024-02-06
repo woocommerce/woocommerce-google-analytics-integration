@@ -3,7 +3,7 @@ Contributors: woocommerce, automattic, claudiosanches, bor0, royho, laurendaviss
 Tags: woocommerce, google analytics
 Requires at least: 3.9
 Tested up to: 6.4
-Stable tag: 1.8.13
+Stable tag: 1.8.14
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -59,6 +59,10 @@ Exact wording depends on the national data privacy laws and should be adjusted.
 1. Google Analytics Integration Settings.
 
 == Changelog ==
+
+= 1.8.14 - 2024-02-07 =
+* Tweak - Declare feature compatibility for the new product editor (also called product block editor).
+* Tweak - WC 8.6 compatibility.
 
 = 1.8.13 - 2024-01-09 =
 * Dev - Upgrade all NPM dev dependencies.

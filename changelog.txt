@@ -1,5 +1,9 @@
 *** Changelog ***
 
+= 1.8.14 - 2024-02-07 =
+* Tweak - Declare feature compatibility for the new product editor (also called product block editor).
+* Tweak - WC 8.6 compatibility.
+
 = 1.8.13 - 2024-01-09 =
 * Dev - Upgrade all NPM dev dependencies.
 * Dev - Upgrade to Node.js 18.

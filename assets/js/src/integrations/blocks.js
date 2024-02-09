@@ -6,37 +6,37 @@ import { ACTION_PREFIX, NAMESPACE } from '../constants';
 addUniqueAction(
 	`${ ACTION_PREFIX }-product-list-render`,
 	NAMESPACE,
-	tracker.event( 'view_item_list' ).handler
+	tracker.eventHandler( 'view_item_list' )
 );
 
 addUniqueAction(
 	`${ ACTION_PREFIX }-product-render`,
 	NAMESPACE,
-	tracker.event( 'view_item' ).handler
+	tracker.eventHandler( 'view_item' )
 );
 
 addUniqueAction(
 	`${ ACTION_PREFIX }-cart-add-item`,
 	NAMESPACE,
-	tracker.event( 'add_to_cart' ).handler
+	tracker.eventHandler( 'add_to_cart' )
 );
 
 addUniqueAction(
 	`${ ACTION_PREFIX }-cart-remove-item`,
 	NAMESPACE,
-	tracker.event( 'remove_from_cart' ).handler
+	tracker.eventHandler( 'remove_from_cart' )
 );
 
 addUniqueAction(
 	`${ ACTION_PREFIX }-checkout-render-checkout-form`,
 	NAMESPACE,
-	tracker.event( 'begin_checkout' ).handler
+	tracker.eventHandler( 'begin_checkout' )
 );
 
 addUniqueAction(
 	`${ ACTION_PREFIX }-product-view-link`,
 	NAMESPACE,
-	tracker.event( 'select_content' ).handler
+	tracker.eventHandler( 'select_content' )
 );
 
 /**

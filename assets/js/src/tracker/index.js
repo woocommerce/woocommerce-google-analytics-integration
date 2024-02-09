@@ -52,28 +52,26 @@ class Tracker {
 	}
 
 	/**
-	 * Creates and returns an event handler object for a specified event name.
+	 * Creates and returns an event handler for a specified event name.
 	 *
 	 * @param {string} name The name of the event.
-	 * @return {{handler: function(*): void}} An object with a `handler` method for processing and tracking the event.
+	 * @return {function(*): void} Function for processing and tracking the event.
 	 * @throws {Error} If the event name is not supported.
 	 */
-	event( name ) {
+	eventHandler( name ) {
 		/* eslint import/namespace: [ 'error', { allowComputed: true } ] */
 		if ( ! formatters[ name ] ) {
 			throw new Error( `Event ${ name } is not supported.` );
 		}
 
-		return {
-			handler: ( data ) => {
-				if ( config.events.includes( name ) ) {
-					window[ config.tracker_var ](
-						'event',
-						name,
-						formatters[ name ]( data )
-					);
-				}
-			},
+		return function trackerEventHandler( data ) {
+			if ( config.events.includes( name ) ) {
+				window[ config.tracker_var ](
+					'event',
+					name,
+					formatters[ name ]( data )
+				);
+			}
 		};
 	}
 }

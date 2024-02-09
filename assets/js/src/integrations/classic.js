@@ -28,9 +28,9 @@ export const trackClassicIntegration = () => {
 
 	Object.values( events ?? {} ).forEach( ( eventName ) => {
 		if ( eventName === 'add_to_cart' ) {
-			tracker.event( eventName ).handler( { product: addedToCart } );
+			tracker.eventHandler( eventName )( { product: addedToCart } );
 		} else {
-			tracker.event( eventName ).handler( eventData );
+			tracker.eventHandler( eventName )( eventData );
 		}
 	} );
 
@@ -43,7 +43,7 @@ export const trackClassicIntegration = () => {
 	 * @param {HTMLElement[]} button - An array of HTML elements representing the add to cart button.
 	 */
 	document.body.onadded_to_cart = ( e, fragments, cartHash, button ) => {
-		tracker.event( 'add_to_cart' ).handler( {
+		tracker.eventHandler( 'add_to_cart' )( {
 			product: getProductFromID(
 				parseInt( button[ 0 ].dataset.product_id )
 			),
@@ -65,7 +65,7 @@ export const trackClassicIntegration = () => {
 					return;
 				}
 
-				tracker.event( 'remove_from_cart' ).handler( {
+				tracker.eventHandler( 'remove_from_cart' )( {
 					product: getProductFromID(
 						parseInt( item.dataset.product_id ),
 						true
@@ -98,7 +98,7 @@ export const trackClassicIntegration = () => {
 					return;
 				}
 
-				tracker.event( 'select_content' ).handler( {
+				tracker.eventHandler( 'select_content' )( {
 					product: getProductFromID( parseInt( productId ) ),
 				} );
 			} );

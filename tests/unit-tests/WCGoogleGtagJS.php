@@ -97,15 +97,10 @@ class WCGoogleGtagJS extends EventsDataTest {
 	
 			$script_data = json_decode( $gtag->get_script_data(), true );
 	
-			$this->assertEquals(
-				$script_data['events'],
-				array(
-					$event => $event
-				)
-			);
+			$this->assertTrue( in_array( $event, $script_data['events'] ) );
 	
 			// Reset event data
-			$gtag->set_script_data( 'events', array(), null, true );
+			$gtag->set_script_data( 'events', array() );
 		}
 	}
 
@@ -114,44 +109,32 @@ class WCGoogleGtagJS extends EventsDataTest {
 	 *
 	 * @return void
 	 */
-	public function test_script_data(): void {
-		$gtag    = new WC_Google_Gtag_JS;
-		$default = json_decode( $gtag->get_script_data(), true );
+	public function test_set_script_data(): void {
+		$gtag         = new WC_Google_Gtag_JS;
+		$example_data = array(
+			'key' => 'value'
+		);
 		
-		$gtag->set_script_data( 'test', 'value' );
+		$gtag->set_script_data( 'test', $example_data );
+
+		$script_data = json_decode( $gtag->get_script_data(), true );
+		$this->assertEquals( $script_data['test'], $example_data );
+	}
+
+	/**
+	 * Test script data can be appended
+	 *
+	 * @return void
+	 */
+	public function test_append_script_data(): void {
+		$gtag = new WC_Google_Gtag_JS;
+		
+		$gtag->append_script_data( 'test', 'first' );
+		$gtag->append_script_data( 'test', 'second' );
+
 		$script_data = json_decode( $gtag->get_script_data(), true );
 
-		$this->assertEquals( $script_data, array_merge(
-			$default,
-			array(
-				'test' => array(
-					'value'
-				),
-			)
-		) );
-		
-		$gtag->set_script_data( 'test', 'value2', 'key' );
-		$script_data = json_decode( $gtag->get_script_data(), true );
-
-		$this->assertEquals( $script_data, array_merge(
-			$default,
-			array(
-				'test' => array(
-					0     => 'value',
-					'key' => 'value2',
-				),
-			)
-		) );
-		
-		$gtag->set_script_data( 'test', 'value', null, true );
-		$script_data = json_decode( $gtag->get_script_data(), true );
-
-		$this->assertEquals( $script_data, array_merge(
-			$default,
-			array(
-				'test' => 'value',
-			)
-		) );
+		$this->assertEquals( $script_data['test'], array( 'first', 'second' ) );
 	}
 
 	/**
@@ -162,12 +145,12 @@ class WCGoogleGtagJS extends EventsDataTest {
 	public function test_tracker_var(): void {
 		$gtag = new WC_Google_Gtag_JS;
 
-		$this->assertEquals( $gtag->tracker_var(), 'gtag' );
+		$this->assertEquals( $gtag->tracker_function_name(), 'gtag' );
 		
 		add_filter( 'woocommerce_gtag_tracker_variable', function( $var ) {
 			return 'filtered';
 		} );
-		$this->assertEquals( $gtag->tracker_var(), 'filtered' );
+		$this->assertEquals( $gtag->tracker_function_name(), 'filtered' );
 	}
 
 	/**

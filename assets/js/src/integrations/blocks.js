@@ -39,9 +39,6 @@ addUniqueAction(
 	tracker.eventHandler( 'select_content' )
 );
 
-/**
- * Temporarily remove all actions for demo purposes.
- */
 removeAction( `${ ACTION_PREFIX }-checkout-submit`, NAMESPACE );
 removeAction( `${ ACTION_PREFIX }-checkout-set-email-address`, NAMESPACE );
 removeAction( `${ ACTION_PREFIX }-checkout-set-phone-number`, NAMESPACE );

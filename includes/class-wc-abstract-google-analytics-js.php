@@ -307,7 +307,7 @@ abstract class WC_Abstract_Google_Analytics_JS {
 	 *
 	 * @return string
 	 */
-	abstract public static function tracker_var(): string;
+	abstract public static function tracker_function_name(): string;
 
 	/**
 	 * Add an event to the script data

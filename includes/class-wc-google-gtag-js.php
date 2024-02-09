@@ -154,7 +154,7 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 	 *
 	 * @return string
 	 */
-	public static function tracker_var(): string {
+	public static function tracker_function_name(): string {
 		return apply_filters( 'woocommerce_gtag_tracker_variable', 'gtag' );
 	}
 
@@ -165,23 +165,23 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 	 */
 	public function load_analytics_config(): void {
 		$this->script_data['config'] = array(
-			'developer_id'         => self::DEVELOPER_ID,
-			'gtag_id'              => self::get( 'ga_id' ),
-			'tracker_var'          => self::tracker_var(),
-			'track_404'            => 'yes' === self::get( 'ga_404_tracking_enabled' ),
-			'allow_google_signals' => 'yes' === self::get( 'ga_support_display_advertising' ),
-			'link_attribution'     => 'yes' === self::get( 'ga_support_enhanced_link_attribution' ),
-			'anonymize_ip'         => 'yes' === self::get( 'ga_anonymize_enabled' ),
-			'logged_in'            => is_user_logged_in(),
-			'linker'               => array(
+			'developer_id'          => self::DEVELOPER_ID,
+			'gtag_id'               => self::get( 'ga_id' ),
+			'tracker_function_name' => self::tracker_function_name(),
+			'track_404'             => 'yes' === self::get( 'ga_404_tracking_enabled' ),
+			'allow_google_signals'  => 'yes' === self::get( 'ga_support_display_advertising' ),
+			'link_attribution'      => 'yes' === self::get( 'ga_support_enhanced_link_attribution' ),
+			'anonymize_ip'          => 'yes' === self::get( 'ga_anonymize_enabled' ),
+			'logged_in'             => is_user_logged_in(),
+			'linker'                => array(
 				'domains'        => ! empty( self::get( 'ga_linker_cross_domains' ) ) ? array_map( 'esc_js', explode( ',', self::get( 'ga_linker_cross_domains' ) ) ) : array(),
 				'allow_incoming' => 'yes' === self::get( 'ga_linker_allow_incoming_enabled' ),
 			),
-			'custom_map'           => array(
+			'custom_map'            => array(
 				'dimension1' => 'logged_in',
 			),
-			'events'               => self::get_enabled_events(),
-			'identifier'           => self::get( 'ga_product_identifier' ),
+			'events'                => self::get_enabled_events(),
+			'identifier'            => self::get( 'ga_product_identifier' ),
 		);
 	}
 

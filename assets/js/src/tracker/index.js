@@ -26,7 +26,7 @@ class Tracker {
 	 * Initializes the tracker and dataLayer if not already done.
 	 */
 	init() {
-		if ( window[ config.tracker_var ] ) {
+		if ( window[ config.tracker_function_name ] ) {
 			// Tracker already initialized. Do nothing.
 			return;
 		}
@@ -37,7 +37,7 @@ class Tracker {
 			window.dataLayer.push( arguments );
 		}
 
-		window[ config.tracker_var ] = gtag;
+		window[ config.tracker_function_name ] = gtag;
 
 		gtag( 'js', new Date() );
 		gtag( 'set', `developer_id.${ config.developer_id }`, true );
@@ -66,7 +66,7 @@ class Tracker {
 		}
 
 		return function trackerEventHandler( data ) {
-			window[ config.tracker_var ](
+			window[ config.tracker_function_name ](
 				'event',
 				name,
 				formatter( data )

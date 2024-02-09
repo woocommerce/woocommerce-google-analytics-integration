@@ -245,7 +245,7 @@ abstract class WC_Abstract_Google_Analytics_JS {
 
 		return array(
 			'currency' => $order->get_currency(),
-			'value'    => $this->get_formatted_product( $order->get_total() ),
+			'value'    => $this->get_formatted_price( $order->get_total() ),
 			'items'    => array_map(
 				function( $item ) {
 					return array(

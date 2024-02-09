@@ -65,13 +65,11 @@ class Tracker {
 		}
 
 		return function trackerEventHandler( data ) {
-			if ( config.events.includes( name ) ) {
-				window[ config.tracker_var ](
-					'event',
-					name,
-					formatters[ name ]( data )
-				);
-			}
+			window[ config.tracker_var ](
+				'event',
+				name,
+				formatters[ name ]( data )
+			);
 		};
 	}
 }

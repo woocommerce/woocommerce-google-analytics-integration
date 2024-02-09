@@ -60,7 +60,8 @@ class Tracker {
 	 */
 	eventHandler( name ) {
 		/* eslint import/namespace: [ 'error', { allowComputed: true } ] */
-		if ( ! formatters[ name ] ) {
+		const formatter = formatters[ name ];
+		if ( typeof formatter !== 'function' ) {
 			throw new Error( `Event ${ name } is not supported.` );
 		}
 
@@ -68,7 +69,7 @@ class Tracker {
 			window[ config.tracker_var ](
 				'event',
 				name,
-				formatters[ name ]( data )
+				formatter( data )
 			);
 		};
 	}

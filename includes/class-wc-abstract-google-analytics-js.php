@@ -65,14 +65,14 @@ abstract class WC_Abstract_Google_Analytics_JS {
 		add_action(
 			'woocommerce_before_cart',
 			function() {
-				$this->set_script_data( 'cart', $this->get_formatted_cart(), null, true );
+				$this->set_script_data( 'cart', $this->get_formatted_cart() );
 			}
 		);
 
 		add_action(
 			'woocommerce_before_checkout_form',
 			function() {
-				$this->set_script_data( 'cart', $this->get_formatted_cart(), null, true );
+				$this->set_script_data( 'cart', $this->get_formatted_cart() );
 			}
 		);
 
@@ -80,14 +80,14 @@ abstract class WC_Abstract_Google_Analytics_JS {
 			'woocommerce_before_single_product',
 			function() {
 				global $product;
-				$this->set_script_data( 'product', $this->get_formatted_product( $product ), null, true );
+				$this->set_script_data( 'product', $this->get_formatted_product( $product ) );
 			}
 		);
 
 		add_action(
 			'woocommerce_add_to_cart',
 			function( $cart_item_key, $product_id, $quantity, $variation_id, $variation ) {
-				$this->set_script_data( 'added_to_cart', $this->get_formatted_product( wc_get_product( $product_id ), $variation ), null, true );
+				$this->set_script_data( 'added_to_cart', $this->get_formatted_product( wc_get_product( $product_id ), $variation ) );
 			},
 			10,
 			5
@@ -97,14 +97,14 @@ abstract class WC_Abstract_Google_Analytics_JS {
 			'woocommerce_shop_loop_item_title',
 			function() {
 				global $product;
-				$this->set_script_data( 'products', $this->get_formatted_product( $product ) );
+				$this->append_script_data( 'products', $this->get_formatted_product( $product ) );
 			}
 		);
 
 		add_action(
 			'woocommerce_thankyou',
 			function( $order_id ) {
-				$this->set_script_data( 'order', $this->get_formatted_order( $order_id ), null, true );
+				$this->set_script_data( 'order', $this->get_formatted_order( $order_id ) );
 			}
 		);
 	}
@@ -314,11 +314,20 @@ abstract class WC_Abstract_Google_Analytics_JS {
 	 *
 	 * @param string       $type The type of event this data is related to.
 	 * @param string|array $data The event data to add.
-	 * @param string       $key  If not null then the $data will be added as a new array item with this key.
 	 *
 	 * @return void
 	 */
-	abstract public function set_script_data( string $type, $data, ?string $key = null ): void;
+	abstract public function set_script_data( string $type, $data ): void;
+
+	/**
+	 * Append data to an existing script data array
+	 *
+	 * @param string       $type The type of event this data is related to.
+	 * @param string|array $data The event data to add.
+	 *
+	 * @return void
+	 */
+	abstract public function append_script_data( string $type, $data ): void;
 
 	/**
 	 * Get the class instance

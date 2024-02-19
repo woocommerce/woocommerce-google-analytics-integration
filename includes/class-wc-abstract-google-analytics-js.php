@@ -170,9 +170,11 @@ abstract class WC_Abstract_Google_Analytics_JS {
 		return array(
 			'items'   => array_map(
 				function( $item ) {
-					return array(
-						...$this->get_formatted_product( $item['data'] ),
-						'quantity' => $item['quantity']
+					return array_merge(
+						$this->get_formatted_product( $item['data'] ),
+						array(
+							'quantity' => $item['quantity'],
+						)
 					);
 				},
 				array_values( WC()->cart->get_cart() )
@@ -248,9 +250,11 @@ abstract class WC_Abstract_Google_Analytics_JS {
 			'value'    => $this->get_formatted_price( $order->get_total() ),
 			'items'    => array_map(
 				function( $item ) {
-					return array(
-						...$this->get_formatted_product( $item->get_product() ),
-						'quantity' => $item->get_quantity(),
+					return array_merge(
+						$this->get_formatted_product( $item->get_product() ),
+						array(
+							'quantity' => $item->get_quantity(),
+						)
 					);
 				},
 				array_values( $order->get_items() ),

@@ -63,14 +63,7 @@ abstract class WC_Abstract_Google_Analytics_JS {
 	 */
 	public function attach_event_data(): void {
 		add_action(
-			'woocommerce_before_cart',
-			function() {
-				$this->set_script_data( 'cart', $this->get_formatted_cart() );
-			}
-		);
-
-		add_action(
-			'woocommerce_before_checkout_form',
+			'wp_head',
 			function() {
 				$this->set_script_data( 'cart', $this->get_formatted_cart() );
 			}
@@ -148,7 +141,7 @@ abstract class WC_Abstract_Google_Analytics_JS {
 	 * @return string
 	 */
 	public static function get_product_identifier( WC_Product $product ): string {
-		$identifier = $product->get_id();
+		$identifier = $product->is_type( 'variation' ) ? $product->get_parent_id() : $product->get_id();
 
 		if ( 'product_sku' === self::get( 'ga_product_identifier' ) ) {
 			if ( ! empty( $product->get_sku() ) ) {
@@ -174,6 +167,10 @@ abstract class WC_Abstract_Google_Analytics_JS {
 						$this->get_formatted_product( $item['data'] ),
 						array(
 							'quantity' => $item['quantity'],
+							'prices'     => array(
+								'price'               => $this->get_formatted_price( $item['line_total'] ),
+								'currency_minor_unit' => wc_get_price_decimals(),
+							),
 						)
 					);
 				},
@@ -198,8 +195,8 @@ abstract class WC_Abstract_Google_Analytics_JS {
 	 */
 	public function get_formatted_product( WC_Product $product, $variation = false ): array {
 		$formatted = array(
-			'id'         => $product->get_id(),
-			'name'       => $product->get_name(),
+			'id'         => $product->is_type( 'variation' ) ? $product->get_parent_id() : $product->get_id(),
+			'name'       => $product->get_title(),
 			'categories' => array_map(
 				fn( $category ) => array( 'name' => $category->name ),
 				wc_get_product_terms( $product->get_id(), 'product_cat', array( 'number' => 5 ) )
@@ -215,6 +212,10 @@ abstract class WC_Abstract_Google_Analytics_JS {
 			),
 		);
 
+		if ( $product->is_type( 'variation' ) ) {
+			$variation = $product->get_attributes();
+		}
+
 		if ( false !== $variation ) {
 			$formatted['variation'] = implode(
 				', ',
@@ -222,7 +223,7 @@ abstract class WC_Abstract_Google_Analytics_JS {
 					function( $attribute, $value ) {
 						return sprintf(
 							'%s: %s',
-							$attribute,
+							str_replace( 'attribute_', '', $attribute ),
 							$value
 						);
 					},

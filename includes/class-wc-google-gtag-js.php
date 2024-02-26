@@ -130,14 +130,11 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 	 *
 	 * @return void
 	 */
-	public function append_script_data( string $type, $data ): void {
-		$this->set_script_data(
-			$type,
-			array(
-				...$this->script_data[ $type ] ?? [],
-				$data
-			)
-		);
+	public function append_script_data( string $type, $data ): void {	
+		if ( ! isset( $this->script_data[ $type ] ) ) {
+			$this->script_data[ $type ] = array();
+		}
+		$this->script_data[ $type ][] = $data;
 	}
 
 	/**

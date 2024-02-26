@@ -161,5 +161,8 @@ const formatCategoryKey = ( index ) => {
  * @return {Object|undefined} The product object or undefined if not found
  */
 export const getProductFromID = ( search ) => {
-	return products?.find( ( { id } ) => id === search ) ?? cart?.items?.find( ( { id } ) => id === search );
+	return (
+		products?.find( ( { id } ) => id === search ) ??
+		cart?.items?.find( ( { id } ) => id === search )
+	);
 };

@@ -61,7 +61,7 @@ export const trackClassicIntegration = () => {
 			.forEach( ( item ) =>
 				item.addEventListener( 'click', removeFromCartHandler )
 			);
-	}
+	};
 
 	/**
 	 * Handle remove from cart events
@@ -81,7 +81,13 @@ export const trackClassicIntegration = () => {
 	document.body.onupdated_wc_div = () => removeFromCartListener();
 
 	// Trigger the handler when an item is removed from the mini-cart and WooCommerce dispatches the `removed_from_cart` event.
-	document.body.onremoved_from_cart = ( event, fragments, cart_hash, button ) => removeFromCartHandler( { target: button[0] } );
+	document.body.onremoved_from_cart = (
+		event,
+		fragments,
+		/* eslint-disable-next-line camelcase */
+		cart_hash,
+		button
+	) => removeFromCartHandler( { target: button[ 0 ] } );
 
 	/**
 	 * Attaches click event listeners to non-block product listings that sends a
@@ -89,9 +95,9 @@ export const trackClassicIntegration = () => {
 	 */
 	document
 		.querySelectorAll( '.products .product:not(.wp-block-post)' )
-		?.forEach( ( product ) => {
+		?.forEach( ( item ) => {
 			// Get the Product ID from a child node containing the relevant attribute
-			const productId = product
+			const productId = item
 				.querySelector( 'a[data-product_id]' )
 				?.getAttribute( 'data-product_id' );
 
@@ -99,7 +105,7 @@ export const trackClassicIntegration = () => {
 				return;
 			}
 
-			product.addEventListener( 'click', ( event ) => {
+			item.addEventListener( 'click', ( event ) => {
 				// Return early if the user has clicked on anything other
 				// than a product link or an Add to cart button.
 				const targetLink = event.target.closest(
@@ -110,7 +116,9 @@ export const trackClassicIntegration = () => {
 
 				const isAddToCartButton =
 					event.target.classList.contains( 'add_to_cart_button' ) &&
-					! event.target.classList.contains( 'product_type_variable' )
+					! event.target.classList.contains(
+						'product_type_variable'
+					);
 
 				if ( ! targetLink && ( ! isButton || isAddToCartButton ) ) {
 					return;
@@ -119,6 +127,6 @@ export const trackClassicIntegration = () => {
 				tracker.eventHandler( 'select_content' )( {
 					product: getProductFromID( parseInt( productId ) ),
 				} );
-			});
+			} );
 		} );
 };

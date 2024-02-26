@@ -162,7 +162,7 @@ const formatCategoryKey = ( index ) => {
  */
 export const getProductFromID = ( search ) => {
 	return (
-		products?.find( ( { id } ) => id === search ) ??
-		cart?.items?.find( ( { id } ) => id === search )
+		cart?.items?.find( ( { id } ) => id === search ) ??
+		products?.find( ( { id } ) => id === search )
 	);
 };

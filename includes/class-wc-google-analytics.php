@@ -16,51 +16,6 @@ use Automattic\WooCommerce\Admin\Features\OnboardingTasks\TaskLists;
  */
 class WC_Google_Analytics extends WC_Integration {
 
-	/** @var string $ga_id Google Analytics Tracking ID */
-	public $ga_id;
-
-	/** @var string $ga_standard_tracking_enabled Is standard tracking enabled (yes|no) */
-	public $ga_standard_tracking_enabled;
-
-	/** @var string $ga_support_display_advertising Supports display advertising (yes|no) */
-	public $ga_support_display_advertising;
-
-	/** @var string $ga_support_enhanced_link_attribution Use enhanced link attribution (yes|no) */
-	public $ga_support_enhanced_link_attribution;
-
-	/** @var string $ga_anonymize_enabled Anonymize IP addresses (yes|no) */
-	public $ga_anonymize_enabled;
-
-	/** @var string $ga_404_tracking_enabled Track 404 errors (yes|no) */
-	public $ga_404_tracking_enabled;
-
-	/** @var string $ga_ecommerce_tracking_enabled Purchase transactions (yes|no) */
-	public $ga_ecommerce_tracking_enabled;
-
-	/** @var string $ga_enhanced_remove_from_cart_enabled Track remove from cart events (yes|no) */
-	public $ga_enhanced_remove_from_cart_enabled;
-
-	/** @var string $ga_enhanced_product_impression_enabled Track product impressions (yes|no) */
-	public $ga_enhanced_product_impression_enabled;
-
-	/** @var string $ga_enhanced_product_click_enabled Track product clicks (yes|no) */
-	public $ga_enhanced_product_click_enabled;
-
-	/** @var string $ga_enhanced_checkout_process_enabled Track checkout initiated (yes|no) */
-	public $ga_enhanced_checkout_process_enabled;
-
-	/** @var string $ga_enhanced_product_detail_view_enabled Track product detail views (yes|no) */
-	public $ga_enhanced_product_detail_view_enabled;
-
-	/** @var string $ga_event_tracking_enabled Track add to cart events (yes|no) */
-	public $ga_event_tracking_enabled;
-
-	/** @var string $ga_linker_cross_domains Domains for automatic linking */
-	public $ga_linker_cross_domains;
-
-	/** @var string $ga_linker_allow_incoming_enabled Accept incoming linker (yes|no) */
-	public $ga_linker_allow_incoming_enabled;
-
 	/**
 	 * Defines the script handles that should be async.
 	 */
@@ -386,7 +341,7 @@ class WC_Google_Analytics extends WC_Integration {
 	 * @return bool         True if tracking for a certain setting is disabled
 	 */
 	private function disable_tracking( $type ) {
-		return is_admin() || current_user_can( 'manage_options' ) || ( ! $this->ga_id ) || 'no' === $type || apply_filters( 'woocommerce_ga_disable_tracking', false, $type );
+		return is_admin() || current_user_can( 'manage_options' ) || ( ! $this->settings['ga_id'] ) || 'no' === $type || apply_filters( 'woocommerce_ga_disable_tracking', false, $type );
 	}
 
 	/**

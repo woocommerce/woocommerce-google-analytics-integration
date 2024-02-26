@@ -53,7 +53,7 @@ class WC_Google_Analytics extends WC_Integration {
 		// Display a task on  "Things to do next section"
 		add_action( 'init', array( $this, 'add_wc_setup_task' ), 20 );
 		// Admin Options
-		add_filter( 'woocommerce_tracker_data', array( $this, 'track_options' ) );
+		add_filter( 'woocommerce_tracker_data', array( $this, 'track_settings' ) );
 		add_action( 'woocommerce_update_options_integration_google_analytics', array( $this, 'process_admin_options' ) );
 		add_action( 'woocommerce_update_options_integration_google_analytics', array( $this, 'show_options_info' ) );
 		add_action( 'admin_init', array( $this, 'privacy_policy' ) );
@@ -236,23 +236,23 @@ class WC_Google_Analytics extends WC_Integration {
 	 * @param  array $data Current WC tracker data.
 	 * @return array       Updated WC Tracker data.
 	 */
-	public function track_options( $data ) {
-		$options = $this->settings;
+	public function track_settings( $data ) {
+		$settings = $this->settings;
 		$data['wc-google-analytics'] = array(
-			'standard_tracking_enabled'         => $options['ga_standard_tracking_enabled'],
-			'support_display_advertising'       => $options['ga_support_display_advertising'],
-			'support_enhanced_link_attribution' => $options['ga_support_enhanced_link_attribution'],
-			'anonymize_enabled'                 => $options['ga_anonymize_enabled'],
-			'ga_404_tracking_enabled'           => $options['ga_404_tracking_enabled'],
-			'ecommerce_tracking_enabled'        => $options['ga_ecommerce_tracking_enabled'],
-			'event_tracking_enabled'            => $options['ga_event_tracking_enabled'],
+			'standard_tracking_enabled'         => $settings['ga_standard_tracking_enabled'],
+			'support_display_advertising'       => $settings['ga_support_display_advertising'],
+			'support_enhanced_link_attribution' => $settings['ga_support_enhanced_link_attribution'],
+			'anonymize_enabled'                 => $settings['ga_anonymize_enabled'],
+			'ga_404_tracking_enabled'           => $settings['ga_404_tracking_enabled'],
+			'ecommerce_tracking_enabled'        => $settings['ga_ecommerce_tracking_enabled'],
+			'event_tracking_enabled'            => $settings['ga_event_tracking_enabled'],
 			'plugin_version'                    => WC_GOOGLE_ANALYTICS_INTEGRATION_VERSION,
-			'linker_allow_incoming_enabled'     => empty( $options['ga_linker_allow_incoming_enabled'] ) ? 'no' : 'yes',
-			'linker_cross_domains'              => $options['ga_linker_cross_domains'],
+			'linker_allow_incoming_enabled'     => empty( $settings['ga_linker_allow_incoming_enabled'] ) ? 'no' : 'yes',
+			'linker_cross_domains'              => $settings['ga_linker_cross_domains'],
 		);
 
 		// ID prefix, blank, or X for unknown
-		$prefix = strstr( strtoupper( $options['ga_id'] ), '-', true );
+		$prefix = strstr( strtoupper( $settings['ga_id'] ), '-', true );
 		if ( in_array( $prefix, array( 'UA', 'G', 'GT' ), true ) || empty( $prefix ) ) {
 			$data['wc-google-analytics']['ga_id'] = $prefix;
 		} else {

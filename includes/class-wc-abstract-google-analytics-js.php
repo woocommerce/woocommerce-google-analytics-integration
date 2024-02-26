@@ -17,8 +17,8 @@ abstract class WC_Abstract_Google_Analytics_JS {
 	/** @var WC_Abstract_Google_Analytics_JS $instance Class Instance */
 	protected static $instance;
 
-	/** @var array $options Inherited Analytics options */
-	protected static $options;
+	/** @var array $settings Inherited Analytics settings */
+	protected static $settings;
 
 	/** @var string Developer ID */
 	public const DEVELOPER_ID = 'dOGY3NW';
@@ -110,14 +110,14 @@ abstract class WC_Abstract_Google_Analytics_JS {
 	}
 
 	/**
-	 * Return one of our options
+	 * Return one of our settings
 	 *
-	 * @param string $option Key/name for the option.
+	 * @param string $setting Key/name for the setting.
 	 *
-	 * @return string|null Value of the option or null if not found
+	 * @return string|null Value of the setting or null if not found
 	 */
-	protected static function get( $option ): ?string {
-		return self::$options[ $option ] ?? null;
+	protected static function get( $setting ): ?string {
+		return self::$settings[ $setting ] ?? null;
 	}
 
 	/**
@@ -336,8 +336,8 @@ abstract class WC_Abstract_Google_Analytics_JS {
 	/**
 	 * Get the class instance
 	 *
-	 * @param  array $options Options
+	 * @param  array $settings Settings
 	 * @return WC_Abstract_Google_Analytics_JS
 	 */
-	abstract public static function get_instance( $options = array() ): WC_Abstract_Google_Analytics_JS;
+	abstract public static function get_instance( $settings = array() ): WC_Abstract_Google_Analytics_JS;
 }

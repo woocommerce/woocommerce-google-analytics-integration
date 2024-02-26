@@ -37,7 +37,7 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 	 */
 	public function __construct( $settings = array() ) {
 		parent::__construct();
-		self::$options = $settings;
+		self::$settings = $settings;
 
 		$this->load_analytics_config();
 		$this->map_actions();
@@ -202,8 +202,8 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 			'begin_checkout'   => 'ga_enhanced_checkout_process_enabled',
 		);
 
-		foreach( $settings as $event => $option_name ) {
-			if ( 'yes' === self::get( $option_name ) ) {
+		foreach( $settings as $event => $setting_name ) {
+			if ( 'yes' === self::get( $setting_name ) ) {
 				$events[] = $event;
 			}
 		}

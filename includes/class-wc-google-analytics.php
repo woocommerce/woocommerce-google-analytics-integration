@@ -69,11 +69,10 @@ class WC_Google_Analytics extends WC_Integration {
 	/**
 	 * Returns the proper class based on Gtag settings.
 	 *
-	 * @param  array $options                  Options
 	 * @return WC_Abstract_Google_Analytics_JS
 	 */
-	protected function get_tracking_instance( $options = array() ) {
-		return WC_Google_Gtag_JS::get_instance( $options );
+	protected function get_tracking_instance() {
+		return WC_Google_Gtag_JS::get_instance( $this->settings );
 	}
 
 	/**
@@ -88,14 +87,13 @@ class WC_Google_Analytics extends WC_Integration {
 		// Load the settings
 		$this->init_form_fields();
 		$this->init_settings();
-		$constructor = $this->init_options();
 
 		add_action( 'admin_notices', array( $this, 'universal_analytics_upgrade_notice' ) );
 
 		// Contains snippets/JS tracking code
 		include_once 'class-wc-abstract-google-analytics-js.php';
 		include_once 'class-wc-google-gtag-js.php';
-		$this->get_tracking_instance( $constructor );
+		$this->get_tracking_instance();
 
 		// Display a task on  "Things to do next section"
 		add_action( 'init', array( $this, 'add_wc_setup_task' ), 20 );
@@ -133,38 +131,6 @@ class WC_Google_Analytics extends WC_Integration {
 				)
 			);
 		}
-	}
-
-	/**
-	 * Loads all of our options for this plugin (stored as properties as well)
-	 *
-	 * @return array An array of options that can be passed to other classes
-	 */
-	public function init_options() {
-		$options = array(
-			'ga_product_identifier'                   => 'product_sku',
-			'ga_id'                                   => null,
-			'ga_standard_tracking_enabled'            => null,
-			'ga_support_display_advertising'          => null,
-			'ga_support_enhanced_link_attribution'    => null,
-			'ga_anonymize_enabled'                    => null,
-			'ga_404_tracking_enabled'                 => null,
-			'ga_enhanced_remove_from_cart_enabled'    => null,
-			'ga_enhanced_product_impression_enabled'  => null,
-			'ga_enhanced_product_click_enabled'       => null,
-			'ga_enhanced_checkout_process_enabled'    => null,
-			'ga_enhanced_product_detail_view_enabled' => null,
-			'ga_event_tracking_enabled'               => null,
-			'ga_linker_cross_domains'                 => null,
-			'ga_linker_allow_incoming_enabled'        => null,
-		);
-
-		$constructor = array();
-		foreach ( $options as $option => $default ) {
-			$constructor[ $option ] = $this->$option = $this->get_option( $option, $default );
-		}
-
-		return $constructor;
 	}
 
 	/**
@@ -316,21 +282,22 @@ class WC_Google_Analytics extends WC_Integration {
 	 * @return array       Updated WC Tracker data.
 	 */
 	public function track_options( $data ) {
+		$options = $this->settings;
 		$data['wc-google-analytics'] = array(
-			'standard_tracking_enabled'         => $this->ga_standard_tracking_enabled,
-			'support_display_advertising'       => $this->ga_support_display_advertising,
-			'support_enhanced_link_attribution' => $this->ga_support_enhanced_link_attribution,
-			'anonymize_enabled'                 => $this->ga_anonymize_enabled,
-			'ga_404_tracking_enabled'           => $this->ga_404_tracking_enabled,
-			'ecommerce_tracking_enabled'        => $this->ga_ecommerce_tracking_enabled,
-			'event_tracking_enabled'            => $this->ga_event_tracking_enabled,
+			'standard_tracking_enabled'         => $options['ga_standard_tracking_enabled'],
+			'support_display_advertising'       => $options['ga_support_display_advertising'],
+			'support_enhanced_link_attribution' => $options['ga_support_enhanced_link_attribution'],
+			'anonymize_enabled'                 => $options['ga_anonymize_enabled'],
+			'ga_404_tracking_enabled'           => $options['ga_404_tracking_enabled'],
+			'ecommerce_tracking_enabled'        => $options['ga_ecommerce_tracking_enabled'],
+			'event_tracking_enabled'            => $options['ga_event_tracking_enabled'],
 			'plugin_version'                    => WC_GOOGLE_ANALYTICS_INTEGRATION_VERSION,
-			'linker_allow_incoming_enabled'     => empty( $this->ga_linker_allow_incoming_enabled ) ? 'no' : 'yes',
-			'linker_cross_domains'              => $this->ga_linker_cross_domains,
+			'linker_allow_incoming_enabled'     => empty( $options['ga_linker_allow_incoming_enabled'] ) ? 'no' : 'yes',
+			'linker_cross_domains'              => $options['ga_linker_cross_domains'],
 		);
 
 		// ID prefix, blank, or X for unknown
-		$prefix = strstr( strtoupper( $this->ga_id ), '-', true );
+		$prefix = strstr( strtoupper( $options['ga_id'] ), '-', true );
 		if ( in_array( $prefix, array( 'UA', 'G', 'GT' ), true ) || empty( $prefix ) ) {
 			$data['wc-google-analytics']['ga_id'] = $prefix;
 		} else {

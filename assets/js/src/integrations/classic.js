@@ -51,32 +51,37 @@ export const trackClassicIntegration = () => {
 	};
 
 	/**
-	 * Attach click event listeners to all remove from cart links on page load and when the cart is updated.
+	 * Attaches click event listeners to all remove from cart links
 	 */
 	const removeFromCartListener = () => {
 		document
-			.querySelector( '.woocommerce-cart-form' )
-			?.addEventListener( 'click', ( e ) => {
-				const item = e.target.closest(
-					'.woocommerce-cart-form__cart-item .remove'
-				);
+			.querySelectorAll(
+				'.woocommerce-cart-form .woocommerce-cart-form__cart-item .remove[data-product_id]'
+			)
+			.forEach( ( item ) =>
+				item.addEventListener( 'click', removeFromCartHandler )
+			);
+	}
 
-				if ( ! item || ! item.dataset.product_id ) {
-					return;
-				}
+	/**
+	 * Handle remove from cart events
+	 *
+	 * @param {HTMLElement|Object} element - The HTML element clicked on to trigger this event
+	 */
+	function removeFromCartHandler( element ) {
+		tracker.eventHandler( 'remove_from_cart' )( {
+			product: getProductFromID(
+				parseInt( element.target.dataset.product_id )
+			),
+		} );
+	}
 
-				tracker.eventHandler( 'remove_from_cart' )( {
-					product: getProductFromID(
-						parseInt( item.dataset.product_id ),
-						true
-					),
-				} );
-			} );
-	};
-
+	// Attach event listeners on initial page load and when the cart div is updated
 	removeFromCartListener();
-
 	document.body.onupdated_wc_div = () => removeFromCartListener();
+
+	// Trigger the handler when an item is removed from the mini-cart and WooCommerce dispatches the `removed_from_cart` event.
+	document.body.onremoved_from_cart = ( event, fragments, cart_hash, button ) => removeFromCartHandler( { target: button[0] } );
 
 	/**
 	 * Attaches click event listeners to non-block product listings that sends a

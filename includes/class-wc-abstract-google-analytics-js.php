@@ -63,14 +63,7 @@ abstract class WC_Abstract_Google_Analytics_JS {
 	 */
 	public function attach_event_data(): void {
 		add_action(
-			'woocommerce_before_cart',
-			function() {
-				$this->set_script_data( 'cart', $this->get_formatted_cart() );
-			}
-		);
-
-		add_action(
-			'woocommerce_before_checkout_form',
+			'wp_head',
 			function() {
 				$this->set_script_data( 'cart', $this->get_formatted_cart() );
 			}

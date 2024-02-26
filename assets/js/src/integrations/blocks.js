@@ -39,6 +39,11 @@ addUniqueAction(
 	tracker.eventHandler( 'select_content' )
 );
 
+/**
+ * Remove additional actions added by WooCommerce Core which are either
+ * not supported by Google Analytics for WooCommerce or are redundant
+ * since Google retired Universal Analytics.
+ */
 removeAction( `${ ACTION_PREFIX }-checkout-submit`, NAMESPACE );
 removeAction( `${ ACTION_PREFIX }-checkout-set-email-address`, NAMESPACE );
 removeAction( `${ ACTION_PREFIX }-checkout-set-phone-number`, NAMESPACE );

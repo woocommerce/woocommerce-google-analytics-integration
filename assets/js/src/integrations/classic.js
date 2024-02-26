@@ -79,28 +79,41 @@ export const trackClassicIntegration = () => {
 	document.body.onupdated_wc_div = () => removeFromCartListener();
 
 	/**
-	 * Attach click event listeners to all product listings and send select_content events for specific targets.
+	 * Attaches click event listeners to non-block product listings that sends a
+	 * `select_content` event if the target link takes the user to the product page.
 	 */
 	document
-		.querySelectorAll( '.product a[data-product_id]' )
-		?.forEach( ( button ) => {
-			const productId = button.dataset.product_id;
+		.querySelectorAll( '.product:not(.wp-block-post)' )
+		?.forEach( ( product ) => {
+			// Get the Product ID from a child node containing the relevant attribute
+			const productId = product
+				.querySelector( 'a[data-product_id]' )
+				?.getAttribute( 'data-product_id' );
 
-			button.parentNode.addEventListener( 'click', ( listing ) => {
-				const targetLink = listing.target.closest(
+			if ( ! productId ) {
+				return;
+			}
+
+			product.addEventListener( 'click', ( event ) => {
+				// Return early if the user has clicked on anything other
+				// than a product link or an Add to cart button.
+				const targetLink = event.target.closest(
 					'.woocommerce-loop-product__link'
 				);
-				const isAddToCartButton =
-					button.classList.contains( 'add_to_cart_button' ) &&
-					! button.classList.contains( 'product_type_variable' );
 
-				if ( ! targetLink && isAddToCartButton ) {
+				const isButton = event.target.classList.contains( 'button' );
+
+				const isAddToCartButton =
+					event.target.classList.contains( 'add_to_cart_button' ) &&
+					! event.target.classList.contains( 'product_type_variable' )
+
+				if ( ! targetLink && ( ! isButton || isAddToCartButton ) ) {
 					return;
 				}
 
 				tracker.eventHandler( 'select_content' )( {
 					product: getProductFromID( parseInt( productId ) ),
 				} );
-			} );
+			});
 		} );
 };

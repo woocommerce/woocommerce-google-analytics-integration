@@ -88,7 +88,7 @@ export const trackClassicIntegration = () => {
 	 * `select_content` event if the target link takes the user to the product page.
 	 */
 	document
-		.querySelectorAll( '.product:not(.wp-block-post)' )
+		.querySelectorAll( '.products .product:not(.wp-block-post)' )
 		?.forEach( ( product ) => {
 			// Get the Product ID from a child node containing the relevant attribute
 			const productId = product

@@ -51,7 +51,7 @@ add_action( 'wp_enqueue_scripts', function () {
             region: 'ES',
         } );";
 
-    wp_register_script( 'my-custom-consent-mode', '', array('woocommerce-google-analytics-integration'), null, false );
+    wp_register_script( 'my-custom-consent-mode', '', array('woocommerce-google-analytics-integration'), null, [ 'in_footer' => true ] );
     wp_add_inline_script( 'my-custom-consent-mode', $customConsentConfig );
     wp_enqueue_script( 'my-custom-consent-mode' );
 } );

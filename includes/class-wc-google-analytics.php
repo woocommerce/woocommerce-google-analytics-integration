@@ -7,7 +7,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 use Automattic\WooCommerce\Admin\Features\OnboardingTasks\TaskLists;
 
 /**
- * Google Analytics Integration
+ * Google Analytics for WooCommerce
  *
  * Allows tracking code to be inserted into store pages.
  *
@@ -358,7 +358,7 @@ class WC_Google_Analytics extends WC_Integration {
 			<p class="privacy-policy-tutorial">' . $policy_text . '</p>
 			<style>#privacy-settings-accordion-block-woocommerce-google-analytics-integration .privacy-settings-accordion-actions { display: none }</style>';
 
-		wp_add_privacy_policy_content( 'WooCommerce Google Analytics Integration', wpautop( $content, false ) );
+		wp_add_privacy_policy_content( 'Google Analytics for WooCommerce', wpautop( $content, false ) );
 	}
 
 	/**
@@ -368,6 +368,8 @@ class WC_Google_Analytics extends WC_Integration {
 	public function enqueue_tracking_code() {
 		global $wp;
 		$display_ecommerce_tracking = false;
+
+		$this->get_tracking_instance()->load_opt_out();
 
 		if ( $this->disable_tracking( 'all' ) ) {
 			return;
@@ -382,23 +384,6 @@ class WC_Google_Analytics extends WC_Integration {
 				$this->enqueue_ecommerce_tracking_code( $order_id );
 			}
 		}
-
-		if ( is_woocommerce() || is_cart() || ( is_checkout() && ! $display_ecommerce_tracking ) ) {
-			$display_ecommerce_tracking = true;
-			$this->enqueue_standard_tracking_code();
-		}
-
-		if ( ! $display_ecommerce_tracking && 'yes' === $this->ga_standard_tracking_enabled ) {
-			$this->enqueue_standard_tracking_code();
-		}
-	}
-
-	/**
-	 * Generate Standard Google Analytics tracking
-	 */
-	protected function enqueue_standard_tracking_code() {
-		$this->get_tracking_instance()->load_opt_out();
-		$this->get_tracking_instance()->load_analytics();
 	}
 
 	/**
@@ -421,10 +406,6 @@ class WC_Google_Analytics extends WC_Integration {
 		if ( ! $order->key_is_valid( $order_key ) ) {
 			return;
 		}
-
-		$this->get_tracking_instance()->add_transaction( $order );
-		$this->get_tracking_instance()->load_opt_out();
-		$this->get_tracking_instance()->load_analytics();
 
 		// Mark the order as tracked.
 		$order->update_meta_data( '_ga_tracked', 1 );

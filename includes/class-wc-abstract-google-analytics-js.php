@@ -4,6 +4,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+use Automattic\WooCommerce\StoreApi\Schemas\V1\ProductSchema;
+use Automattic\WooCommerce\StoreApi\Schemas\V1\CartItemSchema;
+
 /**
  * WC_Abstract_Google_Analytics_JS class
  *
@@ -21,35 +24,99 @@ abstract class WC_Abstract_Google_Analytics_JS {
 	public const DEVELOPER_ID = 'dOGY3NW';
 
 	/**
-	 * Get the class instance
+	 * Constructor
+	 * To be called from child classes to setup event data
 	 *
-	 * @param  array $options Options
-	 * @return WC_Abstract_Google_Analytics_JS
+	 * @return void
 	 */
-	abstract public static function get_instance( $options = array() );
+	public function __construct() {
+		$this->attach_event_data();
+
+		if ( did_action( 'woocommerce_blocks_loaded' ) ) {
+			woocommerce_store_api_register_endpoint_data(
+				array(
+					'endpoint'        => ProductSchema::IDENTIFIER,
+					'namespace'       => 'woocommerce_google_analytics_integration',
+					'data_callback'   => array( $this, 'data_callback' ),
+					'schema_callback' => array( $this, 'schema_callback' ),
+					'schema_type'     => ARRAY_A,
+				)
+			);
+
+			woocommerce_store_api_register_endpoint_data(
+				array(
+					'endpoint'        => CartItemSchema::IDENTIFIER,
+					'namespace'       => 'woocommerce_google_analytics_integration',
+					'data_callback'   => array( $this, 'data_callback' ),
+					'schema_callback' => array( $this, 'schema_callback' ),
+					'schema_type'     => ARRAY_A,
+				)
+			);
+		}
+	}
+
+	/**
+	 * Hook into various parts of WooCommerce and set the relevant
+	 * script data that the frontend tracking script will use.
+	 *
+	 * @return void
+	 */
+	public function attach_event_data(): void {
+		add_action(
+			'wp_head',
+			function() {
+				$this->set_script_data( 'cart', $this->get_formatted_cart() );
+			}
+		);
+
+		add_action(
+			'woocommerce_before_single_product',
+			function() {
+				global $product;
+				$this->set_script_data( 'product', $this->get_formatted_product( $product ) );
+			}
+		);
+
+		add_action(
+			'woocommerce_add_to_cart',
+			function( $cart_item_key, $product_id, $quantity, $variation_id, $variation ) {
+				$this->set_script_data( 'added_to_cart', $this->get_formatted_product( wc_get_product( $product_id ), $variation ) );
+			},
+			10,
+			5
+		);
+
+		add_action(
+			'woocommerce_shop_loop_item_title',
+			function() {
+				global $product;
+				$this->append_script_data( 'products', $this->get_formatted_product( $product ) );
+			}
+		);
+
+		add_action(
+			'woocommerce_thankyou',
+			function( $order_id ) {
+				$this->set_script_data( 'order', $this->get_formatted_order( $order_id ) );
+			}
+		);
+	}
 
 	/**
 	 * Return one of our options
 	 *
-	 * @param string $option Key/name for the option
+	 * @param string $option Key/name for the option.
 	 *
 	 * @return string|null Value of the option or null if not found
 	 */
-	protected static function get( $option ) {
+	protected static function get( $option ): ?string {
 		return self::$options[ $option ] ?? null;
 	}
 
 	/**
-	 * Returns the tracker variable this integration should use
-	 *
-	 * @return string
-	 */
-	abstract public static function tracker_var();
-
-	/**
 	 * Generic GA snippet for opt out
 	 */
-	public static function load_opt_out() {
+	public static function load_opt_out(): void {
 		$code = "
 			var gaProperty = '" . esc_js( self::get( 'ga_id' ) ) . "';
 			var disableStr = 'ga-disable-' + gaProperty;
@@ -67,51 +134,14 @@ abstract class WC_Abstract_Google_Analytics_JS {
 	}
 
 	/**
-	 * Enqueues JavaScript to build the addImpression object
-	 *
-	 * @param WC_Product $product
-	 */
-	abstract public static function listing_impression( $product );
-
-	/**
-	 * Enqueues JavaScript to build an addProduct and click object
-	 *
-	 * @param WC_Product $product
-	 */
-	abstract public static function listing_click( $product );
-
-	/**
-	 * Loads the correct Google Gtag code (classic or universal)
-	 *
-	 * @param  boolean|WC_Order $order Classic analytics needs order data to set the currency correctly
-	 */
-	abstract public static function load_analytics( $order = false );
-
-	/**
-	 * Generate code used to pass transaction data to Google Analytics.
-	 *
-	 * @param  WC_Order $order WC_Order Object
-	 */
-	public function add_transaction( $order ) {
-		wc_enqueue_js( static::add_transaction_enhanced( $order ) );
-	}
-
-	/**
-	 * Generate Enhanced eCommerce transaction tracking code
-	 *
-	 * @param  WC_Order $order WC_Order object
-	 * @return string          Add Transaction Code
-	 */
-	abstract protected function add_transaction_enhanced( $order );
-
-	/**
 	 * Get item identifier from product data
 	 *
-	 * @param  WC_Product $product WC_Product Object
+	 * @param WC_Product $product WC_Product Object.
+	 *
 	 * @return string
 	 */
-	public static function get_product_identifier( $product ) {
-		$identifier = $product->get_id();
+	public static function get_product_identifier( WC_Product $product ): string {
+		$identifier = $product->is_type( 'variation' ) ? $product->get_parent_id() : $product->get_id();
 
 		if ( 'product_sku' === self::get( 'ga_product_identifier' ) ) {
 			if ( ! empty( $product->get_sku() ) ) {
@@ -125,59 +155,190 @@ abstract class WC_Abstract_Google_Analytics_JS {
 	}
 
 	/**
-	 * Returns a 'category' JSON line based on $product
+	 * Returns an array of cart data in the required format
 	 *
-	 * @param  WC_Product $_product  Product to pull info for
-	 * @return string                Line of JSON
+	 * @return array
 	 */
-	public static function product_get_category_line( $_product ) {
-		$out            = [];
-		$variation_data = $_product->is_type( 'variation' ) ? wc_get_product_variation_attributes( $_product->get_id() ) : false;
-		$categories     = get_the_terms( $_product->get_id(), 'product_cat' );
-
-		if ( is_array( $variation_data ) && ! empty( $variation_data ) ) {
-			$parent_product = wc_get_product( $_product->get_parent_id() );
-			$categories     = get_the_terms( $parent_product->get_id(), 'product_cat' );
-		}
-
-		if ( $categories ) {
-			foreach ( $categories as $category ) {
-				$out[] = $category->name;
-			}
-		}
-
-		return "'" . esc_js( join( '/', $out ) ) . "',";
+	public function get_formatted_cart(): array {
+		return array(
+			'items'   => array_map(
+				function( $item ) {
+					return array_merge(
+						$this->get_formatted_product( $item['data'] ),
+						array(
+							'quantity' => $item['quantity'],
+							'prices'     => array(
+								'price'               => $this->get_formatted_price( $item['line_total'] ),
+								'currency_minor_unit' => wc_get_price_decimals(),
+							),
+						)
+					);
+				},
+				array_values( WC()->cart->get_cart() )
+			),
+			'coupons' => WC()->cart->get_coupons(),
+			'totals'  => array(
+				'currency_code'       => get_woocommerce_currency(),
+				'total_price'         => $this->get_formatted_price( WC()->cart->get_total( 'edit' ) ),
+				'currency_minor_unit' => wc_get_price_decimals(),
+			),
+		);
 	}
 
 	/**
-	 * Returns a 'variant' JSON line based on $product
+	 * Returns an array of product data in the required format
 	 *
-	 * @param  WC_Product $_product  Product to pull info for
-	 * @return string                Line of JSON
+	 * @param WC_Product $product   The product to format.
+	 * @param array|bool $variation An array containing product variation attributes to include in the product data.
+	 *
+	 * @return array
 	 */
-	public static function product_get_variant_line( $_product ) {
-		$out            = '';
-		$variation_data = $_product->is_type( 'variation' ) ? wc_get_product_variation_attributes( $_product->get_id() ) : false;
+	public function get_formatted_product( WC_Product $product, $variation = false ): array {
+		$formatted = array(
+			'id'         => $product->is_type( 'variation' ) ? $product->get_parent_id() : $product->get_id(),
+			'name'       => $product->get_title(),
+			'categories' => array_map(
+				fn( $category ) => array( 'name' => $category->name ),
+				wc_get_product_terms( $product->get_id(), 'product_cat', array( 'number' => 5 ) )
+			),
+			'prices'     => array(
+				'price'               => $this->get_formatted_price( $product->get_price() ),
+				'currency_minor_unit' => wc_get_price_decimals(),
+			),
+			'extensions' => array(
+				'woocommerce_google_analytics_integration' => array(
+					'identifier' => $this->get_product_identifier( $product ),
+				),
+			),
+		);
 
-		if ( is_array( $variation_data ) && ! empty( $variation_data ) ) {
-			$out = "'" . esc_js( wc_get_formatted_variation( $variation_data, true ) ) . "',";
+		if ( $product->is_type( 'variation' ) ) {
+			$variation = $product->get_attributes();
 		}
 
-		return $out;
+		if ( false !== $variation ) {
+			$formatted['variation'] = implode(
+				', ',
+				array_map(
+					function( $attribute, $value ) {
+						return sprintf(
+							'%s: %s',
+							str_replace( 'attribute_', '', $attribute ),
+							$value
+						);
+					},
+					array_keys( $variation ),
+					array_values( $variation )
+				)
+			);
+		}
+
+		return $formatted;
 	}
 
 	/**
-	 * Echo JavaScript to track an enhanced ecommerce remove from cart action
+	 * Returns an array of order data in the required format
+	 *
+	 * @param string $order_id The ID of the order
+	 *
+	 * @return array
 	 */
-	abstract public function remove_from_cart();
+	public function get_formatted_order( int $order_id ): array {
+		$order = wc_get_order( $order_id );
+
+		return array(
+			'currency' => $order->get_currency(),
+			'value'    => $this->get_formatted_price( $order->get_total() ),
+			'items'    => array_map(
+				function( $item ) {
+					return array_merge(
+						$this->get_formatted_product( $item->get_product() ),
+						array(
+							'quantity' => $item->get_quantity(),
+						)
+					);
+				},
+				array_values( $order->get_items() ),
+			),
+		);
+	}
 
 	/**
-	 * Enqueue JavaScript to track a product detail view
+	 * Formats a price the same way WooCommerce Blocks does
+	 *
+	 * @return int
 	 */
-	abstract public function product_detail();
+	public function get_formatted_price( $value ): int {
+		return intval(
+			round(
+				( (float) wc_format_decimal( $value ) ) * ( 10 ** absint( wc_get_price_decimals() ) ),
+				0
+			)
+		);
+	}
 
 	/**
-	 * Enqueue JS to track when the checkout process is started
+	 * Add product identifier to StoreAPI
+	 *
+	 * @param WC_Product|array $product Either an instance of WC_Product or a cart item array depending on the endpoint
+	 *
+	 * @return array
 	 */
-	abstract public function checkout_process();
+	public function data_callback( $product ): array {
+		$product = is_a( $product, 'WC_Product' ) ? $product : $product['data'];
+
+		return array(
+			'identifier' => (string) $this->get_product_identifier( $product ),
+		);
+	}
+
+	/**
+	 * Schema for the extended StoreAPI data
+	 *
+	 * @return array
+	 */
+	public function schema_callback(): array {
+		return array(
+			'identifier' => array(
+				'description' => __( 'The formatted product identifier to use in Google Analytics events.', 'woocommerce-google-analytics-integration' ),
+				'type'        => 'string',
+				'readonly'    => true,
+			)
+		);
+	}
+
+	/**
+	 * Returns the tracker variable this integration should use
+	 *
+	 * @return string
+	 */
+	abstract public static function tracker_function_name(): string;
+
+	/**
+	 * Add an event to the script data
+	 *
+	 * @param string       $type The type of event this data is related to.
+	 * @param string|array $data The event data to add.
+	 *
+	 * @return void
+	 */
+	abstract public function set_script_data( string $type, $data ): void;
+
+	/**
+	 * Append data to an existing script data array
+	 *
+	 * @param string       $type The type of event this data is related to.
+	 * @param string|array $data The event data to add.
+	 *
+	 * @return void
+	 */
+	abstract public function append_script_data( string $type, $data ): void;
+
+	/**
+	 * Get the class instance
+	 *
+	 * @param  array $options Options
+	 * @return WC_Abstract_Google_Analytics_JS
+	 */
+	abstract public static function get_instance( $options = array() ): WC_Abstract_Google_Analytics_JS;
 }

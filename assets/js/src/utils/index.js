@@ -1,4 +1,5 @@
 import { addAction, removeAction } from '@wordpress/hooks';
+import { config, products, cart } from '../config.js';
 
 /**
  * Formats data into the productFieldObject shape.
@@ -10,15 +11,21 @@ import { addAction, removeAction } from '@wordpress/hooks';
  * @return {Object} The product data
  */
 export const getProductFieldObject = ( product, quantity ) => {
+	const variantData = {};
+	if ( product.variation ) {
+		variantData.item_variant = product.variation;
+	}
+
 	return {
 		item_id: getProductId( product ),
 		item_name: product.name,
-		quantity: product.quantity ?? quantity,
 		...getProductCategories( product ),
+		quantity: product.quantity ?? quantity,
 		price: formatPrice(
 			product.prices.price,
 			product.prices.currency_minor_unit
 		),
+		...variantData,
 	};
 };
 
@@ -69,14 +76,28 @@ export const addUniqueAction = ( hookName, namespace, callback ) => {
 };
 
 /**
- * Returns the product ID by checking if the product has a SKU, if not, it returns '#' concatenated with the product ID.
+ * Returns the product ID by checking if the product data includes the formatted
+ * identifier. If the identifier is not present then it will return either the product
+ * SKU, the product ID prefixed with #, or the product ID depending on the site settings
  *
  * @param {Object} product - The product object
  *
  * @return {string} - The product ID
  */
 export const getProductId = ( product ) => {
-	return product.sku ? product.sku : '#' + product.id;
+	const identifier =
+		product.extensions?.woocommerce_google_analytics_integration
+			?.identifier;
+
+	if ( identifier !== undefined ) {
+		return identifier;
+	}
+
+	if ( config.identifier === 'product_sku' ) {
+		return product.sku ? product.sku : '#' + product.id;
+	}
+
+	return product.id;
 };
 
 /**
@@ -131,4 +152,17 @@ const getCategoryObject = ( categories ) => {
  */
 const formatCategoryKey = ( index ) => {
 	return 'item_category' + ( index > 0 ? index + 1 : '' );
+};
+
+/**
+ * Searches through the global wcgaiData.products object to find a single product by its ID
+ *
+ * @param {number} search The ID of the product to search for
+ * @return {Object|undefined} The product object or undefined if not found
+ */
+export const getProductFromID = ( search ) => {
+	return (
+		cart?.items?.find( ( { id } ) => id === search ) ??
+		products?.find( ( { id } ) => id === search )
+	);
 };

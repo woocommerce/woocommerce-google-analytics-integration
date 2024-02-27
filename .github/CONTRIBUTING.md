@@ -1,14 +1,14 @@
 # Contributing
 
-Thanks for your interest in contributing to WooCommerce Google Analytics Integration!
+Thanks for your interest in contributing to Google Analytics for WooCommerce!
 
 ## Guidelines
 
 Like the WooCommerce project, we want to ensure a welcoming environment for everyone. With that in mind, all contributors are expected to follow our [Code of Conduct](./CODE_OF_CONDUCT.md).
 
-If you wish to contribute code, please read the information in the sections below. Then [fork](https://help.github.com/articles/fork-a-repo/) WooCommerce Google Analytics Integration, commit your changes, and [submit a pull request](https://docs.github.com/en/github/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/about-pull-requests) 🎉
+If you wish to contribute code, please read the information in the sections below. Then [fork](https://help.github.com/articles/fork-a-repo/) Google Analytics for WooCommerce, commit your changes, and [submit a pull request](https://docs.github.com/en/github/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/about-pull-requests) 🎉
 
-WooCommerce Google Analytics Integration is licensed under the GPLv3+, and all contributions to the project will be released under the same license. You maintain copyright over any contribution you make, and by submitting a pull request, you are agreeing to release that contribution under the GPLv3+ license.
+Google Analytics for WooCommerce is licensed under the GPLv3+, and all contributions to the project will be released under the same license. You maintain copyright over any contribution you make, and by submitting a pull request, you are agreeing to release that contribution under the GPLv3+ license.
 
 ## Reporting Security Issues
 

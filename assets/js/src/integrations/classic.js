@@ -78,16 +78,22 @@ export const trackClassicIntegration = () => {
 
 	// Attach event listeners on initial page load and when the cart div is updated
 	removeFromCartListener();
-	document.body.onupdated_wc_div = () => removeFromCartListener();
+	const oldOnupdatedWcDiv = document.body.onupdated_wc_div;
+	document.body.onupdated_wc_div = ( ...args ) => {
+		if ( typeof oldOnupdatedWcDiv === 'function' ) {
+			oldOnupdatedWcDiv( ...args );
+		}
+		removeFromCartListener();
+	};
 
 	// Trigger the handler when an item is removed from the mini-cart and WooCommerce dispatches the `removed_from_cart` event.
-	document.body.onremoved_from_cart = (
-		event,
-		fragments,
-		/* eslint-disable-next-line camelcase */
-		cart_hash,
-		button
-	) => removeFromCartHandler( { target: button[ 0 ] } );
+	const oldOnRemovedFromCart = document.body.onremoved_from_cart;
+	document.body.onremoved_from_cart = ( ...args ) => {
+		if ( typeof oldOnRemovedFromCart === 'function' ) {
+			oldOnRemovedFromCart( ...args );
+		}
+		removeFromCartHandler( { target: args[ 3 ][ 0 ] } );
+	};
 
 	/**
 	 * Attaches click event listeners to non-block product listings that sends a

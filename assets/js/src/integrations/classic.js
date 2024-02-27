@@ -100,39 +100,44 @@ export const trackClassicIntegration = () => {
 	 * `select_content` event if the target link takes the user to the product page.
 	 */
 	document
-		.querySelectorAll( '.products .product:not(.wp-block-post)' )
-		?.forEach( ( item ) => {
-			// Get the Product ID from a child node containing the relevant attribute
-			const productId = item
-				.querySelector( 'a[data-product_id]' )
-				?.getAttribute( 'data-product_id' );
+	.querySelectorAll( '.products .product:not(.wp-block-post)' )
+	?.forEach( ( item ) => {
+		// Get the Product ID from a child node containing the relevant attribute
+		const productId = item
+			.querySelector( 'a[data-product_id]' )
+			?.getAttribute( 'data-product_id' );
 
-			if ( ! productId ) {
+		if ( ! productId ) {
+			return;
+		}
+
+		item.addEventListener( 'click', ( event ) => {
+			// Return early if the user has clicked on an
+			// "Add to cart" button or anything other than a product link
+			const targetLink = event.target.closest(
+				'.woocommerce-loop-product__link'
+			);
+
+			const isProductButton =
+				event.target.classList.contains( 'button' ) &&
+				event.target.hasAttribute( 'data-product_id' );
+
+			const isAddToCartButton =
+				event.target.classList.contains( 'add_to_cart_button' ) &&
+				! event.target.classList.contains(
+					'product_type_variable'
+				);
+
+			if (
+				! targetLink &&
+				( ! isProductButton || isAddToCartButton )
+			) {
 				return;
 			}
 
-			item.addEventListener( 'click', ( event ) => {
-				// Return early if the user has clicked on anything other
-				// than a product link or an Add to cart button.
-				const targetLink = event.target.closest(
-					'.woocommerce-loop-product__link'
-				);
-
-				const isButton = event.target.classList.contains( 'button' );
-
-				const isAddToCartButton =
-					event.target.classList.contains( 'add_to_cart_button' ) &&
-					! event.target.classList.contains(
-						'product_type_variable'
-					);
-
-				if ( ! targetLink && ( ! isButton || isAddToCartButton ) ) {
-					return;
-				}
-
-				tracker.eventHandler( 'select_content' )( {
-					product: getProductFromID( parseInt( productId ) ),
-				} );
+			tracker.eventHandler( 'select_content' )( {
+				product: getProductFromID( parseInt( productId ) ),
 			} );
 		} );
+	} );
 };

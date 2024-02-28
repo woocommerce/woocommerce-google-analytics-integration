@@ -1,5 +1,5 @@
 import { addAction, removeAction } from '@wordpress/hooks';
-import { config, products, cart } from '../config.js';
+import { trackerData as config, eventData } from '../config.js';
 
 /**
  * Formats data into the productFieldObject shape.
@@ -161,6 +161,8 @@ const formatCategoryKey = ( index ) => {
  * @return {Object|undefined} The product object or undefined if not found
  */
 export const getProductFromID = ( search ) => {
+	const { products, cart } = eventData();
+
 	return (
 		cart?.items?.find( ( { id } ) => id === search ) ??
 		products?.find( ( { id } ) => id === search )

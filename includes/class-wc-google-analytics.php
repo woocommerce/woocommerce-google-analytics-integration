@@ -111,6 +111,12 @@ class WC_Google_Analytics extends WC_Integration {
 
 		// utm_nooverride parameter for Google AdWords
 		add_filter( 'woocommerce_get_return_url', array( $this, 'utm_nooverride' ) );
+
+		// Dequeue the WooCommerce Blocks Google Analytics integration
+		add_action( 'wp_enqueue_scripts', function() {
+			wp_dequeue_script( 'wc-blocks-google-analytics' );
+		});
+
 	}
 
 	/**

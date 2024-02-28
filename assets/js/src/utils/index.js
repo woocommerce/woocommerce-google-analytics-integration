@@ -1,5 +1,5 @@
 import { addAction, removeAction } from '@wordpress/hooks';
-import { config, products, cart } from '../config.js';
+import { config } from '../config.js';
 
 /**
  * Formats data into the productFieldObject shape.
@@ -158,9 +158,11 @@ const formatCategoryKey = ( index ) => {
  * Searches through the global wcgaiData.products object to find a single product by its ID
  *
  * @param {number} search The ID of the product to search for
+ * @param {Object[]} products The array of available products
+ * @param {Object} cart The cart object
  * @return {Object|undefined} The product object or undefined if not found
  */
-export const getProductFromID = ( search ) => {
+export const getProductFromID = ( search, products, cart ) => {
 	return (
 		cart?.items?.find( ( { id } ) => id === search ) ??
 		products?.find( ( { id } ) => id === search )

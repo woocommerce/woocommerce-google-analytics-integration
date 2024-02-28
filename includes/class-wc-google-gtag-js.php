@@ -16,6 +16,9 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 	/** @var string $script_handle Handle for the front end JavaScript file */
 	public $script_handle = 'woocommerce-google-analytics-integration';
 
+	/** @var string $script_handle Handle for the event data inline script */
+	public $data_script_handle = 'woocommerce-google-analytics-integration-data';
+
 	/** @var string $script_data Data required for frontend event tracking */
 	private $script_data = array();
 
@@ -39,20 +42,20 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 		parent::__construct();
 		self::$options = $options;
 
-		$this->load_analytics_config();
 		$this->map_actions();
 
 		// Setup frontend scripts
-		add_action( 'wp_enqueue_scripts', array( $this, 'register_scripts' ), 5 );
+		add_action( 'wp_enqueue_scripts', array( $this, 'enquque_tracker' ), 5 );
 		add_action( 'wp_footer', array( $this, 'inline_script_data' ) );
 	}
 
 	/**
-	 * Register front end scripts and inline script data
+	 * Register tracker scripts and its inline config.
+	 * We need to execute tracker.js w/ `gtag` configuration before any trackable action may happen.
 	 *
 	 * @return void
 	 */
-	public function register_scripts(): void {
+	public function enquque_tracker(): void {
 		wp_enqueue_script(
 			'google-tag-manager',
 			'https://www.googletagmanager.com/gtag/js?id=' . self::get( 'ga_id' ),
@@ -60,7 +63,8 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 			null,
 			false
 		);
-
+		// tracker.js needs to be executed ASAP, the remaining bits for main.js could be deffered,
+		// but to reduce the traffic, we ship it all together.
 		wp_enqueue_script(
 			$this->script_handle,
 			Plugin::get_instance()->get_js_asset_url( 'main.js' ),
@@ -71,22 +75,39 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 			Plugin::get_instance()->get_js_asset_version( 'main' ),
 			true
 		);
+		// Provide tracker's configuration.
+		wp_add_inline_script(
+			$this->script_handle,
+			sprintf(
+				'var wcgai = {config: %s};',
+				wp_json_encode( $this->get_analytics_config() )
+			),
+			'before'
+		);
 	}
 
 	/**
-	 * Add inline script data to the front end
+	 * Feed classic tracking with event data via inline script.
+	 * Make sure it's added at the bottom of the page, so all the data is collected.
 	 *
 	 * @return void
 	 */
 	public function inline_script_data(): void {
-		wp_add_inline_script(
-			$this->script_handle,
-			sprintf(
-				'const wcgaiData = %s;',
-				$this->get_script_data()
-			),
-			'before'
+		wp_register_script(
+			$this->data_script_handle,
+			'',
+			array( $this->script_handle ),
 		);
+
+		wp_add_inline_script(
+			$this->data_script_handle,
+			sprintf(
+				'wcgai.trackClassicPages( %s );',
+				$this->get_script_data()
+			)
+		);
+
+		wp_enqueue_script( $this->data_script_handle );
 	}
 
 	/**
@@ -156,12 +177,12 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 	}
 
 	/**
-	 * Add Google Analytics configuration data to the script data
+	 * Return Google Analytics configuration, for JS to read.
 	 *
 	 * @return void
 	 */
-	public function load_analytics_config(): void {
-		$this->script_data['config'] = array(
+	public function get_analytics_config(): array {
+		return array(
 			'developer_id'          => self::DEVELOPER_ID,
 			'gtag_id'               => self::get( 'ga_id' ),
 			'tracker_function_name' => self::tracker_function_name(),

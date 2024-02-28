@@ -1,4 +1,4 @@
-import { config } from '../config';
+import { trackerData as config } from '../config.js';
 import * as formatters from './data-formatting';
 
 let instance;

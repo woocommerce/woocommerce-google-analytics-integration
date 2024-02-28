@@ -1,13 +1,5 @@
 import { tracker } from '../tracker';
 import { getProductFromID } from '../utils';
-import {
-	events,
-	cart,
-	products,
-	product,
-	addedToCart,
-	order,
-} from '../config.js';
 
 /**
  * The Google Analytics integration for classic WooCommerce pages
@@ -18,7 +10,14 @@ import {
  * 3. Listen for various actions (i.e clicks) on specific elements.
  */
 
-export const trackClassicIntegration = () => {
+export const trackClassicIntegration = ( {
+	events,
+	cart,
+	products,
+	product,
+	added_to_cart: addedToCart,
+	order,
+} ) => {
 	const eventData = {
 		storeCart: cart,
 		products,

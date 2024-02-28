@@ -43,7 +43,7 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 		$this->map_actions();
 
 		// Setup frontend scripts
-		add_action( 'wp_enqueue_scripts', array( $this, 'register_scripts' ) );
+		add_action( 'wp_enqueue_scripts', array( $this, 'register_scripts' ), 5 );
 		add_action( 'wp_footer', array( $this, 'inline_script_data' ) );
 	}
 
@@ -130,7 +130,7 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 	 *
 	 * @return void
 	 */
-	public function append_script_data( string $type, $data ): void {	
+	public function append_script_data( string $type, $data ): void {
 		if ( ! isset( $this->script_data[ $type ] ) ) {
 			$this->script_data[ $type ] = array();
 		}

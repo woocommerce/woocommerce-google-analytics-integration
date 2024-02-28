@@ -16,6 +16,9 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 	/** @var string $script_handle Handle for the front end JavaScript file */
 	public $script_handle = 'woocommerce-google-analytics-integration';
 
+	/** @var string $script_handle Handle for the event data inline script */
+	public $data_script_handle = 'woocommerce-google-analytics-integration-data';
+
 	/** @var string $script_data Data required for frontend event tracking */
 	private $script_data = array();
 
@@ -43,7 +46,7 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 		$this->map_actions();
 
 		// Setup frontend scripts
-		add_action( 'wp_enqueue_scripts', array( $this, 'register_scripts' ) );
+		add_action( 'wp_enqueue_scripts', array( $this, 'register_scripts' ), 5 );
 		add_action( 'wp_footer', array( $this, 'inline_script_data' ) );
 	}
 
@@ -71,22 +74,37 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 			Plugin::get_instance()->get_js_asset_version( 'main' ),
 			true
 		);
+
+		wp_add_inline_script(
+			$this->script_handle,
+			sprintf(
+				'const wcgaiTracker = %s;',
+				wp_json_encode( $this->load_analytics_config() )
+			),
+			'before'
+		);
 	}
 
 	/**
-	 * Add inline script data to the front end
+	 * Add the event data inline script late to ensure it's added at the bottom of the page
 	 *
 	 * @return void
 	 */
 	public function inline_script_data(): void {
+		wp_register_script(
+			$this->data_script_handle,
+			''
+		);
+
 		wp_add_inline_script(
-			$this->script_handle,
+			$this->data_script_handle,
 			sprintf(
 				'const wcgaiData = %s;',
 				$this->get_script_data()
-			),
-			'before'
+			)
 		);
+
+		wp_enqueue_script( $this->data_script_handle );
 	}
 
 	/**
@@ -156,12 +174,12 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 	}
 
 	/**
-	 * Add Google Analytics configuration data to the script data
+	 * Get Google Analytics configuration data
 	 *
-	 * @return void
+	 * @return array
 	 */
-	public function load_analytics_config(): void {
-		$this->script_data['config'] = array(
+	public function load_analytics_config(): array {
+		return array(
 			'developer_id'          => self::DEVELOPER_ID,
 			'gtag_id'               => self::get( 'ga_id' ),
 			'tracker_function_name' => self::tracker_function_name(),

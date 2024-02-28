@@ -1,6 +1,6 @@
 /* global wcgaiData */
-/* eslint-disable camelcase */
-export const eventData = function() {
+/* global wcgaiTracker */
+export const eventData = function () {
 	return wcgaiData;
 };
 

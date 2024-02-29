@@ -1,31 +1,39 @@
 import { tracker } from '../tracker';
 import { getProductFromID } from '../utils';
-import {
-	events,
-	cart,
-	products,
-	product,
-	addedToCart,
-	order,
-} from '../config.js';
 
 /**
  * The Google Analytics integration for classic WooCommerce pages
  * triggers events using three different methods.
  *
- * 1. Automatically handle events listed in the global `wcgaiData.events` object.
+ * 1. Instantly handle events listed in the `events` object.
  * 2. Listen for custom events from WooCommerce core.
  * 3. Listen for various actions (i.e clicks) on specific elements.
+ *
+ * To be executed once data set is complete, and `document` is ready.
+ *
+ * @param {Object} data - The tracking data from the current page load, containing the following properties:
+ * @param {Object} data.events - An object containing the events to be instantly tracked.
+ * @param {Object} data.cart - The cart object.
+ * @param {Object[]} data.products - An array of all product from the current page.
+ * @param {Object} data.product - The single product object.
+ * @param {Object} data.added_to_cart - The product added to cart.
+ * @param {Object} data.order - The order object.
  */
-
-export const trackClassicIntegration = () => {
+export function trackClassicPages( {
+	events,
+	cart,
+	products,
+	product,
+	added_to_cart: addedToCart,
+	order,
+} ) {
+	// Instantly track the events listed in the `events` object.
 	const eventData = {
 		storeCart: cart,
 		products,
 		product,
 		order,
 	};
-
 	Object.values( events ?? {} ).forEach( ( eventName ) => {
 		if ( eventName === 'add_to_cart' ) {
 			tracker.eventHandler( eventName )( { product: addedToCart } );
@@ -34,6 +42,7 @@ export const trackClassicIntegration = () => {
 		}
 	} );
 
+	// Handle runtime cart events.
 	/**
 	 * Track the custom add to cart event dispatched by WooCommerce Core
 	 *
@@ -45,7 +54,9 @@ export const trackClassicIntegration = () => {
 	document.body.onadded_to_cart = ( e, fragments, cartHash, button ) => {
 		tracker.eventHandler( 'add_to_cart' )( {
 			product: getProductFromID(
-				parseInt( button[ 0 ].dataset.product_id )
+				parseInt( button[ 0 ].dataset.product_id ),
+				products,
+				cart
 			),
 		} );
 	};
@@ -71,7 +82,9 @@ export const trackClassicIntegration = () => {
 	function removeFromCartHandler( element ) {
 		tracker.eventHandler( 'remove_from_cart' )( {
 			product: getProductFromID(
-				parseInt( element.target.dataset.product_id )
+				parseInt( element.target.dataset.product_id ),
+				products,
+				cart
 			),
 		} );
 	}
@@ -95,10 +108,9 @@ export const trackClassicIntegration = () => {
 		removeFromCartHandler( { target: args[ 3 ][ 0 ] } );
 	};
 
-	/**
-	 * Attaches click event listeners to non-block product listings that sends a
-	 * `select_content` event if the target link takes the user to the product page.
-	 */
+	// Handle product selection events.
+	// Attach click event listeners to non-block product listings
+	// to send a `select_content` event if the target link takes the user to the product page.
 	document
 		.querySelectorAll( '.products .product:not(.wp-block-post)' )
 		?.forEach( ( item ) => {
@@ -136,8 +148,12 @@ export const trackClassicIntegration = () => {
 				}
 
 				tracker.eventHandler( 'select_content' )( {
-					product: getProductFromID( parseInt( productId ) ),
+					product: getProductFromID(
+						parseInt( productId ),
+						products,
+						cart
+					),
 				} );
 			} );
 		} );
-};
+}

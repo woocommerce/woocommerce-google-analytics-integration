@@ -31,6 +31,6 @@ export const EEARegions = [
 	'SI',
 	'ES',
 	'SE',
-	'UK',
+	'GB',
 	'CH',
 ];

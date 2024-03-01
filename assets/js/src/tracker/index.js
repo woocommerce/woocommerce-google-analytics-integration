@@ -1,4 +1,4 @@
-import { config } from '../config';
+import { config, EEARegions } from '../config';
 import * as formatters from './data-formatting';
 
 let instance;
@@ -38,6 +38,15 @@ class Tracker {
 		}
 
 		window[ config.tracker_function_name ] = gtag;
+
+		// Set up default consent state, denying all for EEA visitors.
+		gtag( 'consent', 'default', {
+			analytics_storage: 'denied',
+			ad_storage: 'denied',
+			ad_user_data: 'denied',
+			ad_personalization: 'denied',
+			region: EEARegions,
+		} );
 
 		gtag( 'js', new Date() );
 		gtag( 'set', `developer_id.${ config.developer_id }`, true );

@@ -34,13 +34,13 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 
 	/**
 	 * Constructor
-	 * Takes our options from the parent class so we can later use them in the JS snippets
+	 * Takes our settings from the parent class so we can later use them in the JS snippets
 	 *
-	 * @param array $options Options
+	 * @param array $settings Settings
 	 */
-	public function __construct( $options = array() ) {
+	public function __construct( $settings = array() ) {
 		parent::__construct();
-		self::$options = $options;
+		self::$settings = $settings;
 
 		$this->map_actions();
 
@@ -220,8 +220,8 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 			'begin_checkout'   => 'ga_enhanced_checkout_process_enabled',
 		);
 
-		foreach( $settings as $event => $option_name ) {
-			if ( 'yes' === self::get( $option_name ) ) {
+		foreach( $settings as $event => $setting_name ) {
+			if ( 'yes' === self::get( $setting_name ) ) {
 				$events[] = $event;
 			}
 		}
@@ -232,12 +232,12 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 	/**
 	 * Get the class instance
 	 *
-	 * @param array $options Options
+	 * @param array $settings Settings
 	 * @return WC_Abstract_Google_Analytics_JS
 	 */
-	public static function get_instance( $options = array() ): WC_Abstract_Google_Analytics_JS {
+	public static function get_instance( $settings = array() ): WC_Abstract_Google_Analytics_JS {
 		if ( null === self::$instance ) {
-			self::$instance = new self( $options );
+			self::$instance = new self( $settings );
 		}
 
 		return self::$instance;

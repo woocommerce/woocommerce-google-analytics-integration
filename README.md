@@ -45,19 +45,18 @@ Alternatively, run `npm run lint:php:diff` to run coding standards checks agains
 The extension sets up [the default state of consent mode](https://developers.google.com/tag-platform/security/guides/consent?hl=en&consentmode=advanced#default-consent), denying all parameters for the EEA region. You can append or overwrite that configuration using the following snippet:
 
 ```php
-add_action( 'wp_enqueue_scripts', function () {
-    $customConsentConfig = "
-        gtag( 'consent', 'default', {
-            analytics_storage: 'granted',
-            ad_storage: 'granted',
-            ad_user_data: 'denied',
-            ad_personalization: 'denied',
-            region: 'ES',
-        } );";
-
-    wp_register_script( 'my-custom-consent-mode', '', array('woocommerce-google-analytics-integration'), null, false );
-    wp_add_inline_script( 'my-custom-consent-mode', $customConsentConfig );
-    wp_enqueue_script( 'my-custom-consent-mode' );
+add_filter( 'woocommerce_ga_gtag_consent_modes', function ( $consent_modes ) {
+    $consent_modes[] =
+		array(
+            'analytics_storage' => 'granted',
+            'region'            => array( 'ES' ),
+        );
+    $consent_modes[] =
+        array(
+            'analytics_storage' => 'denied',
+            'region'            => array( 'US-AK' ),
+        );
+   return $consent_modes;
 } );
 ```
 

@@ -24,12 +24,12 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 
 	/** @var array $mappings A map of the GA4 events and the classic WooCommerce hooks that trigger them */
 	private $mappings = array(
-		'begin_checkout'    => 'woocommerce_before_checkout_form',
-		'purchase'          => 'woocommerce_thankyou',
-		'view_item_list'    => 'woocommerce_before_shop_loop_item',
-		'add_to_cart'       => 'woocommerce_add_to_cart',
-		'remove_from_cart'  => 'woocommerce_cart_item_removed',
-		'view_item'         => 'woocommerce_after_single_product',
+		'begin_checkout'   => 'woocommerce_before_checkout_form',
+		'purchase'         => 'woocommerce_thankyou',
+		'view_item_list'   => 'woocommerce_before_shop_loop_item',
+		'add_to_cart'      => 'woocommerce_add_to_cart',
+		'remove_from_cart' => 'woocommerce_cart_item_removed',
+		'view_item'        => 'woocommerce_after_single_product',
 	);
 
 	/**
@@ -97,6 +97,10 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 			$this->data_script_handle,
 			'',
 			array( $this->script_handle ),
+			null,
+			array(
+				'in_footer' => true,
+			)
 		);
 
 		wp_add_inline_script(
@@ -118,11 +122,11 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 	public function map_actions(): void {
 		array_walk(
 			$this->mappings,
-			function( $hook, $gtag_event ) {
+			function ( $hook, $gtag_event ) {
 				add_action(
 					$hook,
-					function() use ( $gtag_event ) {
-						if ( ! in_array( $gtag_event, $this->script_data['events'] ?? [] ) ) {
+					function () use ( $gtag_event ) {
+						if ( ! in_array( $gtag_event, $this->script_data['events'] ?? [], true ) ) {
 							$this->append_script_data( 'events', $gtag_event );
 						}
 					}
@@ -179,7 +183,7 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 	/**
 	 * Return Google Analytics configuration, for JS to read.
 	 *
-	 * @return void
+	 * @return array
 	 */
 	public function get_analytics_config(): array {
 		return array(
@@ -220,7 +224,7 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 			'begin_checkout'   => 'ga_enhanced_checkout_process_enabled',
 		);
 
-		foreach( $settings as $event => $setting_name ) {
+		foreach ( $settings as $event => $setting_name ) {
 			if ( 'yes' === self::get( $setting_name ) ) {
 				$events[] = $event;
 			}

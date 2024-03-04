@@ -63,7 +63,7 @@ class WCGoogleGtagJS extends EventsDataTest {
 
 		add_filter(
 			'woocommerce_ga_product_identifier',
-			function( $product ) {
+			function ( $product ) {
 				return 'filtered';
 			}
 		);
@@ -78,27 +78,27 @@ class WCGoogleGtagJS extends EventsDataTest {
 	 * @return void
 	 */
 	public function test_map_actions(): void {
-		$gtag     = new WC_Google_Gtag_JS;
+		$gtag     = new WC_Google_Gtag_JS();
 		$mappings = array(
-			'begin_checkout'    => 'woocommerce_before_checkout_form',
-			'purchase'          => 'woocommerce_thankyou',
-			'view_item_list'    => 'woocommerce_before_shop_loop_item',
-			'add_to_cart'       => 'woocommerce_add_to_cart',
-			'remove_from_cart'  => 'woocommerce_cart_item_removed',
-			'view_item'         => 'woocommerce_after_single_product',
+			'begin_checkout'   => 'woocommerce_before_checkout_form',
+			'purchase'         => 'woocommerce_thankyou',
+			'view_item_list'   => 'woocommerce_before_shop_loop_item',
+			'add_to_cart'      => 'woocommerce_add_to_cart',
+			'remove_from_cart' => 'woocommerce_cart_item_removed',
+			'view_item'        => 'woocommerce_after_single_product',
 		);
-		
+
 		array_map( 'remove_all_actions', $mappings );
 
 		$gtag->map_actions();
 
-		foreach( $mappings as $event => $hook ) {
+		foreach ( $mappings as $event => $hook ) {
 			do_action( $hook );
-	
+
 			$script_data = json_decode( $gtag->get_script_data(), true );
-	
-			$this->assertTrue( in_array( $event, $script_data['events'] ) );
-	
+
+			$this->assertTrue( in_array( $event, $script_data['events'], true ) );
+
 			// Reset event data
 			$gtag->set_script_data( 'events', array() );
 		}
@@ -110,11 +110,11 @@ class WCGoogleGtagJS extends EventsDataTest {
 	 * @return void
 	 */
 	public function test_set_script_data(): void {
-		$gtag         = new WC_Google_Gtag_JS;
+		$gtag         = new WC_Google_Gtag_JS();
 		$example_data = array(
-			'key' => 'value'
+			'key' => 'value',
 		);
-		
+
 		$gtag->set_script_data( 'test', $example_data );
 
 		$script_data = json_decode( $gtag->get_script_data(), true );
@@ -127,8 +127,8 @@ class WCGoogleGtagJS extends EventsDataTest {
 	 * @return void
 	 */
 	public function test_append_script_data(): void {
-		$gtag = new WC_Google_Gtag_JS;
-		
+		$gtag = new WC_Google_Gtag_JS();
+
 		$gtag->append_script_data( 'test', 'first' );
 		$gtag->append_script_data( 'test', 'second' );
 
@@ -143,13 +143,16 @@ class WCGoogleGtagJS extends EventsDataTest {
 	 * @return void
 	 */
 	public function test_tracker_var(): void {
-		$gtag = new WC_Google_Gtag_JS;
+		$gtag = new WC_Google_Gtag_JS();
 
 		$this->assertEquals( $gtag->tracker_function_name(), 'gtag' );
-		
-		add_filter( 'woocommerce_gtag_tracker_variable', function( $var ) {
-			return 'filtered';
-		} );
+
+		add_filter(
+			'woocommerce_gtag_tracker_variable',
+			function ( $variable ) {
+				return 'filtered';
+			}
+		);
 		$this->assertEquals( $gtag->tracker_function_name(), 'filtered' );
 	}
 
@@ -169,7 +172,7 @@ class WCGoogleGtagJS extends EventsDataTest {
 			'begin_checkout'   => 'ga_enhanced_checkout_process_enabled',
 		);
 
-		foreach( $settings as $event => $option_name ) {
+		foreach ( $settings as $event => $option_name ) {
 			$gtag = new WC_Google_Gtag_JS( array( $option_name => 'yes' ) );
 			$this->assertEquals( $gtag->get_enabled_events(), array( $event ) );
 		}

@@ -64,14 +64,14 @@ abstract class WC_Abstract_Google_Analytics_JS {
 	public function attach_event_data(): void {
 		add_action(
 			'wp_head',
-			function() {
+			function () {
 				$this->set_script_data( 'cart', $this->get_formatted_cart() );
 			}
 		);
 
 		add_action(
 			'woocommerce_before_single_product',
-			function() {
+			function () {
 				global $product;
 				$this->set_script_data( 'product', $this->get_formatted_product( $product ) );
 			}
@@ -79,7 +79,7 @@ abstract class WC_Abstract_Google_Analytics_JS {
 
 		add_action(
 			'woocommerce_add_to_cart',
-			function( $cart_item_key, $product_id, $quantity, $variation_id, $variation ) {
+			function ( $cart_item_key, $product_id, $quantity, $variation_id, $variation ) {
 				$this->set_script_data( 'added_to_cart', $this->get_formatted_product( wc_get_product( $product_id ), $variation ) );
 			},
 			10,
@@ -88,7 +88,7 @@ abstract class WC_Abstract_Google_Analytics_JS {
 
 		add_action(
 			'woocommerce_shop_loop_item_title',
-			function() {
+			function () {
 				global $product;
 				$this->append_script_data( 'products', $this->get_formatted_product( $product ) );
 			}
@@ -96,7 +96,7 @@ abstract class WC_Abstract_Google_Analytics_JS {
 
 		add_action(
 			'woocommerce_thankyou',
-			function( $order_id ) {
+			function ( $order_id ) {
 				$this->set_script_data( 'order', $this->get_formatted_order( $order_id ) );
 			}
 		);
@@ -162,12 +162,12 @@ abstract class WC_Abstract_Google_Analytics_JS {
 	public function get_formatted_cart(): array {
 		return array(
 			'items'   => array_map(
-				function( $item ) {
+				function ( $item ) {
 					return array_merge(
 						$this->get_formatted_product( $item['data'] ),
 						array(
 							'quantity' => $item['quantity'],
-							'prices'     => array(
+							'prices'   => array(
 								'price'               => $this->get_formatted_price( $item['line_total'] ),
 								'currency_minor_unit' => wc_get_price_decimals(),
 							),
@@ -220,7 +220,7 @@ abstract class WC_Abstract_Google_Analytics_JS {
 			$formatted['variation'] = implode(
 				', ',
 				array_map(
-					function( $attribute, $value ) {
+					function ( $attribute, $value ) {
 						return sprintf(
 							'%s: %s',
 							str_replace( 'attribute_', '', $attribute ),
@@ -239,7 +239,7 @@ abstract class WC_Abstract_Google_Analytics_JS {
 	/**
 	 * Returns an array of order data in the required format
 	 *
-	 * @param string $order_id The ID of the order
+	 * @param int $order_id The ID of the order
 	 *
 	 * @return array
 	 */
@@ -250,7 +250,7 @@ abstract class WC_Abstract_Google_Analytics_JS {
 			'currency' => $order->get_currency(),
 			'value'    => $this->get_formatted_price( $order->get_total() ),
 			'items'    => array_map(
-				function( $item ) {
+				function ( $item ) {
 					return array_merge(
 						$this->get_formatted_product( $item->get_product() ),
 						array(
@@ -265,6 +265,8 @@ abstract class WC_Abstract_Google_Analytics_JS {
 
 	/**
 	 * Formats a price the same way WooCommerce Blocks does
+	 *
+	 * @param mixed $value The price value for format
 	 *
 	 * @return int
 	 */
@@ -303,7 +305,7 @@ abstract class WC_Abstract_Google_Analytics_JS {
 				'description' => __( 'The formatted product identifier to use in Google Analytics events.', 'woocommerce-google-analytics-integration' ),
 				'type'        => 'string',
 				'readonly'    => true,
-			)
+			),
 		);
 	}
 

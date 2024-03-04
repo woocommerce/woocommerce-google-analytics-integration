@@ -67,10 +67,12 @@ class WC_Google_Analytics extends WC_Integration {
 
 		// Dequeue the WooCommerce Blocks Google Analytics integration,
 		// not to let it register its `gtag` function so that we could provide a more detailed configuration.
-		add_action( 'wp_enqueue_scripts', function() {
-			wp_dequeue_script( 'wc-blocks-google-analytics' );
-		});
-
+		add_action(
+			'wp_enqueue_scripts',
+			function () {
+				wp_dequeue_script( 'wc-blocks-google-analytics' );
+			}
+		);
 	}
 
 	/**
@@ -80,7 +82,7 @@ class WC_Google_Analytics extends WC_Integration {
 	 */
 	public function universal_analytics_upgrade_notice() {
 		if ( 'ua' === substr( strtolower( $this->get_option( 'ga_id' ) ), 0, 2 ) ) {
-			echo sprintf(
+			printf(
 				'<div class="%1$s"><p>%2$s</p></div>',
 				'notice notice-error',
 				sprintf(
@@ -244,7 +246,7 @@ class WC_Google_Analytics extends WC_Integration {
 	 * @return array       Updated WC Tracker data.
 	 */
 	public function track_settings( $data ) {
-		$settings = $this->settings;
+		$settings                    = $this->settings;
 		$data['wc-google-analytics'] = array(
 			'standard_tracking_enabled'         => $settings['ga_standard_tracking_enabled'],
 			'support_display_advertising'       => $settings['ga_support_display_advertising'],

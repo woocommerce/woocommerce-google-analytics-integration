@@ -1,5 +1,40 @@
 *** Changelog ***
 
+= 1.8.14 - 2024-02-07 =
+* Tweak - Declare feature compatibility for the new product editor (also called product block editor).
+* Tweak - WC 8.6 compatibility.
+
+= 1.8.13 - 2024-01-09 =
+* Dev - Upgrade all NPM dev dependencies.
+* Dev - Upgrade to Node.js 18.
+* Tweak - WC 8.5 compatibility.
+
+= 1.8.12 - 2023-12-28 =
+* Fix - Avoid JavaScript exceptions when sending checkout event tracking due to incompatible data structure.
+* Fix - Correct misplaced each product index value as its quantity when sending checkout event tracking.
+
+= 1.8.11 - 2023-12-18 =
+* Dev - Prevent DB warnings in unit tests.
+* Tweak - WC 8.4 compatibility.
+
+= 1.8.10 - 2023-11-28 =
+* Dev - Update phpunit polyfills to 1.1 for WP 6.4.
+* Fix - Add semicolon after `gtag` calls.
+* Fix - Prevent firing up the add_to_cart event when clicking in product image.
+* Tweak - Test environment setup to resolve notice.
+
+= 1.8.9 - 2023-11-07 =
+* Tweak - WC 8.3 compatibility.
+* Tweak - WP 6.4 compatibility.
+* Update - Use new Woo.com domain.
+* Update - WordPressCS to version 3.0.
+
+= 1.8.8 - 2023-10-24 =
+* Tweak - Declare cart_checkout_blocks feature compatibility.
+
+= 1.8.7 - 2023-10-10 =
+* Fix - JS syntax error on pages with cart and mini-cart rendered, which was causing purchases and cart removals not to be tracked.
+
 = 1.8.6 - 2023-10-03 =
 * Add - Privacy policy guide section.
 * Dev - Enable since tag replacement.

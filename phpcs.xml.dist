@@ -18,14 +18,14 @@
 		<exclude name="Squiz.Commenting.LongConditionClosingComment"/>
 
 		<!-- No thanks -->
-		<exclude name="WordPress.PHP.DisallowShortTernary"/>
+		<exclude name="Universal.Operators.DisallowShortTernary"/>
 		<exclude name="WordPress.PHP.YodaConditions.NotYoda"/>
 
 		<!-- These overrides are useful for code hinting -->
 		<exclude name="Generic.CodeAnalysis.UselessOverridingMethod.Found"/>
 
 		<!-- We like short array syntax -->
-		<exclude name="Generic.Arrays.DisallowShortArraySyntax"/>
+		<exclude name="Universal.Arrays.DisallowShortArraySyntax"/>
 
 		<!-- Multiple throws tags are fine -->
 		<exclude name="Squiz.Commenting.FunctionCommentThrowTag.WrongNumber"/>
@@ -62,8 +62,8 @@
 	</rule>
 
 	<!-- This rule flags space indents in HTML tags, which are generally OK. -->
-	<rule ref="WordPress.WhiteSpace.PrecisionAlignment">
-		<exclude name="WordPress.WhiteSpace.PrecisionAlignment.Found"/>
+	<rule ref="Universal.WhiteSpace.PrecisionAlignment">
+		<exclude name="Universal.WhiteSpace.PrecisionAlignment.Found"/>
 	</rule>
 
 	<!-- We allow the use of / in hooks -->

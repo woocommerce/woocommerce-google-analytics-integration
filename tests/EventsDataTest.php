@@ -106,5 +106,4 @@ abstract class EventsDataTest extends WP_UnitTestCase {
 		$args = $this->get_filter()->get_args();
 		return $args[0][0];
 	}
-
 }

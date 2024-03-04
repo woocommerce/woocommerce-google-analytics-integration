@@ -1,12 +1,16 @@
 # Google Analytics for WooCommerce
 
+[![PHP Unit Tests](https://github.com/woocommerce/woocommerce-google-analytics-integration/actions/workflows/php-unit-tests.yml/badge.svg)](https://github.com/woocommerce/woocommerce-google-analytics-integration/actions/workflows/php-unit-tests.yml)
+[![JavaScript Linting](https://github.com/woocommerce/woocommerce-google-analytics-integration/actions/workflows/js-linting.yml/badge.svg)](https://github.com/woocommerce/woocommerce-google-analytics-integration/actions/workflows/js-linting.yml)
+[![Build](https://github.com/woocommerce/woocommerce-google-analytics-integration/actions/workflows/build.yml/badge.svg)](https://github.com/woocommerce/woocommerce-google-analytics-integration/actions/workflows/build.yml)
+
 WordPress plugin: Provides the integration between WooCommerce and Google Analytics.
 
 Will be required for WooCommerce shops using the integration from WooCommerce 2.1 and up.
 
 - [WordPress.org plugin page](https://wordpress.org/plugins/woocommerce-google-analytics-integration/)
-- [WooCommerce.com product page (free)](https://woocommerce.com/products/woocommerce-google-analytics/)
-- [User documentation](https://docs.woocommerce.com/document/google-analytics-integration/)
+- [Woo.com product page (free)](https://woo.com/products/woocommerce-google-analytics/)
+- [User documentation](https://woo.com/document/google-analytics-integration/)
 
 ## NPM Scripts
 

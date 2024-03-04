@@ -2,8 +2,8 @@
 Contributors: woocommerce, automattic, claudiosanches, bor0, royho, laurendavissmith001, c-shultz
 Tags: woocommerce, google analytics
 Requires at least: 3.9
-Tested up to: 6.3
-Stable tag: 1.8.6
+Tested up to: 6.4
+Stable tag: 1.8.14
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -60,25 +60,21 @@ Exact wording depends on the national data privacy laws and should be adjusted.
 
 == Changelog ==
 
-= 1.8.6 - 2023-10-03 =
-* Add - Privacy policy guide section.
-* Dev - Enable since tag replacement.
-* Fix - Track select_content instead of add_to_cart for variations.
-* Tweak - Add documentation link with UTM parameters.
-* Tweak - Tracking for Products ( Add To Cart and Impression) when using Products (Beta) Block.
-* Tweak - WC 8.2 compatibility.
+= 1.8.14 - 2024-02-07 =
+* Tweak - Declare feature compatibility for the new product editor (also called product block editor).
+* Tweak - WC 8.6 compatibility.
 
-= 1.8.5 - 2023-09-14 =
-* Dev - Add Workflow for generation Hooks documentation.
-* Dev - Fetch WooCommerce and WordPress versions for our tests.
-* Fix - Add To Cart and Impression events when using Blocks.
-* Fix - Compat - Add PHP 8.2 support.
-* Tweak - WC 8.1.0 compatibility.
+= 1.8.13 - 2024-01-09 =
+* Dev - Upgrade all NPM dev dependencies.
+* Dev - Upgrade to Node.js 18.
+* Tweak - WC 8.5 compatibility.
 
-= 1.8.4 - 2023-08-08 =
-* Dev - Add release preparation GH workflow.
-* Fix - Add async attribute in `google-tag-manager` script.
-* Tweak - WC 8.0 compatibility.
-* Tweak - WP 6.3 compatibility.
+= 1.8.12 - 2023-12-28 =
+* Fix - Avoid JavaScript exceptions when sending checkout event tracking due to incompatible data structure.
+* Fix - Correct misplaced each product index value as its quantity when sending checkout event tracking.
+
+= 1.8.11 - 2023-12-18 =
+* Dev - Prevent DB warnings in unit tests.
+* Tweak - WC 8.4 compatibility.
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce-google-analytics-integration/trunk/changelog.txt).

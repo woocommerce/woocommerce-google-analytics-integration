@@ -4,11 +4,11 @@
  * Plugin URI: https://wordpress.org/plugins/woocommerce-google-analytics-integration/
  * Description: Allows Google Analytics tracking code to be inserted into WooCommerce store pages.
  * Author: WooCommerce
- * Author URI: https://woocommerce.com
- * Version: 1.8.6
+ * Author URI: https://woo.com
+ * Version: 1.8.14
  * WC requires at least: 6.8
- * WC tested up to: 8.2
- * Tested up to: 6.3
+ * WC tested up to: 8.6
+ * Tested up to: 6.4
  * License: GPLv2 or later
  * Text Domain: woocommerce-google-analytics-integration
  * Domain Path: languages/
@@ -22,7 +22,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 if ( ! class_exists( 'WC_Google_Analytics_Integration' ) ) {
 
-	define( 'WC_GOOGLE_ANALYTICS_INTEGRATION_VERSION', '1.8.6' ); // WRCS: DEFINED_VERSION.
+	define( 'WC_GOOGLE_ANALYTICS_INTEGRATION_VERSION', '1.8.14' ); // WRCS: DEFINED_VERSION.
 	define( 'WC_GOOGLE_ANALYTICS_INTEGRATION_MIN_WC_VER', '6.8' );
 
 	// Maybe show the GA Pro notice on plugin activation.
@@ -40,6 +40,8 @@ if ( ! class_exists( 'WC_Google_Analytics_Integration' ) ) {
 		function () {
 			if ( class_exists( FeaturesUtil::class ) ) {
 				FeaturesUtil::declare_compatibility( 'custom_order_tables', __FILE__ );
+				FeaturesUtil::declare_compatibility( 'cart_checkout_blocks', __FILE__ );
+				FeaturesUtil::declare_compatibility( 'product_block_editor', __FILE__ );
 			}
 		}
 	);
@@ -107,7 +109,7 @@ if ( ! class_exists( 'WC_Google_Analytics_Integration' ) ) {
 		public function plugin_links( $links ) {
 			$settings_url = $this->get_settings_url();
 			$support_url  = 'https://wordpress.org/support/plugin/woocommerce-google-analytics-integration';
-			$docs_url     = 'https://woocommerce.com/document/google-analytics-integration/?utm_source=wordpress&utm_medium=all-plugins-page&utm_campaign=doc-link&utm_content=woocommerce-google-analytics-integration';
+			$docs_url     = 'https://woo.com/document/google-analytics-integration/?utm_source=wordpress&utm_medium=all-plugins-page&utm_campaign=doc-link&utm_content=woocommerce-google-analytics-integration';
 
 			$plugin_links = array(
 				'<a href="' . esc_url( $settings_url ) . '">' . esc_html__( 'Settings', 'woocommerce-google-analytics-integration' ) . '</a>',
@@ -155,7 +157,6 @@ if ( ! class_exists( 'WC_Google_Analytics_Integration' ) ) {
 			}
 
 			echo '<div class="error"><p><strong>' . wp_kses_post( $error ) . '</strong></p></div>';
-
 		}
 
 		/**
@@ -203,7 +204,7 @@ if ( ! class_exists( 'WC_Google_Analytics_Integration' ) ) {
 			$notice_html = '<strong>' . esc_html__( 'Get detailed insights into your sales with Google Analytics Pro', 'woocommerce-google-analytics-integration' ) . '</strong><br><br>';
 
 			/* translators: 1: href link to GA pro */
-			$notice_html .= sprintf( __( 'Add advanced tracking for your sales funnel, coupons and more. [<a href="%s" target="_blank">Learn more</a> &gt;]', 'woocommerce-google-analytics-integration' ), 'https://woocommerce.com/products/woocommerce-google-analytics-pro/?utm_source=woocommerce-google-analytics-integration&utm_medium=product&utm_campaign=google%20analytics%20free%20to%20pro%20extension%20upsell' );
+			$notice_html .= sprintf( __( 'Add advanced tracking for your sales funnel, coupons and more. [<a href="%s" target="_blank">Learn more</a> &gt;]', 'woocommerce-google-analytics-integration' ), 'https://woo.com/products/woocommerce-google-analytics-pro/?utm_source=woocommerce-google-analytics-integration&utm_medium=product&utm_campaign=google%20analytics%20free%20to%20pro%20extension%20upsell' );
 
 			WC_Admin_Notices::add_custom_notice( 'woocommerce_google_analytics_pro_notice', $notice_html );
 			update_option( 'woocommerce_google_analytics_pro_notice_shown', true );
@@ -236,7 +237,7 @@ if ( ! class_exists( 'WC_Google_Analytics_Integration' ) ) {
 		 * @return string
 		 */
 		public function path( $end = '' ) {
-			return untrailingslashit( dirname( __FILE__ ) ) . $end;
+			return untrailingslashit( __DIR__ ) . $end;
 		}
 
 		/**

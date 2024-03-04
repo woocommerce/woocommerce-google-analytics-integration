@@ -1,8 +1,8 @@
 <?php
 /**
- * Set up Google Analytics Integration task.
+ * Set up Google Analytics for WooCommerce task.
  *
- * Adds a set up Google Analytics Integration task to the task list.
+ * Adds a set up Google Analytics for WooCommerce task to the task list.
  */
 
 defined( 'ABSPATH' ) || exit;

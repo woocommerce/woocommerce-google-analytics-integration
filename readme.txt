@@ -1,4 +1,4 @@
-=== WooCommerce Google Analytics Integration ===
+=== Google Analytics for WooCommerce ===
 Contributors: woocommerce, automattic, claudiosanches, bor0, royho, laurendavissmith001, c-shultz
 Tags: woocommerce, google analytics
 Requires at least: 3.9

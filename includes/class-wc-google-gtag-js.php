@@ -16,67 +16,159 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 	/** @var string $script_handle Handle for the front end JavaScript file */
 	public $script_handle = 'woocommerce-google-analytics-integration';
 
-	/**
-	 * Get the class instance
-	 *
-	 * @param array $options Options
-	 * @return WC_Abstract_Google_Analytics_JS
-	 */
-	public static function get_instance( $options = array() ) {
-		if ( null === self::$instance ) {
-			self::$instance = new self( $options );
-		}
+	/** @var string $script_handle Handle for the event data inline script */
+	public $data_script_handle = 'woocommerce-google-analytics-integration-data';
 
-		return self::$instance;
-	}
+	/** @var string $script_data Data required for frontend event tracking */
+	private $script_data = array();
+
+	/** @var array $mappings A map of the GA4 events and the classic WooCommerce hooks that trigger them */
+	private $mappings = array(
+		'begin_checkout'   => 'woocommerce_before_checkout_form',
+		'purchase'         => 'woocommerce_thankyou',
+		'view_item_list'   => 'woocommerce_before_shop_loop_item',
+		'add_to_cart'      => 'woocommerce_add_to_cart',
+		'remove_from_cart' => 'woocommerce_cart_item_removed',
+		'view_item'        => 'woocommerce_after_single_product',
+	);
 
 	/**
 	 * Constructor
-	 * Takes our options from the parent class so we can later use them in the JS snippets
+	 * Takes our settings from the parent class so we can later use them in the JS snippets
 	 *
-	 * @param array $options Options
+	 * @param array $settings Settings
 	 */
-	public function __construct( $options = array() ) {
-		self::$options = $options;
+	public function __construct( $settings = array() ) {
+		parent::__construct();
+		self::$settings = $settings;
+
+		$this->map_actions();
+
 		// Setup frontend scripts
-		add_action( 'wp_enqueue_scripts', array( $this, 'register_scripts' ) );
-		add_action( 'woocommerce_before_single_product', array( $this, 'setup_frontend_scripts' ) );
+		add_action( 'wp_enqueue_scripts', array( $this, 'enquque_tracker' ), 5 );
+		add_action( 'wp_footer', array( $this, 'inline_script_data' ) );
 	}
 
 	/**
-	 * Enqueue the frontend scripts and make formatted variant data available via filter
+	 * Register tracker scripts and its inline config.
+	 * We need to execute tracker.js w/ `gtag` configuration before any trackable action may happen.
 	 *
 	 * @return void
 	 */
-	public function setup_frontend_scripts() {
-		global $product;
-
-		if ( $product instanceof WC_Product_Variable ) {
-			// Filter variation data to include formatted strings required for add_to_cart event
-			add_filter( 'woocommerce_available_variation', array( $this, 'variant_data' ), 10, 3 );
-			// Add default inline product data for add to cart tracking
-			wp_enqueue_script( $this->script_handle . '-ga-integration' );
-		}
+	public function enquque_tracker(): void {
+		wp_enqueue_script(
+			'google-tag-manager',
+			'https://www.googletagmanager.com/gtag/js?id=' . self::get( 'ga_id' ),
+			array(),
+			null,
+			false
+		);
+		// tracker.js needs to be executed ASAP, the remaining bits for main.js could be deffered,
+		// but to reduce the traffic, we ship it all together.
+		wp_enqueue_script(
+			$this->script_handle,
+			Plugin::get_instance()->get_js_asset_url( 'main.js' ),
+			array(
+				...Plugin::get_instance()->get_js_asset_dependencies( 'main' ),
+				'google-tag-manager',
+			),
+			Plugin::get_instance()->get_js_asset_version( 'main' ),
+			true
+		);
+		// Provide tracker's configuration.
+		wp_add_inline_script(
+			$this->script_handle,
+			sprintf(
+				'var wcgai = {config: %s};',
+				wp_json_encode( $this->get_analytics_config() )
+			),
+			'before'
+		);
 	}
 
 	/**
-	 * Register front end JavaScript
+	 * Feed classic tracking with event data via inline script.
+	 * Make sure it's added at the bottom of the page, so all the data is collected.
+	 *
+	 * @return void
 	 */
-	public function register_scripts() {
+	public function inline_script_data(): void {
 		wp_register_script(
-			$this->script_handle . '-ga-integration',
-			Plugin::get_instance()->get_js_asset_url( 'ga-integration.js' ),
-			Plugin::get_instance()->get_js_asset_dependencies( 'ga-integration', [ 'jquery' ] ),
-			Plugin::get_instance()->get_js_asset_version( 'ga-integration' ),
-			true
+			$this->data_script_handle,
+			'',
+			array( $this->script_handle ),
+			null,
+			array(
+				'in_footer' => true,
+			)
 		);
-		wp_enqueue_script(
-			$this->script_handle . '-actions',
-			Plugin::get_instance()->get_js_asset_url( 'actions.js' ),
-			Plugin::get_instance()->get_js_asset_dependencies( 'actions' ),
-			Plugin::get_instance()->get_js_asset_version( 'actions' ),
-			true
+
+		wp_add_inline_script(
+			$this->data_script_handle,
+			sprintf(
+				'wcgai.trackClassicPages( %s );',
+				$this->get_script_data()
+			)
 		);
+
+		wp_enqueue_script( $this->data_script_handle );
+	}
+
+	/**
+	 * Hook into WooCommerce and add corresponding Blocks Actions to our event data
+	 *
+	 * @return void
+	 */
+	public function map_actions(): void {
+		array_walk(
+			$this->mappings,
+			function ( $hook, $gtag_event ) {
+				add_action(
+					$hook,
+					function () use ( $gtag_event ) {
+						if ( ! in_array( $gtag_event, $this->script_data['events'] ?? [], true ) ) {
+							$this->append_script_data( 'events', $gtag_event );
+						}
+					}
+				);
+			}
+		);
+	}
+
+	/**
+	 * Set script data for a specific event
+	 *
+	 * @param string       $type The type of event this data is related to.
+	 * @param string|array $data The event data to add.
+	 *
+	 * @return void
+	 */
+	public function set_script_data( string $type, $data ): void {
+		$this->script_data[ $type ] = $data;
+	}
+
+	/**
+	 * Append data to an existing script data array
+	 *
+	 * @param string       $type The type of event this data is related to.
+	 * @param string|array $data The event data to add.
+	 *
+	 * @return void
+	 */
+	public function append_script_data( string $type, $data ): void {
+		if ( ! isset( $this->script_data[ $type ] ) ) {
+			$this->script_data[ $type ] = array();
+		}
+		$this->script_data[ $type ][] = $data;
+	}
+
+	/**
+	 * Return a JSON encoded string of all script data for the current page load
+	 *
+	 * @return string
+	 */
+	public function get_script_data(): string {
+		return wp_json_encode( $this->script_data );
 	}
 
 	/**
@@ -84,428 +176,74 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 	 *
 	 * @return string
 	 */
-	public static function tracker_var() {
+	public static function tracker_function_name(): string {
 		return apply_filters( 'woocommerce_gtag_tracker_variable', 'gtag' );
 	}
 
 	/**
-	 * Add formatted id and variant to variable product data
+	 * Return Google Analytics configuration, for JS to read.
 	 *
-	 * @param array                $data Data accessible via `found_variation` trigger
-	 * @param WC_Product_Variable  $product
-	 * @param WC_Product_Variation $variation
 	 * @return array
 	 */
-	public function variant_data( $data, $product, $variation ) {
-		$data['google_analytics_integration'] = array(
-			'id'      => self::get_product_identifier( $variation ),
-			'variant' => substr( self::product_get_variant_line( $variation ), 1, -2 ),
+	public function get_analytics_config(): array {
+		return array(
+			'developer_id'          => self::DEVELOPER_ID,
+			'gtag_id'               => self::get( 'ga_id' ),
+			'tracker_function_name' => self::tracker_function_name(),
+			'track_404'             => 'yes' === self::get( 'ga_404_tracking_enabled' ),
+			'allow_google_signals'  => 'yes' === self::get( 'ga_support_display_advertising' ),
+			'link_attribution'      => 'yes' === self::get( 'ga_support_enhanced_link_attribution' ),
+			'anonymize_ip'          => 'yes' === self::get( 'ga_anonymize_enabled' ),
+			'logged_in'             => is_user_logged_in(),
+			'linker'                => array(
+				'domains'        => ! empty( self::get( 'ga_linker_cross_domains' ) ) ? array_map( 'esc_js', explode( ',', self::get( 'ga_linker_cross_domains' ) ) ) : array(),
+				'allow_incoming' => 'yes' === self::get( 'ga_linker_allow_incoming_enabled' ),
+			),
+			'custom_map'            => array(
+				'dimension1' => 'logged_in',
+			),
+			'events'                => self::get_enabled_events(),
+			'identifier'            => self::get( 'ga_product_identifier' ),
+		);
+	}
+
+	/**
+	 * Get an array containing the names of all enabled events
+	 *
+	 * @return array
+	 */
+	public static function get_enabled_events(): array {
+		$events   = array();
+		$settings = array(
+			'purchase'         => 'ga_ecommerce_tracking_enabled',
+			'add_to_cart'      => 'ga_event_tracking_enabled',
+			'remove_from_cart' => 'ga_enhanced_remove_from_cart_enabled',
+			'view_item_list'   => 'ga_enhanced_product_impression_enabled',
+			'select_content'   => 'ga_enhanced_product_click_enabled',
+			'view_item'        => 'ga_enhanced_product_detail_view_enabled',
+			'begin_checkout'   => 'ga_enhanced_checkout_process_enabled',
 		);
 
-		return $data;
-	}
-
-	/**
-	 * Returns Javascript string for Google Analytics events
-	 *
-	 * @param string       $event The type of event
-	 * @param array|string $data  Event data to be sent. If $data is an array then it will be filtered, escaped, and encoded
-	 * @return string
-	 */
-	public static function get_event_code( string $event, $data ): string {
-		return sprintf( "%s('event', '%s', %s);", self::tracker_var(), esc_js( $event ), ( is_array( $data ) ? self::format_event_data( $data ) : $data ) );
-	}
-
-	/**
-	 * Escape and encode event data
-	 *
-	 * @param array $data Event data to processed and formatted
-	 * @return string
-	 */
-	public static function format_event_data( array $data ): string {
-		$data = apply_filters( 'woocommerce_gtag_event_data', $data );
-
-		// Recursively walk through $data array and escape all values that will be used in JS.
-		array_walk_recursive(
-			$data,
-			function ( &$value, $key ) {
-				$value = esc_js( $value );
-			}
-		);
-
-		return wp_json_encode( $data );
-	}
-
-	/**
-	 * Returns a list of category names the product is atttributed to
-	 *
-	 * @param  WC_Product $product Product to generate category line for
-	 * @return string
-	 */
-	public static function product_get_category_line( $product ) {
-		$category_names = array();
-		$categories     = get_the_terms( $product->get_id(), 'product_cat' );
-
-		$variation_data = $product->is_type( 'variation' ) ? wc_get_product_variation_attributes( $product->get_id() ) : false;
-		if ( is_array( $variation_data ) && ! empty( $variation_data ) ) {
-			$categories = get_the_terms( $product->get_parent_id(), 'product_cat' );
-		}
-
-		if ( false !== $categories && ! is_wp_error( $categories ) ) {
-			foreach ( $categories as $category ) {
-				$category_names[] = $category->name;
+		foreach ( $settings as $event => $setting_name ) {
+			if ( 'yes' === self::get( $setting_name ) ) {
+				$events[] = $event;
 			}
 		}
 
-		return join( '/', $category_names );
+		return $events;
 	}
 
 	/**
-	 * Return list name for event
+	 * Get the class instance
 	 *
-	 * @return string
+	 * @param array $settings Settings
+	 * @return WC_Abstract_Google_Analytics_JS
 	 */
-	public static function get_list_name(): string {
-		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		return isset( $_GET['s'] ) ? __( 'Search Results', 'woocommerce-google-analytics-integration' ) : __( 'Product List', 'woocommerce-google-analytics-integration' );
-	}
-
-	/**
-	 * Enqueues JavaScript to build the view_item_list event
-	 *
-	 * @param WC_Product $product
-	 */
-	public static function listing_impression( $product ) {
-		$event_code = self::get_event_code(
-			'view_item_list',
-			array(
-				'items' => array(
-					array(
-						'id'       => self::get_product_identifier( $product ),
-						'name'     => $product->get_title(),
-						'category' => self::product_get_category_line( $product ),
-						'list'     => self::get_list_name(),
-					),
-				),
-			)
-		);
-
-		wc_enqueue_js( $event_code );
-	}
-
-	/**
-	 * Enqueues JavaScript for select_content and add_to_cart events for the product archive
-	 *
-	 * @param WC_Product $product
-	 */
-	public static function listing_click( $product ) {
-		$item = array(
-			'id'       => self::get_product_identifier( $product ),
-			'name'     => $product->get_title(),
-			'category' => self::product_get_category_line( $product ),
-			'quantity' => 1,
-		);
-
-		$select_content_event_code = self::get_event_code(
-			'select_content',
-			array(
-				'items' => array( $item ),
-			)
-		);
-
-		$add_to_cart_event_code = self::get_event_code(
-			'add_to_cart',
-			array(
-				'items' => array( $item ),
-			)
-		);
-
-		wc_enqueue_js(
-			"
-			$( '.product.post-" . esc_js( $product->get_id() ) . ' a.button , .product.post-' . esc_js( $product->get_id() ) . " button' ).on('click', function() {
-				if ( false === $(this).hasClass( 'product_type_variable' ) && false === $(this).hasClass( 'product_type_grouped' ) ) {
-					$add_to_cart_event_code
-				} else {
-					$select_content_event_code
-				}
-			});"
-		);
-	}
-
-	/**
-	 * Output Javascript to track add_to_cart event on single product page
-	 *
-	 * @param WC_Product $product The product currently being viewed
-	 */
-	public static function add_to_cart( WC_Product $product ) {
-		$items = array(
-			'id'       => self::get_product_identifier( $product ),
-			'name'     => $product->get_title(),
-			'category' => self::product_get_category_line( $product ),
-			'quantity' => 1,
-		);
-
-		// Set item data as Javascript variable so that quantity, variant, and ID can be updated before sending the event
-		$event_code = '
-			const item_data    = ' . self::format_event_data( $items ) . ';
-			item_data.quantity = $("input.qty").val() ? $("input.qty").val() : 1;';
-
-		if ( $product->is_type( 'variable' ) ) {
-			// Check the global google_analytics_integration_product_data Javascript variable contains data
-			// for the current variation selection and if it does update the item_data to be sent for this event
-			$event_code .= "
-			const selected_variation = google_analytics_integration_product_data[ $('input[name=\"variation_id\"]').val() ];
-			if ( selected_variation !== undefined ) {
-				item_data.id       = selected_variation.id;
-				item_data.variant  = selected_variation.variant;
-			}
-			";
+	public static function get_instance( $settings = array() ): WC_Abstract_Google_Analytics_JS {
+		if ( null === self::$instance ) {
+			self::$instance = new self( $settings );
 		}
 
-		$event_code .= self::get_event_code(
-			'add_to_cart',
-			'{"items": [item_data]}',
-			false
-		);
-
-		wc_enqueue_js(
-			"$( '.single_add_to_cart_button' ).on('click', function() {
-				$event_code
-			});"
-		);
-	}
-
-	/**
-	 * Loads the standard Gtag code
-	 *
-	 * @param WC_Order $order WC_Order Object (not used in this implementation, but mandatory in the abstract class)
-	 */
-	public static function load_analytics( $order = false ) {
-		$logged_in = is_user_logged_in() ? 'yes' : 'no';
-
-		$track_404_enabled = '';
-		if ( 'yes' === self::get( 'ga_404_tracking_enabled' ) && is_404() ) {
-			// See https://developers.google.com/analytics/devguides/collection/gtagjs/events for reference
-			$track_404_enabled = self::tracker_var() . "( 'event', '404_not_found', { 'event_category':'error', 'event_label':'page: ' + document.location.pathname + document.location.search + ' referrer: ' + document.referrer });";
-		}
-
-		$gtag_developer_id = '';
-		if ( ! empty( self::DEVELOPER_ID ) ) {
-			$gtag_developer_id = self::tracker_var() . "('set', 'developer_id." . self::DEVELOPER_ID . "', true);";
-		}
-
-		$gtag_id            = self::get( 'ga_id' );
-		$gtag_cross_domains = ! empty( self::get( 'ga_linker_cross_domains' ) ) ? array_map( 'esc_js', explode( ',', self::get( 'ga_linker_cross_domains' ) ) ) : array();
-		$gtag_snippet       = '
-		window.dataLayer = window.dataLayer || [];
-		function ' . self::tracker_var() . '(){dataLayer.push(arguments);}
-		' . self::tracker_var() . "('js', new Date());
-		$gtag_developer_id
-
-		" . self::tracker_var() . "('config', '" . esc_js( $gtag_id ) . "', {
-			'allow_google_signals': " . ( 'yes' === self::get( 'ga_support_display_advertising' ) ? 'true' : 'false' ) . ",
-			'link_attribution': " . ( 'yes' === self::get( 'ga_support_enhanced_link_attribution' ) ? 'true' : 'false' ) . ",
-			'anonymize_ip': " . ( 'yes' === self::get( 'ga_anonymize_enabled' ) ? 'true' : 'false' ) . ",
-			'linker':{
-				'domains': " . wp_json_encode( $gtag_cross_domains ) . ",
-				'allow_incoming': " . ( 'yes' === self::get( 'ga_linker_allow_incoming_enabled' ) ? 'true' : 'false' ) . ",
-			},
-			'custom_map': {
-				'dimension1': 'logged_in'
-			},
-			'logged_in': '$logged_in'
-		} );
-
-		$track_404_enabled
-		";
-
-		wp_register_script( 'google-tag-manager', 'https://www.googletagmanager.com/gtag/js?id=' . esc_js( $gtag_id ), array( 'google-analytics-opt-out' ), null, false );
-		wp_add_inline_script( 'google-tag-manager', apply_filters( 'woocommerce_gtag_snippet', $gtag_snippet ) );
-		wp_enqueue_script( 'google-tag-manager' );
-	}
-
-	/**
-	 * Generate Gtag transaction tracking code
-	 *
-	 * @param  WC_Order $order
-	 * @return string
-	 */
-	public function add_transaction_enhanced( $order ) {
-		$event_items = array();
-		$order_items = $order->get_items();
-		if ( ! empty( $order_items ) ) {
-			foreach ( $order_items as $item ) {
-				$event_items[] = self::add_item( $order, $item );
-			}
-		}
-
-		return self::get_event_code(
-			'purchase',
-			array(
-				'transaction_id' => $order->get_order_number(),
-				'affiliation'    => get_bloginfo( 'name' ),
-				'value'          => $order->get_total(),
-				'tax'            => $order->get_total_tax(),
-				'shipping'       => $order->get_total_shipping(),
-				'currency'       => $order->get_currency(),
-				'items'          => $event_items,
-			)
-		);
-	}
-
-	/**
-	 * Add Item
-	 *
-	 * @param WC_Order      $order WC_Order Object
-	 * @param WC_Order_Item $item  The item to add to a transaction/order
-	 */
-	public function add_item( $order, $item ) {
-		$product = $item->get_product();
-		$variant = self::product_get_variant_line( $product );
-
-		$event_item = array(
-			'id'       => self::get_product_identifier( $product ),
-			'name'     => $item['name'],
-			'category' => self::product_get_category_line( $product ),
-			'price'    => $order->get_item_total( $item ),
-			'quantity' => $item['qty'],
-		);
-
-		if ( '' !== $variant ) {
-			$event_item['variant'] = $variant;
-		}
-
-		return $event_item;
-	}
-
-	/**
-	 * Output JavaScript to track an enhanced ecommerce remove from cart action
-	 */
-	public function remove_from_cart() {
-		$event_code = self::get_event_code(
-			'remove_from_cart',
-			'{"items": [{
-				"id": $(this).data("product_sku") ? $(this).data("product_sku") : "#" + $(this).data("product_id"),
-				"quantity": $(this).parent().parent().find(".qty").val() ? $(this).parent().parent().find(".qty").val() : "1"
-			 }]}'
-		);
-
-		// To track all the consecutive removals,
-		// we listen for clicks on `.woocommerce` container(s),
-		// as `.woocommerce-cart-form` and its items are re-rendered on each removal.
-		wc_enqueue_js(
-			"(function(){
-				const selector = '.woocommerce-cart-form__cart-item .remove';
-				$( '.woocommerce' ).off('click', selector).on( 'click', selector, function() {
-					$event_code
-				});
-			})();"
-		);
-	}
-
-	/**
-	 * Enqueue JavaScript to track a product detail view
-	 *
-	 * @param WC_Product $product
-	 */
-	public function product_detail( $product ) {
-		if ( empty( $product ) ) {
-			return;
-		}
-
-		$event_code = self::get_event_code(
-			'view_item',
-			array(
-				'items' => array(
-					array(
-						'id'       => self::get_product_identifier( $product ),
-						'name'     => $product->get_title(),
-						'category' => self::product_get_category_line( $product ),
-						'price'    => $product->get_price(),
-					),
-				),
-			)
-		);
-
-		wc_enqueue_js( $event_code );
-	}
-
-	/**
-	 * Enqueue JS to track when the checkout process is started
-	 *
-	 * @param array $cart items/contents of the cart
-	 */
-	public function checkout_process( $cart ) {
-		$items = array();
-		foreach ( $cart as $cart_item_key => $cart_item ) {
-			$product = apply_filters( 'woocommerce_cart_item_product', $cart_item['data'], $cart_item, $cart_item_key );
-
-			$item_data = array(
-				'id'       => self::get_product_identifier( $product ),
-				'name'     => $product->get_title(),
-				'category' => self::product_get_category_line( $product ),
-				'price'    => $product->get_price(),
-				'quantity' => $cart_item['quantity'],
-			);
-
-			$variant = self::product_get_variant_line( $product );
-			if ( '' !== $variant ) {
-				$item_data['variant'] = $variant;
-			}
-
-			$items[] = $item_data;
-		}
-
-		$event_code = self::get_event_code(
-			'begin_checkout',
-			array(
-				'items' => $items,
-			)
-		);
-
-		wc_enqueue_js( $event_code );
-	}
-
-	/**
-	 * @deprecated 1.6.0
-	 *
-	 * Enqueue JavaScript for Add to cart tracking
-	 *
-	 * @param array  $parameters Associative array of _trackEvent parameters
-	 * @param string $selector   jQuery selector for binding click event
-	 */
-	public function event_tracking_code( $parameters, $selector ) {
-		wc_deprecated_function( 'event_tracking_code', '1.6.0', 'get_event_code' );
-
-		// Called with invalid 'Add to Cart' action, update to sync with Default Google Analytics Event 'add_to_cart'
-		$parameters['action']   = '\'add_to_cart\'';
-		$parameters['category'] = '\'ecommerce\'';
-
-		$parameters = apply_filters( 'woocommerce_gtag_event_tracking_parameters', $parameters );
-
-		if ( 'yes' === self::get( 'ga_enhanced_ecommerce_tracking_enabled' ) ) {
-			$track_event = sprintf(
-				self::tracker_var() . "( 'event', %s, { 'event_category': %s, 'event_label': %s, 'items': [ %s ] } );",
-				$parameters['action'],
-				$parameters['category'],
-				$parameters['label'],
-				$parameters['item']
-			);
-		} else {
-			$track_event = sprintf(
-				self::tracker_var() . "( 'event', %s, { 'event_category': %s, 'event_label': %s } );",
-				$parameters['action'],
-				$parameters['category'],
-				$parameters['label']
-			);
-		}
-
-		wc_enqueue_js(
-			"
-			$( '" . $selector . "' ).on( 'click', function() {
-				" . $track_event . '
-			});
-		'
-		);
+		return self::$instance;
 	}
 }

@@ -12,8 +12,8 @@ import {
 /**
  * Formats data for the view_item_list event
  *
- * @param {Object} params The function params
- * @param {Array} params.products The products to track
+ * @param {Object} params            The function params
+ * @param {Array}  params.products   The products to track
  * @param {string} [params.listName] The name of the list in which the item was presented to the user.
  */
 export const view_item_list = ( {
@@ -40,8 +40,8 @@ export const view_item_list = ( {
 /**
  * Formats data for the add_to_cart event
  *
- * @param {Object} params The function params
- * @param {Array} params.product The product to track
+ * @param {Object} params              The function params
+ * @param {Array}  params.product      The product to track
  * @param {number} [params.quantity=1] The quantity of that product in the cart.
  */
 export const add_to_cart = ( { product, quantity = 1 } ) => {
@@ -53,8 +53,8 @@ export const add_to_cart = ( { product, quantity = 1 } ) => {
 /**
  * Formats data for the remove_from_cart event
  *
- * @param {Object} params The function params
- * @param {Array} params.product The product to track
+ * @param {Object} params              The function params
+ * @param {Array}  params.product      The product to track
  * @param {number} [params.quantity=1] The quantity of that product in the cart.
  */
 export const remove_from_cart = ( { product, quantity = 1 } ) => {
@@ -66,8 +66,8 @@ export const remove_from_cart = ( { product, quantity = 1 } ) => {
 /**
  * Tracks change_cart_quantity event
  *
- * @param {Object} params The function params
- * @param {Array} params.product The product to track
+ * @param {Object} params              The function params
+ * @param {Array}  params.product      The product to track
  * @param {number} [params.quantity=1] The quantity of that product in the cart.
  */
 export const trackChangeCartItemQuantity = ( { product, quantity = 1 } ) => {
@@ -84,7 +84,7 @@ export const trackChangeCartItemQuantity = ( { product, quantity = 1 } ) => {
 /**
  * Formats data for the begin_checkout event
  *
- * @param {Object} params The function params
+ * @param {Object} params           The function params
  * @param {Object} params.storeCart The cart object
  */
 export const begin_checkout = ( { storeCart } ) => {
@@ -102,7 +102,7 @@ export const begin_checkout = ( { storeCart } ) => {
 /**
  * Formats data for the add_shipping_info event
  *
- * @param {Object} params The function params
+ * @param {Object} params           The function params
  * @param {Object} params.storeCart The cart object
  */
 export const add_shipping_info = ( { storeCart } ) => {
@@ -124,7 +124,7 @@ export const add_shipping_info = ( { storeCart } ) => {
 /**
  * Formats data for the select_content event.
  *
- * @param {Object} params The function params
+ * @param {Object} params         The function params
  * @param {Object} params.product The product to track
  */
 export const select_content = ( { product } ) => {
@@ -137,7 +137,7 @@ export const select_content = ( { product } ) => {
 /**
  * Formats data for the search event.
  *
- * @param {Object} params The function params
+ * @param {Object} params            The function params
  * @param {string} params.searchTerm The search term to track
  */
 export const search = ( { searchTerm } ) => {
@@ -149,8 +149,8 @@ export const search = ( { searchTerm } ) => {
 /**
  * Formats data for the view_item event
  *
- * @param {Object} params The function params
- * @param {Object} params.product The product to track
+ * @param {Object} params            The function params
+ * @param {Object} params.product    The product to track
  * @param {string} [params.listName] The name of the list in which the item was presented to the user.
  */
 export const view_item = ( {
@@ -169,7 +169,7 @@ export const view_item = ( {
 /**
  * Formats order data for the purchase event
  *
- * @param {Object} params The function params
+ * @param {Object} params       The function params
  * @param {Object} params.order The order object
  */
 export const purchase = ( { order } ) => {
@@ -185,8 +185,8 @@ export const purchase = ( { order } ) => {
 /**
  * Formats data for the exception event
  *
- * @param {Object} params The function params
- * @param {string} params.status The status of the exception. It should be "error" for tracking it.
+ * @param {Object} params         The function params
+ * @param {string} params.status  The status of the exception. It should be "error" for tracking it.
  * @param {string} params.content The exception description
  */
 export const trackException = ( { status, content } ) => {
@@ -201,7 +201,7 @@ export const trackException = ( { status, content } ) => {
 /**
  * Track an event using the global gtag function.
  *
- * @param {string} eventName - Name of the event to track
+ * @param {string} eventName     - Name of the event to track
  * @param {Object} [eventParams] - Props to send within the event
  */
 export const trackEvent = ( eventName, eventParams ) => {

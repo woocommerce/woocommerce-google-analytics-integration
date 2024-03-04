@@ -11,13 +11,13 @@ import { getProductFromID } from '../utils';
  *
  * To be executed once data set is complete, and `document` is ready.
  *
- * @param {Object} data - The tracking data from the current page load, containing the following properties:
- * @param {Object} data.events - An object containing the events to be instantly tracked.
- * @param {Object} data.cart - The cart object.
- * @param {Object[]} data.products - An array of all product from the current page.
- * @param {Object} data.product - The single product object.
- * @param {Object} data.added_to_cart - The product added to cart.
- * @param {Object} data.order - The order object.
+ * @param {Object}   data               - The tracking data from the current page load, containing the following properties:
+ * @param {Object}   data.events        - An object containing the events to be instantly tracked.
+ * @param {Object}   data.cart          - The cart object.
+ * @param {Object[]} data.products      - An array of all product from the current page.
+ * @param {Object}   data.product       - The single product object.
+ * @param {Object}   data.added_to_cart - The product added to cart.
+ * @param {Object}   data.order         - The order object.
  */
 export function trackClassicPages( {
 	events,
@@ -46,10 +46,10 @@ export function trackClassicPages( {
 	/**
 	 * Track the custom add to cart event dispatched by WooCommerce Core
 	 *
-	 * @param {Event} e - The event object
-	 * @param {Object} fragments - An object containing fragments of the updated cart.
-	 * @param {string} cartHash - A string representing the hash of the cart after the update.
-	 * @param {HTMLElement[]} button - An array of HTML elements representing the add to cart button.
+	 * @param {Event}         e         - The event object
+	 * @param {Object}        fragments - An object containing fragments of the updated cart.
+	 * @param {string}        cartHash  - A string representing the hash of the cart after the update.
+	 * @param {HTMLElement[]} button    - An array of HTML elements representing the add to cart button.
 	 */
 	document.body.onadded_to_cart = ( e, fragments, cartHash, button ) => {
 		tracker.eventHandler( 'add_to_cart' )( {

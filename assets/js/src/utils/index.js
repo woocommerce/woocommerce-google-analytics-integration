@@ -5,7 +5,7 @@ import { config } from '../config.js';
  * Formats data into the productFieldObject shape.
  *
  * @see https://developers.google.com/analytics/devguides/collection/gtagjs/enhanced-ecommerce#product-data
- * @param {Object} product - The product data
+ * @param {Object} product  - The product data
  * @param {number} quantity - The product quantity
  *
  * @return {Object} The product data
@@ -33,7 +33,7 @@ export const getProductFieldObject = ( product, quantity ) => {
  * Formats data into the impressionFieldObject shape.
  *
  * @see https://developers.google.com/analytics/devguides/collection/gtagjs/enhanced-ecommerce#impression-data
- * @param {Object} product - The product data
+ * @param {Object} product  - The product data
  * @param {string} listName - The list for this product
  *
  * @return {Object} - The product impression data
@@ -54,7 +54,7 @@ export const getProductImpressionObject = ( product, listName ) => {
 /**
  * Returns the price of a product formatted as a string.
  *
- * @param {string} price - The price to parse
+ * @param {string} price                 - The price to parse
  * @param {number} [currencyMinorUnit=2] - The number decimals to show in the currency
  *
  * @return {number} - The price of the product formatted
@@ -66,9 +66,9 @@ export const formatPrice = ( price, currencyMinorUnit = 2 ) => {
 /**
  * Removes previous actions with the same hookName and namespace and then adds the new action.
  *
- * @param {string} hookName The hook name for the action
- * @param {string} namespace The unique namespace for the action
- * @param {Function} callback The function to run when the action happens.
+ * @param {string}   hookName  The hook name for the action
+ * @param {string}   namespace The unique namespace for the action
+ * @param {Function} callback  The function to run when the action happens.
  */
 export const addUniqueAction = ( hookName, namespace, callback ) => {
 	removeAction( hookName, namespace );
@@ -157,9 +157,9 @@ const formatCategoryKey = ( index ) => {
 /**
  * Searches through the global wcgaiData.products object to find a single product by its ID
  *
- * @param {number} search The ID of the product to search for
+ * @param {number}   search   The ID of the product to search for
  * @param {Object[]} products The array of available products
- * @param {Object} cart The cart object
+ * @param {Object}   cart     The cart object
  * @return {Object|undefined} The product object or undefined if not found
  */
 export const getProductFromID = ( search, products, cart ) => {

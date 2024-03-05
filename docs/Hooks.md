@@ -2,126 +2,37 @@
 
 A list of hooks, e.g. `actions` and `filters`, that are defined or used in this project.
 
-## wc_google_analytics_send_pageview
-
-**Type**: filter
-
-**Used in**:
-
-- [class-wc-google-analytics-js.php#L185](https://github.com/woocommerce/woocommerce-google-analytics-integration/blob/d27d0946394f2950a519bd475b9b89c2d11e1c45/includes/class-wc-google-analytics-js.php#L185)
-
-## woocommerce_cart_item_product
-
-**Type**: filter
-
-**Used in**:
-
-- [class-wc-google-analytics-js.php#L475](https://github.com/woocommerce/woocommerce-google-analytics-integration/blob/d27d0946394f2950a519bd475b9b89c2d11e1c45/includes/class-wc-google-analytics-js.php#L475)
-- [class-wc-google-gtag-js.php#L441](https://github.com/woocommerce/woocommerce-google-analytics-integration/blob/d27d0946394f2950a519bd475b9b89c2d11e1c45/includes/class-wc-google-gtag-js.php#L441)
-
-## woocommerce_ga_classic_snippet_output
-
-**Type**: filter
-
-**Used in**:
-
-- [class-wc-google-analytics-js.php#L105](https://github.com/woocommerce/woocommerce-google-analytics-integration/blob/d27d0946394f2950a519bd475b9b89c2d11e1c45/includes/class-wc-google-analytics-js.php#L105)
-
 ## woocommerce_ga_disable_tracking
 
 **Type**: filter
 
 **Used in**:
 
-- [class-wc-google-analytics.php#L524](https://github.com/woocommerce/woocommerce-google-analytics-integration/blob/d27d0946394f2950a519bd475b9b89c2d11e1c45/includes/class-wc-google-analytics.php#L524)
+- [class-wc-google-analytics.php#L269](https://github.com/woocommerce/woocommerce-google-analytics-integration/blob/b900b712956564edded99deee395385de63d17f9/includes/class-wc-google-analytics.php#L269)
 
-## woocommerce_ga_event_tracking_parameters
-
-**Type**: filter
-
-**Used in**:
-
-- [class-wc-google-analytics-js.php#L502](https://github.com/woocommerce/woocommerce-google-analytics-integration/blob/d27d0946394f2950a519bd475b9b89c2d11e1c45/includes/class-wc-google-analytics-js.php#L502)
-
-## woocommerce_ga_snippet_create
+## woocommerce_ga_gtag_config
 
 **Type**: filter
 
 **Used in**:
 
-- [class-wc-google-analytics-js.php#L276](https://github.com/woocommerce/woocommerce-google-analytics-integration/blob/d27d0946394f2950a519bd475b9b89c2d11e1c45/includes/class-wc-google-analytics-js.php#L276)
+- [class-wc-google-gtag-js.php#L209](https://github.com/woocommerce/woocommerce-google-analytics-integration/blob/b900b712956564edded99deee395385de63d17f9/includes/class-wc-google-gtag-js.php#L209)
 
-## woocommerce_ga_snippet_developer_id
-
-**Type**: filter
-
-**Used in**:
-
-- [class-wc-google-analytics-js.php#L277](https://github.com/woocommerce/woocommerce-google-analytics-integration/blob/d27d0946394f2950a519bd475b9b89c2d11e1c45/includes/class-wc-google-analytics-js.php#L277)
-
-## woocommerce_ga_snippet_head
+## woocommerce_ga_gtag_consent_modes
 
 **Type**: filter
 
 **Used in**:
 
-- [class-wc-google-analytics-js.php#L275](https://github.com/woocommerce/woocommerce-google-analytics-integration/blob/d27d0946394f2950a519bd475b9b89c2d11e1c45/includes/class-wc-google-analytics-js.php#L275)
+- [class-wc-google-gtag-js.php#L293](https://github.com/woocommerce/woocommerce-google-analytics-integration/blob/b900b712956564edded99deee395385de63d17f9/includes/class-wc-google-gtag-js.php#L293)
 
-## woocommerce_ga_snippet_output
-
-**Type**: filter
-
-**Used in**:
-
-- [class-wc-google-analytics-js.php#L282](https://github.com/woocommerce/woocommerce-google-analytics-integration/blob/d27d0946394f2950a519bd475b9b89c2d11e1c45/includes/class-wc-google-analytics-js.php#L282)
-
-## woocommerce_ga_snippet_require
+## woocommerce_ga_product_identifier
 
 **Type**: filter
 
 **Used in**:
 
-- [class-wc-google-analytics-js.php#L278](https://github.com/woocommerce/woocommerce-google-analytics-integration/blob/d27d0946394f2950a519bd475b9b89c2d11e1c45/includes/class-wc-google-analytics-js.php#L278)
-
-## woocommerce_ga_tracker_variable
-
-**Type**: filter
-
-**Used in**:
-
-- [class-wc-google-analytics-js.php#L44](https://github.com/woocommerce/woocommerce-google-analytics-integration/blob/d27d0946394f2950a519bd475b9b89c2d11e1c45/includes/class-wc-google-analytics-js.php#L44)
-
-## woocommerce_google_analytics_script_src
-
-**Type**: filter
-
-**Used in**:
-
-- [class-wc-google-analytics-js.php#L235](https://github.com/woocommerce/woocommerce-google-analytics-integration/blob/d27d0946394f2950a519bd475b9b89c2d11e1c45/includes/class-wc-google-analytics-js.php#L235)
-
-## woocommerce_gtag_event_data
-
-**Type**: filter
-
-**Used in**:
-
-- [class-wc-google-gtag-js.php#L126](https://github.com/woocommerce/woocommerce-google-analytics-integration/blob/d27d0946394f2950a519bd475b9b89c2d11e1c45/includes/class-wc-google-gtag-js.php#L126)
-
-## woocommerce_gtag_event_tracking_parameters
-
-**Type**: filter
-
-**Used in**:
-
-- [class-wc-google-gtag-js.php#L484](https://github.com/woocommerce/woocommerce-google-analytics-integration/blob/d27d0946394f2950a519bd475b9b89c2d11e1c45/includes/class-wc-google-gtag-js.php#L484)
-
-## woocommerce_gtag_snippet
-
-**Type**: filter
-
-**Used in**:
-
-- [class-wc-google-gtag-js.php#L323](https://github.com/woocommerce/woocommerce-google-analytics-integration/blob/d27d0946394f2950a519bd475b9b89c2d11e1c45/includes/class-wc-google-gtag-js.php#L323)
+- [class-wc-abstract-google-analytics-js.php#L168](https://github.com/woocommerce/woocommerce-google-analytics-integration/blob/b900b712956564edded99deee395385de63d17f9/includes/class-wc-abstract-google-analytics-js.php#L168)
 
 ## woocommerce_gtag_tracker_variable
 
@@ -129,7 +40,7 @@ A list of hooks, e.g. `actions` and `filters`, that are defined or used in this 
 
 **Used in**:
 
-- [class-wc-google-gtag-js.php#L88](https://github.com/woocommerce/woocommerce-google-analytics-integration/blob/d27d0946394f2950a519bd475b9b89c2d11e1c45/includes/class-wc-google-gtag-js.php#L88)
+- [class-wc-google-gtag-js.php#L182](https://github.com/woocommerce/woocommerce-google-analytics-integration/blob/b900b712956564edded99deee395385de63d17f9/includes/class-wc-google-gtag-js.php#L182)
 
 ## plugin_locale
 
@@ -137,5 +48,5 @@ A list of hooks, e.g. `actions` and `filters`, that are defined or used in this 
 
 **Used in**:
 
-- [woocommerce-google-analytics-integration.php#L140](https://github.com/woocommerce/woocommerce-google-analytics-integration/blob/d27d0946394f2950a519bd475b9b89c2d11e1c45/woocommerce-google-analytics-integration.php#L140)
+- [woocommerce-google-analytics-integration.php#L141](https://github.com/woocommerce/woocommerce-google-analytics-integration/blob/b900b712956564edded99deee395385de63d17f9/woocommerce-google-analytics-integration.php#L141)
 

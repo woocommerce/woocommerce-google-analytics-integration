@@ -3,7 +3,7 @@ Contributors: woocommerce, automattic, claudiosanches, bor0, royho, laurendaviss
 Tags: woocommerce, google analytics
 Requires at least: 3.9
 Tested up to: 6.4
-Stable tag: 1.8.14
+Stable tag: 2.0.0
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -60,6 +60,19 @@ Exact wording depends on the national data privacy laws and should be adjusted.
 
 == Changelog ==
 
+= 2.0.0 - 2024-03-05 =
+* Add - Basic consent mode support.
+* Add - Setting to specify the structure of the product identifier.
+* Add - Update notice for merchants using a Universal Analytics Property ID.
+* Dev - Remove options remapping, use settings directly.
+* Fix - Prevent tracking orders multiple times and additional fixes.
+* Remove - Universal Analytics code.
+* Remove - Universal Analytics integration.
+* Simplify tracker event handler API.
+* Update - Add shared tracking functionality for WooCommerce Blocks and classic pages.
+* Update - Extension branding to Google Analytics for WooCommerce.
+* Update - Tracking for GA4 when using Blocks.
+
 = 1.8.14 - 2024-02-07 =
 * Tweak - Declare feature compatibility for the new product editor (also called product block editor).
 * Tweak - WC 8.6 compatibility.
@@ -68,13 +81,5 @@ Exact wording depends on the national data privacy laws and should be adjusted.
 * Dev - Upgrade all NPM dev dependencies.
 * Dev - Upgrade to Node.js 18.
 * Tweak - WC 8.5 compatibility.
-
-= 1.8.12 - 2023-12-28 =
-* Fix - Avoid JavaScript exceptions when sending checkout event tracking due to incompatible data structure.
-* Fix - Correct misplaced each product index value as its quantity when sending checkout event tracking.
-
-= 1.8.11 - 2023-12-18 =
-* Dev - Prevent DB warnings in unit tests.
-* Tweak - WC 8.4 compatibility.
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce-google-analytics-integration/trunk/changelog.txt).

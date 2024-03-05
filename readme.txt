@@ -69,12 +69,4 @@ Exact wording depends on the national data privacy laws and should be adjusted.
 * Dev - Upgrade to Node.js 18.
 * Tweak - WC 8.5 compatibility.
 
-= 1.8.12 - 2023-12-28 =
-* Fix - Avoid JavaScript exceptions when sending checkout event tracking due to incompatible data structure.
-* Fix - Correct misplaced each product index value as its quantity when sending checkout event tracking.
-
-= 1.8.11 - 2023-12-18 =
-* Dev - Prevent DB warnings in unit tests.
-* Tweak - WC 8.4 compatibility.
-
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce-google-analytics-integration/trunk/changelog.txt).

@@ -40,9 +40,10 @@ class WC_Google_Analytics extends WC_Integration {
 
 		add_action( 'admin_notices', array( $this, 'universal_analytics_upgrade_notice' ) );
 
+		include_once 'class-wc-abstract-google-analytics-js.php';
+		include_once 'class-wc-google-gtag-js.php';
+
 		if ( ! $this->disable_tracking( 'all' ) ) {
-			include_once 'class-wc-abstract-google-analytics-js.php';
-			include_once 'class-wc-google-gtag-js.php';
 			$this->get_tracking_instance();
 		}
 

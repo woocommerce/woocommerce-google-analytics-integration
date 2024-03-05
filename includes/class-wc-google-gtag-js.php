@@ -204,6 +204,7 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 			),
 			'events'                => self::get_enabled_events(),
 			'identifier'            => self::get( 'ga_product_identifier' ),
+			'consent_modes'         => self::get_consent_modes(),
 		);
 	}
 
@@ -231,6 +232,61 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 		}
 
 		return $events;
+	}
+
+	/**
+	 * Get the default state configuration of consent mode.
+	 */
+	protected static function get_consent_modes(): array {
+		$consent_modes = array(
+			array(
+				'analytics_storage'  => 'denied',
+				'ad_storage'         => 'denied',
+				'ad_user_data'       => 'denied',
+				'ad_personalization' => 'denied',
+				'region'             => array(
+					'AT',
+					'BE',
+					'BG',
+					'HR',
+					'CY',
+					'CZ',
+					'DK',
+					'EE',
+					'FI',
+					'FR',
+					'DE',
+					'GR',
+					'HU',
+					'IS',
+					'IE',
+					'IT',
+					'LV',
+					'LI',
+					'LT',
+					'LU',
+					'MT',
+					'NL',
+					'NO',
+					'PL',
+					'PT',
+					'RO',
+					'SK',
+					'SI',
+					'ES',
+					'SE',
+					'GB',
+					'CH',
+				),
+			),
+		);
+
+		/**
+		 * Filters the default gtag consent mode configuration.
+		 *
+		 * @param array $consent_modes Array of default state configuration of consent mode.
+		 */
+		return apply_filters( 'woocommerce_ga_gtag_consent_modes', $consent_modes );
 	}
 
 	/**

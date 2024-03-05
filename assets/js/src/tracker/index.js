@@ -71,11 +71,12 @@ class Tracker {
 		}
 
 		return function trackerEventHandler( data ) {
-			if ( config.events.includes( name ) ) {
+			const eventData = formatter( data );
+			if ( config.events.includes( name ) && eventData ) {
 				window[ config.tracker_function_name ](
 					'event',
 					name,
-					formatter( data )
+					eventData
 				);
 			}
 		};

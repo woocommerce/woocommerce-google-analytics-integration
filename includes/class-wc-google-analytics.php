@@ -60,7 +60,6 @@ class WC_Google_Analytics extends WC_Integration {
 		add_action( 'admin_init', array( $this, 'privacy_policy' ) );
 
 		// Tracking code
-		// add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_tracking_code' ), 9 );
 		add_filter( 'script_loader_tag', array( $this, 'async_script_loader_tags' ), 10, 3 );
 
 		// utm_nooverride parameter for Google AdWords
@@ -291,57 +290,6 @@ class WC_Google_Analytics extends WC_Integration {
 			<style>#privacy-settings-accordion-block-woocommerce-google-analytics-integration .privacy-settings-accordion-actions { display: none }</style>';
 
 		wp_add_privacy_policy_content( 'Google Analytics for WooCommerce', wpautop( $content, false ) );
-	}
-
-	/**
-	 * Display the tracking codes
-	 * Acts as a controller to figure out which code to display
-	 */
-	public function enqueue_tracking_code() {
-		global $wp;
-		$display_ecommerce_tracking = false;
-
-		$this->get_tracking_instance()->load_opt_out();
-
-		if ( $this->disable_tracking( 'all' ) ) {
-			return;
-		}
-
-		// Check if is order received page and stop when the products and not tracked
-		if ( is_order_received_page() ) {
-			$order_id = isset( $wp->query_vars['order-received'] ) ? $wp->query_vars['order-received'] : 0;
-			$order    = wc_get_order( $order_id );
-			if ( $order && ! (bool) $order->get_meta( '_ga_tracked' ) ) {
-				$display_ecommerce_tracking = true;
-				$this->enqueue_ecommerce_tracking_code( $order_id );
-			}
-		}
-	}
-
-	/**
-	 * Generate eCommerce tracking code
-	 *
-	 * @param int $order_id The Order ID for adding a transaction.
-	 */
-	protected function enqueue_ecommerce_tracking_code( $order_id ) {
-		// Get the order and output tracking code.
-		$order = wc_get_order( $order_id );
-
-		// Make sure we have a valid order object.
-		if ( ! $order ) {
-			return;
-		}
-
-		// Check order key.
-		// phpcs:ignore WordPress.Security.NonceVerification.Recommended,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-		$order_key = empty( $_GET['key'] ) ? '' : wc_clean( wp_unslash( $_GET['key'] ) );
-		if ( ! $order->key_is_valid( $order_key ) ) {
-			return;
-		}
-
-		// Mark the order as tracked.
-		$order->update_meta_data( '_ga_tracked', 1 );
-		$order->save();
 	}
 
 	/**

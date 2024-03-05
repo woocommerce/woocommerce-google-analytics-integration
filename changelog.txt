@@ -1,5 +1,18 @@
 *** Changelog ***
 
+= 2.0.0 - 2024-03-05 =
+* Add - Basic consent mode support.
+* Add - Setting to specify the structure of the product identifier.
+* Add - Update notice for merchants using a Universal Analytics Property ID.
+* Dev - Remove options remapping, use settings directly.
+* Fix - Prevent tracking orders multiple times and additional fixes.
+* Remove - Universal Analytics code.
+* Remove - Universal Analytics integration.
+* Simplify tracker event handler API.
+* Update - Add shared tracking functionality for WooCommerce Blocks and classic pages.
+* Update - Extension branding to Google Analytics for WooCommerce.
+* Update - Tracking for GA4 when using Blocks.
+
 = 1.8.14 - 2024-02-07 =
 * Tweak - Declare feature compatibility for the new product editor (also called product block editor).
 * Tweak - WC 8.6 compatibility.

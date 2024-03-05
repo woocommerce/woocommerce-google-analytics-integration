@@ -62,7 +62,7 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 			array(),
 			null,
 			array(
-				'strategy' => 'async'
+				'strategy' => 'async',
 			)
 		);
 		// tracker.js needs to be executed ASAP, the remaining bits for main.js could be deffered,

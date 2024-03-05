@@ -217,13 +217,13 @@ class WC_Google_Analytics extends WC_Integration {
 	public function track_settings( $data ) {
 		$settings                    = $this->settings;
 		$data['wc-google-analytics'] = array(
-			'support_display_advertising'       => $settings['ga_support_display_advertising'],
-			'ga_404_tracking_enabled'           => $settings['ga_404_tracking_enabled'],
-			'ecommerce_tracking_enabled'        => $settings['ga_ecommerce_tracking_enabled'],
-			'event_tracking_enabled'            => $settings['ga_event_tracking_enabled'],
-			'plugin_version'                    => WC_GOOGLE_ANALYTICS_INTEGRATION_VERSION,
-			'linker_allow_incoming_enabled'     => empty( $settings['ga_linker_allow_incoming_enabled'] ) ? 'no' : 'yes',
-			'linker_cross_domains'              => $settings['ga_linker_cross_domains'],
+			'support_display_advertising'   => $settings['ga_support_display_advertising'],
+			'ga_404_tracking_enabled'       => $settings['ga_404_tracking_enabled'],
+			'ecommerce_tracking_enabled'    => $settings['ga_ecommerce_tracking_enabled'],
+			'event_tracking_enabled'        => $settings['ga_event_tracking_enabled'],
+			'plugin_version'                => WC_GOOGLE_ANALYTICS_INTEGRATION_VERSION,
+			'linker_allow_incoming_enabled' => empty( $settings['ga_linker_allow_incoming_enabled'] ) ? 'no' : 'yes',
+			'linker_cross_domains'          => $settings['ga_linker_cross_domains'],
 		);
 
 		// ID prefix, blank, or X for unknown

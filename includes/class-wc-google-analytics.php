@@ -45,10 +45,11 @@ class WC_Google_Analytics extends WC_Integration {
 
 		add_action( 'admin_notices', array( $this, 'universal_analytics_upgrade_notice' ) );
 
-		// Contains snippets/JS tracking code
-		include_once 'class-wc-abstract-google-analytics-js.php';
-		include_once 'class-wc-google-gtag-js.php';
-		$this->get_tracking_instance();
+		if ( ! $this->disable_tracking( 'all' ) ) {
+			include_once 'class-wc-abstract-google-analytics-js.php';
+			include_once 'class-wc-google-gtag-js.php';
+			$this->get_tracking_instance();
+		}
 
 		// Display a task on  "Things to do next section"
 		add_action( 'init', array( $this, 'add_wc_setup_task' ), 20 );
@@ -59,7 +60,7 @@ class WC_Google_Analytics extends WC_Integration {
 		add_action( 'admin_init', array( $this, 'privacy_policy' ) );
 
 		// Tracking code
-		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_tracking_code' ), 9 );
+		// add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_tracking_code' ), 9 );
 		add_filter( 'script_loader_tag', array( $this, 'async_script_loader_tags' ), 10, 3 );
 
 		// utm_nooverride parameter for Google AdWords

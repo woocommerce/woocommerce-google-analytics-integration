@@ -17,11 +17,6 @@ use Automattic\WooCommerce\Admin\Features\OnboardingTasks\TaskLists;
 class WC_Google_Analytics extends WC_Integration {
 
 	/**
-	 * Defines the script handles that should be async.
-	 */
-	private const ASYNC_SCRIPT_HANDLES = array( 'google-tag-manager' );
-
-	/**
 	 * Returns the proper class based on Gtag settings.
 	 *
 	 * @return WC_Abstract_Google_Analytics_JS
@@ -45,10 +40,12 @@ class WC_Google_Analytics extends WC_Integration {
 
 		add_action( 'admin_notices', array( $this, 'universal_analytics_upgrade_notice' ) );
 
-		// Contains snippets/JS tracking code
 		include_once 'class-wc-abstract-google-analytics-js.php';
 		include_once 'class-wc-google-gtag-js.php';
-		$this->get_tracking_instance();
+
+		if ( ! $this->disable_tracking( 'all' ) ) {
+			$this->get_tracking_instance();
+		}
 
 		// Display a task on  "Things to do next section"
 		add_action( 'init', array( $this, 'add_wc_setup_task' ), 20 );
@@ -57,10 +54,6 @@ class WC_Google_Analytics extends WC_Integration {
 		add_action( 'woocommerce_update_options_integration_google_analytics', array( $this, 'process_admin_options' ) );
 		add_action( 'woocommerce_update_options_integration_google_analytics', array( $this, 'show_options_info' ) );
 		add_action( 'admin_init', array( $this, 'privacy_policy' ) );
-
-		// Tracking code
-		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_tracking_code' ), 9 );
-		add_filter( 'script_loader_tag', array( $this, 'async_script_loader_tags' ), 10, 3 );
 
 		// utm_nooverride parameter for Google AdWords
 		add_filter( 'woocommerce_get_return_url', array( $this, 'utm_nooverride' ) );
@@ -120,13 +113,6 @@ class WC_Google_Analytics extends WC_Integration {
 				'placeholder' => 'GT-XXXXX',
 				'default'     => get_option( 'woocommerce_ga_id' ), // Backwards compat
 			),
-			'ga_standard_tracking_enabled'            => array(
-				'label'         => __( 'Enable Standard Tracking', 'woocommerce-google-analytics-integration' ),
-				'description'   => __( 'This tracks session data such as demographics, system, etc. You don\'t need to enable this if you are using a 3rd party Google analytics plugin.', 'woocommerce-google-analytics-integration' ),
-				'type'          => 'checkbox',
-				'checkboxgroup' => 'start',
-				'default'       => get_option( 'woocommerce_ga_standard_tracking_enabled' ) ? get_option( 'woocommerce_ga_standard_tracking_enabled' ) : 'no',  // Backwards compat
-			),
 			'ga_support_display_advertising'          => array(
 				'label'         => __( '"Display Advertising" Support', 'woocommerce-google-analytics-integration' ),
 				/* translators: Read more link */
@@ -134,22 +120,6 @@ class WC_Google_Analytics extends WC_Integration {
 				'type'          => 'checkbox',
 				'checkboxgroup' => '',
 				'default'       => get_option( 'woocommerce_ga_support_display_advertising' ) ? get_option( 'woocommerce_ga_support_display_advertising' ) : 'yes', // Backwards compat
-			),
-			'ga_support_enhanced_link_attribution'    => array(
-				'label'         => __( 'Use Enhanced Link Attribution', 'woocommerce-google-analytics-integration' ),
-				/* translators: Read more link */
-				'description'   => sprintf( __( 'Set the Google Analytics code to support Enhanced Link Attribution. %1$sRead more about Enhanced Link Attribution%2$s.', 'woocommerce-google-analytics-integration' ), '<a href="https://support.google.com/analytics/answer/7377126?hl=en" target="_blank">', '</a>' ),
-				'type'          => 'checkbox',
-				'checkboxgroup' => '',
-				'default'       => get_option( 'woocommerce_ga_support_enhanced_link_attribution' ) ? get_option( 'woocommerce_ga_support_enhanced_link_attribution' ) : 'no',  // Backwards compat
-			),
-			'ga_anonymize_enabled'                    => array(
-				'label'         => __( 'Anonymize IP addresses', 'woocommerce-google-analytics-integration' ),
-				/* translators: Read more link */
-				'description'   => sprintf( __( 'Enabling this option is mandatory in certain countries due to national privacy laws. %1$sRead more about IP Anonymization%2$s.', 'woocommerce-google-analytics-integration' ), '<a href="https://support.google.com/analytics/answer/2763052" target="_blank">', '</a>' ),
-				'type'          => 'checkbox',
-				'checkboxgroup' => '',
-				'default'       => 'yes',
 			),
 			'ga_404_tracking_enabled'                 => array(
 				'label'         => __( 'Track 404 (Not found) Errors', 'woocommerce-google-analytics-integration' ),
@@ -248,16 +218,13 @@ class WC_Google_Analytics extends WC_Integration {
 	public function track_settings( $data ) {
 		$settings                    = $this->settings;
 		$data['wc-google-analytics'] = array(
-			'standard_tracking_enabled'         => $settings['ga_standard_tracking_enabled'],
-			'support_display_advertising'       => $settings['ga_support_display_advertising'],
-			'support_enhanced_link_attribution' => $settings['ga_support_enhanced_link_attribution'],
-			'anonymize_enabled'                 => $settings['ga_anonymize_enabled'],
-			'ga_404_tracking_enabled'           => $settings['ga_404_tracking_enabled'],
-			'ecommerce_tracking_enabled'        => $settings['ga_ecommerce_tracking_enabled'],
-			'event_tracking_enabled'            => $settings['ga_event_tracking_enabled'],
-			'plugin_version'                    => WC_GOOGLE_ANALYTICS_INTEGRATION_VERSION,
-			'linker_allow_incoming_enabled'     => empty( $settings['ga_linker_allow_incoming_enabled'] ) ? 'no' : 'yes',
-			'linker_cross_domains'              => $settings['ga_linker_cross_domains'],
+			'support_display_advertising'   => $settings['ga_support_display_advertising'],
+			'ga_404_tracking_enabled'       => $settings['ga_404_tracking_enabled'],
+			'ecommerce_tracking_enabled'    => $settings['ga_ecommerce_tracking_enabled'],
+			'event_tracking_enabled'        => $settings['ga_event_tracking_enabled'],
+			'plugin_version'                => WC_GOOGLE_ANALYTICS_INTEGRATION_VERSION,
+			'linker_allow_incoming_enabled' => empty( $settings['ga_linker_allow_incoming_enabled'] ) ? 'no' : 'yes',
+			'linker_cross_domains'          => $settings['ga_linker_cross_domains'],
 		);
 
 		// ID prefix, blank, or X for unknown
@@ -290,57 +257,6 @@ class WC_Google_Analytics extends WC_Integration {
 			<style>#privacy-settings-accordion-block-woocommerce-google-analytics-integration .privacy-settings-accordion-actions { display: none }</style>';
 
 		wp_add_privacy_policy_content( 'Google Analytics for WooCommerce', wpautop( $content, false ) );
-	}
-
-	/**
-	 * Display the tracking codes
-	 * Acts as a controller to figure out which code to display
-	 */
-	public function enqueue_tracking_code() {
-		global $wp;
-		$display_ecommerce_tracking = false;
-
-		$this->get_tracking_instance()->load_opt_out();
-
-		if ( $this->disable_tracking( 'all' ) ) {
-			return;
-		}
-
-		// Check if is order received page and stop when the products and not tracked
-		if ( is_order_received_page() ) {
-			$order_id = isset( $wp->query_vars['order-received'] ) ? $wp->query_vars['order-received'] : 0;
-			$order    = wc_get_order( $order_id );
-			if ( $order && ! (bool) $order->get_meta( '_ga_tracked' ) ) {
-				$display_ecommerce_tracking = true;
-				$this->enqueue_ecommerce_tracking_code( $order_id );
-			}
-		}
-	}
-
-	/**
-	 * Generate eCommerce tracking code
-	 *
-	 * @param int $order_id The Order ID for adding a transaction.
-	 */
-	protected function enqueue_ecommerce_tracking_code( $order_id ) {
-		// Get the order and output tracking code.
-		$order = wc_get_order( $order_id );
-
-		// Make sure we have a valid order object.
-		if ( ! $order ) {
-			return;
-		}
-
-		// Check order key.
-		// phpcs:ignore WordPress.Security.NonceVerification.Recommended,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-		$order_key = empty( $_GET['key'] ) ? '' : wc_clean( wp_unslash( $_GET['key'] ) );
-		if ( ! $order->key_is_valid( $order_key ) ) {
-			return;
-		}
-
-		// Mark the order as tracked.
-		$order->update_meta_data( '_ga_tracked', 1 );
-		$order->save();
 	}
 
 	/**
@@ -395,29 +311,5 @@ class WC_Google_Analytics extends WC_Integration {
 				TaskLists::get_list( 'extended' )
 			)
 		);
-	}
-
-	/**
-	 * Add async to script tags with defined handles.
-	 *
-	 * @param string $tag HTML for the script tag.
-	 * @param string $handle Handle of the script.
-	 * @param string $src Src of the script.
-	 *
-	 * @return string
-	 */
-	public function async_script_loader_tags( $tag, $handle, $src ) {
-		if ( ! in_array( $handle, self::ASYNC_SCRIPT_HANDLES, true ) ) {
-			return $tag;
-		}
-
-		// Check if the script has the async attribute already. If so, don't add it again.
-		$has_async_tag = preg_match( '/\basync\b/', $tag );
-		if ( ! empty( $has_async_tag ) ) {
-			return $tag;
-		}
-
-		// Add the async attribute
-		return str_replace( ' src', ' async src', $tag );
 	}
 }

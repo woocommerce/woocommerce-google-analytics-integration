@@ -173,6 +173,10 @@ export const view_item = ( {
  * @param {Object} params.order The order object
  */
 export const purchase = ( { order } ) => {
+	if ( order === undefined ) {
+		return false;
+	}
+
 	return {
 		currency: order.currency,
 		value: parseInt( order.value ),

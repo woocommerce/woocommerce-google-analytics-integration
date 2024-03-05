@@ -61,7 +61,9 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 			'https://www.googletagmanager.com/gtag/js?id=' . self::get( 'ga_id' ),
 			array(),
 			null,
-			false
+			array(
+				'strategy' => 'async'
+			)
 		);
 		// tracker.js needs to be executed ASAP, the remaining bits for main.js could be deffered,
 		// but to reduce the traffic, we ship it all together.

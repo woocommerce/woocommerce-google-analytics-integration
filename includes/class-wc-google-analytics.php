@@ -17,11 +17,6 @@ use Automattic\WooCommerce\Admin\Features\OnboardingTasks\TaskLists;
 class WC_Google_Analytics extends WC_Integration {
 
 	/**
-	 * Defines the script handles that should be async.
-	 */
-	private const ASYNC_SCRIPT_HANDLES = array( 'google-tag-manager' );
-
-	/**
 	 * Returns the proper class based on Gtag settings.
 	 *
 	 * @return WC_Abstract_Google_Analytics_JS
@@ -58,9 +53,6 @@ class WC_Google_Analytics extends WC_Integration {
 		add_action( 'woocommerce_update_options_integration_google_analytics', array( $this, 'process_admin_options' ) );
 		add_action( 'woocommerce_update_options_integration_google_analytics', array( $this, 'show_options_info' ) );
 		add_action( 'admin_init', array( $this, 'privacy_policy' ) );
-
-		// Tracking code
-		add_filter( 'script_loader_tag', array( $this, 'async_script_loader_tags' ), 10, 3 );
 
 		// utm_nooverride parameter for Google AdWords
 		add_filter( 'woocommerce_get_return_url', array( $this, 'utm_nooverride' ) );
@@ -344,29 +336,5 @@ class WC_Google_Analytics extends WC_Integration {
 				TaskLists::get_list( 'extended' )
 			)
 		);
-	}
-
-	/**
-	 * Add async to script tags with defined handles.
-	 *
-	 * @param string $tag HTML for the script tag.
-	 * @param string $handle Handle of the script.
-	 * @param string $src Src of the script.
-	 *
-	 * @return string
-	 */
-	public function async_script_loader_tags( $tag, $handle, $src ) {
-		if ( ! in_array( $handle, self::ASYNC_SCRIPT_HANDLES, true ) ) {
-			return $tag;
-		}
-
-		// Check if the script has the async attribute already. If so, don't add it again.
-		$has_async_tag = preg_match( '/\basync\b/', $tag );
-		if ( ! empty( $has_async_tag ) ) {
-			return $tag;
-		}
-
-		// Add the async attribute
-		return str_replace( ' src', ' async src', $tag );
 	}
 }

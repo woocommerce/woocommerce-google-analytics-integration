@@ -71,11 +71,13 @@ class Tracker {
 		}
 
 		return function trackerEventHandler( data ) {
-			window[ config.tracker_function_name ](
-				'event',
-				name,
-				formatter( data )
-			);
+			if ( config.events.includes( name ) ) {
+				window[ config.tracker_function_name ](
+					'event',
+					name,
+					formatter( data )
+				);
+			}
 		};
 	}
 }

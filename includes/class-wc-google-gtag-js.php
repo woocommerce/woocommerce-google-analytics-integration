@@ -193,8 +193,6 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 			'tracker_function_name' => self::tracker_function_name(),
 			'track_404'             => 'yes' === self::get( 'ga_404_tracking_enabled' ),
 			'allow_google_signals'  => 'yes' === self::get( 'ga_support_display_advertising' ),
-			'link_attribution'      => 'yes' === self::get( 'ga_support_enhanced_link_attribution' ),
-			'anonymize_ip'          => 'yes' === self::get( 'ga_anonymize_enabled' ),
 			'logged_in'             => is_user_logged_in(),
 			'linker'                => array(
 				'domains'        => ! empty( self::get( 'ga_linker_cross_domains' ) ) ? array_map( 'esc_js', explode( ',', self::get( 'ga_linker_cross_domains' ) ) ) : array(),

@@ -112,13 +112,6 @@ class WC_Google_Analytics extends WC_Integration {
 				'placeholder' => 'GT-XXXXX',
 				'default'     => get_option( 'woocommerce_ga_id' ), // Backwards compat
 			),
-			'ga_standard_tracking_enabled'            => array(
-				'label'         => __( 'Enable Standard Tracking', 'woocommerce-google-analytics-integration' ),
-				'description'   => __( 'This tracks session data such as demographics, system, etc. You don\'t need to enable this if you are using a 3rd party Google analytics plugin.', 'woocommerce-google-analytics-integration' ),
-				'type'          => 'checkbox',
-				'checkboxgroup' => 'start',
-				'default'       => get_option( 'woocommerce_ga_standard_tracking_enabled' ) ? get_option( 'woocommerce_ga_standard_tracking_enabled' ) : 'no',  // Backwards compat
-			),
 			'ga_support_display_advertising'          => array(
 				'label'         => __( '"Display Advertising" Support', 'woocommerce-google-analytics-integration' ),
 				/* translators: Read more link */
@@ -126,22 +119,6 @@ class WC_Google_Analytics extends WC_Integration {
 				'type'          => 'checkbox',
 				'checkboxgroup' => '',
 				'default'       => get_option( 'woocommerce_ga_support_display_advertising' ) ? get_option( 'woocommerce_ga_support_display_advertising' ) : 'yes', // Backwards compat
-			),
-			'ga_support_enhanced_link_attribution'    => array(
-				'label'         => __( 'Use Enhanced Link Attribution', 'woocommerce-google-analytics-integration' ),
-				/* translators: Read more link */
-				'description'   => sprintf( __( 'Set the Google Analytics code to support Enhanced Link Attribution. %1$sRead more about Enhanced Link Attribution%2$s.', 'woocommerce-google-analytics-integration' ), '<a href="https://support.google.com/analytics/answer/7377126?hl=en" target="_blank">', '</a>' ),
-				'type'          => 'checkbox',
-				'checkboxgroup' => '',
-				'default'       => get_option( 'woocommerce_ga_support_enhanced_link_attribution' ) ? get_option( 'woocommerce_ga_support_enhanced_link_attribution' ) : 'no',  // Backwards compat
-			),
-			'ga_anonymize_enabled'                    => array(
-				'label'         => __( 'Anonymize IP addresses', 'woocommerce-google-analytics-integration' ),
-				/* translators: Read more link */
-				'description'   => sprintf( __( 'Enabling this option is mandatory in certain countries due to national privacy laws. %1$sRead more about IP Anonymization%2$s.', 'woocommerce-google-analytics-integration' ), '<a href="https://support.google.com/analytics/answer/2763052" target="_blank">', '</a>' ),
-				'type'          => 'checkbox',
-				'checkboxgroup' => '',
-				'default'       => 'yes',
 			),
 			'ga_404_tracking_enabled'                 => array(
 				'label'         => __( 'Track 404 (Not found) Errors', 'woocommerce-google-analytics-integration' ),
@@ -240,10 +217,7 @@ class WC_Google_Analytics extends WC_Integration {
 	public function track_settings( $data ) {
 		$settings                    = $this->settings;
 		$data['wc-google-analytics'] = array(
-			'standard_tracking_enabled'         => $settings['ga_standard_tracking_enabled'],
 			'support_display_advertising'       => $settings['ga_support_display_advertising'],
-			'support_enhanced_link_attribution' => $settings['ga_support_enhanced_link_attribution'],
-			'anonymize_enabled'                 => $settings['ga_anonymize_enabled'],
 			'ga_404_tracking_enabled'           => $settings['ga_404_tracking_enabled'],
 			'ecommerce_tracking_enabled'        => $settings['ga_ecommerce_tracking_enabled'],
 			'event_tracking_enabled'            => $settings['ga_event_tracking_enabled'],

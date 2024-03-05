@@ -186,8 +186,7 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 	 * @return array
 	 */
 	public function get_analytics_config(): array {
-		return array(
-			'developer_id'          => self::DEVELOPER_ID,
+		$defaults = array(
 			'gtag_id'               => self::get( 'ga_id' ),
 			'tracker_function_name' => self::tracker_function_name(),
 			'track_404'             => 'yes' === self::get( 'ga_404_tracking_enabled' ),
@@ -206,6 +205,11 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 			'identifier'            => self::get( 'ga_product_identifier' ),
 			'consent_modes'         => self::get_consent_modes(),
 		);
+
+		$config                 = apply_filters( 'woocommerce_ga_gtag_config', $defaults );
+		$config['developer_id'] = self::DEVELOPER_ID;
+
+		return $config;
 	}
 
 	/**

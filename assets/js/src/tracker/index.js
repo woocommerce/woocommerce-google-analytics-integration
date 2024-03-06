@@ -26,11 +26,6 @@ class Tracker {
 	 * Initializes the tracker and dataLayer if not already done.
 	 */
 	init() {
-		if ( window[ config.tracker_function_name ] ) {
-			// Tracker already initialized. Do nothing.
-			return;
-		}
-
 		window.dataLayer = window.dataLayer || [];
 
 		function gtag() {

@@ -19,13 +19,7 @@ class Tracker {
 			throw new Error( 'Cannot instantiate more than one Tracker' );
 		}
 		instance = this;
-		instance.init();
-	}
 
-	/**
-	 * Initializes the tracker and dataLayer if not already done.
-	 */
-	init() {
 		window.dataLayer = window.dataLayer || [];
 
 		function gtag() {

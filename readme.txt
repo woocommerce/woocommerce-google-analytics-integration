@@ -1,5 +1,5 @@
 === Google Analytics for WooCommerce ===
-Contributors: woocommerce, automattic, claudiosanches, bor0, royho, laurendavissmith001, c-shultz
+Contributors: woocommerce, automattic, claudiosanches, bor0, royho, laurendavissmith001, cshultz88, mmjones, tomalec
 Tags: woocommerce, google analytics
 Requires at least: 3.9
 Tested up to: 6.4

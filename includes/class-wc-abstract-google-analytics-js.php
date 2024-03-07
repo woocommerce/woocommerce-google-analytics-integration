@@ -204,6 +204,7 @@ abstract class WC_Abstract_Google_Analytics_JS {
 	 *
 	 * @param WC_Product $product   The product to format.
 	 * @param array|bool $variation An array containing product variation attributes to include in the product data.
+	 *                              For the "variation" type products, we'll use product->get_attributes.
 	 *
 	 * @return array
 	 */
@@ -230,7 +231,7 @@ abstract class WC_Abstract_Google_Analytics_JS {
 			$variation = $product->get_attributes();
 		}
 
-		if ( false !== $variation ) {
+		if ( is_array( $variation ) ) {
 			$formatted['variation'] = implode(
 				', ',
 				array_map(

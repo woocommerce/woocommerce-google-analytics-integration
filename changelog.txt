@@ -1,5 +1,11 @@
 *** Changelog ***
 
+= 2.0.1 - 2024-03-07 =
+* Fix - Adding variable product attributes.
+* Fix - Resolve Google Analytics not loading if gtag already exists on the window object.
+* Tweak - Update Contributors list.
+* Tweak - Update assets and readme for 2.0.
+
 = 2.0.0 - 2024-03-05 =
 * Add - Basic consent mode support.
 * Add - Setting to specify the structure of the product identifier.

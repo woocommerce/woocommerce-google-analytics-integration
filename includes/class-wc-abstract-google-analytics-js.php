@@ -230,7 +230,7 @@ abstract class WC_Abstract_Google_Analytics_JS {
 			$variation = $product->get_attributes();
 		}
 
-		if ( false !== $variation ) {
+		if ( false !== $variation && is_array( $variation ) ) {
 			$formatted['variation'] = implode(
 				', ',
 				array_map(

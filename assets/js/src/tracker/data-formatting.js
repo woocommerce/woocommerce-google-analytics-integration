@@ -64,24 +64,6 @@ export const remove_from_cart = ( { product, quantity = 1 } ) => {
 };
 
 /**
- * Tracks change_cart_quantity event
- *
- * @param {Object} params              The function params
- * @param {Array}  params.product      The product to track
- * @param {number} [params.quantity=1] The quantity of that product in the cart.
- */
-export const trackChangeCartItemQuantity = ( { product, quantity = 1 } ) => {
-	trackEvent( 'change_cart_quantity', {
-		event_category: 'ecommerce',
-		event_label: __(
-			'Change Cart Item Quantity',
-			'woocommerce-google-analytics-integration'
-		),
-		items: [ getProductFieldObject( product, quantity ) ],
-	} );
-};
-
-/**
  * Formats data for the begin_checkout event
  *
  * @param {Object} params           The function params
@@ -185,33 +167,3 @@ export const purchase = ( { order } ) => {
 };
 
 /* eslint-enable camelcase */
-
-/**
- * Formats data for the exception event
- *
- * @param {Object} params         The function params
- * @param {string} params.status  The status of the exception. It should be "error" for tracking it.
- * @param {string} params.content The exception description
- */
-export const trackException = ( { status, content } ) => {
-	if ( status === 'error' ) {
-		return {
-			description: content,
-			fatal: false,
-		};
-	}
-};
-
-/**
- * Track an event using the global gtag function.
- *
- * @param {string} eventName     - Name of the event to track
- * @param {Object} [eventParams] - Props to send within the event
- */
-export const trackEvent = ( eventName, eventParams ) => {
-	if ( typeof gtag !== 'function' ) {
-		throw new Error( 'Function gtag not implemented.' );
-	}
-
-	window.gtag( 'event', eventName, eventParams );
-};

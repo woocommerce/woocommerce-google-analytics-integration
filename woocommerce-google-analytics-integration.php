@@ -6,8 +6,9 @@
  * Author: WooCommerce
  * Author URI: https://woo.com
  * Version: 2.0.0
- * WC requires at least: 6.8
+ * WC requires at least: 8.4
  * WC tested up to: 8.6
+ * Requires at least: 6.2
  * Tested up to: 6.4
  * License: GPLv2 or later
  * Text Domain: woocommerce-google-analytics-integration

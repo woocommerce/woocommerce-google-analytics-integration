@@ -3,7 +3,7 @@ Contributors: woocommerce, automattic, claudiosanches, bor0, royho, laurendaviss
 Tags: woocommerce, google analytics
 Requires at least: 6.2
 Tested up to: 6.4
-Stable tag: 2.0.0
+Stable tag: 2.0.1
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -48,6 +48,12 @@ Duplicate Google Analytics code causes a conflict in tracking. Remove any other 
 
 == Changelog ==
 
+= 2.0.1 - 2024-03-07 =
+* Fix - Adding variable product attributes.
+* Fix - Resolve Google Analytics not loading if gtag already exists on the window object.
+* Tweak - Update Contributors list.
+* Tweak - Update assets and readme for 2.0.
+
 = 2.0.0 - 2024-03-05 =
 * Add - Basic consent mode support.
 * Add - Setting to specify the structure of the product identifier.
@@ -64,10 +70,5 @@ Duplicate Google Analytics code causes a conflict in tracking. Remove any other 
 = 1.8.14 - 2024-02-07 =
 * Tweak - Declare feature compatibility for the new product editor (also called product block editor).
 * Tweak - WC 8.6 compatibility.
-
-= 1.8.13 - 2024-01-09 =
-* Dev - Upgrade all NPM dev dependencies.
-* Dev - Upgrade to Node.js 18.
-* Tweak - WC 8.5 compatibility.
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce-google-analytics-integration/trunk/changelog.txt).

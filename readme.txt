@@ -65,9 +65,4 @@ Duplicate Google Analytics code causes a conflict in tracking. Remove any other 
 * Tweak - Declare feature compatibility for the new product editor (also called product block editor).
 * Tweak - WC 8.6 compatibility.
 
-= 1.8.13 - 2024-01-09 =
-* Dev - Upgrade all NPM dev dependencies.
-* Dev - Upgrade to Node.js 18.
-* Tweak - WC 8.5 compatibility.
-
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce-google-analytics-integration/trunk/changelog.txt).

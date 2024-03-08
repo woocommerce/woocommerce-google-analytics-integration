@@ -16,12 +16,6 @@ addUniqueAction(
 );
 
 addUniqueAction(
-	`${ ACTION_PREFIX }-cart-add-item`,
-	NAMESPACE,
-	tracker.eventHandler( 'add_to_cart' )
-);
-
-addUniqueAction(
 	`${ ACTION_PREFIX }-cart-remove-item`,
 	NAMESPACE,
 	tracker.eventHandler( 'remove_from_cart' )
@@ -33,11 +27,12 @@ addUniqueAction(
 	tracker.eventHandler( 'begin_checkout' )
 );
 
-addUniqueAction(
-	`${ ACTION_PREFIX }-product-view-link`,
-	NAMESPACE,
-	tracker.eventHandler( 'select_content' )
-);
+/**
+ * Remove actions which are unreliable, and sometimes does not work.
+ * We cover them the "classic" way, by attaching event listeners to block internals.
+ */
+removeAction( `${ ACTION_PREFIX }-cart-add-item`, NAMESPACE );
+removeAction( `${ ACTION_PREFIX }-product-view-link`, NAMESPACE );
 
 /**
  * Remove additional actions added by WooCommerce Core which are either

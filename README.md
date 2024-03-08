@@ -29,6 +29,28 @@ Google Analytics for WooCommerce utilizes npm scripts for task management utilit
 
 _For more info see: [WordPress.org > Plugin Unit Tests](https://make.wordpress.org/cli/handbook/misc/plugin-unit-tests/#running-tests-locally)._
 
+## E2E Testing
+
+E2E testing uses [wp-env](https://developer.wordpress.org/block-editor/reference-guides/packages/packages-env/) which requires [Docker](https://www.docker.com/).
+
+Make sure Docker is running in your machine, and run the following:
+
+`npm run wp-env:up` - This will automatically download and run WordPress in a Docker container. You can access it at http://localhost:8889 (Username: admin, Password: password).
+
+To install the PlayWright browser locally you can run:
+`npx playwright install chromium`
+
+Run E2E testing:
+
+-   `npm run test:e2e` to run the test in headless mode.
+-   `npm run test:e2e-dev` to run the tests in Chromium browser.
+
+To remove the Docker container and images (this will **delete everything** in the WordPress Docker container):
+
+`npm run wp-env destroy`
+
+:warning: Currently, the E2E testing on GitHub Actions is only run automatically after opening a PR with `release/*` branches or pushing changes to `release/*` branches. To run it manually, please visit [here](../../actions/workflows/e2e-tests.yml) and follow [this instruction](https://docs.github.com/en/actions/managing-workflow-runs/manually-running-a-workflow?tool=webui) to do so.
+
 ## Coding standards checks
 
 1. Run `composer install` (_if you haven't done so already_)

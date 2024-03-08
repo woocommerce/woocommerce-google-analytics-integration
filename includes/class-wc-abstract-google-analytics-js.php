@@ -99,7 +99,7 @@ abstract class WC_Abstract_Google_Analytics_JS {
 			function ( $order_id ) {
 				if ( 'yes' === self::get( 'ga_ecommerce_tracking_enabled' ) ) {
 					$order = wc_get_order( $order_id );
-					if ( $order && $order->get_meta( '_ga_tracked' ) !== '1' ) {
+					if ( $order && $order->get_meta( '_ga_tracked' ) === '1' ) {
 						// Check order key.
 						// phpcs:ignore WordPress.Security.NonceVerification.Recommended,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 						$order_key = empty( $_GET['key'] ) ? '' : wc_clean( wp_unslash( $_GET['key'] ) );
@@ -254,15 +254,11 @@ abstract class WC_Abstract_Google_Analytics_JS {
 	/**
 	 * Returns an array of order data in the required format
 	 *
-	 * @param WC_Abstract_Order|int $order An instance of the WooCommerce Order object or the order ID
+	 * @param WC_Abstract_Order $order An instance of the WooCommerce Order object.
 	 *
 	 * @return array
 	 */
 	public function get_formatted_order( $order ): array {
-		if ( is_int( $order ) ) {
-			$order = wc_get_order( $order_id );
-		}
-
 		return array(
 			'currency' => $order->get_currency(),
 			'value'    => $this->get_formatted_price( $order->get_total() ),

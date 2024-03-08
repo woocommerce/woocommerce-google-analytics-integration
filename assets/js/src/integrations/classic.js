@@ -11,6 +11,8 @@ import { getProductFromID } from '../utils';
  *
  * To be executed once data set is complete, and `document` is ready.
  *
+ * It also handles some Block events that are not fired reliably for `woocommerce/all-products` block.
+ *
  * @param {Object}   data               - The tracking data from the current page load, containing the following properties:
  * @param {Object}   data.events        - An object containing the events to be instantly tracked.
  * @param {Object}   data.cart          - The cart object.
@@ -112,20 +114,18 @@ export function trackClassicPages( {
 	// Attach click event listeners to non-block product listings
 	// to send a `select_content` event if the target link takes the user to the product page.
 	document
-		.querySelectorAll(
-			'.products .product, .products-block-post-template .product'
-		)
-		?.forEach( ( item ) => {
+		.querySelectorAll( '.products .product:not(.wp-block-post)' )
+		?.forEach( ( productCard ) => {
 			// Get the Product ID from a child node containing the relevant attribute
-			const productId = item
-				.querySelector( '[data-product_id]' )
+			const productId = productCard
+				.querySelector( 'a[data-product_id]' )
 				?.getAttribute( 'data-product_id' );
 
 			if ( ! productId ) {
 				return;
 			}
 
-			item.addEventListener( 'click', ( event ) => {
+			productCard.addEventListener( 'click', ( event ) => {
 				// Return early if the user has clicked on an
 				// "Add to cart" button or anything other than a product link
 				const targetLink = event.target.closest(
@@ -146,13 +146,7 @@ export function trackClassicPages( {
 					! targetLink &&
 					( ! isProductButton || isAddToCartButton )
 				) {
-					tracker.eventHandler( 'add_to_cart' )( {
-						product: getProductFromID(
-							parseInt( productId ),
-							products,
-							cart
-						),
-					} );
+					return;
 				}
 
 				tracker.eventHandler( 'select_content' )( {
@@ -162,6 +156,58 @@ export function trackClassicPages( {
 						cart
 					),
 				} );
+			} );
+		} );
+
+	// Handle selection and add_to_cart in **Block** product listing the classic way.
+	// Attach click event listeners to a whole product card, as some links may not have the product_id data attribute.
+	document
+		.querySelectorAll( '.products-block-post-template .product' )
+		?.forEach( ( productCard ) => {
+			// Get the Product ID from a child node containing the relevant attribute
+			const productId = productCard
+				.querySelector( '[data-product_id]' )
+				?.getAttribute( 'data-product_id' );
+
+			if ( ! productId ) {
+				return;
+			}
+
+			productCard.addEventListener( 'click', ( event ) => {
+				const target = event.target;
+				// `product-view-link` has no serilized HTML identifier/selector, so we look for the parent block element.
+				const viewLink = target.closest(
+					'.wc-block-components-product-image a'
+				);
+				// Catch the enclosing product button.
+				const button = target.closest(
+					'.wc-block-components-product-button [data-product_id]'
+				);
+
+				const isAddToCartButton =
+					button &&
+					button.classList.contains( 'add_to_cart_button' ) &&
+					! button.classList.contains( 'product_type_variable' );
+
+				if ( isAddToCartButton ) {
+					// Add to cart.
+					tracker.eventHandler( 'add_to_cart' )( {
+						product: getProductFromID(
+							parseInt( productId ),
+							products,
+							cart
+						),
+					} );
+				} else if ( viewLink || button ) {
+					// Product image or add-to-cart-like button.
+					tracker.eventHandler( 'select_content' )( {
+						product: getProductFromID(
+							parseInt( productId ),
+							products,
+							cart
+						),
+					} );
+				}
 			} );
 		} );
 }

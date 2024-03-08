@@ -105,11 +105,23 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 			)
 		);
 
+		$message = sprintf(
+			/* translators: 1 inlined data script, 2 the tracker definition */
+			__( "`wcgai.trackClassicPages` function is not available. Please make sure Google Analytics for WooCommerce's scripts are loaded correctly. `%1\$s` after `%2\$s`. Some other plugins may defer or change the script order.", 'woocommerce-google-analytics-integration' ),
+			$this->data_script_handle,
+			$this->script_handle,
+		);
+
 		wp_add_inline_script(
 			$this->data_script_handle,
 			sprintf(
-				'wcgai.trackClassicPages( %s );',
-				$this->get_script_data()
+				'if( window.wcgai && typeof window.wcgai.trackClassicPages === "function" ){
+					wcgai.trackClassicPages( %s );
+				} else {
+					console.error( "%s" );
+				}',
+				$this->get_script_data(),
+				esc_js( $message ),
 			)
 		);
 

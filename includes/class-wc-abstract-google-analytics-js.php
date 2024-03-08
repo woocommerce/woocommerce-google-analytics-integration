@@ -99,7 +99,7 @@ abstract class WC_Abstract_Google_Analytics_JS {
 			function ( $order_id ) {
 				if ( 'yes' === self::get( 'ga_ecommerce_tracking_enabled' ) ) {
 					$order = wc_get_order( $order_id );
-					if ( $order && $order->get_meta( '_ga_tracked' ) === '1' ) {
+					if ( $order && $order->get_meta( '_ga_tracked' ) !== '1' ) {
 						// Check order key.
 						// phpcs:ignore WordPress.Security.NonceVerification.Recommended,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 						$order_key = empty( $_GET['key'] ) ? '' : wc_clean( wp_unslash( $_GET['key'] ) );

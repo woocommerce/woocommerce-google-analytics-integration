@@ -112,11 +112,13 @@ export function trackClassicPages( {
 	// Attach click event listeners to non-block product listings
 	// to send a `select_content` event if the target link takes the user to the product page.
 	document
-		.querySelectorAll( '.products .product:not(.wp-block-post)' )
+		.querySelectorAll(
+			'.products .product, .products-block-post-template .product'
+		)
 		?.forEach( ( item ) => {
 			// Get the Product ID from a child node containing the relevant attribute
 			const productId = item
-				.querySelector( 'a[data-product_id]' )
+				.querySelector( '[data-product_id]' )
 				?.getAttribute( 'data-product_id' );
 
 			if ( ! productId ) {
@@ -144,7 +146,13 @@ export function trackClassicPages( {
 					! targetLink &&
 					( ! isProductButton || isAddToCartButton )
 				) {
-					return;
+					tracker.eventHandler( 'add_to_cart' )( {
+						product: getProductFromID(
+							parseInt( productId ),
+							products,
+							cart
+						),
+					} );
 				}
 
 				tracker.eventHandler( 'select_content' )( {

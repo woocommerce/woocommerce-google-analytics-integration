@@ -264,12 +264,12 @@ abstract class WC_Abstract_Google_Analytics_JS {
 		}
 
 		return array(
-			'totals'  => array(
+			'totals' => array(
 				'currency_code'       => $order->get_currency(),
 				'total_price'         => $this->get_formatted_price( $order->get_total() ),
 				'currency_minor_unit' => wc_get_price_decimals(),
 			),
-			'items'    => array_map(
+			'items'  => array_map(
 				function ( $item ) {
 					return array_merge(
 						$this->get_formatted_product( $item->get_product() ),

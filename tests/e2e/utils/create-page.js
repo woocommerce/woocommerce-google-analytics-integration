@@ -40,6 +40,18 @@ export async function createPage( title, content ) {
 }
 
 /**
+ * Creates a classic cart page using shortcodes.
+ */
+export async function createClassicCartPage() {
+	const title = 'Classic Cart';
+	const content = '[woocommerce_cart]';
+
+	if ( ! ( await pageExistsByTitle( title ) ) ) {
+		await createPage( title, content );
+	}
+}
+
+/**
  * Creates a classic shop page using shortcodes.
  */
 export async function createClassicShopPage() {

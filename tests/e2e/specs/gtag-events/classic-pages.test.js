@@ -11,7 +11,10 @@ import {
 	setSettings,
 	clearSettings,
 } from '../../utils/api';
-import { createClassicShopPage } from '../../utils/create-page';
+import {
+	createClassicCartPage,
+	createClassicShopPage,
+} from '../../utils/create-page';
 import { checkout, singleProductAddToCart } from '../../utils/customer';
 import { getEventData, trackGtagEvent } from '../../utils/track-event';
 
@@ -146,18 +149,26 @@ test.describe( 'GTag events', () => {
 		} );
 	} );
 
-	test( 'Cart page view event is sent from the cart page', async ( {
+	test( 'Remove from cart event is sent from a classic cart page', async ( {
 		page,
 	} ) => {
+		await createClassicCartPage();
 		await singleProductAddToCart( page, simpleProductID );
 
-		const event = trackGtagEvent( page, 'page_view', 'cart' );
-		await page.goto( 'cart' );
+		const event = trackGtagEvent( page, 'remove_from_cart' );
+		await page.goto( 'classic-cart' );
 
-		// TODO: This event doesn't track any more details than a page view.
+		await page.locator( '.cart_item .remove' ).first().click();
+
 		await event.then( ( request ) => {
-			const data = getEventData( request, 'page_view' );
-			expect( data.en ).toEqual( 'page_view' );
+			const data = getEventData( request, 'remove_from_cart' );
+			expect( data.product1 ).toEqual( {
+				id: simpleProductID.toString(),
+				nm: 'Simple product',
+				ca: 'Uncategorized',
+				qt: '1',
+				pr: productPrice.toString(),
+			} );
 		} );
 	} );
 

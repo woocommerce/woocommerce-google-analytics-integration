@@ -3,7 +3,6 @@ import { addUniqueAction } from '../utils';
 import { tracker } from '../tracker';
 import { ACTION_PREFIX, NAMESPACE } from '../constants';
 
-
 addUniqueAction(
 	`${ ACTION_PREFIX }-product-render`,
 	NAMESPACE,

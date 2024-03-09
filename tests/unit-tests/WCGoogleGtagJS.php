@@ -82,7 +82,6 @@ class WCGoogleGtagJS extends EventsDataTest {
 		$mappings = array(
 			'begin_checkout'   => 'woocommerce_before_checkout_form',
 			'purchase'         => 'woocommerce_thankyou',
-			'view_item_list'   => 'woocommerce_before_shop_loop_item',
 			'add_to_cart'      => 'woocommerce_add_to_cart',
 			'remove_from_cart' => 'woocommerce_cart_item_removed',
 			'view_item'        => 'woocommerce_after_single_product',

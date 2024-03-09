@@ -17,6 +17,7 @@
     "@wordpress/env": "^9.5.0",
     "@wordpress/eslint-plugin": "^17.5.0",
     "@wordpress/scripts": "^26.19.0",
+    "axios": "^1.6.7",
     "eslint": "^8.0.0",
     "node-wp-i18n": "~1.2.3",
     "prettier": "npm:wp-prettier@^3.0.3"

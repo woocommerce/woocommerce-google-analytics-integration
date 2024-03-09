@@ -121,6 +121,31 @@ test.describe( 'GTag events', () => {
 		} );
 	} );
 
+	test( 'View item list event is sent from a classic shop page', async ( {
+		page,
+	} ) => {
+		await createClassicShopPage();
+
+		const event = trackGtagEvent( page, 'view_item_list' );
+
+		// Go to shop page (newest first)
+		await page.goto( 'classic-shop?orderby=date' );
+
+		await event.then( ( request ) => {
+			const data = getEventData( request, 'view_item_list' );
+			expect( data.product1 ).toEqual( {
+				id: simpleProductID.toString(),
+				nm: 'Simple product',
+				ln: 'Product List',
+				ca: 'Uncategorized',
+				pr: productPrice.toString(),
+				lp: '1',
+			} );
+			expect( data[ 'ep.item_list_id' ] ).toEqual( 'engagement' );
+			expect( data[ 'ep.item_list_name' ] ).toEqual( 'Viewing products' );
+		} );
+	} );
+
 	test( 'Cart page view event is sent from the cart page', async ( {
 		page,
 	} ) => {

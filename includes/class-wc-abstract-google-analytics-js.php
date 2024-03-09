@@ -87,11 +87,13 @@ abstract class WC_Abstract_Google_Analytics_JS {
 		);
 
 		add_action(
-			'woocommerce_shop_loop_item_title',
-			function () {
-				global $product;
+			'woocommerce_loop_add_to_cart_link',
+			function ( $button, $product, $args ) {
 				$this->append_script_data( 'products', $this->get_formatted_product( $product ) );
-			}
+				return $button;
+			},
+			10,
+			3
 		);
 
 		add_action(

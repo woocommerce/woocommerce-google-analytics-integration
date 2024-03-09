@@ -52,6 +52,18 @@ export async function createClassicCartPage() {
 }
 
 /**
+ * Creates a classic checkout page using shortcodes.
+ */
+export async function createClassicCheckoutPage() {
+	const title = 'Classic Checkout';
+	const content = '[woocommerce_checkout]';
+
+	if ( ! ( await pageExistsByTitle( title ) ) ) {
+		await createPage( title, content );
+	}
+}
+
+/**
  * Creates a classic shop page using shortcodes.
  */
 export async function createClassicShopPage() {

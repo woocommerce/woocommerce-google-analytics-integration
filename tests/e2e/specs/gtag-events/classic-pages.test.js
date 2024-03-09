@@ -13,6 +13,7 @@ import {
 } from '../../utils/api';
 import {
 	createClassicCartPage,
+	createClassicCheckoutPage,
 	createClassicShopPage,
 } from '../../utils/create-page';
 import { checkout, singleProductAddToCart } from '../../utils/customer';
@@ -169,6 +170,29 @@ test.describe( 'GTag events', () => {
 				qt: '1',
 				pr: productPrice.toString(),
 			} );
+		} );
+	} );
+
+	test( 'Begin checkout event is sent from a classic checkout page', async ( {
+		page,
+	} ) => {
+		await createClassicCheckoutPage();
+		await singleProductAddToCart( page, simpleProductID );
+
+		const event = trackGtagEvent( page, 'begin_checkout' );
+		await page.goto( 'classic-checkout' );
+
+		await event.then( ( request ) => {
+			const data = getEventData( request, 'begin_checkout' );
+			expect( data.product1 ).toEqual( {
+				id: simpleProductID.toString(),
+				nm: 'Simple product',
+				ca: 'Uncategorized',
+				qt: '1',
+				pr: productPrice.toString(),
+			} );
+			expect( data.cu ).toEqual( 'USD' );
+			expect( data[ 'epn.value' ] ).toEqual( productPrice.toString() );
 		} );
 	} );
 

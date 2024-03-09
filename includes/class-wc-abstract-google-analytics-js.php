@@ -88,7 +88,7 @@ abstract class WC_Abstract_Google_Analytics_JS {
 
 		add_action(
 			'woocommerce_loop_add_to_cart_link',
-			function ( $button, $product, $args ) {
+			function ( $button, $product ) {
 				$this->append_script_data( 'products', $this->get_formatted_product( $product ) );
 				return $button;
 			},

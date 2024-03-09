@@ -11,6 +11,7 @@ import {
 	setSettings,
 	clearSettings,
 } from '../../utils/api';
+import { createClassicShopPage } from '../../utils/create-page';
 import { checkout, singleProductAddToCart } from '../../utils/customer';
 import { getEventData, trackGtagEvent } from '../../utils/track-event';
 
@@ -81,6 +82,32 @@ test.describe( 'GTag events', () => {
 		const event = trackGtagEvent( page, 'add_to_cart' );
 
 		await singleProductAddToCart( page, simpleProductID );
+
+		await event.then( ( request ) => {
+			const data = getEventData( request, 'add_to_cart' );
+			expect( data.product1 ).toEqual( {
+				id: simpleProductID.toString(),
+				nm: 'Simple product',
+				ca: 'Uncategorized',
+				qt: '1',
+				pr: productPrice.toString(),
+			} );
+		} );
+	} );
+
+	test( 'Add to cart event is sent from a classic shop page', async ( {
+		page,
+	} ) => {
+		await createClassicShopPage();
+
+		const event = trackGtagEvent( page, 'add_to_cart' );
+
+		// Go to shop page (newest first)
+		await page.goto( 'classic-shop?orderby=date' );
+		const addToCart = `[data-product_id="${ simpleProductID }"]`;
+		const addToCartButton = await page.locator( addToCart ).first();
+		await addToCartButton.click();
+		await expect( addToCartButton ).toHaveClass( /added/ );
 
 		await event.then( ( request ) => {
 			const data = getEventData( request, 'add_to_cart' );

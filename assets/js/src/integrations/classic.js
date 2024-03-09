@@ -179,6 +179,10 @@ export function trackClassicPages( {
 				const viewLink = target.closest(
 					'.wc-block-components-product-image a'
 				);
+
+				// Catch name click
+				const nameLink = target.closest( '.wp-block-post-title a' );
+
 				// Catch the enclosing product button.
 				const button = target.closest(
 					'.wc-block-components-product-button [data-product_id]'
@@ -198,7 +202,7 @@ export function trackClassicPages( {
 							cart
 						),
 					} );
-				} else if ( viewLink || button ) {
+				} else if ( viewLink || button || nameLink ) {
 					// Product image or add-to-cart-like button.
 					tracker.eventHandler( 'select_content' )( {
 						product: getProductFromID(

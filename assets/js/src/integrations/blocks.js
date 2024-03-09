@@ -3,11 +3,6 @@ import { addUniqueAction } from '../utils';
 import { tracker } from '../tracker';
 import { ACTION_PREFIX, NAMESPACE } from '../constants';
 
-addUniqueAction(
-	`${ ACTION_PREFIX }-product-list-render`,
-	NAMESPACE,
-	tracker.eventHandler( 'view_item_list' )
-);
 
 addUniqueAction(
 	`${ ACTION_PREFIX }-product-render`,
@@ -33,6 +28,7 @@ addUniqueAction(
  */
 removeAction( `${ ACTION_PREFIX }-cart-add-item`, NAMESPACE );
 removeAction( `${ ACTION_PREFIX }-product-view-link`, NAMESPACE );
+removeAction( `${ ACTION_PREFIX }-view_item_list`, NAMESPACE );
 
 /**
  * Remove additional actions added by WooCommerce Core which are either

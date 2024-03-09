@@ -37,14 +37,32 @@ function register_routes() {
  * Set the settings to enable tracking.
  */
 function set_settings() {
-	// TODO: set some test settings.
+	update_option(
+		'woocommerce_google_analytics_settings',
+		[
+			'ga_product_identifier'                   => 'product_id',
+			'ga_id'                                   => 'G-ABCD123',
+			'ga_support_display_advertising'          => 'no',
+			'ga_404_tracking_enabled'                 => 'yes',
+			'ga_linker_allow_incoming_enabled'        => 'no',
+			'ga_ecommerce_tracking_enabled'           => 'yes',
+			'ga_event_tracking_enabled'               => 'yes',
+			'ga_enhanced_ecommerce_tracking_enabled'  => 'yes',
+			'ga_enhanced_remove_from_cart_enabled'    => 'yes',
+			'ga_enhanced_product_impression_enabled'  => 'yes',
+			'ga_enhanced_product_click_enabled'       => 'yes',
+			'ga_enhanced_product_detail_view_enabled' => 'yes',
+			'ga_enhanced_checkout_process_enabled'    => 'yes',
+			'ga_linker_cross_domains'                 => '',
+		]
+	);
 }
 
 /**
  * Clear the previously set settings.
  */
 function clear_settings() {
-	// TODO: clear settings.
+	delete_option( 'woocommerce_google_analytics_settings' );
 }
 
 /**

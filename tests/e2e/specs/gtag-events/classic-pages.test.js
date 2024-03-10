@@ -8,6 +8,7 @@ const { test, expect } = require( '@playwright/test' );
  */
 import {
 	createSimpleProduct,
+	createVariableProduct,
 	setSettings,
 	clearSettings,
 } from '../../utils/api';
@@ -16,17 +17,22 @@ import {
 	createClassicCheckoutPage,
 	createClassicShopPage,
 } from '../../utils/create-page';
-import { checkout, singleProductAddToCart } from '../../utils/customer';
+import {
+	checkout,
+	simpleProductAddToCart,
+	variableProductAddToCart,
+} from '../../utils/customer';
 import { getEventData, trackGtagEvent } from '../../utils/track-event';
 
 const config = require( '../../config/default' );
-const productPrice = config.products.simple.regularPrice;
+const simpleProductPrice = parseFloat( config.products.simple.regular_price );
 
-let simpleProductID;
+let simpleProductID, variableProductID;
 
 test.describe( 'GTag events on classic pages', () => {
 	test.beforeAll( async () => {
 		await setSettings();
+		variableProductID = await createVariableProduct();
 		simpleProductID = await createSimpleProduct();
 	} );
 
@@ -75,7 +81,7 @@ test.describe( 'GTag events on classic pages', () => {
 				nm: 'Simple product',
 				ln: 'Product List',
 				ca: 'Uncategorized',
-				pr: productPrice.toString(),
+				pr: simpleProductPrice.toString(),
 			} );
 		} );
 	} );
@@ -85,8 +91,7 @@ test.describe( 'GTag events on classic pages', () => {
 	} ) => {
 		const event = trackGtagEvent( page, 'add_to_cart' );
 
-		await singleProductAddToCart( page, simpleProductID );
-
+		await simpleProductAddToCart( page, simpleProductID );
 		await event.then( ( request ) => {
 			const data = getEventData( request, 'add_to_cart' );
 			expect( data.product1 ).toEqual( {
@@ -94,7 +99,27 @@ test.describe( 'GTag events on classic pages', () => {
 				nm: 'Simple product',
 				ca: 'Uncategorized',
 				qt: '1',
-				pr: productPrice.toString(),
+				pr: simpleProductPrice.toString(),
+			} );
+		} );
+	} );
+
+	test( 'Add to cart event is sent on a variable product page', async ( {
+		page,
+	} ) => {
+		const event = trackGtagEvent( page, 'add_to_cart' );
+
+		await variableProductAddToCart( page, variableProductID );
+
+		await event.then( ( request ) => {
+			const data = getEventData( request, 'add_to_cart' );
+			expect( data.product1 ).toEqual( {
+				id: variableProductID.toString(),
+				nm: 'Variable Product',
+				ca: 'Uncategorized',
+				qt: '1',
+				pr: '18.99',
+				va: 'colour: Green, size: Medium',
 			} );
 		} );
 	} );
@@ -120,7 +145,7 @@ test.describe( 'GTag events on classic pages', () => {
 				nm: 'Simple product',
 				ca: 'Uncategorized',
 				qt: '1',
-				pr: productPrice.toString(),
+				pr: simpleProductPrice.toString(),
 			} );
 		} );
 	} );
@@ -142,7 +167,7 @@ test.describe( 'GTag events on classic pages', () => {
 				nm: 'Simple product',
 				ln: 'Product List',
 				ca: 'Uncategorized',
-				pr: productPrice.toString(),
+				pr: simpleProductPrice.toString(),
 				lp: '1',
 			} );
 			expect( data[ 'ep.item_list_id' ] ).toEqual( 'engagement' );
@@ -154,7 +179,7 @@ test.describe( 'GTag events on classic pages', () => {
 		page,
 	} ) => {
 		await createClassicCartPage();
-		await singleProductAddToCart( page, simpleProductID );
+		await simpleProductAddToCart( page, simpleProductID );
 
 		const event = trackGtagEvent( page, 'remove_from_cart' );
 		await page.goto( 'classic-cart' );
@@ -168,7 +193,7 @@ test.describe( 'GTag events on classic pages', () => {
 				nm: 'Simple product',
 				ca: 'Uncategorized',
 				qt: '1',
-				pr: productPrice.toString(),
+				pr: simpleProductPrice.toString(),
 			} );
 		} );
 	} );
@@ -177,7 +202,7 @@ test.describe( 'GTag events on classic pages', () => {
 		page,
 	} ) => {
 		await createClassicCheckoutPage();
-		await singleProductAddToCart( page, simpleProductID );
+		await simpleProductAddToCart( page, simpleProductID );
 
 		const event = trackGtagEvent( page, 'begin_checkout' );
 		await page.goto( 'classic-checkout' );
@@ -189,17 +214,19 @@ test.describe( 'GTag events on classic pages', () => {
 				nm: 'Simple product',
 				ca: 'Uncategorized',
 				qt: '1',
-				pr: productPrice.toString(),
+				pr: simpleProductPrice.toString(),
 			} );
 			expect( data.cu ).toEqual( 'USD' );
-			expect( data[ 'epn.value' ] ).toEqual( productPrice.toString() );
+			expect( data[ 'epn.value' ] ).toEqual(
+				simpleProductPrice.toString()
+			);
 		} );
 	} );
 
 	test( 'Purchase event is sent on order complete page', async ( {
 		page,
 	} ) => {
-		await singleProductAddToCart( page, simpleProductID );
+		await simpleProductAddToCart( page, simpleProductID );
 
 		const event = trackGtagEvent( page, 'purchase', 'checkout' );
 		await checkout( page );
@@ -211,10 +238,12 @@ test.describe( 'GTag events on classic pages', () => {
 				nm: 'Simple product',
 				ca: 'Uncategorized',
 				qt: '1',
-				pr: productPrice.toString(),
+				pr: simpleProductPrice.toString(),
 			} );
 			expect( data.cu ).toEqual( 'USD' );
-			expect( data[ 'epn.value' ] ).toEqual( productPrice.toString() );
+			expect( data[ 'epn.value' ] ).toEqual(
+				simpleProductPrice.toString()
+			);
 		} );
 	} );
 } );

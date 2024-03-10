@@ -14,7 +14,7 @@ import {
 import {
 	blockProductAddToCart,
 	relatedProductAddToCart,
-	singleProductAddToCart,
+	simpleProductAddToCart,
 } from '../../utils/customer';
 import {
 	createProductCollectionBlockShopPage,
@@ -23,7 +23,7 @@ import {
 import { getEventData, trackGtagEvent } from '../../utils/track-event';
 
 const config = require( '../../config/default' );
-const productPrice = config.products.simple.regularPrice;
+const simpleProductPrice = parseFloat( config.products.simple.regular_price );
 
 let simpleProductID;
 
@@ -54,7 +54,7 @@ test.describe( 'GTag events on block pages', () => {
 				nm: 'Simple product',
 				ca: 'Uncategorized',
 				qt: '1',
-				pr: productPrice.toString(),
+				pr: simpleProductPrice.toString(),
 			} );
 		} );
 	} );
@@ -74,7 +74,7 @@ test.describe( 'GTag events on block pages', () => {
 				nm: 'Simple product',
 				ln: 'Product List',
 				ca: 'Uncategorized',
-				pr: productPrice.toString(),
+				pr: simpleProductPrice.toString(),
 				lp: '1',
 			} );
 			expect( data[ 'ep.item_list_id' ] ).toEqual( 'engagement' );
@@ -85,7 +85,7 @@ test.describe( 'GTag events on block pages', () => {
 	test( 'Remove from cart event is sent from the cart page', async ( {
 		page,
 	} ) => {
-		await singleProductAddToCart( page, simpleProductID );
+		await simpleProductAddToCart( page, simpleProductID );
 
 		const event = trackGtagEvent( page, 'remove_from_cart' );
 		await page.goto( 'cart' );
@@ -101,7 +101,7 @@ test.describe( 'GTag events on block pages', () => {
 				id: simpleProductID.toString(),
 				nm: 'Simple product',
 				qt: '1',
-				pr: productPrice.toString(),
+				pr: simpleProductPrice.toString(),
 				va: '',
 			} );
 		} );
@@ -110,7 +110,7 @@ test.describe( 'GTag events on block pages', () => {
 	test( 'Remove from cart event is sent from the mini cart', async ( {
 		page,
 	} ) => {
-		await singleProductAddToCart( page, simpleProductID );
+		await simpleProductAddToCart( page, simpleProductID );
 
 		const event = trackGtagEvent( page, 'remove_from_cart' );
 		await page.goto( 'shop' );
@@ -127,7 +127,7 @@ test.describe( 'GTag events on block pages', () => {
 				id: simpleProductID.toString(),
 				nm: 'Simple product',
 				qt: '1',
-				pr: productPrice.toString(),
+				pr: simpleProductPrice.toString(),
 				va: '',
 			} );
 		} );
@@ -136,7 +136,7 @@ test.describe( 'GTag events on block pages', () => {
 	test( 'Begin checkout event is sent from a checkout page', async ( {
 		page,
 	} ) => {
-		await singleProductAddToCart( page, simpleProductID );
+		await simpleProductAddToCart( page, simpleProductID );
 
 		const event = trackGtagEvent( page, 'begin_checkout' );
 		await page.goto( 'checkout' );
@@ -147,11 +147,13 @@ test.describe( 'GTag events on block pages', () => {
 				id: simpleProductID.toString(),
 				nm: 'Simple product',
 				qt: '1',
-				pr: productPrice.toString(),
+				pr: simpleProductPrice.toString(),
 				va: '',
 			} );
 			expect( data.cu ).toEqual( 'USD' );
-			expect( data[ 'epn.value' ] ).toEqual( productPrice.toString() );
+			expect( data[ 'epn.value' ] ).toEqual(
+				simpleProductPrice.toString()
+			);
 		} );
 	} );
 
@@ -172,7 +174,7 @@ test.describe( 'GTag events on block pages', () => {
 				nm: 'Simple product',
 				ca: 'Uncategorized',
 				qt: '1',
-				pr: productPrice.toString(),
+				pr: simpleProductPrice.toString(),
 			} );
 		} );
 	} );
@@ -192,7 +194,7 @@ test.describe( 'GTag events on block pages', () => {
 				nm: 'Simple product',
 				ln: 'Product List',
 				ca: 'Uncategorized',
-				pr: productPrice.toString(),
+				pr: simpleProductPrice.toString(),
 				lp: '1',
 			} );
 			expect( data[ 'ep.item_list_id' ] ).toEqual( 'engagement' );
@@ -217,7 +219,7 @@ test.describe( 'GTag events on block pages', () => {
 				nm: 'Simple product',
 				ca: 'Uncategorized',
 				qt: '1',
-				pr: productPrice.toString(),
+				pr: simpleProductPrice.toString(),
 			} );
 		} );
 	} );
@@ -237,7 +239,7 @@ test.describe( 'GTag events on block pages', () => {
 				nm: 'Simple product',
 				ln: 'Product List',
 				ca: 'Uncategorized',
-				pr: productPrice.toString(),
+				pr: simpleProductPrice.toString(),
 				lp: '1',
 			} );
 			expect( data[ 'ep.item_list_id' ] ).toEqual( 'engagement' );
@@ -262,7 +264,7 @@ test.describe( 'GTag events on block pages', () => {
 				nm: 'Simple product',
 				ca: 'Uncategorized',
 				qt: '1',
-				pr: productPrice.toString(),
+				pr: simpleProductPrice.toString(),
 			} );
 		} );
 	} );

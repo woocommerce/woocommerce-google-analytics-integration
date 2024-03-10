@@ -13,52 +13,40 @@
 	"products": {
 		"simple": {
 			"name": "Simple product",
-			"regularPrice": 9.99
+			"type": "simple",
+			"regular_price": "9.99"
 		},
 		"variable": {
-			"name": "Variable Product with Three Attributes",
-			"defaultAttributes": [
+			"name": "Variable Product",
+			"type": "variable",
+			"default_attributes": [
 				{
-					"id": 0,
 					"name": "Size",
 					"option": "Medium"
 				},
 				{
-					"id": 0,
 					"name": "Colour",
-					"option": "Blue"
+					"option": "Green"
 				}
 			],
 			"attributes": [
 				{
-					"id": 0,
 					"name": "Colour",
-					"isVisibleOnProductPage": true,
-					"isForVariations": true,
-					"options": [ "Red", "Green", "Blue" ],
-					"sortOrder": 0
+					"visible": true,
+					"variation": true,
+					"options": [ "Red", "Green", "Blue" ]
 				},
 				{
-					"id": 0,
 					"name": "Size",
-					"isVisibleOnProductPage": true,
-					"isForVariations": true,
-					"options": [ "Small", "Medium", "Large" ],
-					"sortOrder": 0
-				},
-				{
-					"id": 0,
-					"name": "Logo",
-					"isVisibleOnProductPage": true,
-					"isForVariations": true,
-					"options": [ "Woo", "WordPress" ],
-					"sortOrder": 0
+					"visible": true,
+					"variation": true,
+					"options": [ "Small", "Medium", "Large" ]
 				}
 			]
 		},
 		"variations": [
 			{
-				"regularPrice": "19.99",
+				"regular_price": "19.99",
 				"attributes": [
 					{
 						"name": "Size",
@@ -71,7 +59,7 @@
 				]
 			},
 			{
-				"regularPrice": "18.99",
+				"regular_price": "18.99",
 				"attributes": [
 					{
 						"name": "Size",
@@ -84,7 +72,7 @@
 				]
 			},
 			{
-				"regularPrice": "17.99",
+				"regular_price": "17.99",
 				"attributes": [
 					{
 						"name": "Size",

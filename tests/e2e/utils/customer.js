@@ -16,16 +16,39 @@ import { LOAD_STATE } from './constants';
 const config = require( '../config/default.json' );
 
 /**
- * Adds a single product to the cart.
+ * Adds a simple product to the cart.
  *
  * @param {Page}   page
  * @param {number} productID
  */
-export async function singleProductAddToCart( page, productID ) {
+export async function simpleProductAddToCart( page, productID ) {
 	await page.goto( `?p=${ productID }` );
 
 	const addToCart = '.single_add_to_cart_button';
 	await page.locator( addToCart ).first().click();
+	await expect(
+		page.getByText( 'has been added to your cart' )
+	).toBeVisible();
+
+	// Wait till all tracking event request have been sent after page reloaded.
+	await page.waitForLoadState( LOAD_STATE.DOM_CONTENT_LOADED );
+}
+
+/**
+ * Adds a variable product to the cart.
+ *
+ * @param {Page}   page
+ * @param {number} productID
+ */
+export async function variableProductAddToCart( page, productID ) {
+	await page.goto( `?p=${ productID }` );
+
+	// Default attributes are set, so we just need to wait for the add to cart button to be enabled.
+	await page.waitForTimeout( 3000 );
+
+	const addToCart = '.single_add_to_cart_button:not(.disabled)';
+	await page.locator( addToCart ).click();
+
 	await expect(
 		page.getByText( 'has been added to your cart' )
 	).toBeVisible();

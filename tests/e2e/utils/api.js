@@ -37,15 +37,26 @@ export function apiWP() {
  * @return {number} Product ID of the created product.
  */
 export async function createSimpleProduct() {
-	const product = config.products.simple;
-
 	return await api()
-		.post( 'products', {
-			name: product.name,
-			type: 'simple',
-			regular_price: String( product.regularPrice ),
-		} )
+		.post( 'products', config.products.simple )
 		.then( ( response ) => response.data.id );
+}
+
+/**
+ * Creates a variable product.
+ *
+ * @return {number} Product ID of the created product.
+ */
+export async function createVariableProduct() {
+	const parentID = await api()
+		.post( 'products', config.products.variable )
+		.then( ( response ) => response.data.id );
+
+	config.products.variations.map( async ( variation ) => {
+		await api().post( `products/${ parentID }/variations`, variation );
+	} );
+
+	return parentID;
 }
 
 /**

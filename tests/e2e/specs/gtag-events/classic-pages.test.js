@@ -86,6 +86,26 @@ test.describe( 'GTag events on classic pages', () => {
 		} );
 	} );
 
+	test( 'Add to cart event is sent on the home page when adding product through URL', async ( {
+		page,
+	} ) => {
+		const event = trackGtagEvent( page, 'add_to_cart' );
+
+		// Load home page without products and add product to cart by ID.
+		await page.goto( `/?add-to-cart=${ simpleProductID }` );
+
+		await event.then( ( request ) => {
+			const data = getEventData( request, 'add_to_cart' );
+			expect( data.product1 ).toEqual( {
+				id: simpleProductID.toString(),
+				nm: 'Simple product',
+				ca: 'Uncategorized',
+				qt: '1',
+				pr: simpleProductPrice.toString(),
+			} );
+		} );
+	} );
+
 	test( 'Add to cart event is sent on a single product page', async ( {
 		page,
 	} ) => {

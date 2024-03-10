@@ -107,6 +107,32 @@ test.describe( 'GTag events on block pages', () => {
 		} );
 	} );
 
+	test( 'Remove from cart event is sent from the mini cart', async ( {
+		page,
+	} ) => {
+		await singleProductAddToCart( page, simpleProductID );
+
+		const event = trackGtagEvent( page, 'remove_from_cart' );
+		await page.goto( 'shop' );
+
+		await page.locator( '.wc-block-mini-cart' ).click();
+		await page
+			.locator( '.wc-block-cart-item__remove-link' )
+			.first()
+			.click();
+
+		await event.then( ( request ) => {
+			const data = getEventData( request, 'remove_from_cart' );
+			expect( data.product1 ).toEqual( {
+				id: simpleProductID.toString(),
+				nm: 'Simple product',
+				qt: '1',
+				pr: productPrice.toString(),
+				va: '',
+			} );
+		} );
+	} );
+
 	test( 'Begin checkout event is sent from a checkout page', async ( {
 		page,
 	} ) => {

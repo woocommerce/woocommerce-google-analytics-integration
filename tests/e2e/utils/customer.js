@@ -55,14 +55,14 @@ export async function relatedProductAddToCart( page ) {
 /**
  * Add a product to the cart from a block shop page.
  *
- * @param {Page} page
+ * @param {Page}   page
+ * @param {number} productID
  */
-export async function blockProductAddToCart( page ) {
-	const addToCart =
-		'.wp-block-button__link.add_to_cart_button:not([disabled])';
-
-	await page.locator( addToCart ).first().click();
-	await expect( page.locator( addToCart ).first() ).toHaveClass( /added/ );
+export async function blockProductAddToCart( page, productID ) {
+	const addToCart = `[data-product_id="${ productID }"]`;
+	const addToCartButton = await page.locator( addToCart ).first();
+	await addToCartButton.click();
+	await expect( addToCartButton.getByText( '1 in cart' ) ).toBeVisible();
 }
 
 /**

@@ -24,7 +24,7 @@ const productPrice = config.products.simple.regularPrice;
 
 let simpleProductID;
 
-test.describe( 'GTag events', () => {
+test.describe( 'GTag events on classic pages', () => {
 	test.beforeAll( async () => {
 		await setSettings();
 		simpleProductID = await createSimpleProduct();

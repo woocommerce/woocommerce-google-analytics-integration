@@ -74,3 +74,17 @@ export async function createClassicShopPage() {
 		await createPage( title, content );
 	}
 }
+
+/**
+ * Creates a shop page using the Product Collection block.
+ */
+export async function createProductCollectionBlockShopPage() {
+	const {
+		title,
+		pageContent,
+	} = require( './__fixtures__/product-collection.fixture.json' );
+
+	if ( ! ( await pageExistsByTitle( title ) ) ) {
+		await createPage( title, pageContent );
+	}
+}

@@ -226,7 +226,7 @@ test.describe( 'GTag events on classic pages', () => {
 		} );
 	} );
 
-	test( 'Remove from cart event for a varaiable product', async ( {
+	test( 'Remove from cart event for a variable product', async ( {
 		page,
 	} ) => {
 		await createClassicCartPage();

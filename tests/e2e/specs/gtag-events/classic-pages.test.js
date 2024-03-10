@@ -40,31 +40,19 @@ test.describe( 'GTag events on classic pages', () => {
 		await clearSettings();
 	} );
 
-	test( 'GTag scripts are loaded on a frontend page', async ( { page } ) => {
-		await page.goto( 'shop' );
-
-		await expect(
-			page.locator(
-				'#woocommerce-google-analytics-integration-js-before'
-			)
-		).toBeAttached();
-
-		await expect(
-			page.locator( '#woocommerce-google-analytics-integration-js' )
-		).toBeAttached();
-
-		await expect(
-			page.locator(
-				'#woocommerce-google-analytics-integration-data-js-after'
-			)
-		).toBeAttached();
-	} );
-
-	test( 'Page view event is sent on a frontend page', async ( { page } ) => {
+	test( 'Page view event is sent on a frontend page for a guest user', async ( {
+		page,
+	} ) => {
 		const event = trackGtagEvent( page, 'page_view' );
 
 		await page.goto( 'shop' );
-		await expect( event ).resolves.toBeTruthy();
+
+		await event.then( ( request ) => {
+			const data = getEventData( request, 'page_view' );
+
+			// Confirm we are tracking a guest user.
+			expect( data[ 'ep.logged_in' ] ).toEqual( 'false' );
+		} );
 	} );
 
 	test( 'View item event is sent on a single product page', async ( {

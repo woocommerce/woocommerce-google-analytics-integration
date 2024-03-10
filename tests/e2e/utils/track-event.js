@@ -22,6 +22,20 @@ function parseMultipleEvents( data, eventName ) {
 }
 
 /**
+ * Splits the product data using the ~ seperator and uses the first 2 characters as the key.
+ *
+ * @param {string} data
+ * @return {Object} Product data split into key value pairs.
+ */
+function splitProductData( data ) {
+	return Object.fromEntries(
+		data.split( '~' ).map( ( pair ) => {
+			return [ pair.slice( 0, 2 ), pair.slice( 2 ) ];
+		} )
+	);
+}
+
+/**
  * Tracks when the Gtag Event request matching a specific name is sent.
  *
  * @param {Page}        page
@@ -85,11 +99,12 @@ export function getEventData( request, eventName ) {
 
 	// Split data for first product.
 	if ( data.pr1 ) {
-		data.product1 = Object.fromEntries(
-			data.pr1.split( '~' ).map( ( pair ) => {
-				return [ pair.slice( 0, 2 ), pair.slice( 2 ) ];
-			} )
-		);
+		data.product1 = splitProductData( data.pr1 );
+	}
+
+	// Split data for second product.
+	if ( data.pr2 ) {
+		data.product2 = splitProductData( data.pr2 );
 	}
 
 	return data;

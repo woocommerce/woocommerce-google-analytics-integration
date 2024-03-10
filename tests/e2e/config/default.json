@@ -17,7 +17,7 @@
 			"regular_price": "9.99"
 		},
 		"variable": {
-			"name": "Variable Product",
+			"name": "Variable product",
 			"type": "variable",
 			"default_attributes": [
 				{

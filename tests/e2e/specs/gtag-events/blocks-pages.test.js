@@ -16,7 +16,10 @@ import {
 	relatedProductAddToCart,
 	singleProductAddToCart,
 } from '../../utils/customer';
-import { createProductCollectionBlockShopPage } from '../../utils/create-page';
+import {
+	createProductCollectionBlockShopPage,
+	createProductsBlockShopPage,
+} from '../../utils/create-page';
 import { getEventData, trackGtagEvent } from '../../utils/track-event';
 
 const config = require( '../../config/default' );
@@ -155,6 +158,51 @@ test.describe( 'GTag events on block pages', () => {
 
 		const event = trackGtagEvent( page, 'view_item_list' );
 		await page.goto( 'product-collection-block-shop' );
+
+		await event.then( ( request ) => {
+			const data = getEventData( request, 'view_item_list' );
+			expect( data.product1 ).toEqual( {
+				id: simpleProductID.toString(),
+				nm: 'Simple product',
+				ln: 'Product List',
+				ca: 'Uncategorized',
+				pr: productPrice.toString(),
+				lp: '1',
+			} );
+			expect( data[ 'ep.item_list_id' ] ).toEqual( 'engagement' );
+			expect( data[ 'ep.item_list_name' ] ).toEqual( 'Viewing products' );
+		} );
+	} );
+
+	test( 'Add to cart event is sent from a products block shop page', async ( {
+		page,
+	} ) => {
+		await createProductsBlockShopPage();
+
+		const event = trackGtagEvent( page, 'add_to_cart' );
+
+		await page.goto( 'products-block-shop' );
+		await blockProductAddToCart( page, simpleProductID );
+
+		await event.then( ( request ) => {
+			const data = getEventData( request, 'add_to_cart' );
+			expect( data.product1 ).toEqual( {
+				id: simpleProductID.toString(),
+				nm: 'Simple product',
+				ca: 'Uncategorized',
+				qt: '1',
+				pr: productPrice.toString(),
+			} );
+		} );
+	} );
+
+	test( 'View item list event is sent from the products block shop page', async ( {
+		page,
+	} ) => {
+		await createProductsBlockShopPage();
+
+		const event = trackGtagEvent( page, 'view_item_list' );
+		await page.goto( 'products-block-shop' );
 
 		await event.then( ( request ) => {
 			const data = getEventData( request, 'view_item_list' );

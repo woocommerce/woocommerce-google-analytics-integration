@@ -94,7 +94,7 @@ export async function createProductCollectionBlockShopPage() {
 	const {
 		title,
 		pageContent,
-	} = require( './__fixtures__/product-collection.fixture.json' );
+	} = require( './fixtures/product-collection.fixture.json' );
 
 	return (
 		( await pageExistsByTitle( title ) ) ||
@@ -111,7 +111,7 @@ export async function createProductsBlockShopPage() {
 	const {
 		title,
 		pageContent,
-	} = require( './__fixtures__/products.fixture.json' );
+	} = require( './fixtures/products.fixture.json' );
 
 	return (
 		( await pageExistsByTitle( title ) ) ||

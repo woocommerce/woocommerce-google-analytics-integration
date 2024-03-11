@@ -178,8 +178,11 @@ export const purchase = ( { order } ) => {
 	}
 
 	return {
-		currency: order.currency,
-		value: parseInt( order.value ),
+		currency: order.totals.currency_code,
+		value: formatPrice(
+			order.totals.total_price,
+			order.totals.currency_minor_unit
+		),
 		items: order.items.map( getProductFieldObject ),
 	};
 };

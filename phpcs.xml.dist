@@ -61,6 +61,15 @@
 		</properties>
 	</rule>
 
+	<!-- Add manage_woocommerce to accepted user capabilities -->
+	<rule ref="WordPress.WP.Capabilities">
+		<properties>
+			<property name="custom_capabilities" type="array">
+				<element value="manage_woocommerce"/>
+			</property>
+		</properties>
+	</rule>
+
 	<!-- This rule flags space indents in HTML tags, which are generally OK. -->
 	<rule ref="Universal.WhiteSpace.PrecisionAlignment">
 		<exclude name="Universal.WhiteSpace.PrecisionAlignment.Found"/>

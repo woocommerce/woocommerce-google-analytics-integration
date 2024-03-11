@@ -28,7 +28,7 @@ export async function pageExistsByTitle( title ) {
  * @param {string} title
  * @param {string} content
  *
- * @return {number} Created page ID.
+ * @return {Promise<number>} Created page ID.
  */
 export async function createPage( title, content ) {
 	return await apiWP()
@@ -49,9 +49,10 @@ export async function createClassicCartPage() {
 	const title = 'Classic Cart';
 	const content = '[woocommerce_cart]';
 
-	if ( ! ( await pageExistsByTitle( title ) ) ) {
-		return await createPage( title, content );
-	}
+	return (
+		( await pageExistsByTitle( title ) ) ||
+		( await createPage( title, content ) )
+	);
 }
 
 /**
@@ -63,9 +64,10 @@ export async function createClassicCheckoutPage() {
 	const title = 'Classic Checkout';
 	const content = '[woocommerce_checkout]';
 
-	if ( ! ( await pageExistsByTitle( title ) ) ) {
-		return await createPage( title, content );
-	}
+	return (
+		( await pageExistsByTitle( title ) ) ||
+		( await createPage( title, content ) )
+	);
 }
 
 /**
@@ -77,9 +79,10 @@ export async function createClassicShopPage() {
 	const title = 'Classic Shop';
 	const content = '[products]';
 
-	if ( ! ( await pageExistsByTitle( title ) ) ) {
-		return await createPage( title, content );
-	}
+	return (
+		( await pageExistsByTitle( title ) ) ||
+		( await createPage( title, content ) )
+	);
 }
 
 /**
@@ -93,9 +96,10 @@ export async function createProductCollectionBlockShopPage() {
 		pageContent,
 	} = require( './__fixtures__/product-collection.fixture.json' );
 
-	if ( ! ( await pageExistsByTitle( title ) ) ) {
-		return await createPage( title, pageContent );
-	}
+	return (
+		( await pageExistsByTitle( title ) ) ||
+		( await createPage( title, pageContent ) )
+	);
 }
 
 /**
@@ -109,7 +113,8 @@ export async function createProductsBlockShopPage() {
 		pageContent,
 	} = require( './__fixtures__/products.fixture.json' );
 
-	if ( ! ( await pageExistsByTitle( title ) ) ) {
-		return await createPage( title, pageContent );
-	}
+	return (
+		( await pageExistsByTitle( title ) ) ||
+		( await createPage( title, pageContent ) )
+	);
 }

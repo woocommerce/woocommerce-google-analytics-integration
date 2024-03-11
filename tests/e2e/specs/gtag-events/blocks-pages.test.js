@@ -25,9 +25,9 @@ import { getEventData, trackGtagEvent } from '../../utils/track-event';
 const config = require( '../../config/default' );
 const simpleProductPrice = parseFloat( config.products.simple.regular_price );
 
-let simpleProductID;
-
 test.describe( 'GTag events on block pages', () => {
+	let simpleProductID;
+
 	test.beforeAll( async () => {
 		await setSettings();
 		simpleProductID = await createSimpleProduct();

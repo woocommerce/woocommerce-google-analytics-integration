@@ -281,7 +281,7 @@ test.describe( 'GTag events on classic pages', () => {
 		await variableProductAddToCart( page, variableProductID );
 
 		const event = trackGtagEvent( page, 'purchase', 'checkout' );
-		await checkout( page );
+		const orderID = await checkout( page );
 
 		await event.then( ( request ) => {
 			const data = getEventData( request, 'purchase' );
@@ -300,6 +300,11 @@ test.describe( 'GTag events on classic pages', () => {
 				pr: '18.99',
 				va: 'colour: Green, size: Medium',
 			} );
+
+			expect( data[ 'epn.transaction_id' ] ).toEqual( orderID );
+			expect( data[ 'ep.affiliation' ] ).toEqual(
+				'WooCommerce E2E Test Suite'
+			);
 
 			const total = simpleProductPrice + simpleProductPrice + 18.99;
 			expect( data.cu ).toEqual( 'USD' );

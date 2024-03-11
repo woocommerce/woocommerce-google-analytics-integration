@@ -95,6 +95,8 @@ export async function blockProductAddToCart( page, productID ) {
  * Perform checkout steps to purchase a product.
  *
  * @param {Page} page
+ *
+ * @return {number} Order number.
  */
 export async function checkout( page ) {
 	const user = config.addresses.customer.billing;
@@ -135,4 +137,10 @@ export async function checkout( page ) {
 	await expect(
 		page.locator( '.wc-block-order-confirmation-status' )
 	).toContainText( 'order has been received' );
+
+	// Return order number from page.
+	return await page.$eval(
+		'.wc-block-order-confirmation-summary-list-item__value',
+		( el ) => el.textContent
+	);
 }

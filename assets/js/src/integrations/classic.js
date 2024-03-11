@@ -159,10 +159,12 @@ export function trackClassicPages( {
 			} );
 		} );
 
-	// Handle selection and add_to_cart in **Block** product listing the classic way.
+	// Handle select_content and add_to_cart in Products (Beta) block, Product Collection (Beta) block.
 	// Attach click event listeners to a whole product card, as some links may not have the product_id data attribute.
 	document
-		.querySelectorAll( '.products-block-post-template .product' )
+		.querySelectorAll(
+			'.products-block-post-template .product, .wc-block-product-template .product'
+		)
 		?.forEach( ( productCard ) => {
 			// Get the Product ID from a child node containing the relevant attribute
 			const productId = productCard

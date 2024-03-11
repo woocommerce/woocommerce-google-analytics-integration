@@ -59,7 +59,7 @@ export function trackClassicPages( {
 
 		// If the current product doesn't match search by ID.
 		const productToHandle =
-			product.id === productID
+			product?.id === productID
 				? product
 				: getProductFromID( parseInt( productID ), products, cart );
 

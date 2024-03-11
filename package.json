@@ -13,8 +13,11 @@
     "@wordpress/i18n": "3.15.0"
   },
   "devDependencies": {
+    "@playwright/test": "^1.42.1",
+    "@wordpress/env": "^9.5.0",
     "@wordpress/eslint-plugin": "^17.5.0",
     "@wordpress/scripts": "^26.19.0",
+    "axios": "^1.6.7",
     "eslint": "^8.0.0",
     "node-wp-i18n": "~1.2.3",
     "prettier": "npm:wp-prettier@^3.0.3"
@@ -35,7 +38,12 @@
     "archive": "composer archive --file=$npm_package_name --format=zip",
     "postarchive": "rm -rf $npm_package_name && unzip $npm_package_name.zip -d $npm_package_name && rm $npm_package_name.zip && zip -r $npm_package_name.zip $npm_package_name && rm -rf $npm_package_name",
     "build": "NODE_ENV=production wp-scripts build && npm run makepot &&  npm run archive",
-    "prebuild": "rm -rf ./vendor"
+    "prebuild": "rm -rf ./vendor",
+    "test:e2e": "npx playwright test --config=tests/e2e/config/playwright.config.js",
+    "test:e2e-dev": "npx playwright test --config=tests/e2e/config/playwright.config.js --debug",
+    "wp-env": "wp-env",
+    "wp-env:up": "npm run -- wp-env start --update",
+    "wp-env:down": "npm run wp-env stop"
   },
   "engines": {
     "node": ">=18",

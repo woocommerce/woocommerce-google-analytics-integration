@@ -1,0 +1,76 @@
+name: E2E Tests
+
+on:
+  push:
+    branches:
+      - "release/**"
+  pull_request:
+    branches:
+      - "release/**"
+  workflow_dispatch:
+    inputs:
+      wp-rc-version:
+        description: 'WordPress version for Release Candidate (ex. 6.3-RC3)'
+      wc-rc-version:
+        description: 'WooCommerce version for Release Candidate (ex. 8.0.0-rc.1)'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  E2ETests:
+    name: E2E Tests
+    runs-on: ubuntu-latest
+    env:
+      FORCE_COLOR: 2
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Prepare PHP
+        uses: woocommerce/grow/prepare-php@actions-v1
+        with:
+          install-deps: "no"
+
+      - name: Prepare node
+        uses: woocommerce/grow/prepare-node@actions-v1
+        with:
+          node-version-file: ".nvmrc"
+          ignore-scripts: "no"
+
+      - name: Build production bundle
+        run: |
+          echo "::group::Build log"
+          npm run build
+          echo "::endgroup::"
+
+      - name: Start wp-env container
+        run: npm run wp-env:up
+
+      - name: Install WP release candidate (optional)
+        if: github.event.inputs.wp-rc-version != ''
+        run: |
+          npm run -- wp-env run tests-cli -- wp core update --version=${{ github.event.inputs.wp-rc-version }}
+          npm run -- wp-env run tests-cli -- wp core update-db
+
+      - name: Install WC release candidate (optional)
+        if: github.event.inputs.wc-rc-version != ''
+        run: |
+          npm run -- wp-env run tests-cli -- wp plugin update woocommerce --version=${{ github.event.inputs.wc-rc-version }}
+          npm run -- wp-env run tests-cli -- wp wc update
+
+      - name: Download and install Chromium browser.
+        run: npx playwright install chromium
+
+      - name: Run tests
+        run: npm run test:e2e
+
+      - name: Archive e2e failure screenshots
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v3
+        with:
+            name: e2e-screenshots
+            path: tests/e2e/test-results/report/**/*.png
+            if-no-files-found: ignore
+            retention-days: 5

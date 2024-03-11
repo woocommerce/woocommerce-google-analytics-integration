@@ -216,11 +216,4 @@ export function trackClassicPages( {
 				}
 			} );
 		} );
-
-	// Track View Item List
-	if ( products?.length ) {
-		tracker.eventHandler( 'view_item_list' )( {
-			products,
-		} );
-	}
 }

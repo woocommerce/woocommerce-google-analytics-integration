@@ -182,9 +182,9 @@ export const purchase = ( { order } ) => {
 		affiliation: order.affiliation,
 		currency: order.currency_code,
 		value: formatPrice( order.total_price, order.currency_minor_unit ),
-		tax: formatPrice( order.total_tax, order.currency_minor_unit ),
+		tax: formatPrice( order.tax_total, order.currency_minor_unit ),
 		shipping: formatPrice(
-			order.total_shipping,
+			order.shipping_total,
 			order.currency_minor_unit
 		),
 		items: order.items.map( getProductFieldObject ),

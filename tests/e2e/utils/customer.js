@@ -78,6 +78,9 @@ export async function relatedProductAddToCart( page ) {
 /**
  * Add a product to the cart from a block shop page.
  *
+ * Note: This function will match any product type, so it should not be used for
+ * products that can not be added directly from the shop page.
+ *
  * @param {Page}   page
  * @param {number} productID
  */

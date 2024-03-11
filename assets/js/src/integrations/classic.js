@@ -52,13 +52,23 @@ export function trackClassicPages( {
 	 * @param {HTMLElement[]} button    - An array of HTML elements representing the add to cart button.
 	 */
 	document.body.onadded_to_cart = ( e, fragments, cartHash, button ) => {
-		tracker.eventHandler( 'add_to_cart' )( {
-			product: getProductFromID(
-				parseInt( button[ 0 ].dataset.product_id ),
-				products,
-				cart
-			),
-		} );
+		// Get product ID from data attribute (archive pages) or value (single product pages).
+		const productID = parseInt(
+			button[ 0 ].dataset.product_id || button[ 0 ].value
+		);
+
+		// If the current product doesn't match search by ID.
+		const productToHandle =
+			product.id === productID
+				? product
+				: getProductFromID( parseInt( productID ), products, cart );
+
+		// Confirm we found a product to handle.
+		if ( ! productToHandle ) {
+			return;
+		}
+
+		tracker.eventHandler( 'add_to_cart' )( { product: productToHandle } );
 	};
 
 	/**

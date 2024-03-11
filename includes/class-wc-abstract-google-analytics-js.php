@@ -80,7 +80,7 @@ abstract class WC_Abstract_Google_Analytics_JS {
 		add_action(
 			'woocommerce_add_to_cart',
 			function ( $cart_item_key, $product_id, $quantity, $variation_id, $variation ) {
-				$this->set_script_data( 'added_to_cart', $this->get_formatted_product( wc_get_product( $product_id ), $variation ) );
+				$this->set_script_data( 'added_to_cart', $this->get_formatted_product( wc_get_product( $product_id ), $variation_id, $variation ) );
 			},
 			10,
 			5
@@ -203,21 +203,33 @@ abstract class WC_Abstract_Google_Analytics_JS {
 	 * Returns an array of product data in the required format
 	 *
 	 * @param WC_Product $product   The product to format.
+	 * @param int        $variation_id Variation product ID.
 	 * @param array|bool $variation An array containing product variation attributes to include in the product data.
 	 *                              For the "variation" type products, we'll use product->get_attributes.
 	 *
 	 * @return array
 	 */
-	public function get_formatted_product( WC_Product $product, $variation = false ): array {
+	public function get_formatted_product( WC_Product $product, $variation_id = 0, $variation = false ): array {
+		$product_id = $product->is_type( 'variation' ) ? $product->get_parent_id() : $product->get_id();
+		$price      = $product->get_price();
+
+		// Get product price from chosen variation if set.
+		if ( $variation_id ) {
+			$variation_product = wc_get_product( $variation_id );
+			if ( $variation_product ) {
+				$price = $variation_product->get_price();
+			}
+		}
+
 		$formatted = array(
-			'id'         => $product->is_type( 'variation' ) ? $product->get_parent_id() : $product->get_id(),
+			'id'         => $product_id,
 			'name'       => $product->get_title(),
 			'categories' => array_map(
 				fn( $category ) => array( 'name' => $category->name ),
-				wc_get_product_terms( $product->get_id(), 'product_cat', array( 'number' => 5 ) )
+				wc_get_product_terms( $product_id, 'product_cat', array( 'number' => 5 ) )
 			),
 			'prices'     => array(
-				'price'               => $this->get_formatted_price( $product->get_price() ),
+				'price'               => $this->get_formatted_price( $price ),
 				'currency_minor_unit' => wc_get_price_decimals(),
 			),
 			'extensions' => array(

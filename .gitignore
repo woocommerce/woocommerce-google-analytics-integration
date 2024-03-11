@@ -21,7 +21,7 @@ build
 /logs/*
 !/logs/.htaccess
 
-tests/e2e/config/local-*
+tests/e2e/test-results
 .phpunit.result.cache
 .eslintcache
 

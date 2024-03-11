@@ -266,15 +266,11 @@ abstract class WC_Abstract_Google_Analytics_JS {
 	/**
 	 * Returns an array of order data in the required format
 	 *
-	 * @param WC_Abstract_Order|int $order An instance of the WooCommerce Order object or the order ID
+	 * @param WC_Abstract_Order $order An instance of the WooCommerce Order object.
 	 *
 	 * @return array
 	 */
 	public function get_formatted_order( $order ): array {
-		if ( is_int( $order ) ) {
-			$order = wc_get_order( $order_id );
-		}
-
 		return array(
 			'totals' => array(
 				'currency_code'       => $order->get_currency(),

@@ -178,10 +178,14 @@ export const purchase = ( { order } ) => {
 	}
 
 	return {
-		currency: order.totals.currency_code,
-		value: formatPrice(
-			order.totals.total_price,
-			order.totals.currency_minor_unit
+		transaction_id: order.id,
+		affiliation: order.affiliation,
+		currency: order.currency_code,
+		value: formatPrice( order.total_price, order.currency_minor_unit ),
+		tax: formatPrice( order.total_tax, order.currency_minor_unit ),
+		shipping: formatPrice(
+			order.total_shipping,
+			order.currency_minor_unit
 		),
 		items: order.items.map( getProductFieldObject ),
 	};

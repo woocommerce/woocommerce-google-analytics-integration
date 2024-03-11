@@ -264,12 +264,14 @@ abstract class WC_Abstract_Google_Analytics_JS {
 		}
 
 		return array(
-			'totals' => array(
-				'currency_code'       => $order->get_currency(),
-				'total_price'         => $this->get_formatted_price( $order->get_total() ),
-				'currency_minor_unit' => wc_get_price_decimals(),
-			),
-			'items'  => array_map(
+			'id'                  => $order->get_id(),
+			'affiliation'         => get_bloginfo( 'name' ),
+			'currency_code'       => $order->get_currency(),
+			'currency_minor_unit' => wc_get_price_decimals(),
+			'tax_total'           => $this->get_formatted_price( $order->get_total_tax() ),
+			'shipping_total'      => $this->get_formatted_price( $order->get_total_shipping() ),
+			'total_price'         => $this->get_formatted_price( $order->get_total() ),
+			'items'               => array_map(
 				function ( $item ) {
 					return array_merge(
 						$this->get_formatted_product( $item->get_product() ),

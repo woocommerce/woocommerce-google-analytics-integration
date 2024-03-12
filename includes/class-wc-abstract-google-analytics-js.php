@@ -272,12 +272,16 @@ abstract class WC_Abstract_Google_Analytics_JS {
 	 */
 	public function get_formatted_order( $order ): array {
 		return array(
-			'totals' => array(
+			'id'          => $order->get_id(),
+			'affiliation' => get_bloginfo( 'name' ),
+			'totals'      => array(
 				'currency_code'       => $order->get_currency(),
-				'total_price'         => $this->get_formatted_price( $order->get_total() ),
 				'currency_minor_unit' => wc_get_price_decimals(),
+				'tax_total'           => $this->get_formatted_price( $order->get_total_tax() ),
+				'shipping_total'      => $this->get_formatted_price( $order->get_total_shipping() ),
+				'total_price'         => $this->get_formatted_price( $order->get_total() ),
 			),
-			'items'  => array_map(
+			'items'       => array_map(
 				function ( $item ) {
 					return array_merge(
 						$this->get_formatted_product( $item->get_product() ),

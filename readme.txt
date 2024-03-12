@@ -48,6 +48,15 @@ Duplicate Google Analytics code causes a conflict in tracking. Remove any other 
 
 == Changelog ==
 
+= 2.0.2 - 2024-03-12 =
+* Dev - Add E2E testing to track events across all page types.
+* Fix - Add to cart & select content events for All Products Block.
+* Fix - Get correct variation data when formatting product.
+* Fix - Handle AJAX add to cart for simple products.
+* Fix - Purchase price format.
+* Fix - Track purchase transaction ID.
+* Fix - Typo with undefined variable.
+
 = 2.0.1 - 2024-03-07 =
 * Fix - Adding variable product attributes.
 * Fix - Resolve Google Analytics not loading if gtag already exists on the window object.

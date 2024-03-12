@@ -24,12 +24,16 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 
 	/** @var array $mappings A map of the GA4 events and the classic WooCommerce hooks that trigger them */
 	private $mappings = array(
-		'begin_checkout'   => 'woocommerce_before_checkout_form',
-		'purchase'         => 'woocommerce_thankyou',
-		'view_item_list'   => 'woocommerce_before_shop_loop_item',
-		'add_to_cart'      => 'woocommerce_add_to_cart',
-		'remove_from_cart' => 'woocommerce_cart_item_removed',
-		'view_item'        => 'woocommerce_after_single_product',
+		'actions' => array(
+			'begin_checkout'   => 'woocommerce_before_checkout_form',
+			'purchase'         => 'woocommerce_thankyou',
+			'add_to_cart'      => 'woocommerce_add_to_cart',
+			'remove_from_cart' => 'woocommerce_cart_item_removed',
+			'view_item'        => 'woocommerce_after_single_product',
+		),
+		'filters' => array(
+			'view_item_list' => 'woocommerce_loop_add_to_cart_link',
+		),
 	);
 
 	/**
@@ -42,7 +46,7 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 		parent::__construct();
 		self::$settings = $settings;
 
-		$this->map_actions();
+		$this->map_hooks();
 
 		// Setup frontend scripts
 		add_action( 'wp_enqueue_scripts', array( $this, 'enquque_tracker' ), 5 );
@@ -121,20 +125,43 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 	 *
 	 * @return void
 	 */
-	public function map_actions(): void {
+	public function map_hooks(): void {
 		array_walk(
-			$this->mappings,
+			$this->mappings['actions'],
 			function ( $hook, $gtag_event ) {
 				add_action(
 					$hook,
 					function () use ( $gtag_event ) {
-						if ( ! in_array( $gtag_event, $this->script_data['events'] ?? [], true ) ) {
-							$this->append_script_data( 'events', $gtag_event );
-						}
+						$this->append_event( $gtag_event );
 					}
 				);
 			}
 		);
+
+		array_walk(
+			$this->mappings['filters'],
+			function ( $hook, $gtag_event ) {
+				add_action(
+					$hook,
+					function ( $filtered_value ) use ( $gtag_event ) {
+						$this->append_event( $gtag_event );
+						return $filtered_value;
+					}
+				);
+			}
+		);
+	}
+
+	/**
+	 * Appends a specific event, if it's not included yet.
+	 *
+	 * @param string $gtag_event
+	 * @return void
+	 */
+	private function append_event( string $gtag_event ) {
+		if ( ! in_array( $gtag_event, $this->script_data['events'] ?? [], true ) ) {
+			$this->append_script_data( 'events', $gtag_event );
+		}
 	}
 
 	/**

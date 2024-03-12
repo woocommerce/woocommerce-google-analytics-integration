@@ -46,7 +46,7 @@ export const view_item_list = ( {
  */
 export const add_to_cart = ( { product, quantity = 1 } ) => {
 	return {
-		items: [ getProductFieldObject( product, quantity ) ],
+		items: product ? [ getProductFieldObject( product, quantity ) ] : [],
 	};
 };
 
@@ -59,7 +59,7 @@ export const add_to_cart = ( { product, quantity = 1 } ) => {
  */
 export const remove_from_cart = ( { product, quantity = 1 } ) => {
 	return {
-		items: [ getProductFieldObject( product, quantity ) ],
+		items: product ? [ getProductFieldObject( product, quantity ) ] : [],
 	};
 };
 
@@ -128,6 +128,10 @@ export const add_shipping_info = ( { storeCart } ) => {
  * @param {Object} params.product The product to track
  */
 export const select_content = ( { product } ) => {
+	if ( ! product ) {
+		return false;
+	}
+
 	return {
 		content_type: 'product',
 		content_id: getProductId( product ),

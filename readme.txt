@@ -67,8 +67,4 @@ Duplicate Google Analytics code causes a conflict in tracking. Remove any other 
 * Update - Extension branding to Google Analytics for WooCommerce.
 * Update - Tracking for GA4 when using Blocks.
 
-= 1.8.14 - 2024-02-07 =
-* Tweak - Declare feature compatibility for the new product editor (also called product block editor).
-* Tweak - WC 8.6 compatibility.
-
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce-google-analytics-integration/trunk/changelog.txt).

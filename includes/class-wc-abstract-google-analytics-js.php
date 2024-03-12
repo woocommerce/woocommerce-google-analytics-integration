@@ -285,7 +285,7 @@ abstract class WC_Abstract_Google_Analytics_JS {
 				'shipping_total'      => $this->get_formatted_price( $order->get_total_shipping() ),
 				'total_price'         => $this->get_formatted_price( $order->get_total() ),
 			),
-			'items'        => array_map(
+			'items'       => array_map(
 				function ( $item ) {
 					return array_merge(
 						$this->get_formatted_product( $item->get_product() ),

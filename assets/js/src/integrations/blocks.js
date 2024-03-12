@@ -21,6 +21,7 @@ addUniqueAction(
 	tracker.eventHandler( 'begin_checkout' )
 );
 
+// These actions only works for All Products Block
 addUniqueAction(
 	`${ ACTION_PREFIX }-cart-add-item`,
 	NAMESPACE,
@@ -35,11 +36,11 @@ addUniqueAction(
 	tracker.eventHandler( 'view_item_list' )
 );
 
-/**
- * Remove actions which are unreliable, and sometimes does not work.
- * We cover them the "classic" way, by attaching event listeners to block internals.
- */
-removeAction( `${ ACTION_PREFIX }-product-view-link`, NAMESPACE );
+addUniqueAction(
+	`${ ACTION_PREFIX }-product-view-link`,
+	NAMESPACE,
+	tracker.eventHandler( 'select_content' )
+);
 
 /**
  * Remove additional actions added by WooCommerce Core which are either

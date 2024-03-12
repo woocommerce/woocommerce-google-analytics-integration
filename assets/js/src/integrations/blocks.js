@@ -21,7 +21,6 @@ addUniqueAction(
 	tracker.eventHandler( 'begin_checkout' )
 );
 
-
 addUniqueAction(
 	`${ ACTION_PREFIX }-cart-add-item`,
 	NAMESPACE,

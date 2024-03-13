@@ -49,8 +49,38 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 		$this->map_hooks();
 
 		// Setup frontend scripts
+		add_action( 'wp_head', array( $this, 'setup_site_tag' ), 2 );
 		add_action( 'wp_enqueue_scripts', array( $this, 'enquque_tracker' ), 5 );
 		add_action( 'wp_footer', array( $this, 'inline_script_data' ) );
+	}
+
+	/**
+	 * Setup the global site tag as early as possible on the page
+	 *
+	 * @return void
+	 */
+	public function setup_site_tag() {
+		$tracker_function = self::tracker_function_name();
+		$default_consents = json_encode( self::get_consent_modes() );
+		$ga_id            = self::get( 'ga_id' );
+		$developer_id     = self::DEVELOPER_ID;
+		$config           = $this->get_site_tag_config();
+
+		echo <<<HTML
+		<!-- Google Analytics for WooCommerce (gtag.js) -->
+		<script async src="https://www.googletagmanager.com/gtag/js?id=$ga_id" id="google-tag-manager"></script>
+		<script>
+		window.dataLayer = window.dataLayer || [];
+		function $tracker_function(){dataLayer.push(arguments);}
+		// Set up default consent state, denying all for EEA visitors.
+		for ( const mode of $default_consents || [] ) {
+			$tracker_function( 'consent', 'default', mode );
+		}
+		$tracker_function("js", new Date());
+		$tracker_function("set", "developer_id.$developer_id", true);
+		$tracker_function("config", "$ga_id", $config);
+		</script>
+		HTML;
 	}
 
 	/**
@@ -60,41 +90,28 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 	 * @return void
 	 */
 	public function enquque_tracker(): void {
-		wp_enqueue_script(
+		// Although we're not enqueuing the Google Tag Manager script the WordPress way, it still
+		// needs to be registered to prevent WooCommerce core from enqueueing the script.
+		wp_register_script(
 			'google-tag-manager',
 			'https://www.googletagmanager.com/gtag/js?id=' . self::get( 'ga_id' ),
 			array(),
 			null,
-			array(
-				'strategy' => 'async',
-			)
 		);
-		// tracker.js needs to be executed ASAP, the remaining bits for main.js could be deffered,
-		// but to reduce the traffic, we ship it all together.
+
 		wp_enqueue_script(
 			$this->script_handle,
 			Plugin::get_instance()->get_js_asset_url( 'main.js' ),
 			array(
 				...Plugin::get_instance()->get_js_asset_dependencies( 'main' ),
-				'google-tag-manager',
 			),
 			Plugin::get_instance()->get_js_asset_version( 'main' ),
 			true
 		);
-		// Provide tracker's configuration.
-		wp_add_inline_script(
-			$this->script_handle,
-			sprintf(
-				'var wcgai = {config: %s};',
-				wp_json_encode( $this->get_analytics_config() )
-			),
-			'before'
-		);
 	}
 
 	/**
-	 * Feed classic tracking with event data via inline script.
-	 * Make sure it's added at the bottom of the page, so all the data is collected.
+	 * Add all event data via an inline script in the footer to ensure all the data is collected in time.
 	 *
 	 * @return void
 	 */
@@ -112,7 +129,7 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 		wp_add_inline_script(
 			$this->data_script_handle,
 			sprintf(
-				'wcgai.trackClassicPages( %s );',
+				'var wcgaiData = %s;',
 				$this->get_script_data()
 			)
 		);
@@ -214,10 +231,8 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 	 *
 	 * @return array
 	 */
-	public function get_analytics_config(): array {
-		$defaults = array(
-			'gtag_id'               => self::get( 'ga_id' ),
-			'tracker_function_name' => self::tracker_function_name(),
+	public function get_site_tag_config(): string {
+		return json_encode( array(
 			'track_404'             => 'yes' === self::get( 'ga_404_tracking_enabled' ),
 			'allow_google_signals'  => 'yes' === self::get( 'ga_support_display_advertising' ),
 			'logged_in'             => is_user_logged_in(),
@@ -228,15 +243,7 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 			'custom_map'            => array(
 				'dimension1' => 'logged_in',
 			),
-			'events'                => self::get_enabled_events(),
-			'identifier'            => self::get( 'ga_product_identifier' ),
-			'consent_modes'         => self::get_consent_modes(),
-		);
-
-		$config                 = apply_filters( 'woocommerce_ga_gtag_config', $defaults );
-		$config['developer_id'] = self::DEVELOPER_ID;
-
-		return $config;
+		) );
 	}
 
 	/**

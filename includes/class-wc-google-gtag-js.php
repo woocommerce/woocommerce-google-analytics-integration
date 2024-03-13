@@ -123,6 +123,7 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 			array(
 				'tracker_function_name' => self::tracker_function_name(),
 				'events'                => $this->get_enabled_events(),
+				'identifier'            => self::get( 'ga_product_identifier' ),
 			)
 		);
 

@@ -93,7 +93,7 @@ export const getProductId = ( product ) => {
 		return identifier;
 	}
 
-	if ( config.identifier === 'product_sku' ) {
+	if ( config().settings.identifier === 'product_sku' ) {
 		return product.sku ? product.sku : '#' + product.id;
 	}
 

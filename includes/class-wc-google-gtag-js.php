@@ -63,11 +63,10 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 		// phpcs:disable WordPress.WP.EnqueuedResources.NonEnqueuedScript
 		printf(
 			'<!-- Google Analytics for WooCommerce (gtag.js) -->
-			<script async src="https://www.googletagmanager.com/gtag/js?id=%1$s" id="google-tag-manager"></script>
 			<script>
 			window.dataLayer = window.dataLayer || [];
 			function %2$s(){dataLayer.push(arguments);}
-			// Set up default consent state, denying all for EEA visitors.
+			// Set up default consent state.
 			for ( const mode of %4$s || [] ) {
 				%2$s( "consent", "default", mode );
 			}
@@ -91,14 +90,14 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 	 * @return void
 	 */
 	public function enquque_tracker(): void {
-		// Although we're not enqueuing the Google Tag Manager script the WordPress way, it still
-		// needs to be registered to prevent WooCommerce core from enqueueing the script.
-		wp_register_script(
+		wp_enqueue_script(
 			'google-tag-manager',
 			'https://www.googletagmanager.com/gtag/js?id=' . self::get( 'ga_id' ),
 			array(),
 			null,
-			false
+			array(
+				'strategy' => 'async',
+			)
 		);
 
 		wp_enqueue_script(
@@ -106,6 +105,7 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 			Plugin::get_instance()->get_js_asset_url( 'main.js' ),
 			array(
 				...Plugin::get_instance()->get_js_asset_dependencies( 'main' ),
+				'google-tag-manager',
 			),
 			Plugin::get_instance()->get_js_asset_version( 'main' ),
 			true

@@ -243,16 +243,19 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 	 * @return array
 	 */
 	public function get_site_tag_config(): array {
-		return array(
-			'track_404'            => 'yes' === self::get( 'ga_404_tracking_enabled' ),
-			'allow_google_signals' => 'yes' === self::get( 'ga_support_display_advertising' ),
-			'logged_in'            => is_user_logged_in(),
-			'linker'               => array(
-				'domains'        => ! empty( self::get( 'ga_linker_cross_domains' ) ) ? array_map( 'esc_js', explode( ',', self::get( 'ga_linker_cross_domains' ) ) ) : array(),
-				'allow_incoming' => 'yes' === self::get( 'ga_linker_allow_incoming_enabled' ),
-			),
-			'custom_map'           => array(
-				'dimension1' => 'logged_in',
+		return apply_filters(
+			'woocommerce_ga_gtag_config',
+			array(
+				'track_404'            => 'yes' === self::get( 'ga_404_tracking_enabled' ),
+				'allow_google_signals' => 'yes' === self::get( 'ga_support_display_advertising' ),
+				'logged_in'            => is_user_logged_in(),
+				'linker'               => array(
+					'domains'        => ! empty( self::get( 'ga_linker_cross_domains' ) ) ? array_map( 'esc_js', explode( ',', self::get( 'ga_linker_cross_domains' ) ) ) : array(),
+					'allow_incoming' => 'yes' === self::get( 'ga_linker_allow_incoming_enabled' ),
+				),
+				'custom_map'           => array(
+					'dimension1' => 'logged_in',
+				),
 			),
 		);
 	}

@@ -60,27 +60,28 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 	 * @return void
 	 */
 	public function setup_site_tag() {
-		$tracker_function = self::tracker_function_name();
-		$default_consents = json_encode( self::get_consent_modes() );
-		$ga_id            = self::get( 'ga_id' );
-		$developer_id     = self::DEVELOPER_ID;
-		$config           = $this->get_site_tag_config();
-
-		echo <<<HTML
-		<!-- Google Analytics for WooCommerce (gtag.js) -->
-		<script async src="https://www.googletagmanager.com/gtag/js?id=$ga_id" id="google-tag-manager"></script>
-		<script>
-		window.dataLayer = window.dataLayer || [];
-		function $tracker_function(){dataLayer.push(arguments);}
-		// Set up default consent state, denying all for EEA visitors.
-		for ( const mode of $default_consents || [] ) {
-			$tracker_function( 'consent', 'default', mode );
-		}
-		$tracker_function("js", new Date());
-		$tracker_function("set", "developer_id.$developer_id", true);
-		$tracker_function("config", "$ga_id", $config);
-		</script>
-		HTML;
+		// phpcs:disable WordPress.WP.EnqueuedResources.NonEnqueuedScript
+		printf(
+			'<!-- Google Analytics for WooCommerce (gtag.js) -->
+			<script async src="https://www.googletagmanager.com/gtag/js?id=%1$s" id="google-tag-manager"></script>
+			<script>
+			window.dataLayer = window.dataLayer || [];
+			function %2$s(){dataLayer.push(arguments);}
+			// Set up default consent state, denying all for EEA visitors.
+			for ( const mode of %4$s || [] ) {
+				%2$s( "consent", "default", mode );
+			}
+			%2$s("js", new Date());
+			%2$s("set", "developer_id.%3$s", true);
+			%2$s("config", "%1$s", %5$s);
+			</script>',
+			esc_js( self::get( 'ga_id' ) ),
+			esc_js( self::tracker_function_name() ),
+			esc_js( self::DEVELOPER_ID ),
+			json_encode( self::get_consent_modes() ),
+			json_encode( $this->get_site_tag_config() )
+		);
+		// phpcs:enable WordPress.WP.EnqueuedResources.NonEnqueuedScript
 	}
 
 	/**
@@ -97,6 +98,7 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 			'https://www.googletagmanager.com/gtag/js?id=' . self::get( 'ga_id' ),
 			array(),
 			null,
+			false
 		);
 
 		wp_enqueue_script(
@@ -120,7 +122,7 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 			'settings',
 			array(
 				'tracker_function_name' => self::tracker_function_name(),
-				'events'                => $this->get_enabled_events()
+				'events'                => $this->get_enabled_events(),
 			)
 		);
 
@@ -239,19 +241,19 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 	 *
 	 * @return array
 	 */
-	public function get_site_tag_config(): string {
-		return json_encode( array(
-			'track_404'             => 'yes' === self::get( 'ga_404_tracking_enabled' ),
-			'allow_google_signals'  => 'yes' === self::get( 'ga_support_display_advertising' ),
-			'logged_in'             => is_user_logged_in(),
-			'linker'                => array(
+	public function get_site_tag_config(): array {
+		return array(
+			'track_404'            => 'yes' === self::get( 'ga_404_tracking_enabled' ),
+			'allow_google_signals' => 'yes' === self::get( 'ga_support_display_advertising' ),
+			'logged_in'            => is_user_logged_in(),
+			'linker'               => array(
 				'domains'        => ! empty( self::get( 'ga_linker_cross_domains' ) ) ? array_map( 'esc_js', explode( ',', self::get( 'ga_linker_cross_domains' ) ) ) : array(),
 				'allow_incoming' => 'yes' === self::get( 'ga_linker_allow_incoming_enabled' ),
 			),
-			'custom_map'            => array(
+			'custom_map'           => array(
 				'dimension1' => 'logged_in',
 			),
-		) );
+		);
 	}
 
 	/**

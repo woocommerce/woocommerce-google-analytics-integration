@@ -15,14 +15,7 @@ import { config } from '../config';
  * It also handles some Block events that are not fired reliably for `woocommerce/all-products` block.
  */
 export function classicTracking() {
-	const {
-		events,
-		cart,
-		products,
-		product,
-		addedToCart,
-		order,
-	} = config();
+	const { events, cart, products, product, addedToCart, order } = config();
 
 	// Instantly track the events listed in the `events` object.
 	Object.values( events ?? {} ).forEach( ( eventName ) => {

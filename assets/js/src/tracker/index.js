@@ -30,7 +30,9 @@ class Tracker {
 	 */
 	eventHandler( name ) {
 		if ( ! config() ) {
-			throw new Error( 'Google Analytics for WooCommerce: eventHandler called too early' );
+			throw new Error(
+				'Google Analytics for WooCommerce: eventHandler called too early'
+			);
 		}
 
 		/* eslint import/namespace: [ 'error', { allowComputed: true } ] */

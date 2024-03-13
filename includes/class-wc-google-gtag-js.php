@@ -84,8 +84,7 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 	}
 
 	/**
-	 * Register tracker scripts and its inline config.
-	 * We need to execute tracker.js w/ `gtag` configuration before any trackable action may happen.
+	 * Register tracker scripts.
 	 *
 	 * @return void
 	 */

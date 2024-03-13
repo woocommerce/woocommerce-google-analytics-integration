@@ -3,6 +3,7 @@ import { addUniqueAction } from '../utils';
 import { tracker } from '../tracker';
 import { ACTION_PREFIX, NAMESPACE } from '../constants';
 
+// We add actions asynchronosly, to make sure handlares will have the config available.
 export const blocksTracking = () => {
 	addUniqueAction(
 		`${ ACTION_PREFIX }-product-render`,
@@ -44,7 +45,7 @@ export const blocksTracking = () => {
 	);
 };
 
-/**
+/*
  * Remove additional actions added by WooCommerce Core which are either
  * not supported by Google Analytics for WooCommerce or are redundant
  * since Google retired Universal Analytics.

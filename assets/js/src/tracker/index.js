@@ -19,30 +19,6 @@ class Tracker {
 			throw new Error( 'Cannot instantiate more than one Tracker' );
 		}
 		instance = this;
-
-		window.dataLayer = window.dataLayer || [];
-
-		function gtag() {
-			window.dataLayer.push( arguments );
-		}
-
-		window[ config.tracker_function_name ] = gtag;
-
-		// Set up default consent state, denying all for EEA visitors.
-		for ( const mode of config.consent_modes || [] ) {
-			gtag( 'consent', 'default', mode );
-		}
-
-		gtag( 'js', new Date() );
-		gtag( 'set', `developer_id.${ config.developer_id }`, true );
-		gtag( 'config', config.gtag_id, {
-			allow_google_signals: config.allow_google_signals,
-			link_attribution: config.link_attribution,
-			anonymize_ip: config.anonymize_ip,
-			logged_in: config.logged_in,
-			linker: config.linker,
-			custom_map: config.custom_map,
-		} );
 	}
 
 	/**
@@ -53,6 +29,10 @@ class Tracker {
 	 * @throws {Error} If the event name is not supported.
 	 */
 	eventHandler( name ) {
+		if ( ! config() ) {
+			throw new Error( 'Google Analytics for WooCommerce: eventHandler called too early' );
+		}
+
 		/* eslint import/namespace: [ 'error', { allowComputed: true } ] */
 		const formatter = formatters[ name ];
 		if ( typeof formatter !== 'function' ) {
@@ -61,8 +41,8 @@ class Tracker {
 
 		return function trackerEventHandler( data ) {
 			const eventData = formatter( data );
-			if ( config.events.includes( name ) && eventData ) {
-				window[ config.tracker_function_name ](
+			if ( config().settings.events.includes( name ) && eventData ) {
+				window[ config().settings.tracker_function_name ](
 					'event',
 					name,
 					eventData

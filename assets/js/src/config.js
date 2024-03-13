@@ -1,2 +1,4 @@
-/* global wcgai */
-export const config = wcgai.config;
+/* global ga4wData */
+export const config = () => {
+    return window.ga4wData;
+};

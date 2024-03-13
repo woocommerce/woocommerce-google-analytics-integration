@@ -63,17 +63,4 @@ Duplicate Google Analytics code causes a conflict in tracking. Remove any other 
 * Tweak - Update Contributors list.
 * Tweak - Update assets and readme for 2.0.
 
-= 2.0.0 - 2024-03-05 =
-* Add - Basic consent mode support.
-* Add - Setting to specify the structure of the product identifier.
-* Add - Update notice for merchants using a Universal Analytics Property ID.
-* Dev - Remove options remapping, use settings directly.
-* Fix - Prevent tracking orders multiple times and additional fixes.
-* Remove - Universal Analytics code.
-* Remove - Universal Analytics integration.
-* Simplify tracker event handler API.
-* Update - Add shared tracking functionality for WooCommerce Blocks and classic pages.
-* Update - Extension branding to Google Analytics for WooCommerce.
-* Update - Tracking for GA4 when using Blocks.
-
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce-google-analytics-integration/trunk/changelog.txt).

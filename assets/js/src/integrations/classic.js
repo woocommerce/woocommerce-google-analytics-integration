@@ -1,6 +1,5 @@
 import { tracker } from '../tracker';
 import { getProductFromID } from '../utils';
-import { config } from '../config';
 
 /**
  * The Google Analytics integration for classic WooCommerce pages
@@ -13,10 +12,23 @@ import { config } from '../config';
  * To be executed once data set is complete, and `document` is ready.
  *
  * It also handles some Block events that are not fired reliably for `woocommerce/all-products` block.
+ *
+ * @param {Object}   data               - The tracking data from the current page load, containing the following properties:
+ * @param {Object}   data.events        - An object containing the events to be instantly tracked.
+ * @param {Object}   data.cart          - The cart object.
+ * @param {Object[]} data.products      - An array of all product from the current page.
+ * @param {Object}   data.product       - The single product object.
+ * @param {Object}   data.added_to_cart - The product added to cart.
+ * @param {Object}   data.order         - The order object.
  */
-export function classicTracking() {
-	const { events, cart, products, product, addedToCart, order } = config();
-
+export function classicTracking( {
+	events,
+	cart,
+	products,
+	product,
+	added_to_cart: addedToCart,
+	order,
+} ) {
 	// Instantly track the events listed in the `events` object.
 	Object.values( events ?? {} ).forEach( ( eventName ) => {
 		if ( eventName === 'add_to_cart' ) {

@@ -18,6 +18,6 @@ function eventuallyInitializeTracking() {
 		);
 	}
 
-	classicTracking();
+	classicTracking( config() );
 	blocksTracking();
 }

@@ -17,6 +17,7 @@ import {
 	simpleProductAddToCart,
 } from '../../utils/customer';
 import {
+	createAllProductsBlockShopPage,
 	createProductCollectionBlockShopPage,
 	createProductsBlockShopPage,
 } from '../../utils/create-page';
@@ -239,6 +240,55 @@ test.describe( 'GTag events on block pages', () => {
 				nm: 'Simple product',
 				ln: 'Product List',
 				ca: 'Uncategorized',
+				pr: simpleProductPrice.toString(),
+				lp: '1',
+			} );
+			expect( data[ 'ep.item_list_id' ] ).toEqual( 'engagement' );
+			expect( data[ 'ep.item_list_name' ] ).toEqual( 'Viewing products' );
+		} );
+	} );
+
+	test( 'Add to cart event is sent from the all products block shop page', async ( {
+		page,
+	} ) => {
+		await createAllProductsBlockShopPage();
+
+		const event = trackGtagEvent( page, 'add_to_cart' );
+
+		await page.goto( 'all-products-block-shop' );
+
+		// Buttons do not have a product ID, since they are sorted by latest fetch the first product.
+		const addToCartButton = await page
+			.locator( '.add_to_cart_button' )
+			.first();
+		await addToCartButton.click();
+		await expect( addToCartButton.getByText( '1 in cart' ) ).toBeVisible();
+
+		await event.then( ( request ) => {
+			const data = getEventData( request, 'add_to_cart' );
+			expect( data.product1 ).toEqual( {
+				id: simpleProductID.toString(),
+				nm: 'Simple product',
+				qt: '1',
+				pr: simpleProductPrice.toString(),
+			} );
+		} );
+	} );
+
+	test( 'View item list event is sent from the all products block shop page', async ( {
+		page,
+	} ) => {
+		await createAllProductsBlockShopPage();
+
+		const event = trackGtagEvent( page, 'view_item_list' );
+		await page.goto( 'all-products-block-shop' );
+
+		await event.then( ( request ) => {
+			const data = getEventData( request, 'view_item_list' );
+			expect( data.product1 ).toEqual( {
+				id: simpleProductID.toString(),
+				nm: 'Simple product',
+				ln: 'woocommerce/all-products',
 				pr: simpleProductPrice.toString(),
 				lp: '1',
 			} );

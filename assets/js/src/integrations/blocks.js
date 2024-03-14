@@ -1,26 +1,25 @@
 import { removeAction } from '@wordpress/hooks';
 import { addUniqueAction } from '../utils';
-import { tracker } from '../tracker';
 import { ACTION_PREFIX, NAMESPACE } from '../constants';
 
-// We add actions asynchronosly, to make sure handlares will have the config available.
-export const blocksTracking = () => {
+// We add actions asynchronosly, to make sure handlers will have the config available.
+export const blocksTracking = ( eventHandler ) => {
 	addUniqueAction(
 		`${ ACTION_PREFIX }-product-render`,
 		NAMESPACE,
-		tracker.eventHandler( 'view_item' )
+		eventHandler( 'view_item' )
 	);
 
 	addUniqueAction(
 		`${ ACTION_PREFIX }-cart-remove-item`,
 		NAMESPACE,
-		tracker.eventHandler( 'remove_from_cart' )
+		eventHandler( 'remove_from_cart' )
 	);
 
 	addUniqueAction(
 		`${ ACTION_PREFIX }-checkout-render-checkout-form`,
 		NAMESPACE,
-		tracker.eventHandler( 'begin_checkout' )
+		eventHandler( 'begin_checkout' )
 	);
 
 	// These actions only works for All Products Block
@@ -28,20 +27,20 @@ export const blocksTracking = () => {
 		`${ ACTION_PREFIX }-cart-add-item`,
 		NAMESPACE,
 		( { product } ) => {
-			tracker.eventHandler( 'add_to_cart' )( { product } );
+			eventHandler( 'add_to_cart' )( { product } );
 		}
 	);
 
 	addUniqueAction(
 		`${ ACTION_PREFIX }-product-list-render`,
 		NAMESPACE,
-		tracker.eventHandler( 'view_item_list' )
+		eventHandler( 'view_item_list' )
 	);
 
 	addUniqueAction(
 		`${ ACTION_PREFIX }-product-view-link`,
 		NAMESPACE,
-		tracker.eventHandler( 'select_content' )
+		eventHandler( 'select_content' )
 	);
 };
 

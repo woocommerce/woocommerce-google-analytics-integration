@@ -9,6 +9,7 @@
  * WC requires at least: 8.4
  * WC tested up to: 8.7
  * Requires at least: 6.2
+ * Requires Plugins: woocommerce
  * Tested up to: 6.5
  * License: GPLv2 or later
  * Text Domain: woocommerce-google-analytics-integration

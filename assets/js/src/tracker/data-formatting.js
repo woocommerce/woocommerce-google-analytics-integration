@@ -82,28 +82,6 @@ export const begin_checkout = ( { storeCart } ) => {
 };
 
 /**
- * Formats data for the add_shipping_info event
- *
- * @param {Object} params           The function params
- * @param {Object} params.storeCart The cart object
- */
-export const add_shipping_info = ( { storeCart } ) => {
-	return {
-		currency: storeCart.totals.currency_code,
-		value: formatPrice(
-			storeCart.totals.total_price,
-			storeCart.totals.currency_minor_unit
-		),
-		shipping_tier:
-			storeCart.shippingRates[ 0 ]?.shipping_rates?.find(
-				( rate ) => rate.selected
-			)?.name || '',
-		...getCartCoupon( storeCart ),
-		items: storeCart.items.map( getProductFieldObject ),
-	};
-};
-
-/**
  * Formats data for the select_content event.
  *
  * @param {Object} params         The function params

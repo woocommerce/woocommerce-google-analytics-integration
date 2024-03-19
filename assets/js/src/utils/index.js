@@ -92,7 +92,7 @@ export const getProductId = ( product ) => {
 		return productIdentifier;
 	}
 
-	if ( window.ga4wData?.settings?.identifier === 'product_sku' ) {
+	if ( window.ga4w?.settings?.identifier === 'product_sku' ) {
 		return product.sku ? product.sku : '#' + product.id;
 	}
 

@@ -117,15 +117,6 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 	 * @return void
 	 */
 	public function inline_script_data(): void {
-		$this->set_script_data(
-			'settings',
-			array(
-				'tracker_function_name' => self::tracker_function_name(),
-				'events'                => $this->get_enabled_events(),
-				'identifier'            => self::get( 'ga_product_identifier' ),
-			)
-		);
-
 		wp_register_script(
 			$this->data_script_handle,
 			'',
@@ -139,8 +130,15 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 		wp_add_inline_script(
 			$this->data_script_handle,
 			sprintf(
-				'var ga4wData = %s;',
-				$this->get_script_data()
+				'var ga4w = { data: %1$s, settings: %2$s };',
+				$this->get_script_data(),
+				wp_json_encode(
+					array(
+						'tracker_function_name' => self::tracker_function_name(),
+						'events'                => $this->get_enabled_events(),
+						'identifier'            => self::get( 'ga_product_identifier' ),
+					),
+				),
 			)
 		);
 

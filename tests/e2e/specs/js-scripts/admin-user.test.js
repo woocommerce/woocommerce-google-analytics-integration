@@ -31,5 +31,8 @@ test.describe( 'JavaScript loaded', () => {
 				'#woocommerce-google-analytics-integration-data-js-after'
 			)
 		).not.toBeAttached();
+
+		const dataLayer = await page.evaluate( () => window.dataLayer );
+		expect( dataLayer ).toBeUndefined();
 	} );
 } );

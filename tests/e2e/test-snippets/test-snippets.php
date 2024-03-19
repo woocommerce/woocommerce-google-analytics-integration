@@ -23,3 +23,16 @@ add_filter(
 		return $modes;
 	}
 );
+
+/*
+ * Mimic the behavior of GLA, or other plugin adding some inline events before `wp_enqueue_scripts`.
+ */
+add_action(
+	'woocommerce_after_single_product',
+	function () {
+		wp_add_inline_script(
+			'woocommerce-google-analytics-integration',
+			'document.currentScript.__test__inlineSnippet = "works";',
+		);
+	}
+);

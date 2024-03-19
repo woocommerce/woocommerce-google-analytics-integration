@@ -2,8 +2,8 @@
 Contributors: woocommerce, automattic, claudiosanches, bor0, royho, laurendavissmith001, cshultz88, mmjones, tomalec
 Tags: woocommerce, google analytics
 Requires at least: 6.2
-Tested up to: 6.4
-Stable tag: 2.0.1
+Tested up to: 6.5
+Stable tag: 2.0.3
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -48,27 +48,23 @@ Duplicate Google Analytics code causes a conflict in tracking. Remove any other 
 
 == Changelog ==
 
+= 2.0.3 - 2024-03-13 =
+* Tweak - WC 8.7 compatibility.
+* Tweak - WP 6.5 compatibility.
+
+= 2.0.2 - 2024-03-12 =
+* Dev - Add E2E testing to track events across all page types.
+* Fix - Add to cart & select content events for All Products Block.
+* Fix - Get correct variation data when formatting product.
+* Fix - Handle AJAX add to cart for simple products.
+* Fix - Purchase price format.
+* Fix - Track purchase transaction ID.
+* Fix - Typo with undefined variable.
+
 = 2.0.1 - 2024-03-07 =
 * Fix - Adding variable product attributes.
 * Fix - Resolve Google Analytics not loading if gtag already exists on the window object.
 * Tweak - Update Contributors list.
 * Tweak - Update assets and readme for 2.0.
-
-= 2.0.0 - 2024-03-05 =
-* Add - Basic consent mode support.
-* Add - Setting to specify the structure of the product identifier.
-* Add - Update notice for merchants using a Universal Analytics Property ID.
-* Dev - Remove options remapping, use settings directly.
-* Fix - Prevent tracking orders multiple times and additional fixes.
-* Remove - Universal Analytics code.
-* Remove - Universal Analytics integration.
-* Simplify tracker event handler API.
-* Update - Add shared tracking functionality for WooCommerce Blocks and classic pages.
-* Update - Extension branding to Google Analytics for WooCommerce.
-* Update - Tracking for GA4 when using Blocks.
-
-= 1.8.14 - 2024-02-07 =
-* Tweak - Declare feature compatibility for the new product editor (also called product block editor).
-* Tweak - WC 8.6 compatibility.
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce-google-analytics-integration/trunk/changelog.txt).

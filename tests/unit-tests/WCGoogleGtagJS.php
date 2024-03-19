@@ -75,14 +75,17 @@ class WCGoogleGtagJS extends EventsDataTest {
 	 * Test that events are correctly mapped to WooCommerce hooks and
 	 * are added to the script data array when the action happens.
 	 *
+	 * Note: we are testing both actions and filters in the same way
+	 * as we are only interested in them being triggered for this test.
+	 *
 	 * @return void
 	 */
-	public function test_map_actions(): void {
+	public function test_map_hooks(): void {
 		$gtag     = new WC_Google_Gtag_JS();
 		$mappings = array(
 			'begin_checkout'   => 'woocommerce_before_checkout_form',
 			'purchase'         => 'woocommerce_thankyou',
-			'view_item_list'   => 'woocommerce_before_shop_loop_item',
+			'view_item_list'   => 'woocommerce_loop_add_to_cart_link',
 			'add_to_cart'      => 'woocommerce_add_to_cart',
 			'remove_from_cart' => 'woocommerce_cart_item_removed',
 			'view_item'        => 'woocommerce_after_single_product',
@@ -90,7 +93,7 @@ class WCGoogleGtagJS extends EventsDataTest {
 
 		array_map( 'remove_all_actions', $mappings );
 
-		$gtag->map_actions();
+		$gtag->map_hooks();
 
 		foreach ( $mappings as $event => $hook ) {
 			do_action( $hook );

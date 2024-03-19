@@ -11,6 +11,8 @@ import { getProductFromID } from '../utils';
  *
  * To be executed once data set is complete, and `document` is ready.
  *
+ * It also handles some Block events that are not fired reliably for `woocommerce/all-products` block.
+ *
  * @param {Object}   data               - The tracking data from the current page load, containing the following properties:
  * @param {Object}   data.events        - An object containing the events to be instantly tracked.
  * @param {Object}   data.cart          - The cart object.
@@ -52,13 +54,23 @@ export function trackClassicPages( {
 	 * @param {HTMLElement[]} button    - An array of HTML elements representing the add to cart button.
 	 */
 	document.body.onadded_to_cart = ( e, fragments, cartHash, button ) => {
-		tracker.eventHandler( 'add_to_cart' )( {
-			product: getProductFromID(
-				parseInt( button[ 0 ].dataset.product_id ),
-				products,
-				cart
-			),
-		} );
+		// Get product ID from data attribute (archive pages) or value (single product pages).
+		const productID = parseInt(
+			button[ 0 ].dataset.product_id || button[ 0 ].value
+		);
+
+		// If the current product doesn't match search by ID.
+		const productToHandle =
+			product?.id === productID
+				? product
+				: getProductFromID( parseInt( productID ), products, cart );
+
+		// Confirm we found a product to handle.
+		if ( ! productToHandle ) {
+			return;
+		}
+
+		tracker.eventHandler( 'add_to_cart' )( { product: productToHandle } );
 	};
 
 	/**
@@ -113,9 +125,9 @@ export function trackClassicPages( {
 	// to send a `select_content` event if the target link takes the user to the product page.
 	document
 		.querySelectorAll( '.products .product:not(.wp-block-post)' )
-		?.forEach( ( item ) => {
+		?.forEach( ( productCard ) => {
 			// Get the Product ID from a child node containing the relevant attribute
-			const productId = item
+			const productId = productCard
 				.querySelector( 'a[data-product_id]' )
 				?.getAttribute( 'data-product_id' );
 
@@ -123,7 +135,7 @@ export function trackClassicPages( {
 				return;
 			}
 
-			item.addEventListener( 'click', ( event ) => {
+			productCard.addEventListener( 'click', ( event ) => {
 				// Return early if the user has clicked on an
 				// "Add to cart" button or anything other than a product link
 				const targetLink = event.target.closest(
@@ -154,6 +166,64 @@ export function trackClassicPages( {
 						cart
 					),
 				} );
+			} );
+		} );
+
+	// Handle select_content and add_to_cart in Products (Beta) block, Product Collection (Beta) block.
+	// Attach click event listeners to a whole product card, as some links may not have the product_id data attribute.
+	document
+		.querySelectorAll(
+			'.products-block-post-template .product, .wc-block-product-template .product'
+		)
+		?.forEach( ( productCard ) => {
+			// Get the Product ID from a child node containing the relevant attribute
+			const productId = productCard
+				.querySelector( '[data-product_id]' )
+				?.getAttribute( 'data-product_id' );
+
+			if ( ! productId ) {
+				return;
+			}
+
+			productCard.addEventListener( 'click', ( event ) => {
+				const target = event.target;
+				// `product-view-link` has no serilized HTML identifier/selector, so we look for the parent block element.
+				const viewLink = target.closest(
+					'.wc-block-components-product-image a'
+				);
+
+				// Catch name click
+				const nameLink = target.closest( '.wp-block-post-title a' );
+
+				// Catch the enclosing product button.
+				const button = target.closest(
+					'.wc-block-components-product-button [data-product_id]'
+				);
+
+				const isAddToCartButton =
+					button &&
+					button.classList.contains( 'add_to_cart_button' ) &&
+					! button.classList.contains( 'product_type_variable' );
+
+				if ( isAddToCartButton ) {
+					// Add to cart.
+					tracker.eventHandler( 'add_to_cart' )( {
+						product: getProductFromID(
+							parseInt( productId ),
+							products,
+							cart
+						),
+					} );
+				} else if ( viewLink || button || nameLink ) {
+					// Product image or add-to-cart-like button.
+					tracker.eventHandler( 'select_content' )( {
+						product: getProductFromID(
+							parseInt( productId ),
+							products,
+							cart
+						),
+					} );
+				}
 			} );
 		} );
 }

@@ -1,0 +1,16 @@
+{
+	"phpVersion": "8.0",
+	"plugins": [
+		"https://github.com/WP-API/Basic-Auth/archive/master.zip",
+		"./tests/e2e/test-data",
+		"./tests/e2e/test-snippets",
+		"."
+	],
+	"mappings": {
+		"wp-cli.yml": "./tests/e2e/config/wp-cli.yml"
+	},
+	"lifecycleScripts": {
+		"afterStart": "./tests/e2e/bin/test-env-setup.sh",
+		"afterClean": "./tests/e2e/bin/test-env-setup.sh"
+	}
+}

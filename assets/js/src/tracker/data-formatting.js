@@ -46,7 +46,7 @@ export const view_item_list = ( {
  */
 export const add_to_cart = ( { product, quantity = 1 } ) => {
 	return {
-		items: [ getProductFieldObject( product, quantity ) ],
+		items: product ? [ getProductFieldObject( product, quantity ) ] : [],
 	};
 };
 
@@ -59,7 +59,7 @@ export const add_to_cart = ( { product, quantity = 1 } ) => {
  */
 export const remove_from_cart = ( { product, quantity = 1 } ) => {
 	return {
-		items: [ getProductFieldObject( product, quantity ) ],
+		items: product ? [ getProductFieldObject( product, quantity ) ] : [],
 	};
 };
 
@@ -88,6 +88,10 @@ export const begin_checkout = ( { storeCart } ) => {
  * @param {Object} params.product The product to track
  */
 export const select_content = ( { product } ) => {
+	if ( ! product ) {
+		return false;
+	}
+
 	return {
 		content_type: 'product',
 		content_id: getProductId( product ),
@@ -138,8 +142,21 @@ export const purchase = ( { order } ) => {
 	}
 
 	return {
-		currency: order.currency,
-		value: parseInt( order.value ),
+		transaction_id: order.id,
+		affiliation: order.affiliation,
+		currency: order.totals.currency_code,
+		value: formatPrice(
+			order.totals.total_price,
+			order.totals.currency_minor_unit
+		),
+		tax: formatPrice(
+			order.totals.tax_total,
+			order.totals.currency_minor_unit
+		),
+		shipping: formatPrice(
+			order.totals.shipping_total,
+			order.totals.currency_minor_unit
+		),
 		items: order.items.map( getProductFieldObject ),
 	};
 };

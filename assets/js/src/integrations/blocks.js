@@ -4,21 +4,9 @@ import { tracker } from '../tracker';
 import { ACTION_PREFIX, NAMESPACE } from '../constants';
 
 addUniqueAction(
-	`${ ACTION_PREFIX }-product-list-render`,
-	NAMESPACE,
-	tracker.eventHandler( 'view_item_list' )
-);
-
-addUniqueAction(
 	`${ ACTION_PREFIX }-product-render`,
 	NAMESPACE,
 	tracker.eventHandler( 'view_item' )
-);
-
-addUniqueAction(
-	`${ ACTION_PREFIX }-cart-add-item`,
-	NAMESPACE,
-	tracker.eventHandler( 'add_to_cart' )
 );
 
 addUniqueAction(
@@ -31,6 +19,21 @@ addUniqueAction(
 	`${ ACTION_PREFIX }-checkout-render-checkout-form`,
 	NAMESPACE,
 	tracker.eventHandler( 'begin_checkout' )
+);
+
+// These actions only works for All Products Block
+addUniqueAction(
+	`${ ACTION_PREFIX }-cart-add-item`,
+	NAMESPACE,
+	( { product } ) => {
+		tracker.eventHandler( 'add_to_cart' )( { product } );
+	}
+);
+
+addUniqueAction(
+	`${ ACTION_PREFIX }-product-list-render`,
+	NAMESPACE,
+	tracker.eventHandler( 'view_item_list' )
 );
 
 addUniqueAction(

@@ -1,6 +1,7 @@
 name: Build
 
 on:
+  workflow_call:
   push:
     branches:
       - trunk
@@ -37,6 +38,16 @@ jobs:
           echo "::endgroup::"
 
       - name: Publish dev build to GitHub
+        if: ${{ github.event_name == 'push' && github.ref_name == 'trunk' }}
         uses: woocommerce/grow/publish-extension-dev-build@actions-v1
         with:
           extension-asset-path: woocommerce-google-analytics-integration.zip
+
+      - name: Publish build artifact
+        if: ${{ ! ( github.event_name == 'push' && github.ref_name == 'trunk' ) }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: woocommerce-google-analytics-integration.zip
+          path: ${{ github.workspace }}/woocommerce-google-analytics-integration.zip
+          # Do not bloat the storage. Keep in only long enough for a caller workflow to pick it up and follow up with some manual debugging.
+          retention-days: 2

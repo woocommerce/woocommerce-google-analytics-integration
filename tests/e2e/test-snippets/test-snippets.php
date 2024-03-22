@@ -35,46 +35,51 @@ add_filter(
  * script is loaded. This is important because some third-party plugins will
  * change the load order in unexpected ways which has previously caused problems.
  */
-add_action( 'wp_enqueue_scripts', function() {
-	if ( isset( $_GET['move_mainjs_to'] ) ) {
-		// main.js is a dependency of the inline data script so we need to make sure it doesn't load
-		add_filter(
-			'script_loader_src',
-			function ( $src, $handle ) {
-				if ( $handle === WC_Google_Gtag_JS::get_instance()->script_handle ) {
-					$src = '';
-				}
-				return $src;
-			},
-			10,
-			2
-		);
+add_action(
+	'wp_enqueue_scripts',
+	function () {
+		 // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( isset( $_GET['move_mainjs_to'] ) ) {
+			// main.js is a dependency of the inline data script so we need to make sure it doesn't load
+			add_filter(
+				'script_loader_src',
+				function ( $src, $handle ) {
+					if ( $handle === WC_Google_Gtag_JS::get_instance()->script_handle ) {
+						$src = '';
+					}
+					return $src;
+				},
+				10,
+				2
+			);
 
-		switch( $_GET['move_mainjs_to'] ) {
-			case 'head':
-				wp_enqueue_script(
-					WC_Google_Gtag_JS::get_instance()->script_handle .'-head',
-					WC_Google_Analytics_Integration::get_instance()->get_js_asset_url( 'main.js' ),
-					array(
-						...WC_Google_Analytics_Integration::get_instance()->get_js_asset_dependencies( 'main' ),
-						'google-tag-manager',
-					),
-					WC_Google_Analytics_Integration::get_instance()->get_js_asset_version( 'main' ),
-					false
-				);
-				break;
-			case 'after_inline_data':
-				add_action(
-					'wp_footer',
-					function() {
-						printf(
-							'<script src="%1$s" id="woocommerce-google-analytics-integration-js"></script>',
-							WC_Google_Analytics_Integration::get_instance()->get_js_asset_url( 'main.js' )
-						);
-					},
-					9999
-				);
-				break;
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			switch ( $_GET['move_mainjs_to'] ) {
+				case 'head':
+					wp_enqueue_script(
+						WC_Google_Gtag_JS::get_instance()->script_handle . '-head',
+						WC_Google_Analytics_Integration::get_instance()->get_js_asset_url( 'main.js' ),
+						array(
+							...WC_Google_Analytics_Integration::get_instance()->get_js_asset_dependencies( 'main' ),
+							'google-tag-manager',
+						),
+						WC_Google_Analytics_Integration::get_instance()->get_js_asset_version( 'main' ),
+						false
+					);
+					break;
+				case 'after_inline_data':
+					add_action(
+						'wp_footer',
+						function () {
+							printf(
+								'<script src="%1$s" id="woocommerce-google-analytics-integration-js"></script>', // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
+								WC_Google_Analytics_Integration::get_instance()->get_js_asset_url( 'main.js' ) // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+							);
+						},
+						9999
+					);
+					break;
+			}
 		}
 	}
-} );
+);

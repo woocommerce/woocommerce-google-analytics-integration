@@ -60,27 +60,25 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 	 * @return void
 	 */
 	public function setup_site_tag() {
-		// phpcs:disable WordPress.WP.EnqueuedResources.NonEnqueuedScript
-		printf(
-			'<!-- Google Analytics for WooCommerce (gtag.js) -->
-			<script>
-			window.dataLayer = window.dataLayer || [];
-			function %2$s(){dataLayer.push(arguments);}
-			// Set up default consent state.
-			for ( const mode of %4$s || [] ) {
-				%2$s( "consent", "default", mode );
-			}
-			%2$s("js", new Date());
-			%2$s("set", "developer_id.%3$s", true);
-			%2$s("config", "%1$s", %5$s);
-			</script>',
-			esc_js( self::get( 'ga_id' ) ),
-			esc_js( self::tracker_function_name() ),
-			esc_js( self::DEVELOPER_ID ),
-			json_encode( self::get_consent_modes() ),
-			json_encode( $this->get_site_tag_config() )
+		wp_print_inline_script_tag(
+			sprintf(
+				'/** Google Analytics for WooCommerce (gtag.js) */
+				window.dataLayer = window.dataLayer || [];
+				function %2$s(){dataLayer.push(arguments);}
+				// Set up default consent state.
+				for ( const mode of %4$s || [] ) {
+					%2$s( "consent", "default", mode );
+				}
+				%2$s("js", new Date());
+				%2$s("set", "developer_id.%3$s", true);
+				%2$s("config", "%1$s", %5$s);',
+				esc_js( self::get( 'ga_id' ) ),
+				esc_js( self::tracker_function_name() ),
+				esc_js( self::DEVELOPER_ID ),
+				json_encode( self::get_consent_modes() ),
+				json_encode( $this->get_site_tag_config() )
+			)
 		);
-		// phpcs:enable WordPress.WP.EnqueuedResources.NonEnqueuedScript
 	}
 
 	/**

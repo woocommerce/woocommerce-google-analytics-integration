@@ -12,7 +12,7 @@ import { getProductFromID } from '../utils';
  *
  * It also handles some Block events that are not fired reliably for `woocommerce/all-products` block.
  *
- * @param {Function} eventHandler
+ * @param {Function} getEventHandler
  * @param {Object}   data               - The tracking data from the current page load, containing the following properties:
  * @param {Object}   data.events        - An object containing the events to be instantly tracked.
  * @param {Object}   data.cart          - The cart object.
@@ -22,15 +22,15 @@ import { getProductFromID } from '../utils';
  * @param {Object}   data.order         - The order object.
  */
 export function classicTracking(
-	eventHandler,
+	getEventHandler,
 	{ events, cart, products, product, added_to_cart: addedToCart, order }
 ) {
 	// Instantly track the events listed in the `events` object.
 	Object.values( events ?? {} ).forEach( ( eventName ) => {
 		if ( eventName === 'add_to_cart' ) {
-			eventHandler( eventName )( { product: addedToCart } );
+			getEventHandler( eventName )( { product: addedToCart } );
 		} else {
-			eventHandler( eventName )( {
+			getEventHandler( eventName )( {
 				storeCart: cart,
 				products,
 				product,
@@ -65,7 +65,7 @@ export function classicTracking(
 			return;
 		}
 
-		eventHandler( 'add_to_cart' )( { product: productToHandle } );
+		getEventHandler( 'add_to_cart' )( { product: productToHandle } );
 	};
 
 	/**
@@ -87,7 +87,7 @@ export function classicTracking(
 	 * @param {HTMLElement|Object} element - The HTML element clicked on to trigger this event
 	 */
 	function removeFromCartHandler( element ) {
-		eventHandler( 'remove_from_cart' )( {
+		getEventHandler( 'remove_from_cart' )( {
 			product: getProductFromID(
 				parseInt( element.target.dataset.product_id ),
 				products,
@@ -154,7 +154,7 @@ export function classicTracking(
 					return;
 				}
 
-				eventHandler( 'select_content' )( {
+				getEventHandler( 'select_content' )( {
 					product: getProductFromID(
 						parseInt( productId ),
 						products,
@@ -202,7 +202,7 @@ export function classicTracking(
 
 				if ( isAddToCartButton ) {
 					// Add to cart.
-					eventHandler( 'add_to_cart' )( {
+					getEventHandler( 'add_to_cart' )( {
 						product: getProductFromID(
 							parseInt( productId ),
 							products,
@@ -211,7 +211,7 @@ export function classicTracking(
 					} );
 				} else if ( viewLink || button || nameLink ) {
 					// Product image or add-to-cart-like button.
-					eventHandler( 'select_content' )( {
+					getEventHandler( 'select_content' )( {
 						product: getProductFromID(
 							parseInt( productId ),
 							products,

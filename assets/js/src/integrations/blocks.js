@@ -3,23 +3,23 @@ import { addUniqueAction } from '../utils';
 import { ACTION_PREFIX, NAMESPACE } from '../constants';
 
 // We add actions asynchronosly, to make sure handlers will have the config available.
-export const blocksTracking = ( eventHandler ) => {
+export const blocksTracking = ( getEventHandler ) => {
 	addUniqueAction(
 		`${ ACTION_PREFIX }-product-render`,
 		NAMESPACE,
-		eventHandler( 'view_item' )
+		getEventHandler( 'view_item' )
 	);
 
 	addUniqueAction(
 		`${ ACTION_PREFIX }-cart-remove-item`,
 		NAMESPACE,
-		eventHandler( 'remove_from_cart' )
+		getEventHandler( 'remove_from_cart' )
 	);
 
 	addUniqueAction(
 		`${ ACTION_PREFIX }-checkout-render-checkout-form`,
 		NAMESPACE,
-		eventHandler( 'begin_checkout' )
+		getEventHandler( 'begin_checkout' )
 	);
 
 	// These actions only works for All Products Block
@@ -27,20 +27,20 @@ export const blocksTracking = ( eventHandler ) => {
 		`${ ACTION_PREFIX }-cart-add-item`,
 		NAMESPACE,
 		( { product } ) => {
-			eventHandler( 'add_to_cart' )( { product } );
+			getEventHandler( 'add_to_cart' )( { product } );
 		}
 	);
 
 	addUniqueAction(
 		`${ ACTION_PREFIX }-product-list-render`,
 		NAMESPACE,
-		eventHandler( 'view_item_list' )
+		getEventHandler( 'view_item_list' )
 	);
 
 	addUniqueAction(
 		`${ ACTION_PREFIX }-product-view-link`,
 		NAMESPACE,
-		eventHandler( 'select_content' )
+		getEventHandler( 'select_content' )
 	);
 };
 

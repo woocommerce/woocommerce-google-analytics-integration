@@ -1,4 +1,4 @@
-import { createTracker } from './tracker';
+import { setupEventHandlers } from './tracker';
 import { classicTracking } from './integrations/classic';
 import { blocksTracking } from './integrations/blocks';
 
@@ -17,8 +17,8 @@ function eventuallyInitializeTracking() {
 			'Google Analytics for WooCommerce: Configuration and tracking data not found.'
 		);
 	}
-	const eventHandler = createTracker( window.ga4w.settings );
+	const getEventHandler = setupEventHandlers( window.ga4w.settings );
 
-	classicTracking( eventHandler, window.ga4w.data );
-	blocksTracking( eventHandler );
+	classicTracking( getEventHandler, window.ga4w.data );
+	blocksTracking( getEventHandler );
 }

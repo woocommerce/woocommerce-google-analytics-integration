@@ -62,7 +62,7 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 	public function setup_site_tag() {
 		wp_print_inline_script_tag(
 			sprintf(
-				'/** Google Analytics for WooCommerce (gtag.js) */
+				'/* Google Analytics for WooCommerce (gtag.js) */
 				window.dataLayer = window.dataLayer || [];
 				function %2$s(){dataLayer.push(arguments);}
 				// Set up default consent state.

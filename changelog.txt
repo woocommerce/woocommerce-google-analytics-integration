@@ -1,5 +1,12 @@
 *** Changelog ***
 
+= 2.0.4 - 2024-03-26 =
+* Dev - Add QIT workflow.
+* Dev - E2E tests for the All Products block.
+* Dev - Remove unused functions from code.
+* Fix - Warning after plugin install using wp-cli.
+* Tweak - Add WP 6.5 Require plugins header.
+
 = 2.0.3 - 2024-03-13 =
 * Tweak - WC 8.7 compatibility.
 * Tweak - WP 6.5 compatibility.

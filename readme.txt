@@ -61,10 +61,4 @@ Duplicate Google Analytics code causes a conflict in tracking. Remove any other 
 * Fix - Track purchase transaction ID.
 * Fix - Typo with undefined variable.
 
-= 2.0.1 - 2024-03-07 =
-* Fix - Adding variable product attributes.
-* Fix - Resolve Google Analytics not loading if gtag already exists on the window object.
-* Tweak - Update Contributors list.
-* Tweak - Update assets and readme for 2.0.
-
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce-google-analytics-integration/trunk/changelog.txt).

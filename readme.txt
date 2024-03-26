@@ -3,7 +3,7 @@ Contributors: woocommerce, automattic, claudiosanches, bor0, royho, laurendaviss
 Tags: woocommerce, google analytics
 Requires at least: 6.2
 Tested up to: 6.5
-Stable tag: 2.0.3
+Stable tag: 2.0.4
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -48,6 +48,13 @@ Duplicate Google Analytics code causes a conflict in tracking. Remove any other 
 
 == Changelog ==
 
+= 2.0.4 - 2024-03-26 =
+* Dev - Add QIT workflow.
+* Dev - E2E tests for the All Products block.
+* Dev - Remove unused functions from code.
+* Fix - Warning after plugin install using wp-cli.
+* Tweak - Add WP 6.5 Require plugins header.
+
 = 2.0.3 - 2024-03-13 =
 * Tweak - WC 8.7 compatibility.
 * Tweak - WP 6.5 compatibility.
@@ -60,11 +67,5 @@ Duplicate Google Analytics code causes a conflict in tracking. Remove any other 
 * Fix - Purchase price format.
 * Fix - Track purchase transaction ID.
 * Fix - Typo with undefined variable.
-
-= 2.0.1 - 2024-03-07 =
-* Fix - Adding variable product attributes.
-* Fix - Resolve Google Analytics not loading if gtag already exists on the window object.
-* Tweak - Update Contributors list.
-* Tweak - Update assets and readme for 2.0.
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce-google-analytics-integration/trunk/changelog.txt).

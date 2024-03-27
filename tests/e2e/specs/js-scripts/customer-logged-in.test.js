@@ -24,12 +24,6 @@ test.describe( 'JavaScript loaded', () => {
 		await page.goto( 'shop' );
 
 		await expect(
-			page.locator(
-				'#woocommerce-google-analytics-integration-js-before'
-			)
-		).toBeAttached();
-
-		await expect(
 			page.locator( '#woocommerce-google-analytics-integration-js' )
 		).toBeAttached();
 

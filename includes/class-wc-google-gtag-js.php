@@ -72,10 +72,10 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 				%2$s("js", new Date());
 				%2$s("set", "developer_id.%3$s", true);
 				%2$s("config", "%1$s", %5$s);',
-				esc_js( self::get( 'ga_id' ) ),
-				esc_js( self::tracker_function_name() ),
+				esc_js( $this->get( 'ga_id' ) ),
+				esc_js( $this->tracker_function_name() ),
 				esc_js( self::DEVELOPER_ID ),
-				json_encode( self::get_consent_modes() ),
+				json_encode( $this->get_consent_modes() ),
 				json_encode( $this->get_site_tag_config() )
 			)
 		);
@@ -132,9 +132,9 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 				$this->get_script_data(),
 				wp_json_encode(
 					array(
-						'tracker_function_name' => self::tracker_function_name(),
+						'tracker_function_name' => $this->tracker_function_name(),
 						'events'                => $this->get_enabled_events(),
-						'identifier'            => self::get( 'ga_product_identifier' ),
+						'identifier'            => $this->get( 'ga_product_identifier' ),
 					),
 				),
 			)
@@ -241,12 +241,12 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 		return apply_filters(
 			'woocommerce_ga_gtag_config',
 			array(
-				'track_404'            => 'yes' === self::get( 'ga_404_tracking_enabled' ),
-				'allow_google_signals' => 'yes' === self::get( 'ga_support_display_advertising' ),
+				'track_404'            => 'yes' === $this->get( 'ga_404_tracking_enabled' ),
+				'allow_google_signals' => 'yes' === $this->get( 'ga_support_display_advertising' ),
 				'logged_in'            => is_user_logged_in(),
 				'linker'               => array(
-					'domains'        => ! empty( self::get( 'ga_linker_cross_domains' ) ) ? array_map( 'esc_js', explode( ',', self::get( 'ga_linker_cross_domains' ) ) ) : array(),
-					'allow_incoming' => 'yes' === self::get( 'ga_linker_allow_incoming_enabled' ),
+					'domains'        => ! empty( $this->get( 'ga_linker_cross_domains' ) ) ? array_map( 'esc_js', explode( ',', $this->get( 'ga_linker_cross_domains' ) ) ) : array(),
+					'allow_incoming' => 'yes' === $this->get( 'ga_linker_allow_incoming_enabled' ),
 				),
 				'custom_map'           => array(
 					'dimension1' => 'logged_in',

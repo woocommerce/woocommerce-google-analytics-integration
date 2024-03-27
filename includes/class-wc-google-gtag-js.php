@@ -74,7 +74,7 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 				%2$s("config", "%1$s", %5$s);',
 				esc_js( $this->get( 'ga_id' ) ),
 				esc_js( $this->tracker_function_name() ),
-				esc_js( self::DEVELOPER_ID ),
+				esc_js( static::DEVELOPER_ID ),
 				json_encode( $this->get_consent_modes() ),
 				json_encode( $this->get_site_tag_config() )
 			)

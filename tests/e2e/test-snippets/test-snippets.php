@@ -29,11 +29,14 @@ add_filter(
  * adding some inline events before `wp_enqueue_scripts.`
  */
 add_action(
-	'woocommerce_after_single_product',
+	'wp_head',
 	function () {
-		wp_add_inline_script(
-			'woocommerce-google-analytics-integration',
-			'document.currentScript.__test__inlineSnippet = "works";',
-		);
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( isset( $_GET['add_inline_to_wp_head'] ) ) {
+			wp_add_inline_script(
+				'woocommerce-google-analytics-integration',
+				'document.currentScript.__test__inlineSnippet = "works";',
+			);
+		}
 	}
 );

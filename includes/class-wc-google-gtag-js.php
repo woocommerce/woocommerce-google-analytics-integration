@@ -48,19 +48,20 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 
 		$this->map_hooks();
 
+		$this->register_scripts();
 		// Setup frontend scripts
 		add_action( 'wp_enqueue_scripts', array( $this, 'enquque_tracker' ), 5 );
 		add_action( 'wp_footer', array( $this, 'inline_script_data' ) );
 	}
 
 	/**
-	 * Register tracker scripts and its inline config.
-	 * We need to execute tracker.js w/ `gtag` configuration before any trackable action may happen.
+	 * Register manager and tracker scripts.
+	 * Call early so other extensions could add inline date to it.
 	 *
 	 * @return void
 	 */
-	public function enquque_tracker(): void {
-		wp_enqueue_script(
+	private function register_scripts(): void {
+		wp_register_script(
 			'google-tag-manager',
 			'https://www.googletagmanager.com/gtag/js?id=' . self::get( 'ga_id' ),
 			array(),
@@ -69,9 +70,7 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 				'strategy' => 'async',
 			)
 		);
-		// tracker.js needs to be executed ASAP, the remaining bits for main.js could be deffered,
-		// but to reduce the traffic, we ship it all together.
-		wp_enqueue_script(
+		wp_register_script(
 			$this->script_handle,
 			Plugin::get_instance()->get_js_asset_url( 'main.js' ),
 			array(
@@ -81,6 +80,19 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 			Plugin::get_instance()->get_js_asset_version( 'main' ),
 			true
 		);
+	}
+
+	/**
+	 * Enqueue tracker scripts and its inline config.
+	 * We need to execute tracker.js w/ `gtag` configuration before any trackable action may happen.
+	 *
+	 * @return void
+	 */
+	public function enquque_tracker(): void {
+		wp_enqueue_script( 'google-tag-manager' );
+		// tracker.js needs to be executed ASAP, the remaining bits for main.js could be deffered,
+		// but to reduce the traffic, we ship it all together.
+		wp_enqueue_script( $this->script_handle );
 		// Provide tracker's configuration.
 		wp_add_inline_script(
 			$this->script_handle,

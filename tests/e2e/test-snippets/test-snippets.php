@@ -25,7 +25,8 @@ add_filter(
 );
 
 /*
- * Mimic the behavior of GLA, or other plugin adding some inline events before `wp_enqueue_scripts`.
+ * Mimic the behavior of Google Listings & Ads or other plugins,
+ * adding some inline events before `wp_enqueue_scripts.`
  */
 add_action(
 	'woocommerce_after_single_product',

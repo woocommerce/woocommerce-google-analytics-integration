@@ -23,17 +23,17 @@ test.describe( '`woocommerce-google-analytics-integration`', () => {
 
 	/*
 	 * This test requires a PHP snippet that adds inline script
-	 * on `'wp_head'` to `'woocommerce-google-analytics-integration'`
+	 * on `'wp'` to `'woocommerce-google-analytics-integration'`
 	 * that sets `document.currentScript.__test__inlineSnippet = "works";`
 	 *
 	 * Some themes may change the execution sequence of WP actions against the traditional theme like Storefront.
-	 * Make sure the theme you're testing runs `wp_enqueue_scripts` after the hook used in the snippet - `wp_head`.
+	 * Make sure the theme you're testing runs `wp_enqueue_scripts` after the hook used in the snippet - `wp`.
 	 */
 	test( 'Is registered early enough to attach some data to it on `woocommerce_after_single_product`', async ( {
 		page,
 	} ) => {
 		const simpleProductID = await createSimpleProduct();
-		await page.goto( `?p=${ simpleProductID }&add_inline_to_wp_head=1` );
+		await page.goto( `?p=${ simpleProductID }&add_inline_to_wp_hook=1` );
 
 		await expect(
 			page.locator( '#woocommerce-google-analytics-integration-js-after' )

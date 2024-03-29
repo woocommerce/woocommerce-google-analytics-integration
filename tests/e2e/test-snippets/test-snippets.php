@@ -29,10 +29,10 @@ add_filter(
  * adding some inline events before `wp_enqueue_scripts.`
  */
 add_action(
-	'wp_head',
+	'wp',
 	function () {
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		if ( isset( $_GET['add_inline_to_wp_head'] ) ) {
+		if ( isset( $_GET['add_inline_to_wp_hook'] ) ) {
 			wp_add_inline_script(
 				'woocommerce-google-analytics-integration',
 				'document.currentScript.__test__inlineSnippet = "works";',

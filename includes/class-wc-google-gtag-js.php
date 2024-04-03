@@ -16,7 +16,10 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 	/** @var string $script_handle Handle for the front end JavaScript file */
 	public $script_handle = 'woocommerce-google-analytics-integration';
 
-	/** @var string $script_handle Handle for the event data inline script */
+	/** @var string $gtag_script_handle Handle for the gtag setup script */
+	public $gtag_script_handle = 'woocommerce-google-analytics-integration-gtag';
+
+	/** @var string $data_script_handle Handle for the event data inline script */
 	public $data_script_handle = 'woocommerce-google-analytics-integration-data';
 
 	/** @var string $script_data Data required for frontend event tracking */
@@ -49,36 +52,8 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 		$this->map_hooks();
 
 		// Setup frontend scripts
-		add_action( 'wp_head', array( $this, 'setup_site_tag' ), 2 );
 		add_action( 'wp_enqueue_scripts', array( $this, 'enquque_tracker' ), 5 );
 		add_action( 'wp_footer', array( $this, 'inline_script_data' ) );
-	}
-
-	/**
-	 * Setup the global site tag as early as possible on the page
-	 *
-	 * @return void
-	 */
-	public function setup_site_tag() {
-		wp_print_inline_script_tag(
-			sprintf(
-				'/* Google Analytics for WooCommerce (gtag.js) */
-				window.dataLayer = window.dataLayer || [];
-				function %2$s(){dataLayer.push(arguments);}
-				// Set up default consent state.
-				for ( const mode of %4$s || [] ) {
-					%2$s( "consent", "default", mode );
-				}
-				%2$s("js", new Date());
-				%2$s("set", "developer_id.%3$s", true);
-				%2$s("config", "%1$s", %5$s);',
-				esc_js( $this->get( 'ga_id' ) ),
-				esc_js( $this->tracker_function_name() ),
-				esc_js( static::DEVELOPER_ID ),
-				json_encode( $this->get_consent_modes() ),
-				json_encode( $this->get_site_tag_config() )
-			)
-		);
 	}
 
 	/**
@@ -93,9 +68,45 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 			array(),
 			null,
 			array(
-				'strategy' => 'async',
+				'strategy'  => 'async',
 			)
 		);
+
+		wp_register_script(
+			$this->gtag_script_handle,
+			'',
+			array(),
+			null,
+			array(
+				'in_footer' => false
+			)
+		);
+
+		wp_add_inline_script(
+			$this->gtag_script_handle,
+			apply_filters(
+				'woocommerce_gtag_snippet',
+				sprintf(
+					'/* Google Analytics for WooCommerce (gtag.js) */
+					window.dataLayer = window.dataLayer || [];
+					function %2$s(){dataLayer.push(arguments);}
+					// Set up default consent state.
+					for ( const mode of %4$s || [] ) {
+						%2$s( "consent", "default", mode );
+					}
+					%2$s("js", new Date());
+					%2$s("set", "developer_id.%3$s", true);
+					%2$s("config", "%1$s", %5$s);',
+					esc_js( $this->get( 'ga_id' ) ),
+					esc_js( $this->tracker_function_name() ),
+					esc_js( static::DEVELOPER_ID ),
+					json_encode( $this->get_consent_modes() ),
+					json_encode( $this->get_site_tag_config() )
+				)
+			)
+		);
+
+		wp_enqueue_script( $this->gtag_script_handle );
 
 		wp_enqueue_script(
 			$this->script_handle,

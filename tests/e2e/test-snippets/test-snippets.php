@@ -107,7 +107,7 @@ add_action(
  */
 add_action(
 	'wp_plugin_dependencies_slug',
-	function( $slug ) {
+	function ( $slug ) {
 		if ( 'woocommerce' === $slug ) {
 			$slug = '';
 		}

@@ -1,5 +1,9 @@
 *** Changelog ***
 
+= 2.0.5 - 2024-04-04 =
+* Tweak - Register `woocommerce-google-analytics-integration` script earlier, so other extensions can plug in.
+* Update - Separate the site tag from the event tracking file and delay execution until DOMContentLoaded.
+
 = 2.0.4 - 2024-03-26 =
 * Dev - Add QIT workflow.
 * Dev - E2E tests for the All Products block.

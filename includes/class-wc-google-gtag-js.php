@@ -70,7 +70,7 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 			array(),
 			null,
 			array(
-				'strategy'  => 'async',
+				'strategy' => 'async',
 			)
 		);
 
@@ -133,15 +133,6 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 		// tracker.js needs to be executed ASAP, the remaining bits for main.js could be deffered,
 		// but to reduce the traffic, we ship it all together.
 		wp_enqueue_script( $this->script_handle );
-		// Provide tracker's configuration.
-		wp_add_inline_script(
-			$this->script_handle,
-			sprintf(
-				'var wcgai = {config: %s};',
-				wp_json_encode( $this->get_analytics_config() )
-			),
-			'before'
-		);
 	}
 
 	/**

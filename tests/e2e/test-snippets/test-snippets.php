@@ -100,3 +100,18 @@ add_action(
 		}
 	}
 );
+
+/**
+ * Snippet to bypass the WooCommerce dependency in Google Listings & Ads because
+ * in wp-env WooCommerce is installed in the directory woocommerce-trunk-nightly
+ */
+add_action(
+	'wp_plugin_dependencies_slug',
+	function( $slug ) {
+		if ( 'woocommerce' === $slug ) {
+			$slug = '';
+		}
+
+		return $slug;
+	}
+);

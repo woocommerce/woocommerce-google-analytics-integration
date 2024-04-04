@@ -59,13 +59,4 @@ Duplicate Google Analytics code causes a conflict in tracking. Remove any other 
 * Tweak - WC 8.7 compatibility.
 * Tweak - WP 6.5 compatibility.
 
-= 2.0.2 - 2024-03-12 =
-* Dev - Add E2E testing to track events across all page types.
-* Fix - Add to cart & select content events for All Products Block.
-* Fix - Get correct variation data when formatting product.
-* Fix - Handle AJAX add to cart for simple products.
-* Fix - Purchase price format.
-* Fix - Track purchase transaction ID.
-* Fix - Typo with undefined variable.
-
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce-google-analytics-integration/trunk/changelog.txt).

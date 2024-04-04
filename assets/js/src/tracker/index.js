@@ -1,75 +1,37 @@
-import { config } from '../config';
 import * as formatters from './data-formatting';
 
-let instance;
-
 /**
- * A tracking utility for initializing a GA4 and tracking accepted events.
+ * Get a new event handler constructing function, based on given settings.
  *
- * @class
+ * @param {Object} settings                       - The settings object.
+ * @param {Array}  settings.events                - The list of supported events.
+ * @param {string} settings.tracker_function_name - The name of the global function to call for tracking.
+ * @return {function(string): Function} - A function to get event handlers for specific events.
  */
-class Tracker {
+export function setupEventHandlers( {
+	events,
+	tracker_function_name: trackerFunctionName,
+} ) {
 	/**
-	 * Constructs a new instance of the Tracker class.
+	 * Returns an event handler for a specified event name.
 	 *
-	 * @throws {Error} If an instance of the Tracker already exists.
-	 */
-	constructor() {
-		if ( instance ) {
-			throw new Error( 'Cannot instantiate more than one Tracker' );
-		}
-		instance = this;
-
-		window.dataLayer = window.dataLayer || [];
-
-		function gtag() {
-			window.dataLayer.push( arguments );
-		}
-
-		window[ config.tracker_function_name ] = gtag;
-
-		// Set up default consent state, denying all for EEA visitors.
-		for ( const mode of config.consent_modes || [] ) {
-			gtag( 'consent', 'default', mode );
-		}
-
-		gtag( 'js', new Date() );
-		gtag( 'set', `developer_id.${ config.developer_id }`, true );
-		gtag( 'config', config.gtag_id, {
-			allow_google_signals: config.allow_google_signals,
-			link_attribution: config.link_attribution,
-			anonymize_ip: config.anonymize_ip,
-			logged_in: config.logged_in,
-			linker: config.linker,
-			custom_map: config.custom_map,
-		} );
-	}
-
-	/**
-	 * Creates and returns an event handler for a specified event name.
-	 *
-	 * @param {string} name The name of the event.
+	 * @param {string} eventName The name of the event.
 	 * @return {function(*): void} Function for processing and tracking the event.
 	 * @throws {Error} If the event name is not supported.
 	 */
-	eventHandler( name ) {
+	function getEventHandler( eventName ) {
 		/* eslint import/namespace: [ 'error', { allowComputed: true } ] */
-		const formatter = formatters[ name ];
+		const formatter = formatters[ eventName ];
 		if ( typeof formatter !== 'function' ) {
-			throw new Error( `Event ${ name } is not supported.` );
+			throw new Error( `Event ${ eventName } is not supported.` );
 		}
 
-		return function trackerEventHandler( data ) {
+		return function eventHandler( data ) {
 			const eventData = formatter( data );
-			if ( config.events.includes( name ) && eventData ) {
-				window[ config.tracker_function_name ](
-					'event',
-					name,
-					eventData
-				);
+			if ( events.includes( eventName ) && eventData ) {
+				window[ trackerFunctionName ]( 'event', eventName, eventData );
 			}
 		};
 	}
+	return getEventHandler;
 }
-
-export const tracker = Object.freeze( new Tracker() );

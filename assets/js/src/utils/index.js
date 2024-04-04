@@ -1,5 +1,4 @@
 import { addAction, removeAction } from '@wordpress/hooks';
-import { config } from '../config.js';
 
 /**
  * Formats data into the productFieldObject shape.
@@ -85,15 +84,15 @@ export const addUniqueAction = ( hookName, namespace, callback ) => {
  * @return {string} - The product ID
  */
 export const getProductId = ( product ) => {
-	const identifier =
+	const productIdentifier =
 		product.extensions?.woocommerce_google_analytics_integration
 			?.identifier;
 
-	if ( identifier !== undefined ) {
-		return identifier;
+	if ( productIdentifier !== undefined ) {
+		return productIdentifier;
 	}
 
-	if ( config.identifier === 'product_sku' ) {
+	if ( window.ga4w?.settings?.identifier === 'product_sku' ) {
 		return product.sku ? product.sku : '#' + product.id;
 	}
 

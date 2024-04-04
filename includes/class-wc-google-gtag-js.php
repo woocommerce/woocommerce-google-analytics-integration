@@ -16,7 +16,10 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 	/** @var string $script_handle Handle for the front end JavaScript file */
 	public $script_handle = 'woocommerce-google-analytics-integration';
 
-	/** @var string $script_handle Handle for the event data inline script */
+	/** @var string $gtag_script_handle Handle for the gtag setup script */
+	public $gtag_script_handle = 'woocommerce-google-analytics-integration-gtag';
+
+	/** @var string $data_script_handle Handle for the event data inline script */
 	public $data_script_handle = 'woocommerce-google-analytics-integration-data';
 
 	/** @var string $script_data Data required for frontend event tracking */
@@ -70,6 +73,43 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 				'strategy' => 'async',
 			)
 		);
+
+		wp_register_script(
+			$this->gtag_script_handle,
+			'',
+			array(),
+			null,
+			array(
+				'in_footer' => false,
+			)
+		);
+
+		wp_add_inline_script(
+			$this->gtag_script_handle,
+			apply_filters(
+				'woocommerce_gtag_snippet',
+				sprintf(
+					'/* Google Analytics for WooCommerce (gtag.js) */
+					window.dataLayer = window.dataLayer || [];
+					function %2$s(){dataLayer.push(arguments);}
+					// Set up default consent state.
+					for ( const mode of %4$s || [] ) {
+						%2$s( "consent", "default", mode );
+					}
+					%2$s("js", new Date());
+					%2$s("set", "developer_id.%3$s", true);
+					%2$s("config", "%1$s", %5$s);',
+					esc_js( $this->get( 'ga_id' ) ),
+					esc_js( $this->tracker_function_name() ),
+					esc_js( static::DEVELOPER_ID ),
+					json_encode( $this->get_consent_modes() ),
+					json_encode( $this->get_site_tag_config() )
+				)
+			)
+		);
+
+		wp_enqueue_script( $this->gtag_script_handle );
+
 		wp_register_script(
 			$this->script_handle,
 			Plugin::get_instance()->get_js_asset_url( 'main.js' ),
@@ -93,20 +133,10 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 		// tracker.js needs to be executed ASAP, the remaining bits for main.js could be deffered,
 		// but to reduce the traffic, we ship it all together.
 		wp_enqueue_script( $this->script_handle );
-		// Provide tracker's configuration.
-		wp_add_inline_script(
-			$this->script_handle,
-			sprintf(
-				'var wcgai = {config: %s};',
-				wp_json_encode( $this->get_analytics_config() )
-			),
-			'before'
-		);
 	}
 
 	/**
-	 * Feed classic tracking with event data via inline script.
-	 * Make sure it's added at the bottom of the page, so all the data is collected.
+	 * Add all event data via an inline script in the footer to ensure all the data is collected in time.
 	 *
 	 * @return void
 	 */
@@ -124,8 +154,15 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 		wp_add_inline_script(
 			$this->data_script_handle,
 			sprintf(
-				'wcgai.trackClassicPages( %s );',
-				$this->get_script_data()
+				'window.ga4w = { data: %1$s, settings: %2$s }; document.dispatchEvent(new Event("ga4w:ready"));',
+				$this->get_script_data(),
+				wp_json_encode(
+					array(
+						'tracker_function_name' => $this->tracker_function_name(),
+						'events'                => $this->get_enabled_events(),
+						'identifier'            => $this->get( 'ga_product_identifier' ),
+					),
+				),
 			)
 		);
 
@@ -226,29 +263,22 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 	 *
 	 * @return array
 	 */
-	public function get_analytics_config(): array {
-		$defaults = array(
-			'gtag_id'               => self::get( 'ga_id' ),
-			'tracker_function_name' => self::tracker_function_name(),
-			'track_404'             => 'yes' === self::get( 'ga_404_tracking_enabled' ),
-			'allow_google_signals'  => 'yes' === self::get( 'ga_support_display_advertising' ),
-			'logged_in'             => is_user_logged_in(),
-			'linker'                => array(
-				'domains'        => ! empty( self::get( 'ga_linker_cross_domains' ) ) ? array_map( 'esc_js', explode( ',', self::get( 'ga_linker_cross_domains' ) ) ) : array(),
-				'allow_incoming' => 'yes' === self::get( 'ga_linker_allow_incoming_enabled' ),
+	public function get_site_tag_config(): array {
+		return apply_filters(
+			'woocommerce_ga_gtag_config',
+			array(
+				'track_404'            => 'yes' === $this->get( 'ga_404_tracking_enabled' ),
+				'allow_google_signals' => 'yes' === $this->get( 'ga_support_display_advertising' ),
+				'logged_in'            => is_user_logged_in(),
+				'linker'               => array(
+					'domains'        => ! empty( $this->get( 'ga_linker_cross_domains' ) ) ? array_map( 'esc_js', explode( ',', $this->get( 'ga_linker_cross_domains' ) ) ) : array(),
+					'allow_incoming' => 'yes' === $this->get( 'ga_linker_allow_incoming_enabled' ),
+				),
+				'custom_map'           => array(
+					'dimension1' => 'logged_in',
+				),
 			),
-			'custom_map'            => array(
-				'dimension1' => 'logged_in',
-			),
-			'events'                => self::get_enabled_events(),
-			'identifier'            => self::get( 'ga_product_identifier' ),
-			'consent_modes'         => self::get_consent_modes(),
 		);
-
-		$config                 = apply_filters( 'woocommerce_ga_gtag_config', $defaults );
-		$config['developer_id'] = self::DEVELOPER_ID;
-
-		return $config;
 	}
 
 	/**

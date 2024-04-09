@@ -59,8 +59,4 @@ Duplicate Google Analytics code causes a conflict in tracking. Remove any other 
 * Fix - Warning after plugin install using wp-cli.
 * Tweak - Add WP 6.5 Require plugins header.
 
-= 2.0.3 - 2024-03-13 =
-* Tweak - WC 8.7 compatibility.
-* Tweak - WP 6.5 compatibility.
-
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce-google-analytics-integration/trunk/changelog.txt).

@@ -15,7 +15,7 @@ export const getProductFieldObject = ( product, quantity ) => {
 		variantData.item_variant = product.variation;
 	}
 
-	return {
+	const data = {
 		item_id: getProductId( product ),
 		item_name: product.name,
 		...getProductCategories( product ),
@@ -26,6 +26,23 @@ export const getProductFieldObject = ( product, quantity ) => {
 		),
 		...variantData,
 	};
+
+	// Apply discounts to ecommerce events.
+	// https://developers.google.com/analytics/devguides/collection/ga4/apply-discount?client_type=gtag
+	if (
+		typeof product.price_after_coupon_discount === 'number' &&
+		! isNaN( product.price_after_coupon_discount ) &&
+		product.price_after_coupon_discount !== product.prices.price
+	) {
+		data.discount =
+			product.prices.price - product.price_after_coupon_discount;
+		data.price = formatPrice(
+			product.price_after_coupon_discount,
+			product.prices.currency_minor_unit
+		);
+	}
+
+	return data;
 };
 
 /**

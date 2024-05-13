@@ -50,14 +50,18 @@ jobs:
 
       - name: Install WP release candidate (optional)
         if: github.event.inputs.wp-rc-version != ''
+        env:
+          INPUT_WP_RC_VERSION: ${{ github.event.inputs.wp-rc-version }}
         run: |
-          npm run -- wp-env run tests-cli -- wp core update --version=${{ github.event.inputs.wp-rc-version }}
+          npm run -- wp-env run tests-cli -- wp core update --version="${INPUT_WP_RC_VERSION}"
           npm run -- wp-env run tests-cli -- wp core update-db
 
       - name: Install WC release candidate (optional)
         if: github.event.inputs.wc-rc-version != ''
+        env:
+          INPUT_WC_RC_VERSION: ${{ github.event.inputs.wc-rc-version }}
         run: |
-          npm run -- wp-env run tests-cli -- wp plugin update woocommerce --version=${{ github.event.inputs.wc-rc-version }}
+          npm run -- wp-env run tests-cli -- wp plugin update woocommerce --version="${INPUT_WC_RC_VERSION}"
           npm run -- wp-env run tests-cli -- wp wc update
 
       - name: Download and install Chromium browser.

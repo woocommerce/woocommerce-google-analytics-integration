@@ -32,7 +32,7 @@ export const getProductFieldObject = ( product, quantity ) => {
 	if (
 		typeof product.price_after_coupon_discount === 'number' &&
 		! isNaN( product.price_after_coupon_discount ) &&
-		product.price_after_coupon_discount !== product.prices.price
+		product.price_after_coupon_discount < product.prices.price
 	) {
 		data.discount = formatPrice(
 			product.prices.price - product.price_after_coupon_discount,

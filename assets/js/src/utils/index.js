@@ -29,11 +29,7 @@ export const getProductFieldObject = ( product, quantity ) => {
 
 	// Apply discounts to ecommerce events.
 	// https://developers.google.com/analytics/devguides/collection/ga4/apply-discount?client_type=gtag
-	if (
-		typeof product.price_after_coupon_discount === 'number' &&
-		! isNaN( product.price_after_coupon_discount ) &&
-		product.price_after_coupon_discount < product.prices.price
-	) {
+	if ( product?.price_after_coupon_discount < product.prices.price ) {
 		data.discount = formatPrice(
 			product.prices.price - product.price_after_coupon_discount,
 			product.prices.currency_minor_unit

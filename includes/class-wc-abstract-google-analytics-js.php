@@ -288,7 +288,10 @@ abstract class WC_Abstract_Google_Analytics_JS {
 					return array_merge(
 						$this->get_formatted_product( $item->get_product() ),
 						array(
-							'quantity' => $item->get_quantity(),
+							'quantity'                    => $item->get_quantity(),
+							// The method get_total() will return the price after coupon discounts.
+							// https://github.com/woocommerce/woocommerce/blob/54eba223b8dec015c91a13423f9eced09e96f399/plugins/woocommerce/includes/class-wc-order-item-product.php#L308-L310
+							'price_after_coupon_discount' => $this->get_formatted_price( $item->get_total() ),
 						)
 					);
 				},

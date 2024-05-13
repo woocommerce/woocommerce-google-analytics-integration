@@ -80,7 +80,7 @@ abstract class WC_Abstract_Google_Analytics_JS {
 		add_action(
 			'woocommerce_add_to_cart',
 			function ( $cart_item_key, $product_id, $quantity, $variation_id, $variation ) {
-				$this->set_script_data( 'added_to_cart', $this->get_formatted_product( wc_get_product( $product_id ), $variation_id, $variation ) );
+				$this->set_script_data( 'added_to_cart', $this->get_formatted_product( wc_get_product( $product_id ), $variation_id, $variation, $quantity ) );
 			},
 			10,
 			5
@@ -211,7 +211,7 @@ abstract class WC_Abstract_Google_Analytics_JS {
 	 *
 	 * @return array
 	 */
-	public function get_formatted_product( WC_Product $product, $variation_id = 0, $variation = false ): array {
+	public function get_formatted_product( WC_Product $product, $variation_id = 0, $variation = false, $quantity = false ): array {
 		$product_id = $product->is_type( 'variation' ) ? $product->get_parent_id() : $product->get_id();
 		$price      = $product->get_price();
 
@@ -240,6 +240,10 @@ abstract class WC_Abstract_Google_Analytics_JS {
 				),
 			),
 		);
+
+		if ( $quantity ) {
+			$formatted['quantity'] = (int) $quantity;
+		}
 
 		if ( $product->is_type( 'variation' ) ) {
 			$variation = $product->get_attributes();

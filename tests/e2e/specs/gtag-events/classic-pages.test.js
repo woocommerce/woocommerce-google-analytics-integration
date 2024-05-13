@@ -81,7 +81,7 @@ test.describe( 'GTag events on classic pages', () => {
 
 		await page.goto( `?p=${ simpleProductID }` );
 
-		await page.locator( '.quantity input.qty' ).first().fill('3');
+		await page.locator( '.quantity input.qty' ).first().fill( '3' );
 
 		const addToCart = `.single_add_to_cart_button[value="${ simpleProductID }"]`;
 		const addToCartButton = await page.locator( addToCart ).first();

@@ -208,6 +208,7 @@ abstract class WC_Abstract_Google_Analytics_JS {
 	 * @param int        $variation_id Variation product ID.
 	 * @param array|bool $variation An array containing product variation attributes to include in the product data.
 	 *                              For the "variation" type products, we'll use product->get_attributes.
+	 * @param bool|int   $quantity  Quantity to include in the formatted product object
 	 *
 	 * @return array
 	 */

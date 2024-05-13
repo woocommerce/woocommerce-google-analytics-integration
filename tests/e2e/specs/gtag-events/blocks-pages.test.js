@@ -232,7 +232,7 @@ test.describe( 'GTag events on block pages', () => {
 
 		await createProductsBlockShopPage();
 		await page.goto( `products-block-shop` );
-		
+
 		const addToCartButton = await page.locator( addToCart ).first();
 
 		await addToCartButton.click();

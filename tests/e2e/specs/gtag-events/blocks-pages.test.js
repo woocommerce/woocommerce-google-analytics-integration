@@ -225,6 +225,41 @@ test.describe( 'GTag events on block pages', () => {
 		} );
 	} );
 
+	test( 'Add to cart has correct quantity when product is already in cart', async ( {
+		page,
+	} ) => {
+		const addToCart = `[data-product_id="${ simpleProductID }"]`;
+
+		await createProductsBlockShopPage();
+		await page.goto( `products-block-shop` );
+
+		const addToCartButton = await page.locator( addToCart ).first();
+
+		await addToCartButton.click();
+		await expect( addToCartButton.getByText( '1 in cart' ) ).toBeVisible();
+		await addToCartButton.click();
+		await expect( addToCartButton.getByText( '2 in cart' ) ).toBeVisible();
+
+		await page.reload();
+
+		const event = trackGtagEvent( page, 'add_to_cart' );
+
+		const addToCartButton2 = await page.locator( addToCart ).first();
+		await addToCartButton2.click();
+		await expect( addToCartButton.getByText( '3 in cart' ) ).toBeVisible();
+
+		await event.then( ( request ) => {
+			const data = getEventData( request, 'add_to_cart' );
+			expect( data.product1 ).toEqual( {
+				id: simpleProductID.toString(),
+				nm: 'Simple product',
+				ca: 'Uncategorized',
+				qt: '1',
+				pr: simpleProductPrice.toString(),
+			} );
+		} );
+	} );
+
 	test( 'View item list event is sent from the products block shop page', async ( {
 		page,
 	} ) => {

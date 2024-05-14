@@ -48,6 +48,12 @@ Duplicate Google Analytics code causes a conflict in tracking. Remove any other 
 
 == Changelog ==
 
+= 2.0.7 - 2024-05-14 =
+* Dev - Add a manual workflow run for PHP unit tests.
+* Fix - Apply discounts to the ecommerce event if available.
+* Fix - Incorrect quantity value when adding product to the cart that exists in the cart.
+* Tweak - WC 8.9 compatibility.
+
 = 2.0.6 - 2024-04-09 =
 * Tweak - WC 8.8 compatibility.
 

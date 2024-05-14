@@ -55,11 +55,4 @@ Duplicate Google Analytics code causes a conflict in tracking. Remove any other 
 * Tweak - Register `woocommerce-google-analytics-integration` script earlier, so other extensions can plug in.
 * Update - Separate the site tag from the event tracking file and delay execution until DOMContentLoaded.
 
-= 2.0.4 - 2024-03-26 =
-* Dev - Add QIT workflow.
-* Dev - E2E tests for the All Products block.
-* Dev - Remove unused functions from code.
-* Fix - Warning after plugin install using wp-cli.
-* Tweak - Add WP 6.5 Require plugins header.
-
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce-google-analytics-integration/trunk/changelog.txt).

@@ -58,6 +58,9 @@ class WC_Google_Analytics extends WC_Integration {
 		// utm_nooverride parameter for Google AdWords
 		add_filter( 'woocommerce_get_return_url', array( $this, 'utm_nooverride' ) );
 
+		// Mark extension as compatible with WP Consent API
+		add_filter( 'wp_consent_api_registered_' . plugin_basename( __FILE__ ), '__return_true' );
+
 		// Dequeue the WooCommerce Blocks Google Analytics integration,
 		// not to let it register its `gtag` function so that we could provide a more detailed configuration.
 		add_action(

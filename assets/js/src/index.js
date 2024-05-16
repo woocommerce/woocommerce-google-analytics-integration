@@ -60,3 +60,20 @@ function warnIfDataMissing() {
 		);
 	}
 }
+
+document.addEventListener( 'wp_listen_for_consent_change', function ( event ) {
+	const consentUpdate = {};
+
+	const types = consentMap[ Object.keys( event.detail )[0] ];
+	const state = Object.values( event.detail )[0] === 'allow' ? 'granted' : 'deny';
+
+	if ( types !== undefined ) {
+		types.forEach( type => {
+			consentUpdate[ type ] = state;
+		} );
+
+		if ( Object.keys( consentUpdate ).length > 0 ) {
+			gtag( 'consent', 'update', consentUpdate );
+		}
+	}
+});

@@ -42,12 +42,12 @@ jobs:
     steps:
       - name: Get Release versions from Wordpress
         id: wp
-        uses: woocommerce/grow/get-plugin-releases@actions-v1
+        uses: woocommerce/grow/get-plugin-releases@actions-v2
         with:
             slug: wordpress
       - name: Get Release versions from WooCommerce
         id: wc
-        uses: woocommerce/grow/get-plugin-releases@actions-v1
+        uses: woocommerce/grow/get-plugin-releases@actions-v2
         with:
             slug: woocommerce
 
@@ -73,15 +73,15 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Prepare PHP
-        uses: woocommerce/grow/prepare-php@actions-v1
+        uses: woocommerce/grow/prepare-php@actions-v2
         with:
           php-version: "${{ matrix.php }}"
 
       - name: Set up MySQL
-        uses: woocommerce/grow/prepare-mysql@actions-v1
+        uses: woocommerce/grow/prepare-mysql@actions-v2
 
       - name: Run PHP unit tests
         run: |
@@ -116,15 +116,15 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Prepare PHP
-        uses: woocommerce/grow/prepare-php@actions-v1
+        uses: woocommerce/grow/prepare-php@actions-v2
         with:
           php-version: "${{ inputs.php-version }}"
 
       - name: Prepare MySQL
-        uses: woocommerce/grow/prepare-mysql@actions-v1
+        uses: woocommerce/grow/prepare-mysql@actions-v2
 
       - name: Install WP tests
         env:

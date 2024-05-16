@@ -15,7 +15,37 @@ if ( window.ga4w ) {
 		window.addEventListener( 'load', warnIfDataMissing );
 	}
 }
+
+const consentMap = {
+	statistics: [
+		'analytics_storage',
+	],
+	marketing: [
+		'ad_storage',
+		'ad_user_data',
+		'ad_personalization',
+	],
+};
+
 function initializeTracking() {
+	if ( typeof wp_has_consent === 'function' ) {
+		window.wp_consent_type = 'optin';
+
+		const consentState = {};
+
+		for ( const [ category, types ] of Object.entries( consentMap ) ) {
+			if ( wp_has_consent( category ) ) {
+				types.forEach( type => {
+					consentState[ type ] = 'granted';
+				} );
+			}
+		}
+
+		if ( Object.keys( consentState ).length > 0 ) {
+			gtag( 'consent', 'update', consentState );
+		}
+	}
+
 	const getEventHandler = setupEventHandlers( window.ga4w.settings );
 
 	classicTracking( getEventHandler, window.ga4w.data );

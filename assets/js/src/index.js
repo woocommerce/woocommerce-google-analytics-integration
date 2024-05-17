@@ -22,13 +22,15 @@ const consentMap = {
 };
 
 function initializeTracking() {
-	if ( typeof wp_has_consent === 'function' ) { // eslint-disable-line camelcase
+	// eslint-disable-next-line camelcase
+	if ( typeof wp_has_consent === 'function' ) {
 		window.wp_consent_type = 'optin';
 
 		const consentState = {};
 
 		for ( const [ category, types ] of Object.entries( consentMap ) ) {
-			if ( wp_has_consent( category ) ) { // eslint-disable-line camelcase, no-undef
+			// eslint-disable-next-line camelcase, no-undef
+			if ( wp_has_consent( category ) ) {
 				types.forEach( ( type ) => {
 					consentState[ type ] = 'granted';
 				} );

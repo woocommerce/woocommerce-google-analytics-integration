@@ -17,32 +17,26 @@ if ( window.ga4w ) {
 }
 
 const consentMap = {
-	statistics: [
-		'analytics_storage',
-	],
-	marketing: [
-		'ad_storage',
-		'ad_user_data',
-		'ad_personalization',
-	],
+	statistics: [ 'analytics_storage' ],
+	marketing: [ 'ad_storage', 'ad_user_data', 'ad_personalization' ],
 };
 
 function initializeTracking() {
-	if ( typeof wp_has_consent === 'function' ) {
+	if ( typeof wp_has_consent === 'function' ) { // eslint-disable-line camelcase
 		window.wp_consent_type = 'optin';
 
 		const consentState = {};
 
 		for ( const [ category, types ] of Object.entries( consentMap ) ) {
-			if ( wp_has_consent( category ) ) {
-				types.forEach( type => {
+			if ( wp_has_consent( category ) ) { // eslint-disable-line camelcase, no-undef
+				types.forEach( ( type ) => {
 					consentState[ type ] = 'granted';
 				} );
 			}
 		}
 
 		if ( Object.keys( consentState ).length > 0 ) {
-			gtag( 'consent', 'update', consentState );
+			gtag( 'consent', 'update', consentState ); // eslint-disable-line no-undef
 		}
 	}
 
@@ -64,16 +58,17 @@ function warnIfDataMissing() {
 document.addEventListener( 'wp_listen_for_consent_change', function ( event ) {
 	const consentUpdate = {};
 
-	const types = consentMap[ Object.keys( event.detail )[0] ];
-	const state = Object.values( event.detail )[0] === 'allow' ? 'granted' : 'deny';
+	const types = consentMap[ Object.keys( event.detail )[ 0 ] ];
+	const state =
+		Object.values( event.detail )[ 0 ] === 'allow' ? 'granted' : 'deny';
 
 	if ( types !== undefined ) {
-		types.forEach( type => {
+		types.forEach( ( type ) => {
 			consentUpdate[ type ] = state;
 		} );
 
 		if ( Object.keys( consentUpdate ).length > 0 ) {
-			gtag( 'consent', 'update', consentUpdate );
+			gtag( 'consent', 'update', consentUpdate ); // eslint-disable-line no-undef
 		}
 	}
-});
+} );

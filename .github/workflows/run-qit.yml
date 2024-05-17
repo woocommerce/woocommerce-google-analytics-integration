@@ -58,12 +58,12 @@ jobs:
     needs: build
     steps:
       - name: Download artifact
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: woocommerce-google-analytics-integration.zip
       - name: Run QIT Tests
         # Update it with more stable path once merged.
-        uses: woocommerce/grow/run-qit-extension@actions-v1
+        uses: woocommerce/grow/run-qit-extension@actions-v2
         with:
           qit-partner-user: ${{ secrets.QIT_PARTNER_USER }}
           qit-partner-secret: ${{ secrets.QIT_PARTNER_SECRET }}

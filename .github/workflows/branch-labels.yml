@@ -1,11 +1,15 @@
 name: Set PR Labels
 
 on:
-  pull_request:
+  pull_request_target:
     types: opened
+
 jobs:
   SetLabels:
+    permissions:
+      contents: read
+      pull-requests: write
     runs-on: ubuntu-latest
     steps:
       - name: Set Labels
-        uses: woocommerce/grow/branch-label@actions-v1
+        uses: woocommerce/grow/branch-label@actions-v2

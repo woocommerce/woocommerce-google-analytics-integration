@@ -6,7 +6,7 @@ const consentMap = {
 export const setCurrentConsentState = ( {
 	tracker_function_name: trackerFunctionName,
 } ) => {
-	// eslint-disable-next-line camelcase
+	// eslint-disable-next-line camelcase -- `wp_has_consent` is defined by the WP Consent API plugin.
 	if ( typeof wp_has_consent === 'function' ) {
 		if ( window.wp_consent_type === undefined ) {
 			window.wp_consent_type = 'optin';

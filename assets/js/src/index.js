@@ -1,6 +1,7 @@
 import { setupEventHandlers } from './tracker';
 import { classicTracking } from './integrations/classic';
 import { blocksTracking } from './integrations/blocks';
+import { setCurrentConsentState, addConsentStateChangeEventListener } from './integrations/wp-consent-api';
 
 // Wait for 'ga4w:ready' event if `window.ga4w` is not there yet.
 if ( window.ga4w ) {
@@ -22,25 +23,8 @@ const consentMap = {
 };
 
 function initializeTracking() {
-	// eslint-disable-next-line camelcase
-	if ( typeof wp_has_consent === 'function' ) {
-		window.wp_consent_type = 'optin';
-
-		const consentState = {};
-
-		for ( const [ category, types ] of Object.entries( consentMap ) ) {
-			// eslint-disable-next-line camelcase, no-undef
-			if ( wp_has_consent( category ) ) {
-				types.forEach( ( type ) => {
-					consentState[ type ] = 'granted';
-				} );
-			}
-		}
-
-		if ( Object.keys( consentState ).length > 0 ) {
-			gtag( 'consent', 'update', consentState ); // eslint-disable-line no-undef
-		}
-	}
+	setCurrentConsentState( window.ga4w.settings );
+	addConsentStateChangeEventListener( window.ga4w.settings );
 
 	const getEventHandler = setupEventHandlers( window.ga4w.settings );
 
@@ -56,21 +40,3 @@ function warnIfDataMissing() {
 		);
 	}
 }
-
-document.addEventListener( 'wp_listen_for_consent_change', function ( event ) {
-	const consentUpdate = {};
-
-	const types = consentMap[ Object.keys( event.detail )[ 0 ] ];
-	const state =
-		Object.values( event.detail )[ 0 ] === 'allow' ? 'granted' : 'deny';
-
-	if ( types !== undefined ) {
-		types.forEach( ( type ) => {
-			consentUpdate[ type ] = state;
-		} );
-
-		if ( Object.keys( consentUpdate ).length > 0 ) {
-			gtag( 'consent', 'update', consentUpdate ); // eslint-disable-line no-undef
-		}
-	}
-} );

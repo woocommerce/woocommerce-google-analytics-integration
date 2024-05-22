@@ -3,7 +3,7 @@ import { classicTracking } from './integrations/classic';
 import { blocksTracking } from './integrations/blocks';
 import {
 	setCurrentConsentState,
-	addConsentStateChangeEventListener
+	addConsentStateChangeEventListener,
 } from './integrations/wp-consent-api';
 
 // Wait for 'ga4w:ready' event if `window.ga4w` is not there yet.

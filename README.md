@@ -83,3 +83,30 @@ add_filter( 'woocommerce_ga_gtag_consent_modes', function ( $consent_modes ) {
 ```
 
 After the page loads, the consent for particular parameters can be updated by other plugins or custom code, implementing UI for customer-facing configuration using [Google's consent API](https://developers.google.com/tag-platform/security/guides/consent?hl=en&consentmode=advanced#update-consent) (`gtag('consent', 'update', {…})`).
+
+#### Cookie banners & WP Consent API
+
+The extension does not provide any UI, like a cookie banner, to let your visitors grant consent for tracking. However, it's integrated with [WP Consent API](https://wordpress.org/plugins/wp-consent-api/), so you can pick another extension that provides a banner that meets your needs. Like [Complianz](https://wordpress.org/plugins/complianz-gdpr/), [Cookiebot](https://wordpress.org/plugins/cookiebot), or [GDPR Cookie Compliance](https://wordpress.org/plugins/gdpr-cookie-compliance/).
+
+Each of those extensions may require additional setup or registration. Usually, the basic default setup works out of the box, but there may be some integration caveats. Here are a couple of the most frequent ones:
+
+##### GA4W overwrites the consent mode defaults set by the other extension
+
+If the additional extension you chose sets its own default state of consent modes, different than the one we set, and you would like to make sure we'll not overwrite that, you can use the `woocommerce_ga_gtag_consent_modes` snippet to change or disable our setup:
+
+```php
+add_filter( 'woocommerce_ga_gtag_consent_modes', function ( $consent_modes ) {
+   return array();
+} );
+```
+
+##### I want to stop firing the `page_view` event on the page load
+
+This is actually unrelated to the consent mode; it's a matter of the default tag config. You can alter it using the `woocommerce_ga_gtag_config` snippet
+
+```php
+add_filter( 'woocommerce_ga_gtag_config', function ( $config ) {
+    $config['send_page_view'] = false;
+   return $config;
+} );
+```

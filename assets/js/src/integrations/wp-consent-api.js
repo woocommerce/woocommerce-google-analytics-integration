@@ -15,7 +15,7 @@ export const setCurrentConsentState = ( {
 		const consentState = {};
 
 		for ( const [ category, types ] of Object.entries( consentMap ) ) {
-			// eslint-disable-next-line camelcase, no-undef
+			// eslint-disable-next-line camelcase, no-undef -- `wp_has_consent` is defined by the WP Consent API plugin.
 			if ( wp_has_consent( category ) ) {
 				types.forEach( ( type ) => {
 					consentState[ type ] = 'granted';

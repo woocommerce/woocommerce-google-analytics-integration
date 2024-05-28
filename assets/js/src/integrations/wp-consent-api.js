@@ -37,7 +37,7 @@ export const addConsentStateChangeEventListener = ( {
 
 		const types = consentMap[ Object.keys( event.detail )[ 0 ] ];
 		const state =
-			Object.values( event.detail )[ 0 ] === 'allow' ? 'granted' : 'deny';
+			Object.values( event.detail )[ 0 ] === 'allow' ? 'granted' : 'denied';
 
 		if ( types !== undefined ) {
 			types.forEach( ( type ) => {

@@ -15,10 +15,19 @@ export const setCurrentConsentState = ( {
 		const consentState = {};
 
 		for ( const [ category, types ] of Object.entries( consentMap ) ) {
-			// eslint-disable-next-line camelcase, no-undef -- `wp_has_consent` is defined by the WP Consent API plugin.
-			if ( wp_has_consent( category ) ) {
+			if (
+				// eslint-disable-next-line camelcase, no-undef -- `consent_api_get_cookie` is defined by the WP Consent API plugin.
+				consent_api_get_cookie(
+					window.consent_api.cookie_prefix + '_' + category
+				) !== ''
+			) {
+				// eslint-disable-next-line camelcase, no-undef -- `wp_has_consent` is defined by the WP Consent API plugin.
+				const hasConsent = wp_has_consent( category )
+					? 'granted'
+					: 'denied';
+
 				types.forEach( ( type ) => {
-					consentState[ type ] = 'granted';
+					consentState[ type ] = hasConsent;
 				} );
 			}
 		}
@@ -37,7 +46,9 @@ export const addConsentStateChangeEventListener = ( {
 
 		const types = consentMap[ Object.keys( event.detail )[ 0 ] ];
 		const state =
-			Object.values( event.detail )[ 0 ] === 'allow' ? 'granted' : 'denied';
+			Object.values( event.detail )[ 0 ] === 'allow'
+				? 'granted'
+				: 'denied';
 
 		if ( types !== undefined ) {
 			types.forEach( ( type ) => {

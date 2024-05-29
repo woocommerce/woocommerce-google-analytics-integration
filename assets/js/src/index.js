@@ -1,6 +1,10 @@
 import { setupEventHandlers } from './tracker';
 import { classicTracking } from './integrations/classic';
 import { blocksTracking } from './integrations/blocks';
+import {
+	setCurrentConsentState,
+	addConsentStateChangeEventListener,
+} from './integrations/wp-consent-api';
 
 // Wait for 'ga4w:ready' event if `window.ga4w` is not there yet.
 if ( window.ga4w ) {
@@ -15,7 +19,11 @@ if ( window.ga4w ) {
 		window.addEventListener( 'load', warnIfDataMissing );
 	}
 }
+
 function initializeTracking() {
+	setCurrentConsentState( window.ga4w.settings );
+	addConsentStateChangeEventListener( window.ga4w.settings );
+
 	const getEventHandler = setupEventHandlers( window.ga4w.settings );
 
 	classicTracking( getEventHandler, window.ga4w.data );

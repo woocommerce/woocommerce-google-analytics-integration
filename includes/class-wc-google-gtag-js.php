@@ -94,7 +94,7 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 					function %2$s(){dataLayer.push(arguments);}
 					// Set up default consent state.
 					for ( const mode of %4$s || [] ) {
-						%2$s( "consent", "default", mode );
+						%2$s( "consent", "default", { "wait_for_update": 500, ...mode } );
 					}
 					%2$s("js", new Date());
 					%2$s("set", "developer_id.%3$s", true);

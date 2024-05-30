@@ -219,6 +219,10 @@ class WC_Google_Analytics extends WC_Integration {
 	 * @return array       Updated WC Tracker data.
 	 */
 	public function track_settings( $data ) {
+		if ( 'no' === get_option( 'woocommerce_allow_tracking', 'no' ) ) {
+			return [];
+		}
+
 		$settings                    = $this->settings;
 		$data['wc-google-analytics'] = array(
 			'support_display_advertising'   => $settings['ga_support_display_advertising'],

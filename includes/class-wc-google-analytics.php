@@ -220,7 +220,7 @@ class WC_Google_Analytics extends WC_Integration {
 	 */
 	public function track_settings( $data ) {
 		if ( 'no' === get_option( 'woocommerce_allow_tracking', 'no' ) ) {
-			return [];
+			return $data;
 		}
 
 		$settings                    = $this->settings;

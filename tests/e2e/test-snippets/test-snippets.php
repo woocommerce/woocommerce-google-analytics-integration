@@ -21,7 +21,7 @@ add_filter(
 	function ( $modes ) {
 		$status = 'granted';
 		// Optional: Set the default consent state for tests via the `consent_default` URL parameter.
-		if ( isset( $_GET['consent_default'] ) ) {
+		if ( isset( $_GET['consent_default'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			$status = sanitize_text_field( wp_unslash( $_GET['consent_default'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		}
 

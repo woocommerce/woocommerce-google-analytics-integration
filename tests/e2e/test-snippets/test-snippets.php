@@ -19,8 +19,11 @@ use WC_Google_Gtag_JS;
 add_filter(
 	'woocommerce_ga_gtag_consent_modes',
 	function ( $modes ) {
+		$status = 'granted';
 		// Optional: Set the default consent state for tests via the `consent_default` URL parameter.
-		$status = isset( $_GET['consent_default'] ) ? $_GET['consent_default'] : 'granted';
+		if ( isset( $_GET['consent_default'] ) ) {
+			$status = sanitize_text_field( wp_unslash( $_GET['consent_default'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		}
 
 		$modes[0]['analytics_storage']  = $status;
 		$modes[0]['ad_storage']         = $status;

@@ -84,6 +84,66 @@ test.describe( 'WP Consent API Integration', () => {
 		} );
 	} );
 
+	test( 'Consent update denying `analytics_storage` is sent when WP Consent API `statistics` category is `denied`', async ( {
+		page,
+	} ) => {
+		await page.goto( 'shop?consent_default=granted' );
+		await page.evaluate( () =>
+			window.wp_set_consent( 'statistics', 'deny' )
+		);
+
+		const dataLayer = await page.evaluate( () => window.dataLayer );
+		const consentState = dataLayer.filter( ( i ) => i[ 0 ] === 'consent' );
+
+		await expect( consentState.length ).toEqual( 2 );
+
+		await expect( consentState[ 0 ] ).toEqual( {
+			0: 'consent',
+			1: 'default',
+			2: expect.objectContaining( { analytics_storage: 'granted' } ),
+		} );
+
+		await expect( consentState[ 1 ] ).toEqual( {
+			0: 'consent',
+			1: 'update',
+			2: { analytics_storage: 'denied' },
+		} );
+	} );
+
+	test( 'Consent update denying `ad_storage`, `ad_user_data`, `ad_personalization` is sent when WP Consent API `marketing` category is `denied`', async ( {
+		page,
+	} ) => {
+		await page.goto( 'shop?consent_default=granted' );
+		await page.evaluate( () =>
+			window.wp_set_consent( 'marketing', 'deny' )
+		);
+
+		const dataLayer = await page.evaluate( () => window.dataLayer );
+		const consentState = dataLayer.filter( ( i ) => i[ 0 ] === 'consent' );
+
+		await expect( consentState.length ).toEqual( 2 );
+
+		await expect( consentState[ 0 ] ).toEqual( {
+			0: 'consent',
+			1: 'default',
+			2: expect.objectContaining( {
+				ad_storage: 'granted',
+				ad_user_data: 'granted',
+				ad_personalization: 'granted',
+			} ),
+		} );
+
+		await expect( consentState[ 1 ] ).toEqual( {
+			0: 'consent',
+			1: 'update',
+			2: {
+				ad_storage: 'denied',
+				ad_user_data: 'denied',
+				ad_personalization: 'denied',
+			},
+		} );
+	} );
+
 	test( 'Consent state is sent as update when page is loaded', async ( {
 		page,
 	} ) => {

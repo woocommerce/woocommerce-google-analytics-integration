@@ -86,7 +86,7 @@ After the page loads, the consent for particular parameters can be updated by ot
 
 #### Cookie banners & WP Consent API
 
-The extension does not provide any UI, like a cookie banner, to let your visitors grant consent for tracking. However, it's integrated with [WP Consent API](https://wordpress.org/plugins/wp-consent-api/), so you can pick another extension that provides a banner that meets your needs. Like [Complianz](https://wordpress.org/plugins/complianz-gdpr/), [Cookiebot](https://wordpress.org/plugins/cookiebot), or [GDPR Cookie Compliance](https://wordpress.org/plugins/gdpr-cookie-compliance/).
+The extension does not provide any UI, like a cookie banner, to let your visitors grant consent for tracking. However, it's integrated with [WP Consent API](https://wordpress.org/plugins/wp-consent-api/), so you can pick another extension that provides a banner that meets your needs.
 
 Each of those extensions may require additional setup or registration. Usually, the basic default setup works out of the box, but there may be some integration caveats. Here are a couple of the most frequent ones:
 

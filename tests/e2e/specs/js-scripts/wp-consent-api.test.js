@@ -91,7 +91,8 @@ test.describe( 'WP Consent API Integration', () => {
 		await page.evaluate( () =>
 			window.wp_set_consent( 'marketing', 'allow' )
 		);
-		await page.goto( 'shop?consent_default=denied' );
+		// Go to a new page to confirm that the consent state is maintained across page loads
+		await page.goto( '/?consent_default=denied' );
 
 		const dataLayer = await page.evaluate( () => window.dataLayer );
 		const consentState = dataLayer.filter( ( i ) => i[ 0 ] === 'consent' );

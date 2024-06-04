@@ -87,7 +87,7 @@ test.describe( 'WP Consent API Integration', () => {
 	test( 'Consent update denying `analytics_storage` is sent when WP Consent API `statistics` category is `denied`', async ( {
 		page,
 	} ) => {
-		await page.goto( 'shop?consent_default=granted' );
+		await page.goto( 'shop' );
 		await page.evaluate( () =>
 			window.wp_set_consent( 'statistics', 'deny' )
 		);
@@ -113,7 +113,7 @@ test.describe( 'WP Consent API Integration', () => {
 	test( 'Consent update denying `ad_storage`, `ad_user_data`, `ad_personalization` is sent when WP Consent API `marketing` category is `denied`', async ( {
 		page,
 	} ) => {
-		await page.goto( 'shop?consent_default=granted' );
+		await page.goto( 'shop' );
 		await page.evaluate( () =>
 			window.wp_set_consent( 'marketing', 'deny' )
 		);

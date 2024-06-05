@@ -57,8 +57,4 @@ Duplicate Google Analytics code causes a conflict in tracking. Remove any other 
 = 2.0.6 - 2024-04-09 =
 * Tweak - WC 8.8 compatibility.
 
-= 2.0.5 - 2024-04-04 =
-* Tweak - Register `woocommerce-google-analytics-integration` script earlier, so other extensions can plug in.
-* Update - Separate the site tag from the event tracking file and delay execution until DOMContentLoaded.
-
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce-google-analytics-integration/trunk/changelog.txt).

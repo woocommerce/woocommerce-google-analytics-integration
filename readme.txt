@@ -3,7 +3,7 @@ Contributors: woocommerce, automattic, claudiosanches, bor0, royho, laurendaviss
 Tags: woocommerce, google analytics
 Requires at least: 6.2
 Tested up to: 6.5
-Stable tag: 2.0.7
+Stable tag: 2.1.0
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -48,6 +48,11 @@ Duplicate Google Analytics code causes a conflict in tracking. Remove any other 
 
 == Changelog ==
 
+= 2.1.0 - 2024-06-05 =
+* Add - Integration with the WP Consent API plugin.
+* Fix - Add E2E tests for denying via WP Consent API.
+* Tweak - Document WP Consent API support.
+
 = 2.0.7 - 2024-05-14 =
 * Dev - Add a manual workflow run for PHP unit tests.
 * Fix - Apply discounts to the ecommerce event if available.
@@ -56,9 +61,5 @@ Duplicate Google Analytics code causes a conflict in tracking. Remove any other 
 
 = 2.0.6 - 2024-04-09 =
 * Tweak - WC 8.8 compatibility.
-
-= 2.0.5 - 2024-04-04 =
-* Tweak - Register `woocommerce-google-analytics-integration` script earlier, so other extensions can plug in.
-* Update - Separate the site tag from the event tracking file and delay execution until DOMContentLoaded.
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce-google-analytics-integration/trunk/changelog.txt).

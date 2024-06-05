@@ -48,6 +48,11 @@ Duplicate Google Analytics code causes a conflict in tracking. Remove any other 
 
 == Changelog ==
 
+= 2.1.0 - 2024-06-05 =
+* Add - Integration with the WP Consent API plugin.
+* Fix - Add E2E tests for denying via WP Consent API.
+* Tweak - Document WP Consent API support.
+
 = 2.0.7 - 2024-05-14 =
 * Dev - Add a manual workflow run for PHP unit tests.
 * Fix - Apply discounts to the ecommerce event if available.

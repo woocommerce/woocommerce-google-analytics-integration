@@ -179,7 +179,7 @@ abstract class WC_Abstract_Google_Analytics_JS {
 		$cart = WC()->cart;
 
 		if ( is_null( $cart ) ) {
-			return array();			
+			return array();
 		}
 
 		return array(

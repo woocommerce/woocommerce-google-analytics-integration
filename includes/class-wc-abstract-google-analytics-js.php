@@ -176,6 +176,12 @@ abstract class WC_Abstract_Google_Analytics_JS {
 	 * @return array
 	 */
 	public function get_formatted_cart(): array {
+		$cart = WC()->cart;
+
+		if ( is_null( $cart ) ) {
+			return array();
+		}
+
 		return array(
 			'items'   => array_map(
 				function ( $item ) {
@@ -190,12 +196,12 @@ abstract class WC_Abstract_Google_Analytics_JS {
 						)
 					);
 				},
-				array_values( WC()->cart->get_cart() )
+				array_values( $cart->get_cart() )
 			),
-			'coupons' => WC()->cart->get_coupons(),
+			'coupons' => $cart->get_coupons(),
 			'totals'  => array(
 				'currency_code'       => get_woocommerce_currency(),
-				'total_price'         => $this->get_formatted_price( WC()->cart->get_total( 'edit' ) ),
+				'total_price'         => $this->get_formatted_price( $cart->get_total( 'edit' ) ),
 				'currency_minor_unit' => wc_get_price_decimals(),
 			),
 		);

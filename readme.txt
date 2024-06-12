@@ -48,6 +48,10 @@ Duplicate Google Analytics code causes a conflict in tracking. Remove any other 
 
 == Changelog ==
 
+= 2.1.1 - 2024-06-12 =
+* Tweak - Confirm WC_Cart is available before formatting cart data.
+* Tweak - WC 9.0 compatibility.
+
 = 2.1.0 - 2024-06-05 =
 * Add - Integration with the WP Consent API plugin.
 * Fix - Add E2E tests for denying via WP Consent API.

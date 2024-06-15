@@ -40,6 +40,7 @@ export function classicTracking(
 	} );
 
 	// Handle runtime cart events.
+	const oldAddedToCart = document.body.onadded_to_cart;
 	/**
 	 * Track the custom add to cart event dispatched by WooCommerce Core
 	 *
@@ -47,8 +48,18 @@ export function classicTracking(
 	 * @param {Object}        fragments - An object containing fragments of the updated cart.
 	 * @param {string}        cartHash  - A string representing the hash of the cart after the update.
 	 * @param {HTMLElement[]} button    - An array of HTML elements representing the add to cart button.
+	 * @param {Array}         rest      - An array of additional arguments passed to the event handler.
 	 */
-	document.body.onadded_to_cart = ( e, fragments, cartHash, button ) => {
+	document.body.onadded_to_cart = (
+		e,
+		fragments,
+		cartHash,
+		button,
+		...rest
+	) => {
+		if ( typeof oldAddedToCart === 'function' ) {
+			oldAddedToCart( e, fragments, cartHash, button, ...rest );
+		}
 		// Get product ID from data attribute (archive pages) or value (single product pages).
 		const productID = parseInt(
 			button[ 0 ].dataset.product_id || button[ 0 ].value

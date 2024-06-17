@@ -48,17 +48,15 @@ export function classicTracking(
 	 * @param {Object}        fragments - An object containing fragments of the updated cart.
 	 * @param {string}        cartHash  - A string representing the hash of the cart after the update.
 	 * @param {HTMLElement[]} button    - An array of HTML elements representing the add to cart button.
-	 * @param {Array}         rest      - An array of additional arguments passed to the event handler.
 	 */
-	document.body.onadded_to_cart = (
+	document.body.onadded_to_cart = function (
 		e,
 		fragments,
 		cartHash,
-		button,
-		...rest
-	) => {
+		button
+	) {
 		if ( typeof oldAddedToCart === 'function' ) {
-			oldAddedToCart( e, fragments, cartHash, button, ...rest );
+			oldAddedToCart.apply( this, arguments );
 		}
 		// Get product ID from data attribute (archive pages) or value (single product pages).
 		const productID = parseInt(
@@ -110,20 +108,20 @@ export function classicTracking(
 	// Attach event listeners on initial page load and when the cart div is updated
 	removeFromCartListener();
 	const oldOnupdatedWcDiv = document.body.onupdated_wc_div;
-	document.body.onupdated_wc_div = ( ...args ) => {
+	document.body.onupdated_wc_div = function () {
 		if ( typeof oldOnupdatedWcDiv === 'function' ) {
-			oldOnupdatedWcDiv( ...args );
+			oldOnupdatedWcDiv.apply( this, arguments );
 		}
 		removeFromCartListener();
 	};
 
 	// Trigger the handler when an item is removed from the mini-cart and WooCommerce dispatches the `removed_from_cart` event.
 	const oldOnRemovedFromCart = document.body.onremoved_from_cart;
-	document.body.onremoved_from_cart = ( ...args ) => {
+	document.body.onremoved_from_cart = function () {
 		if ( typeof oldOnRemovedFromCart === 'function' ) {
-			oldOnRemovedFromCart( ...args );
+			oldOnRemovedFromCart.apply( this, arguments );
 		}
-		removeFromCartHandler( { target: args[ 3 ][ 0 ] } );
+		removeFromCartHandler( { target: arguments[ 3 ][ 0 ] } );
 	};
 
 	// Handle product selection events.

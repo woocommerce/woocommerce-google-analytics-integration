@@ -13,7 +13,7 @@ Provides integration between Google Analytics and WooCommerce.
 
 This plugin provides the integration between Google Analytics and the WooCommerce plugin. You can link a referral to a purchase and add transaction information to your Google Analytics data. It supports Global Site Tag (GA4) and eCommerce event tracking.
 
-Please visit the [documentation page for additional information](https://woo.com/document/google-analytics-integration/).
+Please visit the [documentation page for additional information](https://woocommerce.com/document/google-analytics-integration/).
 
 Contributions are welcome via the [GitHub repository](https://github.com/woocommerce/woocommerce-google-analytics-integration).
 

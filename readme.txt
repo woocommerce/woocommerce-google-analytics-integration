@@ -48,6 +48,10 @@ Duplicate Google Analytics code causes a conflict in tracking. Remove any other 
 
 == Changelog ==
 
+= 2.1.2 - 2024-06-18 =
+* Tweak -  Replace woo.com references with woocommerce.com.
+* Tweak - Do not replace other extensions' `add_to_cart` listeners.
+
 = 2.1.1 - 2024-06-12 =
 * Tweak - Confirm WC_Cart is available before formatting cart data.
 * Tweak - WC 9.0 compatibility.

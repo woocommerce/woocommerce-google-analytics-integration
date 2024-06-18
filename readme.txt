@@ -57,10 +57,4 @@ Duplicate Google Analytics code causes a conflict in tracking. Remove any other 
 * Fix - Add E2E tests for denying via WP Consent API.
 * Tweak - Document WP Consent API support.
 
-= 2.0.7 - 2024-05-14 =
-* Dev - Add a manual workflow run for PHP unit tests.
-* Fix - Apply discounts to the ecommerce event if available.
-* Fix - Incorrect quantity value when adding product to the cart that exists in the cart.
-* Tweak - WC 8.9 compatibility.
-
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce-google-analytics-integration/trunk/changelog.txt).

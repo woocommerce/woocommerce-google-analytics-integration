@@ -4,7 +4,7 @@
  * Plugin URI: https://wordpress.org/plugins/woocommerce-google-analytics-integration/
  * Description: Allows Google Analytics tracking code to be inserted into WooCommerce store pages.
  * Author: WooCommerce
- * Author URI: https://woo.com
+ * Author URI: https://woocommerce.com
  * Version: 2.1.1
  * WC requires at least: 8.4
  * WC tested up to: 9.0
@@ -111,7 +111,7 @@ if ( ! class_exists( 'WC_Google_Analytics_Integration' ) ) {
 		public function plugin_links( $links ) {
 			$settings_url = $this->get_settings_url();
 			$support_url  = 'https://wordpress.org/support/plugin/woocommerce-google-analytics-integration';
-			$docs_url     = 'https://woo.com/document/google-analytics-integration/?utm_source=wordpress&utm_medium=all-plugins-page&utm_campaign=doc-link&utm_content=woocommerce-google-analytics-integration';
+			$docs_url     = 'https://woocommerce.com/document/google-analytics-integration/?utm_source=wordpress&utm_medium=all-plugins-page&utm_campaign=doc-link&utm_content=woocommerce-google-analytics-integration';
 
 			$plugin_links = array(
 				'<a href="' . esc_url( $settings_url ) . '">' . esc_html__( 'Settings', 'woocommerce-google-analytics-integration' ) . '</a>',
@@ -206,7 +206,7 @@ if ( ! class_exists( 'WC_Google_Analytics_Integration' ) ) {
 			$notice_html = '<strong>' . esc_html__( 'Get detailed insights into your sales with Google Analytics Pro', 'woocommerce-google-analytics-integration' ) . '</strong><br><br>';
 
 			/* translators: 1: href link to GA pro */
-			$notice_html .= sprintf( __( 'Add advanced tracking for your sales funnel, coupons and more. [<a href="%s" target="_blank">Learn more</a> &gt;]', 'woocommerce-google-analytics-integration' ), 'https://woo.com/products/woocommerce-google-analytics-pro/?utm_source=woocommerce-google-analytics-integration&utm_medium=product&utm_campaign=google%20analytics%20free%20to%20pro%20extension%20upsell' );
+			$notice_html .= sprintf( __( 'Add advanced tracking for your sales funnel, coupons and more. [<a href="%s" target="_blank">Learn more</a> &gt;]', 'woocommerce-google-analytics-integration' ), 'https://woocommerce.com/products/woocommerce-google-analytics-pro/?utm_source=woocommerce-google-analytics-integration&utm_medium=product&utm_campaign=google%20analytics%20free%20to%20pro%20extension%20upsell' );
 
 			WC_Admin_Notices::add_custom_notice( 'woocommerce_google_analytics_pro_notice', $notice_html );
 			update_option( 'woocommerce_google_analytics_pro_notice_shown', true );

@@ -213,7 +213,7 @@ class WC_Google_Analytics extends WC_Integration {
 	/**
 	 * Hooks into woocommerce_tracker_data and tracks some of the analytic settings (just enabled|disabled status)
 	 * only if you have opted into WooCommerce tracking
-	 * https://woo.com/usage-tracking/
+	 * https://woocommerce.com/usage-tracking/
 	 *
 	 * @param  array $data Current WC tracker data.
 	 * @return array       Updated WC Tracker data.

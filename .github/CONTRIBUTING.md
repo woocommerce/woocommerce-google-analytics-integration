@@ -16,7 +16,7 @@ Please see [SECURITY.md](./SECURITY.md).
 
 ## Feature Requests
 
-Feature requests can be submitted to our [feature requests page](https://woo.com/feature-requests/woocommerce-google-analytics/). Be sure to include a good description of the expected behavior and use case, and before submitting a request, please search for similar ones.
+Feature requests can be submitted to our [feature requests page](https://woocommerce.com/feature-requests/woocommerce-google-analytics/). Be sure to include a good description of the expected behavior and use case, and before submitting a request, please search for similar ones.
 
 ## Getting started
 

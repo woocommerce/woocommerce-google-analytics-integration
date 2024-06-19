@@ -21,7 +21,8 @@ export const getProductFieldObject = ( product, quantity ) => {
 		...getProductCategories( product ),
 		quantity: product.quantity ?? quantity,
 		price: formatPrice(
-			product.prices.price,
+			// Use line total for bundled products, if available.
+			product.totals?.line_total || product.prices.price,
 			product.prices.currency_minor_unit
 		),
 		...variantData,

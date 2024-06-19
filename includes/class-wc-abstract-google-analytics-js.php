@@ -230,6 +230,13 @@ abstract class WC_Abstract_Google_Analytics_JS {
 			}
 		}
 
+		// Integration with Product Bundles.
+		// Get the minimum price, as `get_price` may return 0 if the product is a bundle and the price is potentially a range.
+		// Even a range containing a single value.
+		if ( $product->is_type( 'bundle' ) && is_callable( [ $product, 'get_bundle_price' ] ) ) {
+			$price = $product->get_bundle_price( 'min' );
+		}
+
 		$formatted = array(
 			'id'         => $product_id,
 			'name'       => $product->get_title(),

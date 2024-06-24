@@ -60,14 +60,20 @@ export function classicTracking(
 		}
 		// Get product ID from data attribute (archive pages) or value (single product pages).
 		const productID = parseInt(
-			button[ 0 ].dataset.product_id || button[ 0 ].value
+			button?.[ 0 ]?.dataset.product_id || button?.[ 0 ].value
 		);
+
+		if ( isNaN( productID ) ) {
+			throw new Error(
+				'Google Analytics for WooCommerce: Could not read product ID from button given in `added_to_cart` event. Check whether WooCommerce Core events or elements are malformed by other extensions.'
+			);
+		}
 
 		// If the current product doesn't match search by ID.
 		const productToHandle =
 			product?.id === productID
 				? product
-				: getProductFromID( parseInt( productID ), products, cart );
+				: getProductFromID( productID, products, cart );
 
 		// Confirm we found a product to handle.
 		if ( ! productToHandle ) {
@@ -96,12 +102,15 @@ export function classicTracking(
 	 * @param {HTMLElement|Object} element - The HTML element clicked on to trigger this event
 	 */
 	function removeFromCartHandler( element ) {
+		const productID = parseInt( element.target?.dataset.product_id );
+
+		if ( isNaN( productID ) ) {
+			throw new Error(
+				'Google Analytics for WooCommerce: Could not read product ID from the target element given to remove from cart event. Check whether WooCommerce Core events or elements are malformed by other extensions.'
+			);
+		}
 		getEventHandler( 'remove_from_cart' )( {
-			product: getProductFromID(
-				parseInt( element.target.dataset.product_id ),
-				products,
-				cart
-			),
+			product: getProductFromID( productID, products, cart ),
 		} );
 	}
 
@@ -117,11 +126,24 @@ export function classicTracking(
 
 	// Trigger the handler when an item is removed from the mini-cart and WooCommerce dispatches the `removed_from_cart` event.
 	const oldOnRemovedFromCart = document.body.onremoved_from_cart;
-	document.body.onremoved_from_cart = function () {
+	/**
+	 * Track the custom removed from cart event dispatched by WooCommerce Core
+	 *
+	 * @param {Event}         e         - The event object
+	 * @param {Object}        fragments - An object containing fragments of the updated cart.
+	 * @param {string}        cartHash  - A string representing the hash of the cart after the update.
+	 * @param {HTMLElement[]} button    - An array of HTML elements representing the remove from cart button.
+	 */
+	document.body.onremoved_from_cart = function (
+		e,
+		fragments,
+		cartHash,
+		button
+	) {
 		if ( typeof oldOnRemovedFromCart === 'function' ) {
 			oldOnRemovedFromCart.apply( this, arguments );
 		}
-		removeFromCartHandler( { target: arguments[ 3 ][ 0 ] } );
+		removeFromCartHandler( { target: button?.[ 0 ] } );
 	};
 
 	// Handle product selection events.

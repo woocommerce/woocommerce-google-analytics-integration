@@ -60,12 +60,12 @@ export function classicTracking(
 		}
 		// Get product ID from data attribute (archive pages) or value (single product pages).
 		const productID = parseInt(
-			button?.[ 0 ]?.dataset.product_id || button?.[ 0 ].value
+			button?.[ 0 ]?.dataset.product_id || button?.[ 0 ]?.value
 		);
 
 		if ( isNaN( productID ) ) {
 			throw new Error(
-				'Google Analytics for WooCommerce: Could not read product ID from button given in `added_to_cart` event. Check whether WooCommerce Core events or elements are malformed by other extensions.'
+				'Google Analytics for WooCommerce: Could not read product ID from the button given in `added_to_cart` event. Check whether WooCommerce Core events or elements are malformed by other extensions.'
 			);
 		}
 

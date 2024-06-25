@@ -56,9 +56,4 @@ Duplicate Google Analytics code causes a conflict in tracking. Remove any other 
 * Tweak - Confirm WC_Cart is available before formatting cart data.
 * Tweak - WC 9.0 compatibility.
 
-= 2.1.0 - 2024-06-05 =
-* Add - Integration with the WP Consent API plugin.
-* Fix - Add E2E tests for denying via WP Consent API.
-* Tweak - Document WP Consent API support.
-
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce-google-analytics-integration/trunk/changelog.txt).

@@ -63,7 +63,7 @@ export function classicTracking(
 			button?.[ 0 ]?.dataset.product_id || button?.[ 0 ]?.value
 		);
 
-		if ( isNaN( productID ) ) {
+		if ( Number.isNaN( productID ) ) {
 			throw new Error(
 				'Google Analytics for WooCommerce: Could not read product ID from the button given in `added_to_cart` event. Check whether WooCommerce Core events or elements are malformed by other extensions.'
 			);
@@ -104,7 +104,7 @@ export function classicTracking(
 	function removeFromCartHandler( element ) {
 		const productID = parseInt( element.target?.dataset.product_id );
 
-		if ( isNaN( productID ) ) {
+		if ( Number.isNaN( productID ) ) {
 			throw new Error(
 				'Google Analytics for WooCommerce: Could not read product ID from the target element given to remove from cart event. Check whether WooCommerce Core events or elements are malformed by other extensions.'
 			);

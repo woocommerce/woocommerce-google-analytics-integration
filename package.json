@@ -46,8 +46,8 @@
     "wp-env:down": "npm run wp-env stop"
   },
   "engines": {
-    "node": ">=18",
-    "npm": ">=9"
+    "node": ">=20",
+    "npm": ">=10"
   },
   "config": {
     "wp_org_slug": "woocommerce-google-analytics-integration",

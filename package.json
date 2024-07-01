@@ -35,7 +35,6 @@
     "makepot": "wpi18n makepot --domain-path languages --pot-file $npm_package_name.pot --type plugin --main-file $npm_package_name.php --exclude node_modules,tests,docs,assets/js/src",
     "lint:js": "wp-scripts lint-js",
     "lint:php": "vendor/bin/phpcs",
-    "lint:php:diff": "./bin/phpcs-diff.sh",
     "archive": "composer archive --file=$npm_package_name --format=zip",
     "postarchive": "rm -rf $npm_package_name && unzip $npm_package_name.zip -d $npm_package_name && rm $npm_package_name.zip && zip -r $npm_package_name.zip $npm_package_name && rm -rf $npm_package_name",
     "build": "NODE_ENV=production wp-scripts build && npm run makepot &&  npm run archive",

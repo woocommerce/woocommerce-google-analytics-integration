@@ -1,5 +1,4 @@
 <?php
-// phpcs:ignoreFile
 
 namespace GoogleAnalyticsIntegration;
 
@@ -51,7 +50,9 @@ class UnitTestsBootstrap {
 	 * Show errors.
 	 */
 	public function set_show_errors() {
+		// phpcs:ignore WordPress.PHP.IniSet.display_errors_Disallowed
 		ini_set( 'display_errors', 'on' );
+		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.prevent_path_disclosure_error_reporting, WordPress.PHP.DiscouragedPHPFunctions.runtime_configuration_error_reporting
 		error_reporting( E_ALL );
 	}
 
@@ -69,8 +70,12 @@ class UnitTestsBootstrap {
 	 * Set server props
 	 */
 	public function set_server_props() {
-		$_SERVER['REMOTE_ADDR'] = isset( $_SERVER['REMOTE_ADDR'] ) ? $_SERVER['REMOTE_ADDR'] : '';
-		$_SERVER['SERVER_NAME'] = isset( $_SERVER['SERVER_NAME'] ) ? $_SERVER['SERVER_NAME'] : 'ga_integration_test';
+		if ( ! isset( $_SERVER['REMOTE_ADDR'] ) ) {
+			$_SERVER['REMOTE_ADDR'] = '';
+		}
+		if ( ! isset( $_SERVER['SERVER_NAME'] ) ) {
+			$_SERVER['SERVER_NAME'] = 'ga_integration_test';
+		}
 	}
 
 	/**

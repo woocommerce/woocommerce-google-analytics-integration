@@ -55,8 +55,4 @@ Duplicate Google Analytics code causes a conflict in tracking. Remove any other 
 * Tweak -  Replace woo.com references with woocommerce.com.
 * Tweak - Do not replace other extensions' `add_to_cart` listeners.
 
-= 2.1.1 - 2024-06-12 =
-* Tweak - Confirm WC_Cart is available before formatting cart data.
-* Tweak - WC 9.0 compatibility.
-
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce-google-analytics-integration/trunk/changelog.txt).

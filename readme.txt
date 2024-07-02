@@ -48,6 +48,11 @@ Duplicate Google Analytics code causes a conflict in tracking. Remove any other 
 
 == Changelog ==
 
+= 2.1.4 - 2024-07-02 =
+* Dev - Upgrade npm dependencies.
+* Dev - Upgrade to Node.js 20.
+* Tweak - Add checks and explicit errors when cart buttons are missing data.
+
 = 2.1.3 - 2024-06-25 =
 * Add - WooCommerce Product Bundles integration.
 

@@ -56,8 +56,4 @@ Duplicate Google Analytics code causes a conflict in tracking. Remove any other 
 = 2.1.3 - 2024-06-25 =
 * Add - WooCommerce Product Bundles integration.
 
-= 2.1.2 - 2024-06-18 =
-* Tweak -  Replace woo.com references with woocommerce.com.
-* Tweak - Do not replace other extensions' `add_to_cart` listeners.
-
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce-google-analytics-integration/trunk/changelog.txt).

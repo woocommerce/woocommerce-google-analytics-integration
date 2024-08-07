@@ -126,7 +126,7 @@ export async function checkout( page ) {
 			.fill( user.addressfirstline );
 		await page.getByLabel( 'City' ).fill( user.city );
 		await page.getByLabel( 'ZIP Code' ).fill( user.postcode );
-		await page.locator( '#billing-state input' ).fill( user.statename );
+		await page.locator( '#billing-state' ).fill( user.statename );
 	}
 
 	//TODO: See if there's an alternative method to click the button without relying on waitForTimeout.

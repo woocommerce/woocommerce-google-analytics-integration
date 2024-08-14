@@ -126,7 +126,17 @@ export async function checkout( page ) {
 			.fill( user.addressfirstline );
 		await page.getByLabel( 'City' ).fill( user.city );
 		await page.getByLabel( 'ZIP Code' ).fill( user.postcode );
-		await page.locator( '#billing-state' ).selectOption( user.statename );
+
+		const stateField = page.getByRole( 'combobox', { name: /State$/ } );
+		const stateFieldTagName = await stateField.evaluate(
+			( element ) => element.tagName
+		);
+		if ( stateFieldTagName === 'SELECT' ) {
+			stateField.selectOption( user.statename );
+		} else {
+			// compatibility-code "WC < 9.2"
+			stateField.fill( user.statename );
+		}
 	}
 
 	//TODO: See if there's an alternative method to click the button without relying on waitForTimeout.

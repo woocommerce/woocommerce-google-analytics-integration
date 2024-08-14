@@ -3,7 +3,7 @@ Contributors: woocommerce, automattic, claudiosanches, bor0, royho, laurendaviss
 Tags: woocommerce, google analytics
 Requires at least: 6.2
 Tested up to: 6.6
-Stable tag: 2.1.5
+Stable tag: 2.1.6
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -48,6 +48,9 @@ Duplicate Google Analytics code causes a conflict in tracking. Remove any other 
 
 == Changelog ==
 
+= 2.1.6 - 2024-08-14 =
+* Tweak - WC 9.2.0 compatibility.
+
 = 2.1.5 - 2024-07-09 =
 * Tweak - WC 9.1 compatibility.
 * Tweak - WP 6.6 compatibility.
@@ -56,8 +59,5 @@ Duplicate Google Analytics code causes a conflict in tracking. Remove any other 
 * Dev - Upgrade npm dependencies.
 * Dev - Upgrade to Node.js 20.
 * Tweak - Add checks and explicit errors when cart buttons are missing data.
-
-= 2.1.3 - 2024-06-25 =
-* Add - WooCommerce Product Bundles integration.
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce-google-analytics-integration/trunk/changelog.txt).

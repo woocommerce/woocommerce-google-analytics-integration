@@ -47,7 +47,7 @@
   },
   "engines": {
     "node": ">=20",
-    "npm": ">=10"
+    "npm": ">=10 || ^9"
   },
   "config": {
     "wp_org_slug": "woocommerce-google-analytics-integration",

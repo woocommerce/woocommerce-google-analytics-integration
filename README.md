@@ -19,6 +19,9 @@ Google Analytics for WooCommerce utilizes npm scripts for task management utilit
 
 `npm run build` - Runs the tasks necessary for a release. These may include building JavaScript, SASS, CSS minification, and language files.
 
+The `engines` in package.json includes npm `^9` to allow dependabot to update our dependencies. However, it's not the version intended to be used in development.
+
+-   See https://github.com/dependabot/dependabot-core/issues/9277
 
 ## Unit tests
 ### Running PHP unit tests in your local dev environment

@@ -55,9 +55,4 @@ Duplicate Google Analytics code causes a conflict in tracking. Remove any other 
 * Tweak - WC 9.1 compatibility.
 * Tweak - WP 6.6 compatibility.
 
-= 2.1.4 - 2024-07-02 =
-* Dev - Upgrade npm dependencies.
-* Dev - Upgrade to Node.js 20.
-* Tweak - Add checks and explicit errors when cart buttons are missing data.
-
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce-google-analytics-integration/trunk/changelog.txt).

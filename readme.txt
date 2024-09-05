@@ -48,6 +48,9 @@ Duplicate Google Analytics code causes a conflict in tracking. Remove any other 
 
 == Changelog ==
 
+= 2.1.7 - 2024-09-05 =
+* Tweak - WC 9.3.0 compatibility.
+
 = 2.1.6 - 2024-08-14 =
 * Tweak - WC 9.2.0 compatibility.
 

@@ -69,7 +69,7 @@ module.exports = async ( config ) => {
 			await adminPage
 				.locator( 'input[name="pwd"]' )
 				.fill( admin.password );
-			await adminPage.locator( 'text=Log In' ).click();
+			await adminPage.getByRole( 'button', { name: 'Log In' } ).click();
 			await adminPage.waitForLoadState( LOAD_STATE.DOM_CONTENT_LOADED );
 			await adminPage.goto( `/wp-admin` );
 			await adminPage.waitForLoadState( LOAD_STATE.DOM_CONTENT_LOADED );
@@ -110,7 +110,9 @@ module.exports = async ( config ) => {
 			await customerPage
 				.locator( 'input[name="pwd"]' )
 				.fill( customer.password );
-			await customerPage.locator( 'text=Log In' ).click();
+			await customerPage
+				.getByRole( 'button', { name: 'Log In' } )
+				.click();
 
 			await customerPage.goto( `/my-account` );
 			await expect(

@@ -83,6 +83,9 @@ jobs:
       - name: Set up MySQL
         uses: woocommerce/grow/prepare-mysql@actions-v2
 
+      - name: Install svn (used for installing WP versions)
+        run: sudo apt-get -y install subversion
+
       - name: Run PHP unit tests
         run: |
           WC_VERSIONS=$(echo "${{ matrix.wc-versions }}" | sed -r "s/ *, */ /g")
@@ -125,6 +128,9 @@ jobs:
 
       - name: Prepare MySQL
         uses: woocommerce/grow/prepare-mysql@actions-v2
+
+      - name: Install svn (used for installing WP versions)
+        run: sudo apt-get -y install subversion
 
       - name: Install WP tests
         env:

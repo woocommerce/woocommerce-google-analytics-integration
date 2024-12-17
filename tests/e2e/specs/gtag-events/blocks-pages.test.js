@@ -382,7 +382,7 @@ test.describe( 'GTag events on block pages', () => {
 		const relatedProductID = await relatedProductAddToCart( page );
 
 		await event.then( ( request ) => {
-			const data = getEventData( request );
+			const data = getEventData( request, 'add_to_cart' );
 			expect( data.product1 ).toEqual( {
 				id: relatedProductID.toString(),
 				nm: 'Simple product',

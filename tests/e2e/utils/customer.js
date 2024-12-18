@@ -65,9 +65,9 @@ export async function variableProductAddToCart( page, productID ) {
  * @return {number} Product ID of the added product.
  */
 export async function relatedProductAddToCart( page ) {
-	const addToCart = ( await page.locator( '.related.products' ).isVisible() )
-		? '.related.products .add_to_cart_button.product_type_simple'
-		: '.wp-block-woocommerce-related-products .add_to_cart_button.product_type_simple';
+	const addToCart = `.related.products .add_to_cart_button.product_type_simple,
+		.wp-block-woocommerce-related-products .add_to_cart_button.product_type_simple,
+		[data-collection="woocommerce/product-collection/related"] .add_to_cart_button.product_type_simple`;
 
 	const addToCartButton = await page.locator( addToCart ).first();
 	await addToCartButton.click();

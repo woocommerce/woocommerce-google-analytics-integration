@@ -20,6 +20,7 @@ import {
 	createAllProductsBlockShopPage,
 	createProductCollectionBlockShopPage,
 	createProductsBlockShopPage,
+	createRelatedProductsPage,
 } from '../../utils/create-page';
 import { getEventData, trackGtagEvent } from '../../utils/track-event';
 
@@ -337,9 +338,47 @@ test.describe( 'GTag events on block pages', () => {
 		page,
 	} ) => {
 		await createSimpleProduct(); // Create an additional product for related to show up.
+		await page.goto( `?p=${ simpleProductID }` );
+
+		// Check if it has the related products section.
+		const hasRelatedProducts = await page
+			.getByRole( 'heading', {
+				name: 'Related products',
+			} )
+			.isVisible();
+
+		test.skip(
+			! hasRelatedProducts,
+			'This WC setup does not have "Related products" section on the single product page.'
+		);
+
+		const event = trackGtagEvent( page, 'add_to_cart' );
+		const relatedProductID = await relatedProductAddToCart( page );
+
+		await event.then( ( request ) => {
+			const data = getEventData( request, 'add_to_cart' );
+			expect( data.product1 ).toEqual( {
+				id: relatedProductID.toString(),
+				nm: 'Simple product',
+				ca: 'Uncategorized',
+				qt: '1',
+				pr: simpleProductPrice.toString(),
+			} );
+		} );
+	} );
+
+	test( 'Add to cart event is sent from related products block', async ( {
+		page,
+	} ) => {
+		await createSimpleProduct(); // Create an additional product for related to show up.
+
+		const pageSlug = await createRelatedProductsPage( simpleProductID );
+
 		const event = trackGtagEvent( page, 'add_to_cart' );
 
-		await page.goto( `?p=${ simpleProductID }` );
+		// Go to block page
+		await page.goto( pageSlug );
+
 		const relatedProductID = await relatedProductAddToCart( page );
 
 		await event.then( ( request ) => {

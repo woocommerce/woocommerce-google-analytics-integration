@@ -14,7 +14,12 @@
 		"simple": {
 			"name": "Simple product",
 			"type": "simple",
-			"regular_price": "9.99"
+			"regular_price": "9.99",
+			"tags": [
+				{
+					"name": "related"
+				}
+			]
 		},
 		"variable": {
 			"name": "Variable product",

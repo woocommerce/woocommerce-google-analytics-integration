@@ -141,7 +141,7 @@ export async function createAllProductsBlockShopPage() {
  * Creates a page with related products block.
  *
  * @param {number} productId Product ID.
- * @return {string} Slug of the created page.
+ * @return {Promise<string>} Slug of the created page.
  */
 export async function createRelatedProductsPage( productId ) {
 	const { title, slug, pageContent } = relatedProductPage( productId );

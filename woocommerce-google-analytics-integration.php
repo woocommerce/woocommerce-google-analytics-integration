@@ -15,7 +15,7 @@
  * License: GPLv3
  * License URI: https://www.gnu.org/licenses/gpl-3.0.html
  * Text Domain: woocommerce-google-analytics-integration
- * Domain Path: languages/
+ * Domain Path: /languages
  */
 
 use Automattic\WooCommerce\Utilities\FeaturesUtil;

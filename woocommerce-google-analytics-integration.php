@@ -11,6 +11,7 @@
  * Requires at least: 6.2
  * Requires Plugins: woocommerce
  * Tested up to: 6.7
+ * Requires PHP: 7.4
  * License: GPLv2 or later
  * Text Domain: woocommerce-google-analytics-integration
  * Domain Path: languages/

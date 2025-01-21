@@ -48,6 +48,11 @@ Duplicate Google Analytics code causes a conflict in tracking. Remove any other 
 
 == Changelog ==
 
+= 2.1.11 - 2025-01-21 =
+* Tweak - Add required PHP header.
+* Tweak - Replace WooCommerce logo to Woo 2.0 Brand.
+* Tweak - Resolve plugin check errors and warnings.
+
 = 2.1.10 - 2025-01-15 =
 * Dev - Fix E2E tests for WC 9.6.
 * Tweak - WC 9.6 compatibility.

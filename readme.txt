@@ -57,9 +57,4 @@ Duplicate Google Analytics code causes a conflict in tracking. Remove any other 
 * Dev - Fix E2E tests for WC 9.6.
 * Tweak - WC 9.6 compatibility.
 
-= 2.1.9 - 2024-12-18 =
-* Dev - Fix PHP unit tests - install svn.
-* Dev - Improve E2E tests for related products.
-* Tweak - WC 9.5 compatibility.
-
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce-google-analytics-integration/trunk/changelog.txt).

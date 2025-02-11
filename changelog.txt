@@ -1,5 +1,8 @@
 *** Changelog ***
 
+= 2.1.12 - 2025-02-11 =
+* Dev - Update npm dependencies to resolve all npm vulnerabilities
+
 = 2.1.11 - 2025-01-21 =
 * Tweak - Add required PHP header.
 * Tweak - Replace WooCommerce logo to Woo 2.0 Brand.

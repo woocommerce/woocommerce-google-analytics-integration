@@ -48,6 +48,9 @@ Duplicate Google Analytics code causes a conflict in tracking. Remove any other 
 
 == Changelog ==
 
+= 2.1.13 - 2025-02-18 =
+* Tweak - WC 9.7 compatibility.
+
 = 2.1.12 - 2025-02-11 =
 * Dev - Update npm dependencies to resolve all npm vulnerabilities
 

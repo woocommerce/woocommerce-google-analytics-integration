@@ -50,7 +50,7 @@ test.describe( 'JavaScript file position', () => {
 
 		await expect(
 			page.locator(
-				'#woocommerce-google-analytics-integration-data-js-after + #woocommerce-google-analytics-integration-js'
+				'#woocommerce-google-analytics-integration-data-js-after ~ #woocommerce-google-analytics-integration-js'
 			)
 		).toBeAttached();
 

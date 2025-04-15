@@ -2,8 +2,8 @@
 Contributors: woocommerce, automattic, claudiosanches, bor0, royho, laurendavissmith001, cshultz88, mmjones, tomalec
 Tags: woocommerce, google analytics
 Requires at least: 6.2
-Tested up to: 6.7
-Stable tag: 2.1.13
+Tested up to: 6.8
+Stable tag: 2.1.14
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 

@@ -54,9 +54,4 @@ Duplicate Google Analytics code causes a conflict in tracking. Remove any other 
 = 2.1.12 - 2025-02-11 =
 * Dev - Update npm dependencies to resolve all npm vulnerabilities
 
-= 2.1.11 - 2025-01-21 =
-* Tweak - Add required PHP header.
-* Tweak - Replace WooCommerce logo to Woo 2.0 Brand.
-* Tweak - Resolve plugin check errors and warnings.
-
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce-google-analytics-integration/trunk/changelog.txt).

@@ -2,8 +2,8 @@
 Contributors: woocommerce, automattic, claudiosanches, bor0, royho, laurendavissmith001, cshultz88, mmjones, tomalec
 Tags: woocommerce, google analytics
 Requires at least: 6.2
-Tested up to: 6.7
-Stable tag: 2.1.13
+Tested up to: 6.8
+Stable tag: 2.1.14
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -48,15 +48,14 @@ Duplicate Google Analytics code causes a conflict in tracking. Remove any other 
 
 == Changelog ==
 
+= 2.1.14 - 2025-04-15 =
+* Tweak - WC 9.8 compatibility.
+* Tweak - WP 6.8 compatibility.
+
 = 2.1.13 - 2025-02-18 =
 * Tweak - WC 9.7 compatibility.
 
 = 2.1.12 - 2025-02-11 =
 * Dev - Update npm dependencies to resolve all npm vulnerabilities
-
-= 2.1.11 - 2025-01-21 =
-* Tweak - Add required PHP header.
-* Tweak - Replace WooCommerce logo to Woo 2.0 Brand.
-* Tweak - Resolve plugin check errors and warnings.
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce-google-analytics-integration/trunk/changelog.txt).

@@ -51,6 +51,8 @@ jobs:
         uses: woocommerce/grow/get-plugin-releases@actions-v2
         with:
             slug: woocommerce
+            releases: 2
+            includeRC: true # If an RC is upcoming, test it preferably.
 
   UnitTests:
     if: github.event_name != 'workflow_dispatch'
@@ -67,7 +69,7 @@ jobs:
         include:
           - php: 7.4
             wp-version: ${{ fromJson(needs.GetMatrix.outputs.wp-versions)[1] }} # L-1 WP Version support
-            wc-versions: ${{ fromJson(needs.GetMatrix.outputs.wc-versions)[2] }} # L-2 WC Version support
+            wc-versions: ${{ fromJson(needs.GetMatrix.outputs.wc-versions)[1] }} # L-1 WC Version support
           - php: 8.3
             wp-version: latest
             wc-versions: latest

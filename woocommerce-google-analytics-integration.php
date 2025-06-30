@@ -8,7 +8,7 @@
  * Version: 2.1.15
  * WC requires at least: 9.5
  * WC tested up to: 9.9
- * Requires at least: 6.6
+ * Requires at least: 6.7
  * Requires Plugins: woocommerce
  * Tested up to: 6.8
  * Requires PHP: 7.4

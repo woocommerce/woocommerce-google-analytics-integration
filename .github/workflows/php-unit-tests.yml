@@ -45,6 +45,7 @@ jobs:
         uses: woocommerce/grow/get-plugin-releases@actions-v2
         with:
             slug: wordpress
+            releases: 2
       - name: Get Release versions from WooCommerce
         id: wc
         uses: woocommerce/grow/get-plugin-releases@actions-v2
@@ -65,7 +66,7 @@ jobs:
         wc-versions: [ '${{ join(fromJson(needs.GetMatrix.outputs.wc-versions)) }}' ]
         include:
           - php: 7.4
-            wp-version: ${{ fromJson(needs.GetMatrix.outputs.wp-versions)[2] }} # L-2 WP Version support
+            wp-version: ${{ fromJson(needs.GetMatrix.outputs.wp-versions)[1] }} # L-1 WP Version support
             wc-versions: ${{ fromJson(needs.GetMatrix.outputs.wc-versions)[2] }} # L-2 WC Version support
           - php: 8.3
             wp-version: latest

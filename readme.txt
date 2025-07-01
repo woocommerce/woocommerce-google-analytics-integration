@@ -55,7 +55,4 @@ Duplicate Google Analytics code causes a conflict in tracking. Remove any other 
 * Tweak - WC 9.8 compatibility.
 * Tweak - WP 6.8 compatibility.
 
-= 2.1.13 - 2025-02-18 =
-* Tweak - WC 9.7 compatibility.
-
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce-google-analytics-integration/trunk/changelog.txt).

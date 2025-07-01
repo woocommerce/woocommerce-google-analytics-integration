@@ -48,6 +48,11 @@ Duplicate Google Analytics code causes a conflict in tracking. Remove any other 
 
 == Changelog ==
 
+= 2.1.16 - 2025-07-01 =
+* Tweak - WC 10.0 compatibility.
+* Update - Require WooCommerce 9.5+.
+* Update - Require WordPress 6.6+.
+
 = 2.1.15 - 2025-06-04 =
 * Tweak - WC 9.9 compatibility.
 

@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@wordpress/hooks": "^4.26.0",
-    "@wordpress/i18n": "^5.0.0"
+    "@wordpress/i18n": "^5.26.0"
   },
   "devDependencies": {
     "@playwright/test": "^1.54.1",

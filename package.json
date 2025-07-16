@@ -17,7 +17,7 @@
     "@wordpress/env": "^10.26.0",
     "@wordpress/eslint-plugin": "^19.0.1",
     "@wordpress/scripts": "^30.19.0",
-    "@wordpress/url": "^4.0.1",
+    "@wordpress/url": "^4.26.0",
     "axios": "^1.8.4",
     "eslint": "^8.3.0",
     "node-wp-i18n": "~1.2.3",

@@ -9,7 +9,7 @@
     "url": "git://github.com/woocommerce/woocommerce-google-analytics-integration.git"
   },
   "dependencies": {
-    "@wordpress/hooks": "^4.0.0",
+    "@wordpress/hooks": "^4.26.0",
     "@wordpress/i18n": "^5.0.0"
   },
   "devDependencies": {

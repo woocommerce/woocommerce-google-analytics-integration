@@ -16,7 +16,7 @@
     "@playwright/test": "^1.54.1",
     "@wordpress/env": "^10.26.0",
     "@wordpress/eslint-plugin": "^19.0.1",
-    "@wordpress/scripts": "^30.10.0",
+    "@wordpress/scripts": "^30.19.0",
     "@wordpress/url": "^4.0.1",
     "axios": "^1.8.4",
     "eslint": "^8.3.0",

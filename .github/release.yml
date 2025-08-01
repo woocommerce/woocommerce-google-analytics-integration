@@ -4,7 +4,9 @@ changelog:
       - "changelog: none"
     authors:
       - dependabot
+      - dependabot[bot]
       - github-actions
+      - github-actions[bot]
 
   categories:
     # Major level

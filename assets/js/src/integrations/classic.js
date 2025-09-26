@@ -60,13 +60,15 @@ export function classicTracking(
 		}
 		// Get product ID from data attribute (archive pages) or value (single product pages).
 		const productID = parseInt(
-			button?.[ 0 ]?.dataset.product_id || button?.[ 0 ]?.value
+			button?.[ 0 ]?.dataset?.product_id || button?.[ 0 ]?.value
 		);
 
 		if ( Number.isNaN( productID ) ) {
-			throw new Error(
+			// eslint-disable-next-line no-console
+			console.error(
 				'Google Analytics for WooCommerce: Could not read product ID from the button given in `added_to_cart` event. Check whether WooCommerce Core events or elements are malformed by other extensions.'
 			);
+			return;
 		}
 
 		// If the current product doesn't match search by ID.
@@ -102,12 +104,14 @@ export function classicTracking(
 	 * @param {HTMLElement|Object} element - The HTML element clicked on to trigger this event
 	 */
 	function removeFromCartHandler( element ) {
-		const productID = parseInt( element.target?.dataset.product_id );
+		const productID = parseInt( element.target?.dataset?.product_id );
 
 		if ( Number.isNaN( productID ) ) {
-			throw new Error(
+			// eslint-disable-next-line no-console
+			console.error(
 				'Google Analytics for WooCommerce: Could not read product ID from the target element given to remove from cart event. Check whether WooCommerce Core events or elements are malformed by other extensions.'
 			);
+			return;
 		}
 		getEventHandler( 'remove_from_cart' )( {
 			product: getProductFromID( productID, products, cart ),

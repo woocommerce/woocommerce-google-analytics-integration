@@ -64,9 +64,11 @@ export function classicTracking(
 		);
 
 		if ( Number.isNaN( productID ) ) {
-			throw new Error(
+			// eslint-disable-next-line no-console
+			console.error(
 				'Google Analytics for WooCommerce: Could not read product ID from the button given in `added_to_cart` event. Check whether WooCommerce Core events or elements are malformed by other extensions.'
 			);
+			return;
 		}
 
 		// If the current product doesn't match search by ID.
@@ -105,9 +107,11 @@ export function classicTracking(
 		const productID = parseInt( element.target?.dataset.product_id );
 
 		if ( Number.isNaN( productID ) ) {
-			throw new Error(
+			// eslint-disable-next-line no-console
+			console.error(
 				'Google Analytics for WooCommerce: Could not read product ID from the target element given to remove from cart event. Check whether WooCommerce Core events or elements are malformed by other extensions.'
 			);
+			return;
 		}
 		getEventHandler( 'remove_from_cart' )( {
 			product: getProductFromID( productID, products, cart ),

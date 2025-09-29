@@ -60,7 +60,7 @@ export function classicTracking(
 		}
 		// Get product ID from data attribute (archive pages) or value (single product pages).
 		const productID = parseInt(
-			button?.[ 0 ]?.dataset?.product_id || button?.[ 0 ]?.value
+			button?.[ 0 ]?.dataset.product_id || button?.[ 0 ]?.value
 		);
 
 		if ( Number.isNaN( productID ) ) {
@@ -104,7 +104,7 @@ export function classicTracking(
 	 * @param {HTMLElement|Object} element - The HTML element clicked on to trigger this event
 	 */
 	function removeFromCartHandler( element ) {
-		const productID = parseInt( element.target?.dataset?.product_id );
+		const productID = parseInt( element.target?.dataset.product_id );
 
 		if ( Number.isNaN( productID ) ) {
 			// eslint-disable-next-line no-console

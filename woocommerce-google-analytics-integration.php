@@ -6,7 +6,7 @@
  * Author: WooCommerce
  * Author URI: https://woocommerce.com
  * Version: 2.1.17
- * WC requires at least: 10.0
+ * WC requires at least: 10.1
  * WC tested up to: 10.1
  * Requires at least: 6.7
  * Requires Plugins: woocommerce
@@ -27,7 +27,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 if ( ! class_exists( 'WC_Google_Analytics_Integration' ) ) {
 
 	define( 'WC_GOOGLE_ANALYTICS_INTEGRATION_VERSION', '2.1.17' ); // WRCS: DEFINED_VERSION.
-	define( 'WC_GOOGLE_ANALYTICS_INTEGRATION_MIN_WC_VER', '10.0' );
+	define( 'WC_GOOGLE_ANALYTICS_INTEGRATION_MIN_WC_VER', '10.1' );
 
 	// Maybe show the GA Pro notice on plugin activation.
 	register_activation_hook(

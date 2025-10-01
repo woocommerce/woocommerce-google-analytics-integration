@@ -48,6 +48,11 @@ Duplicate Google Analytics code causes a conflict in tracking. Remove any other 
 
 == Changelog ==
 
+= 2.1.18 - 2025-10-01 =
+* Tweak - Don't throw errors when the product ID is not found for legacy Ajax add-to-cart.
+* Tweak - WC 10.2 compatibility.
+* Update - Require WooCommerce 10.1+.
+
 = 2.1.17 - 2025-08-12 =
 * Dev - Updated vulnerable dependencies.
 * Tweak - WC 10.1 compatibility.

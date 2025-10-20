@@ -13,7 +13,7 @@
     "@wordpress/i18n": "^5.26.0"
   },
   "devDependencies": {
-    "@playwright/test": "^1.54.1",
+    "@playwright/test": "^1.56.1",
     "@wordpress/env": "^10.26.0",
     "@wordpress/eslint-plugin": "^19.0.1",
     "@wordpress/scripts": "^30.19.0",

@@ -102,8 +102,8 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 					esc_js( $this->get( 'ga_id' ) ),
 					esc_js( $this->tracker_function_name() ),
 					esc_js( static::DEVELOPER_ID ),
-					wp_json_encode( $this->get_consent_modes() ),
-					wp_json_encode( $this->get_site_tag_config() )
+					wp_json_encode( $this->get_consent_modes(), JSON_HEX_TAG | JSON_UNESCAPED_SLASHES ),
+					wp_json_encode( $this->get_site_tag_config(), JSON_HEX_TAG | JSON_UNESCAPED_SLASHES )
 				)
 			)
 		);
@@ -162,6 +162,7 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 						'events'                => $this->get_enabled_events(),
 						'identifier'            => $this->get( 'ga_product_identifier' ),
 					),
+					JSON_HEX_TAG | JSON_UNESCAPED_SLASHES
 				),
 			)
 		);
@@ -246,7 +247,7 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 	 * @return string
 	 */
 	public function get_script_data(): string {
-		return wp_json_encode( $this->script_data );
+		return wp_json_encode( $this->script_data, JSON_HEX_TAG | JSON_UNESCAPED_SLASHES );
 	}
 
 	/**

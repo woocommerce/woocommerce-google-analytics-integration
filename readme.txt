@@ -3,7 +3,7 @@ Contributors: woocommerce, automattic, claudiosanches, bor0, royho, laurendaviss
 Tags: woocommerce, google analytics
 Requires at least: 6.7
 Tested up to: 6.8
-Stable tag: 2.1.18
+Stable tag: 2.1.19
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -47,6 +47,10 @@ Duplicate Google Analytics code causes a conflict in tracking. Remove any other 
 1. Google Analytics Integration Settings.
 
 == Changelog ==
+
+= 2.1.19 - 2025-10-30 =
+* Fix - Add safe script tag encoding flags to all `wp_json_encode()` calls in inline scripts.
+* Update - Require WooCommerce 10.2+.
 
 = 2.1.18 - 2025-10-01 =
 * Tweak - Don't throw errors when the product ID is not found for legacy Ajax add-to-cart.

@@ -1,5 +1,9 @@
 *** Changelog ***
 
+= 2.1.19 - 2025-10-30 =
+* Fix - Add safe script tag encoding flags to all `wp_json_encode()` calls in inline scripts.
+* Update - Require WooCommerce 10.2+.
+
 = 2.1.18 - 2025-10-01 =
 * Tweak - Don't throw errors when the product ID is not found for legacy Ajax add-to-cart.
 * Tweak - WC 10.2 compatibility.

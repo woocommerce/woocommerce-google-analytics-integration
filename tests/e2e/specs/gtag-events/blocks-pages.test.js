@@ -125,13 +125,17 @@ test.describe( 'GTag events on block pages', () => {
 
 		await event.then( ( request ) => {
 			const data = getEventData( request, 'remove_from_cart' );
-			expect( data.product1 ).toEqual( {
+			// Check common required fields
+			expect( data.product1 ).toMatchObject( {
 				id: simpleProductID.toString(),
 				nm: 'Simple product',
 				qt: '1',
 				pr: simpleProductPrice.toString(),
-				va: '',
 			} );
+			// Accept either category (WooCommerce 10.4+ fallback) or variant (older WooCommerce hook)
+			expect(
+				data.product1.ca === 'Uncategorized' || data.product1.va === ''
+			).toBe( true );
 		} );
 	} );
 
@@ -145,13 +149,17 @@ test.describe( 'GTag events on block pages', () => {
 
 		await event.then( ( request ) => {
 			const data = getEventData( request, 'begin_checkout' );
-			expect( data.product1 ).toEqual( {
+			// Check common required fields
+			expect( data.product1 ).toMatchObject( {
 				id: simpleProductID.toString(),
 				nm: 'Simple product',
 				qt: '1',
 				pr: simpleProductPrice.toString(),
-				va: '',
 			} );
+			// Accept either category (WooCommerce 10.4+ fallback) or variant (older WooCommerce hook)
+			expect(
+				data.product1.ca === 'Uncategorized' || data.product1.va === ''
+			).toBe( true );
 			expect( data.cu ).toEqual( 'USD' );
 			expect( data[ 'epn.value' ] ).toEqual(
 				simpleProductPrice.toString()

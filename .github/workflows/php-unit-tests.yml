@@ -37,22 +37,23 @@ jobs:
     name: Get WP and WC version Matrix
     runs-on: ubuntu-latest
     outputs:
-        wp-versions: ${{ steps.wp.outputs.versions }}
-        wc-versions: ${{ steps.wc.outputs.versions }}
+      wp-versions: ${{ steps.wp.outputs.versions }}
+      wc-versions: ${{ steps.wc.outputs.versions }}
     steps:
       - name: Get Release versions from Wordpress
         id: wp
         uses: woocommerce/grow/get-plugin-releases@actions-v2
         with:
-            slug: wordpress
-            releases: 2
+          slug: wordpress
+          releases: 2
       - name: Get Release versions from WooCommerce
         id: wc
         uses: woocommerce/grow/get-plugin-releases@actions-v2
         with:
-            slug: woocommerce
-            releases: 2
-            includeRC: true # If an RC is upcoming, test it preferably.
+          source: github
+          slug: woocommerce/woocommerce
+          releases: 2
+          includeRC: true # If an RC is upcoming, test it preferably.
 
   UnitTests:
     if: github.event_name != 'workflow_dispatch'

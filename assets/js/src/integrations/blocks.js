@@ -9,6 +9,13 @@ import { ACTION_PREFIX, NAMESPACE } from '../constants';
 let hookFiredRecently = false;
 
 /**
+ * Get WooCommerce settings from the global wcSettings object.
+ *
+ * @return {Object|undefined} The wcSettings object or undefined if not available.
+ */
+const getWcSettings = () => window.wc?.wcSettings || window.wcSettings;
+
+/**
  * Get the current cart data from WooCommerce's store (if available) or fallback to static data.
  * The store provides fresh cart data that updates when items are added/removed via AJAX.
  *
@@ -30,41 +37,52 @@ const getCartData = () => {
 };
 
 /**
- * Extract product data from Interactivity API context on a cart item element.
- * WooCommerce 10.4+ stores cart item data in data-wp-context attributes.
+ * Parse a price string into a numeric value using WooCommerce's accounting.js library.
+ * Falls back to wcSettings currency configuration if accounting.js is not available.
  *
- * @param {Element} cartItem - The cart item row element.
- * @return {Object|null} Product object or null if not found.
+ * @param {string} priceText - The raw price text from DOM (e.g., "$1,234.56" or "1.234,56 €").
+ * @return {number} The parsed price as a float, or 0 if parsing failed.
  */
-const getProductFromInteractivityContext = ( cartItem ) => {
-	// Find the element with data-wp-context (could be on cartItem or a parent)
-	const contextElement =
-		cartItem.closest( '[data-wp-context]' ) ||
-		cartItem.querySelector( '[data-wp-context]' );
-
-	if ( ! contextElement ) {
-		return null;
+const parsePriceFromDOM = ( priceText ) => {
+	if ( ! priceText ) {
+		return 0;
 	}
 
-	try {
-		const context = JSON.parse(
-			contextElement.getAttribute( 'data-wp-context' )
-		);
-		// The context structure may vary, look for cart item data
-		const item = context?.woocommerce?.cart?.item || context?.item;
-		if ( item ) {
-			return item;
-		}
-	} catch ( e ) {
-		// Invalid JSON, ignore
+	const wcSettings = getWcSettings();
+	const decimalSeparator = wcSettings?.currency?.decimalSeparator || '.';
+
+	// Use WooCommerce's accounting.js library if available
+	if ( window.accounting?.unformat ) {
+		return window.accounting.unformat( priceText, decimalSeparator );
 	}
 
-	return null;
+	// Fallback: manual parsing using wcSettings currency configuration
+	const thousandSeparator = wcSettings?.currency?.thousandSeparator || ',';
+
+	// Remove currency symbols and whitespace, keeping only digits and separators
+	let cleaned = priceText.replace( /[^\d.,\s]/g, '' ).trim();
+
+	// Remove thousand separators (need to escape special regex chars like '.')
+	const escapedThousand = thousandSeparator.replace(
+		/[.*+?^${}()|[\]\\]/g,
+		'\\$&'
+	);
+	cleaned = cleaned.replace( new RegExp( escapedThousand, 'g' ), '' );
+
+	// Convert decimal separator to standard period for parseFloat
+	if ( decimalSeparator !== '.' ) {
+		cleaned = cleaned.replace( decimalSeparator, '.' );
+	}
+
+	return parseFloat( cleaned ) || 0;
 };
 
 /**
  * Extract product data from DOM elements in a cart item row.
- * This is a fallback when other data sources are unavailable.
+ * This is a last-resort fallback when:
+ * - WooCommerce Blocks store (wc/store/cart) is unavailable or empty
+ * - Static cart data from server is unavailable
+ * - Product cannot be matched by ID or name in cart data
  *
  * @param {Element} cartItem - The cart item row element.
  * @return {Object|null} Product object or null if extraction failed.
@@ -97,16 +115,18 @@ const getProductFromDOM = ( cartItem ) => {
 		) ||
 		cartItem.querySelector( '.wc-block-components-product-price__value' );
 
+	// Get currency minor unit from cart data or wcSettings, default to 2
+	const cart = getCartData();
+	const wcSettings = getWcSettings();
+	const currencyMinorUnit =
+		cart?.totals?.currency_minor_unit ??
+		wcSettings?.currency?.precision ??
+		2;
+
 	let price = 0;
 	if ( priceElement ) {
-		const priceText = priceElement.textContent
-			?.replace( /[^0-9.,]/g, '' )
-			.replace( ',', '.' );
-		price = parseFloat( priceText ) || 0;
+		price = parsePriceFromDOM( priceElement.textContent );
 	}
-
-	// Get currency minor unit (decimal places) - default to 2
-	const currencyMinorUnit = 2;
 
 	// Build a minimal product object that works with getProductFieldObject
 	return {
@@ -147,39 +167,41 @@ const trackMiniCartRemoval = ( getEventHandler ) => {
 
 		let product = null;
 
-		// 1. Try Interactivity API context first (WooCommerce 10.4+)
-		product = getProductFromInteractivityContext( cartItem );
+		/*
+		 * Try to find product data from available sources:
+		 * 1. WooCommerce Blocks store (wc/store/cart) - real-time cart state
+		 * 2. Static cart data from server (window.ga4w.data.cart) - initial page load
+		 * 3. DOM extraction - last resort when store data is unavailable
+		 */
+		const productLink = cartItem.querySelector(
+			'.wc-block-components-product-name'
+		);
+		const productHref = productLink?.getAttribute( 'href' );
+		const productName = productLink?.textContent?.trim();
 
-		// 2. Try WooCommerce store or static cart data
-		if ( ! product ) {
-			const productLink = cartItem.querySelector(
-				'.wc-block-components-product-name'
-			);
-			const productHref = productLink?.getAttribute( 'href' );
-			const productName = productLink?.textContent?.trim();
-
-			// Extract product ID from URL (e.g., ?p=123)
-			let productId = null;
-			if ( productHref ) {
-				const paramMatch = productHref.match( /[?&]p=(\d+)/ );
-				if ( paramMatch ) {
-					productId = parseInt( paramMatch[ 1 ], 10 );
-				}
-			}
-
-			const cart = getCartData();
-			if ( cart?.items ) {
-				if ( productId ) {
-					product = getProductFromID( productId, [], cart );
-				} else if ( productName ) {
-					product = cart.items.find(
-						( item ) => item.name === productName
-					);
-				}
+		// Extract product ID from URL (e.g., ?p=123)
+		let productId = null;
+		if ( productHref ) {
+			const paramMatch = productHref.match( /[?&]p=(\d+)/ );
+			if ( paramMatch ) {
+				productId = parseInt( paramMatch[ 1 ], 10 );
 			}
 		}
 
-		// 3. Fallback: extract from DOM elements
+		// Try WooCommerce store or static cart data
+		const cart = getCartData();
+		if ( cart?.items ) {
+			if ( productId ) {
+				product = getProductFromID( productId, [], cart );
+			} else if ( productName ) {
+				product = cart.items.find(
+					( item ) => item.name === productName
+				);
+			}
+		}
+
+		// Fallback: extract from DOM when cart data lookup fails
+		// This can happen if the cart store hasn't synced yet or product matching fails
 		if ( ! product ) {
 			product = getProductFromDOM( cartItem );
 		}

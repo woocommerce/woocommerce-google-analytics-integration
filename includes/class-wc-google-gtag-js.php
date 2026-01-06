@@ -161,6 +161,11 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 						'tracker_function_name' => $this->tracker_function_name(),
 						'events'                => $this->get_enabled_events(),
 						'identifier'            => $this->get( 'ga_product_identifier' ),
+						'currency'              => array(
+							'decimalSeparator'  => wc_get_price_decimal_separator(),
+							'thousandSeparator' => wc_get_price_thousand_separator(),
+							'precision'         => wc_get_price_decimals(),
+						),
 					),
 					JSON_HEX_TAG | JSON_UNESCAPED_SLASHES
 				),

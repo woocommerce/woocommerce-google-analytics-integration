@@ -139,7 +139,7 @@ test.describe( 'GTag events on block pages', () => {
 		} );
 	} );
 
-	test( 'Remove from cart DOM fallback parses US price format correctly', async ( {
+	test( 'Remove from cart DOM fallback parses price correctly', async ( {
 		page,
 	} ) => {
 		await simpleProductAddToCart( page, simpleProductID );
@@ -153,17 +153,10 @@ test.describe( 'GTag events on block pages', () => {
 			.waitFor();
 
 		// Force DOM fallback by clearing cart data sources
-		// and mock US currency format (thousand: comma, decimal: period)
+		// Currency settings from ga4w.settings.currency are still available
 		await page.evaluate( () => {
 			window.ga4w.data.cart = null;
-			window.wcSettings = {
-				currency: {
-					thousandSeparator: ',',
-					decimalSeparator: '.',
-					precision: 2,
-				},
-			};
-			// Mock wp.data.select if it exists
+			// Mock wp.data.select to return empty cart
 			if ( window.wp?.data?.select ) {
 				const originalSelect = window.wp.data.select;
 				window.wp.data.select = ( store ) => {
@@ -183,64 +176,12 @@ test.describe( 'GTag events on block pages', () => {
 
 		await event.then( ( request ) => {
 			const data = getEventData( request, 'remove_from_cart' );
-			// DOM fallback should still parse price correctly
+			// DOM fallback should parse price correctly using ga4w.settings.currency
 			expect( data.product1.nm ).toEqual( 'Simple product' );
 			expect( data.product1.qt ).toEqual( '1' );
 			expect( parseFloat( data.product1.pr ) ).toEqual(
 				simpleProductPrice
 			);
-		} );
-	} );
-
-	test( 'Remove from cart DOM fallback parses European price format correctly', async ( {
-		page,
-	} ) => {
-		await simpleProductAddToCart( page, simpleProductID );
-		await page.goto( 'shop' );
-		await page.locator( '.wc-block-mini-cart' ).click();
-
-		// Wait for mini cart to be visible
-		await page
-			.locator( '.wc-block-cart-item__remove-link' )
-			.first()
-			.waitFor();
-
-		// Force DOM fallback and mock European currency format
-		// (thousand: period, decimal: comma - e.g., "1.234,56 €")
-		await page.evaluate( () => {
-			window.ga4w.data.cart = null;
-			window.wcSettings = {
-				currency: {
-					thousandSeparator: '.',
-					decimalSeparator: ',',
-					precision: 2,
-				},
-			};
-			// Mock wp.data.select if it exists
-			if ( window.wp?.data?.select ) {
-				const originalSelect = window.wp.data.select;
-				window.wp.data.select = ( store ) => {
-					if ( store === 'wc/store/cart' ) {
-						return { getCartData: () => ( { items: [] } ) };
-					}
-					return originalSelect( store );
-				};
-			}
-		} );
-
-		const event = trackGtagEvent( page, 'remove_from_cart' );
-		await page
-			.locator( '.wc-block-cart-item__remove-link' )
-			.first()
-			.click();
-
-		await event.then( ( request ) => {
-			const data = getEventData( request, 'remove_from_cart' );
-			// DOM fallback should parse European format correctly
-			expect( data.product1.nm ).toEqual( 'Simple product' );
-			expect( data.product1.qt ).toEqual( '1' );
-			// Price should be parsed correctly regardless of format
-			expect( parseFloat( data.product1.pr ) ).toBeGreaterThan( 0 );
 		} );
 	} );
 

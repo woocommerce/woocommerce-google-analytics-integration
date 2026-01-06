@@ -9,11 +9,11 @@ import { ACTION_PREFIX, NAMESPACE } from '../constants';
 let hookFiredRecently = false;
 
 /**
- * Get WooCommerce settings from the global wcSettings object.
+ * Get currency settings from our plugin's settings.
  *
- * @return {Object|undefined} The wcSettings object or undefined if not available.
+ * @return {Object|undefined} Currency object with decimalSeparator, thousandSeparator, precision.
  */
-const getWcSettings = () => window.wc?.wcSettings || window.wcSettings;
+const getCurrencySettings = () => window.ga4w?.settings?.currency;
 
 /**
  * Get the current cart data from WooCommerce's store (if available) or fallback to static data.
@@ -37,8 +37,7 @@ const getCartData = () => {
 };
 
 /**
- * Parse a price string into a numeric value using WooCommerce's accounting.js library.
- * Falls back to wcSettings currency configuration if accounting.js is not available.
+ * Parse a price string into a numeric value using currency settings.
  *
  * @param {string} priceText - The raw price text from DOM (e.g., "$1,234.56" or "1.234,56 €").
  * @return {number} The parsed price as a float, or 0 if parsing failed.
@@ -48,26 +47,31 @@ const parsePriceFromDOM = ( priceText ) => {
 		return 0;
 	}
 
-	const wcSettings = getWcSettings();
-	const decimalSeparator = wcSettings?.currency?.decimalSeparator || '.';
+	const currency = getCurrencySettings();
+	// Currency settings should be always available this is only safe check
+	if ( ! currency ) {
+		return 0;
+	}
 
-	// Use WooCommerce's accounting.js library if available
+	const { decimalSeparator = '.', thousandSeparator = ',' } = currency;
+
+	// Use WooCommerce's accounting.js library if available (most reliable)
 	if ( window.accounting?.unformat ) {
 		return window.accounting.unformat( priceText, decimalSeparator );
 	}
 
-	// Fallback: manual parsing using wcSettings currency configuration
-	const thousandSeparator = wcSettings?.currency?.thousandSeparator || ',';
-
+	// Manual parsing using currency settings
 	// Remove currency symbols and whitespace, keeping only digits and separators
-	let cleaned = priceText.replace( /[^\d.,\s]/g, '' ).trim();
+	let cleaned = priceText.replace( /[^\d.,]/g, '' ).trim();
 
-	// Remove thousand separators (need to escape special regex chars like '.')
-	const escapedThousand = thousandSeparator.replace(
-		/[.*+?^${}()|[\]\\]/g,
-		'\\$&'
-	);
-	cleaned = cleaned.replace( new RegExp( escapedThousand, 'g' ), '' );
+	// Remove thousand separators
+	if ( thousandSeparator ) {
+		const escapedThousand = thousandSeparator.replace(
+			/[.*+?^${}()|[\]\\]/g,
+			'\\$&'
+		);
+		cleaned = cleaned.replace( new RegExp( escapedThousand, 'g' ), '' );
+	}
 
 	// Convert decimal separator to standard period for parseFloat
 	if ( decimalSeparator !== '.' ) {
@@ -115,18 +119,15 @@ const getProductFromDOM = ( cartItem ) => {
 		) ||
 		cartItem.querySelector( '.wc-block-components-product-price__value' );
 
-	// Get currency minor unit from cart data or wcSettings, default to 2
+	// Get currency minor unit from cart data or currency settings, default to 2
 	const cart = getCartData();
-	const wcSettings = getWcSettings();
+	const currency = getCurrencySettings();
 	const currencyMinorUnit =
-		cart?.totals?.currency_minor_unit ??
-		wcSettings?.currency?.precision ??
-		2;
+		cart?.totals?.currency_minor_unit ?? currency?.precision ?? 2;
 
-	let price = 0;
-	if ( priceElement ) {
-		price = parsePriceFromDOM( priceElement.textContent );
-	}
+	const price = priceElement
+		? parsePriceFromDOM( priceElement.textContent )
+		: 0;
 
 	// Build a minimal product object that works with getProductFieldObject
 	return {

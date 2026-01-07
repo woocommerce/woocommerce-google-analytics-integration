@@ -125,13 +125,63 @@ test.describe( 'GTag events on block pages', () => {
 
 		await event.then( ( request ) => {
 			const data = getEventData( request, 'remove_from_cart' );
-			expect( data.product1 ).toEqual( {
+			// Check common required fields
+			expect( data.product1 ).toMatchObject( {
 				id: simpleProductID.toString(),
 				nm: 'Simple product',
 				qt: '1',
 				pr: simpleProductPrice.toString(),
-				va: '',
 			} );
+			// Accept either category (WooCommerce 10.4+ fallback) or variant (older WooCommerce hook)
+			expect(
+				data.product1.ca === 'Uncategorized' || data.product1.va === ''
+			).toBe( true );
+		} );
+	} );
+
+	test( 'Remove from cart DOM fallback parses price correctly', async ( {
+		page,
+	} ) => {
+		await simpleProductAddToCart( page, simpleProductID );
+		await page.goto( 'shop' );
+		await page.locator( '.wc-block-mini-cart' ).click();
+
+		// Wait for mini cart to be visible
+		await page
+			.locator( '.wc-block-cart-item__remove-link' )
+			.first()
+			.waitFor();
+
+		// Force DOM fallback by clearing cart data sources
+		// Currency settings from ga4w.settings.currency are still available
+		await page.evaluate( () => {
+			window.ga4w.data.cart = null;
+			// Mock wp.data.select to return empty cart
+			if ( window.wp?.data?.select ) {
+				const originalSelect = window.wp.data.select;
+				window.wp.data.select = ( store ) => {
+					if ( store === 'wc/store/cart' ) {
+						return { getCartData: () => ( { items: [] } ) };
+					}
+					return originalSelect( store );
+				};
+			}
+		} );
+
+		const event = trackGtagEvent( page, 'remove_from_cart' );
+		await page
+			.locator( '.wc-block-cart-item__remove-link' )
+			.first()
+			.click();
+
+		await event.then( ( request ) => {
+			const data = getEventData( request, 'remove_from_cart' );
+			// DOM fallback should parse price correctly using ga4w.settings.currency
+			expect( data.product1.nm ).toEqual( 'Simple product' );
+			expect( data.product1.qt ).toEqual( '1' );
+			expect( parseFloat( data.product1.pr ) ).toEqual(
+				simpleProductPrice
+			);
 		} );
 	} );
 
@@ -145,13 +195,17 @@ test.describe( 'GTag events on block pages', () => {
 
 		await event.then( ( request ) => {
 			const data = getEventData( request, 'begin_checkout' );
-			expect( data.product1 ).toEqual( {
+			// Check common required fields
+			expect( data.product1 ).toMatchObject( {
 				id: simpleProductID.toString(),
 				nm: 'Simple product',
 				qt: '1',
 				pr: simpleProductPrice.toString(),
-				va: '',
 			} );
+			// Accept either category (WooCommerce 10.4+ fallback) or variant (older WooCommerce hook)
+			expect(
+				data.product1.ca === 'Uncategorized' || data.product1.va === ''
+			).toBe( true );
 			expect( data.cu ).toEqual( 'USD' );
 			expect( data[ 'epn.value' ] ).toEqual(
 				simpleProductPrice.toString()

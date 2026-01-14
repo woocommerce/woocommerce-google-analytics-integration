@@ -3,7 +3,7 @@ Contributors: woocommerce, automattic, claudiosanches, bor0, royho, laurendaviss
 Tags: woocommerce, google analytics
 Requires at least: 6.8
 Tested up to: 6.9
-Stable tag: 2.1.19
+Stable tag: 2.1.20
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -47,6 +47,13 @@ Duplicate Google Analytics code causes a conflict in tracking. Remove any other 
 1. Google Analytics Integration Settings.
 
 == Changelog ==
+
+= 2.1.20 - 2026-01-14 =
+* Add WooCommerce 10.4+ Interactivity API Mini Cart compatibility.
+* Dev - updated vulnerable packages.
+* Tweak - WordPress 6.9 compatibility.
+* Update - Require WooCommerce 10.3+.
+* Update - Require WordPress 6.8+.
 
 = 2.1.19 - 2025-10-30 =
 * Fix - Add safe script tag encoding flags to all `wp_json_encode()` calls in inline scripts.

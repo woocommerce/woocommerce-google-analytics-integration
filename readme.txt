@@ -48,6 +48,10 @@ Duplicate Google Analytics code causes a conflict in tracking. Remove any other 
 
 == Changelog ==
 
+= 2.1.21 - 2026-02-10 =
+* Tweak - WC 10.5 compatibility.
+* Update - Require WooCommerce 10.4+.
+
 = 2.1.20 - 2026-01-14 =
 * Add WooCommerce 10.4+ Interactivity API Mini Cart compatibility.
 * Dev - updated vulnerable packages.

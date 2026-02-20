@@ -8,12 +8,16 @@ on:
       - "**.php"
       - composer.json
       - composer.lock
+      - package.json
+      - package-lock.json
       - .github/workflows/php-unit-tests.yml
   pull_request:
     paths:
       - "**.php"
       - composer.json
       - composer.lock
+      - package.json
+      - package-lock.json
       - .github/workflows/php-unit-tests.yml
   workflow_dispatch:
     inputs:

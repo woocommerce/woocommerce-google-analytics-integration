@@ -119,4 +119,30 @@ Summarize all results in a table:
 | Smoke: Product page | ✅/❌ | |
 | Smoke: Add to cart | ✅/❌ | |
 
-If any tests failed, list the issues and recommended next steps.
+## Error triage
+
+When any test fails, classify each error into one of three categories and take the corresponding action:
+
+### 1. Plugin error — fix it
+
+The error is in code from this repository (e.g., a PHP fatal in `includes/`, a JS error from `assets/`, a failing unit test in `tests/`).
+
+**Action:** Fix the issue directly in the codebase. Run the failing test again to confirm the fix.
+
+### 2. QIT / test environment error — report to #qit
+
+The error is related to the QIT tool itself or the testing environment (e.g., QIT command crashes, Docker/environment setup failures, test infrastructure timeouts, flaky QIT test runner behavior unrelated to plugin code).
+
+**Action:** Draft a Slack message for the `#qit` channel describing the error, the QIT command that was run, and the full error output. Ask the user to send the message to the coresponding channel.
+
+### 3. WooCommerce / other plugin error — report to #woo-core-releases
+
+The error is caused by WooCommerce core or another plugin (e.g., a WooCommerce API regression, a breaking change in WC beta, a failure in a WC core E2E test unrelated to this plugin's code).
+
+**Action:**
+1. Use the context-a8c MCP to identify which team owns the affected area (search Linear, Slack, or Matticspace for the relevant WooCommerce component)
+2. Draft a Slack message for the `#woo-core-releases` channel describing:
+   - The WooCommerce beta version being tested
+   - The specific error and which test surfaced it
+   - A ping to the responsible team identified above
+3. Ask the user to review and send the message

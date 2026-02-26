@@ -2,13 +2,6 @@
 
 A WordPress/WooCommerce plugin that integrates Google Analytics (GA4) tracking via gtag.js into WooCommerce stores. Tracks e-commerce events (add to cart, purchases, etc.), supports both classic and block-based storefronts, and integrates with the WP Consent API for GDPR compliance.
 
-## Tech Stack
-
-- **PHP 7.4+** — WordPress plugin backend. Follows WordPress Coding Standards with some PSR-12 additions (see `phpcs.xml.dist`).
-- **JavaScript (ES6+)** — Frontend tracking scripts. Built with Webpack via `@wordpress/scripts`. Uses `@wordpress/hooks` and `@wordpress/i18n`.
-- **Node 20+** (see `.nvmrc`), **npm 10+** (or ^9).
-- **Composer** — PHP dev dependencies only (PHPCS, PHPUnit). No production PHP dependencies.
-
 ## Project Structure
 
 ```
@@ -55,7 +48,7 @@ npm run lint:php      # PHPCS (WordPress Coding Standards)
 ### Test
 
 ```sh
-vendor/bin/phpunit                # Run PHP unit tests (requires WP test environment)
+vendor/bin/phpunit                # Run PHP unit tests (see README.md for setup requirements)
 npm run wp-env:up                 # Start local WordPress Docker environment
 npm run test:e2e                  # Run Playwright E2E tests (headless, requires wp-env)
 npm run test:e2e-dev              # Run E2E tests in debug mode with browser visible
@@ -99,13 +92,6 @@ wp-env automatically installs Basic Auth plugin for API testing and runs `tests/
 - YAML: spaces, width 2.
 - All files: UTF-8, LF line endings, final newline.
 
-### Versioning
-
-When bumping the plugin version, it MUST be updated in three places:
-1. `woocommerce-google-analytics-integration.php` — Plugin header `Version:` and `WC_GOOGLE_ANALYTICS_INTEGRATION_VERSION` constant.
-2. `package.json` — `version` field.
-3. `readme.txt` — `Stable tag:` header (if present).
-
 ### Pull Requests
 
 - Branch from `trunk`. The main branch is `trunk`, not `main` or `master`.
@@ -134,8 +120,5 @@ When bumping the plugin version, it MUST be updated in three places:
 - **Do NOT add production PHP dependencies** via Composer. The plugin ships without a `vendor/` directory. Composer is dev-only (PHPCS, PHPUnit).
 - **Do NOT use `main` or `master`** — the primary branch is `trunk`.
 - **Do NOT hardcode tracking IDs** — the measurement ID comes from plugin settings via `WC_Google_Analytics::get_integration()`.
-- **Version strings must stay in sync** — if you change the version, update all three locations listed above.
-- **PHPUnit tests require a WordPress test environment** — they won't run standalone. Use `wp-env` or a compatible WP test setup.
-- **E2E tests require wp-env running** — start it with `npm run wp-env:up` before running `npm run test:e2e`.
 - **The `WC_GOOGLE_ANALYTICS_INTEGRATION_MIN_WC_VER` constant** gates minimum WooCommerce version. Don't use WC APIs newer than this version without a compatibility check.
 - **External scripts (gtag.js) are loaded from Google** — the `WordPress.WP.EnqueuedResourceParameters.MissingVersion` PHPCS warning is intentionally suppressed for this reason.

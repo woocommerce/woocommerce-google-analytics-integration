@@ -24,12 +24,27 @@ The `engines` in package.json includes npm `^9` to allow dependabot to update ou
 -   See https://github.com/dependabot/dependabot-core/issues/9277
 
 ## Unit tests
-### Running PHP unit tests in your local dev environment
+
+### Running PHP unit tests via wp-env (recommended)
+
+This uses the same Docker environment as E2E tests — no local MySQL, svn, or manual setup required.
+
+1. Make sure Docker is running
+2. `npm run wp-env:up` to start the environment
+3. `npm run test:php:setup` to install WooCommerce from source and dependencies (only needed once after starting the environment)
+4. `npm run test:php` to run all PHPUnit tests
+
+To test against a specific WooCommerce version:
+
+`npm run test:php:setup -- --wc-version=9.6.0`
+
+### Running PHP unit tests locally (without Docker)
+
 1. Install prerequisites: composer, git, xdebug, svn, wget or curl, mysqladmin
 2. `cd` into the `woocommerce-google-analytics-integration/` plugin directory
 3. Run `composer install`
 4. Run `bin/install-unit-tests.sh <db-name> <db-user> <db-pass> [db-host] [wp-version] [wc-version] [skip-database-creation]` e.g. `bin/install-unit-tests.sh wordpress_test root root localhost latest latest`
-5. Run `XDEBUG_MODE=coverage vendor/bin/phpunit --coverage-text` to run all unit test
+5. Run `XDEBUG_MODE=coverage vendor/bin/phpunit --coverage-text` to run all unit tests
 
 _For more info see: [WordPress.org > Plugin Unit Tests](https://make.wordpress.org/cli/handbook/misc/plugin-unit-tests/#running-tests-locally)._
 

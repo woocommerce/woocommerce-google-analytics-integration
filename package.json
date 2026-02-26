@@ -46,6 +46,8 @@
     "prebuild": "rm -rf ./vendor",
     "test:e2e": "npx playwright test --config=tests/e2e/config/playwright.config.js",
     "test:e2e-dev": "npx playwright test --config=tests/e2e/config/playwright.config.js --debug",
+    "test:php:setup": "./tests/bin/setup-phpunit-env.sh",
+    "test:php": "wp-env run tests-cli --env-cwd=wp-content/plugins/woocommerce-google-analytics-integration vendor/bin/phpunit",
     "wp-env": "wp-env",
     "wp-env:up": "npm run -- wp-env start --update",
     "wp-env:down": "npm run wp-env stop"

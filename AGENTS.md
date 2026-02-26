@@ -48,10 +48,12 @@ npm run lint:php      # PHPCS (WordPress Coding Standards)
 ### Test
 
 ```sh
-vendor/bin/phpunit                # Run PHP unit tests (see README.md for setup requirements)
 npm run wp-env:up                 # Start local WordPress Docker environment
+npm run test:php:setup            # Install WooCommerce + deps for PHPUnit (once after wp-env:up)
+npm run test:php                  # Run PHP unit tests via wp-env
 npm run test:e2e                  # Run Playwright E2E tests (headless, requires wp-env)
 npm run test:e2e-dev              # Run E2E tests in debug mode with browser visible
+vendor/bin/phpunit                # Run PHP unit tests locally (see README.md for setup)
 ```
 
 ### Local Environment (wp-env)

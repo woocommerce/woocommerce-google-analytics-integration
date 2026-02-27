@@ -12,8 +12,11 @@ use WC_Google_Analytics;
  */
 class Configuration extends EventsDataTest {
 
-	// --- get_site_tag_config ---
-
+	/**
+	 * Test that default config contains expected keys and values.
+	 *
+	 * @return void
+	 */
 	public function test_get_site_tag_config_default_values() {
 		$gtag   = new WC_Google_Gtag_JS();
 		$config = $gtag->get_site_tag_config();
@@ -27,6 +30,11 @@ class Configuration extends EventsDataTest {
 		$this->assertEquals( 'logged_in', $config['custom_map']['dimension1'] );
 	}
 
+	/**
+	 * Test that track_404 reflects the ga_404_tracking_enabled setting.
+	 *
+	 * @return void
+	 */
 	public function test_get_site_tag_config_track_404_reflects_setting() {
 		$gtag   = new WC_Google_Gtag_JS( [ 'ga_404_tracking_enabled' => 'yes' ] );
 		$config = $gtag->get_site_tag_config();
@@ -37,6 +45,11 @@ class Configuration extends EventsDataTest {
 		$this->assertFalse( $config['track_404'] );
 	}
 
+	/**
+	 * Test that allow_google_signals reflects the display advertising setting.
+	 *
+	 * @return void
+	 */
 	public function test_get_site_tag_config_allow_google_signals_reflects_setting() {
 		$gtag   = new WC_Google_Gtag_JS( [ 'ga_support_display_advertising' => 'yes' ] );
 		$config = $gtag->get_site_tag_config();
@@ -47,6 +60,11 @@ class Configuration extends EventsDataTest {
 		$this->assertFalse( $config['allow_google_signals'] );
 	}
 
+	/**
+	 * Test that logged_in reflects the current user state.
+	 *
+	 * @return void
+	 */
 	public function test_get_site_tag_config_logged_in_reflects_user_state() {
 		$gtag = new WC_Google_Gtag_JS();
 
@@ -60,6 +78,11 @@ class Configuration extends EventsDataTest {
 		wp_set_current_user( 0 );
 	}
 
+	/**
+	 * Test that linker domains are parsed from comma-separated setting.
+	 *
+	 * @return void
+	 */
 	public function test_get_site_tag_config_linker_domains_parses_comma_separated() {
 		$gtag   = new WC_Google_Gtag_JS( [ 'ga_linker_cross_domains' => 'example.com,example.net' ] );
 		$config = $gtag->get_site_tag_config();
@@ -67,16 +90,23 @@ class Configuration extends EventsDataTest {
 		$this->assertEquals( [ 'example.com', 'example.net' ], $config['linker']['domains'] );
 	}
 
+	/**
+	 * Test that whitespace in linker domains is preserved (documents current behavior).
+	 *
+	 * @return void
+	 */
 	public function test_get_site_tag_config_linker_domains_with_whitespace() {
-		// The source uses explode(',') without trim, so spaces are preserved.
-		// This documents current behavior — user input "example.com, example.net"
-		// results in a leading space on the second domain.
 		$gtag   = new WC_Google_Gtag_JS( [ 'ga_linker_cross_domains' => 'example.com, example.net' ] );
 		$config = $gtag->get_site_tag_config();
 
 		$this->assertEquals( [ 'example.com', ' example.net' ], $config['linker']['domains'] );
 	}
 
+	/**
+	 * Test that linker domains is empty when setting is empty.
+	 *
+	 * @return void
+	 */
 	public function test_get_site_tag_config_linker_domains_empty_when_setting_empty() {
 		$gtag   = new WC_Google_Gtag_JS( [ 'ga_linker_cross_domains' => '' ] );
 		$config = $gtag->get_site_tag_config();
@@ -84,6 +114,11 @@ class Configuration extends EventsDataTest {
 		$this->assertEquals( [], $config['linker']['domains'] );
 	}
 
+	/**
+	 * Test that linker allow_incoming reflects the setting.
+	 *
+	 * @return void
+	 */
 	public function test_get_site_tag_config_linker_allow_incoming_reflects_setting() {
 		$gtag   = new WC_Google_Gtag_JS( [ 'ga_linker_allow_incoming_enabled' => 'yes' ] );
 		$config = $gtag->get_site_tag_config();
@@ -94,6 +129,11 @@ class Configuration extends EventsDataTest {
 		$this->assertFalse( $config['linker']['allow_incoming'] );
 	}
 
+	/**
+	 * Test that the woocommerce_ga_gtag_config filter can modify config.
+	 *
+	 * @return void
+	 */
 	public function test_get_site_tag_config_filter_can_modify() {
 		$gtag     = new WC_Google_Gtag_JS();
 		$callback = function ( $config ) {
@@ -109,8 +149,11 @@ class Configuration extends EventsDataTest {
 		remove_filter( 'woocommerce_ga_gtag_config', $callback );
 	}
 
-	// --- get_consent_modes ---
-
+	/**
+	 * Test that get_consent_modes returns an array with one mode.
+	 *
+	 * @return void
+	 */
 	public function test_get_consent_modes_returns_array_with_one_mode() {
 		$gtag  = new WC_Google_Gtag_JS();
 		$modes = $this->call_protected_method( $gtag, 'get_consent_modes' );
@@ -119,6 +162,11 @@ class Configuration extends EventsDataTest {
 		$this->assertCount( 1, $modes );
 	}
 
+	/**
+	 * Test that all consent categories are denied by default.
+	 *
+	 * @return void
+	 */
 	public function test_get_consent_modes_all_categories_denied() {
 		$gtag  = new WC_Google_Gtag_JS();
 		$modes = $this->call_protected_method( $gtag, 'get_consent_modes' );
@@ -130,12 +178,16 @@ class Configuration extends EventsDataTest {
 		$this->assertEquals( 'denied', $mode['ad_personalization'] );
 	}
 
+	/**
+	 * Test that the region list contains 32 countries (27 EU + 3 EEA + GB + CH).
+	 *
+	 * @return void
+	 */
 	public function test_get_consent_modes_region_list() {
 		$gtag  = new WC_Google_Gtag_JS();
 		$modes = $this->call_protected_method( $gtag, 'get_consent_modes' );
 		$mode  = $modes[0];
 
-		// 27 EU + IS, LI, NO (EEA) + GB + CH = 32
 		$this->assertCount( 32, $mode['region'] );
 		$this->assertContains( 'GB', $mode['region'] );
 		$this->assertContains( 'CH', $mode['region'] );
@@ -145,10 +197,14 @@ class Configuration extends EventsDataTest {
 		$this->assertContains( 'LI', $mode['region'] );
 		$this->assertContains( 'NO', $mode['region'] );
 
-		// No duplicate entries
 		$this->assertCount( count( $mode['region'] ), array_unique( $mode['region'] ) );
 	}
 
+	/**
+	 * Test that the woocommerce_ga_gtag_consent_modes filter can modify modes.
+	 *
+	 * @return void
+	 */
 	public function test_get_consent_modes_filter_can_modify() {
 		$gtag     = new WC_Google_Gtag_JS();
 		$callback = function ( $modes ) {
@@ -164,8 +220,11 @@ class Configuration extends EventsDataTest {
 		remove_filter( 'woocommerce_ga_gtag_consent_modes', $callback );
 	}
 
-	// --- utm_nooverride ---
-
+	/**
+	 * Test that utm_nooverride adds the parameter to a URL.
+	 *
+	 * @return void
+	 */
 	public function test_utm_nooverride_adds_parameter() {
 		$ga  = $this->create_ga_instance();
 		$url = $ga->utm_nooverride( 'https://example.com/checkout/' );
@@ -173,6 +232,11 @@ class Configuration extends EventsDataTest {
 		$this->assertStringContainsString( 'utm_nooverride=1', $url );
 	}
 
+	/**
+	 * Test that utm_nooverride replaces an existing value without duplicates.
+	 *
+	 * @return void
+	 */
 	public function test_utm_nooverride_replaces_existing_value() {
 		$ga  = $this->create_ga_instance();
 		$url = $ga->utm_nooverride( 'https://example.com/checkout/?utm_nooverride=0' );
@@ -181,6 +245,11 @@ class Configuration extends EventsDataTest {
 		$this->assertEquals( 1, substr_count( $url, 'utm_nooverride' ) );
 	}
 
+	/**
+	 * Test that utm_nooverride preserves existing query parameters.
+	 *
+	 * @return void
+	 */
 	public function test_utm_nooverride_preserves_existing_query_params() {
 		$ga  = $this->create_ga_instance();
 		$url = $ga->utm_nooverride( 'https://example.com/checkout/?foo=bar&baz=qux' );
@@ -190,6 +259,11 @@ class Configuration extends EventsDataTest {
 		$this->assertStringContainsString( 'baz=qux', $url );
 	}
 
+	/**
+	 * Test that utm_nooverride escapes dangerous characters.
+	 *
+	 * @return void
+	 */
 	public function test_utm_nooverride_escapes_dangerous_characters() {
 		$ga  = $this->create_ga_instance();
 		$url = $ga->utm_nooverride( 'https://example.com/checkout/?key=val&x=<script>' );
@@ -198,10 +272,13 @@ class Configuration extends EventsDataTest {
 		$this->assertStringContainsString( 'utm_nooverride=1', $url );
 	}
 
-	// --- track_settings ---
-
+	/**
+	 * Test that track_settings returns all expected fields.
+	 *
+	 * @return void
+	 */
 	public function test_track_settings_returns_all_fields() {
-		$ga   = $this->create_ga_instance(
+		$ga      = $this->create_ga_instance(
 			[
 				'ga_id'                            => 'G-TEST123',
 				'ga_support_display_advertising'   => 'yes',
@@ -212,7 +289,7 @@ class Configuration extends EventsDataTest {
 				'ga_linker_cross_domains'          => 'example.com',
 			]
 		);
-		$data = $ga->track_settings( [] );
+		$data    = $ga->track_settings( [] );
 		$ga_data = $data['wc-google-analytics'];
 
 		$this->assertEquals( 'yes', $ga_data['support_display_advertising'] );
@@ -224,12 +301,17 @@ class Configuration extends EventsDataTest {
 		$this->assertEquals( 'G', $ga_data['ga_id'] );
 	}
 
+	/**
+	 * Test that GA ID prefix is extracted correctly for various formats.
+	 *
+	 * @return void
+	 */
 	public function test_track_settings_ga_id_prefix_extraction() {
 		$cases = [
 			'G-XXXX'  => 'G',
 			'GT-XXXX' => 'GT',
 			'UA-XXXX' => 'UA',
-			''         => '',
+			''        => '',
 			'ZZ-XXXX' => 'X',
 		];
 
@@ -255,8 +337,12 @@ class Configuration extends EventsDataTest {
 		}
 	}
 
+	/**
+	 * Test that linker_allow_incoming is normalized to yes/no.
+	 *
+	 * @return void
+	 */
 	public function test_track_settings_linker_allow_incoming_normalization() {
-		// Source normalizes: empty() => 'no', otherwise => 'yes'
 		$ga   = $this->create_ga_instance(
 			[
 				'ga_id'                            => 'G-TEST',
@@ -287,17 +373,27 @@ class Configuration extends EventsDataTest {
 	}
 
 	/**
-	 * Helper to call protected/private static methods via reflection.
+	 * Call a protected or private method via reflection.
+	 *
+	 * @param mixed  $instance    The object instance to call the method on.
+	 * @param string $method_name The method name to call.
+	 * @param array  $args        Arguments to pass to the method.
+	 *
+	 * @return mixed The method return value.
 	 */
-	private function call_protected_method( $object, $method_name, $args = [] ) {
-		$reflection = new \ReflectionMethod( get_class( $object ), $method_name );
+	private function call_protected_method( $instance, $method_name, $args = [] ) {
+		$reflection = new \ReflectionMethod( get_class( $instance ), $method_name );
 		$reflection->setAccessible( true );
-		return $reflection->invokeArgs( $object, $args );
+		return $reflection->invokeArgs( $instance, $args );
 	}
 
 	/**
-	 * Helper to create a WC_Google_Analytics instance with test settings
-	 * using a mock to avoid the full constructor side effects.
+	 * Create a WC_Google_Analytics instance with test settings using a mock
+	 * to avoid the full constructor side effects.
+	 *
+	 * @param array $settings Settings to inject.
+	 *
+	 * @return WC_Google_Analytics The mock instance.
 	 */
 	private function create_ga_instance( $settings = [] ) {
 		$ga = $this->getMockBuilder( WC_Google_Analytics::class )

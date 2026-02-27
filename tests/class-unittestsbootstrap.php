@@ -60,10 +60,18 @@ class UnitTestsBootstrap {
 	 * Set directory paths.
 	 */
 	public function set_path_props() {
-		$this->tests_dir    = __DIR__;
-		$this->plugin_dir   = dirname( $this->tests_dir );
-		$this->plugins_dir  = sys_get_temp_dir() . '/wordpress/wp-content/plugins';
-		$this->wp_tests_dir = sys_get_temp_dir() . '/wordpress-tests-lib';
+		$this->tests_dir  = __DIR__;
+		$this->plugin_dir = dirname( $this->tests_dir );
+
+		// Support wp-env: WP_TESTS_DIR is set inside wp-env containers.
+		$wp_tests_dir = getenv( 'WP_TESTS_DIR' );
+		if ( $wp_tests_dir ) {
+			$this->wp_tests_dir = $wp_tests_dir;
+			$this->plugins_dir  = '/var/www/html/wp-content/plugins';
+		} else {
+			$this->wp_tests_dir = sys_get_temp_dir() . '/wordpress-tests-lib';
+			$this->plugins_dir  = sys_get_temp_dir() . '/wordpress/wp-content/plugins';
+		}
 	}
 
 	/**

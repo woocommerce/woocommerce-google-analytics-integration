@@ -18,11 +18,21 @@ class DataFormatting extends EventsDataTest {
 	/** @var WC_Google_Gtag_JS */
 	private $gtag;
 
+	/**
+	 * Set up test fixtures.
+	 *
+	 * @return void
+	 */
 	public function set_up() {
 		parent::set_up();
 		$this->gtag = new WC_Google_Gtag_JS( [ 'ga_product_identifier' => 'product_id' ] );
 	}
 
+	/**
+	 * Clean up after each test.
+	 *
+	 * @return void
+	 */
 	public function tear_down() {
 		if ( WC()->cart ) {
 			WC()->cart->empty_cart();
@@ -30,36 +40,65 @@ class DataFormatting extends EventsDataTest {
 		parent::tear_down();
 	}
 
-	// --- get_formatted_price ---
-
+	/**
+	 * Test that a standard price is formatted correctly.
+	 *
+	 * @return void
+	 */
 	public function test_get_formatted_price_standard() {
 		$this->assertEquals( 1000, $this->gtag->get_formatted_price( 10.00 ) );
 	}
 
+	/**
+	 * Test that zero price returns zero.
+	 *
+	 * @return void
+	 */
 	public function test_get_formatted_price_zero() {
 		$this->assertEquals( 0, $this->gtag->get_formatted_price( 0 ) );
 	}
 
+	/**
+	 * Test that string input is cast to float before formatting.
+	 *
+	 * @return void
+	 */
 	public function test_get_formatted_price_string_input() {
 		$this->assertEquals( 999, $this->gtag->get_formatted_price( '9.99' ) );
 	}
 
+	/**
+	 * Test that half-cent values round up correctly.
+	 *
+	 * @return void
+	 */
 	public function test_get_formatted_price_rounding_up() {
-		// 9.995 * 100 = 999.5, rounded = 1000
 		$this->assertEquals( 1000, $this->gtag->get_formatted_price( 9.995 ) );
 	}
 
+	/**
+	 * Test that sub-half-cent values round down (not ceil).
+	 *
+	 * @return void
+	 */
 	public function test_get_formatted_price_rounding_down() {
-		// 10.004 * 100 = 1000.4, round gives 1000 (not 1001 like ceil would)
 		$this->assertEquals( 1000, $this->gtag->get_formatted_price( 10.004 ) );
 	}
 
+	/**
+	 * Test that negative prices (refunds) are formatted correctly.
+	 *
+	 * @return void
+	 */
 	public function test_get_formatted_price_negative() {
 		$this->assertEquals( -1000, $this->gtag->get_formatted_price( -10.00 ) );
 	}
 
-	// --- get_formatted_product ---
-
+	/**
+	 * Test that a simple product returns correct structure and values.
+	 *
+	 * @return void
+	 */
 	public function test_get_formatted_product_simple_structure_and_values() {
 		$product   = $this->get_product();
 		$formatted = $this->gtag->get_formatted_product( $product );
@@ -77,6 +116,11 @@ class DataFormatting extends EventsDataTest {
 		);
 	}
 
+	/**
+	 * Test that the SKU-based identifier is used when ga_product_identifier is product_sku.
+	 *
+	 * @return void
+	 */
 	public function test_get_formatted_product_with_sku_identifier() {
 		$gtag_sku = new WC_Google_Gtag_JS( [ 'ga_product_identifier' => 'product_sku' ] );
 		$product  = WC_Helper_Product::create_simple_product();
@@ -91,6 +135,11 @@ class DataFormatting extends EventsDataTest {
 		);
 	}
 
+	/**
+	 * Test that passing a variation_id uses the variation's price.
+	 *
+	 * @return void
+	 */
 	public function test_get_formatted_product_with_variation_id_uses_variation_price() {
 		$variation_product = WC_Helper_Product::create_variation_product();
 		$variations        = $variation_product->get_children();
@@ -103,6 +152,11 @@ class DataFormatting extends EventsDataTest {
 		$this->assertEquals( $expected_price, $formatted['prices']['price'] );
 	}
 
+	/**
+	 * Test that a variation array is formatted as "attr: value, attr2: value2".
+	 *
+	 * @return void
+	 */
 	public function test_get_formatted_product_with_variation_array() {
 		$product   = $this->get_product();
 		$variation = [
@@ -116,6 +170,11 @@ class DataFormatting extends EventsDataTest {
 		$this->assertEquals( 'color: red, size: large', $formatted['variation'] );
 	}
 
+	/**
+	 * Test that a variation-type product uses the parent ID and includes attribute data.
+	 *
+	 * @return void
+	 */
 	public function test_get_formatted_product_variation_type_uses_parent_id_and_attributes() {
 		$variation_product = WC_Helper_Product::create_variation_product();
 		$variations        = $variation_product->get_children();
@@ -128,6 +187,11 @@ class DataFormatting extends EventsDataTest {
 		$this->assertNotEmpty( $formatted['variation'], 'Variation string should contain attribute data' );
 	}
 
+	/**
+	 * Test that quantity is included when passed.
+	 *
+	 * @return void
+	 */
 	public function test_get_formatted_product_with_quantity() {
 		$product   = $this->get_product();
 		$formatted = $this->gtag->get_formatted_product( $product, 0, false, 3 );
@@ -136,6 +200,11 @@ class DataFormatting extends EventsDataTest {
 		$this->assertEquals( 3, $formatted['quantity'] );
 	}
 
+	/**
+	 * Test that quantity is omitted when not passed.
+	 *
+	 * @return void
+	 */
 	public function test_get_formatted_product_without_quantity() {
 		$product   = $this->get_product();
 		$formatted = $this->gtag->get_formatted_product( $product );
@@ -143,6 +212,11 @@ class DataFormatting extends EventsDataTest {
 		$this->assertArrayNotHasKey( 'quantity', $formatted );
 	}
 
+	/**
+	 * Test that categories are limited to 5.
+	 *
+	 * @return void
+	 */
 	public function test_get_formatted_product_categories_limited_to_five() {
 		$product = WC_Helper_Product::create_simple_product();
 
@@ -162,14 +236,22 @@ class DataFormatting extends EventsDataTest {
 		}
 	}
 
-	// --- get_formatted_order ---
-
+	/**
+	 * Create a fresh order with its own product and customer for test isolation.
+	 *
+	 * @return \WC_Order
+	 */
 	private function create_order_with_product() {
 		$product  = WC_Helper_Product::create_simple_product();
 		$customer = WC_Helper_Customer::create_customer( 'fmt_' . uniqid(), 'pw', uniqid() . '@test.test' );
 		return WC_Helper_Order::create_order( $customer->get_id(), $product );
 	}
 
+	/**
+	 * Test that order ID and blog name affiliation are returned.
+	 *
+	 * @return void
+	 */
 	public function test_get_formatted_order_returns_id_and_affiliation() {
 		$order     = $this->create_order_with_product();
 		$formatted = $this->gtag->get_formatted_order( $order );
@@ -178,6 +260,11 @@ class DataFormatting extends EventsDataTest {
 		$this->assertEquals( get_bloginfo( 'name' ), $formatted['affiliation'] );
 	}
 
+	/**
+	 * Test that order totals contain correct currency, decimal, and price values.
+	 *
+	 * @return void
+	 */
 	public function test_get_formatted_order_totals_values() {
 		$order     = $this->create_order_with_product();
 		$formatted = $this->gtag->get_formatted_order( $order );
@@ -190,6 +277,11 @@ class DataFormatting extends EventsDataTest {
 		$this->assertEquals( $this->gtag->get_formatted_price( $order->get_total() ), $totals['total_price'] );
 	}
 
+	/**
+	 * Test that order items contain merged product data and order-specific fields.
+	 *
+	 * @return void
+	 */
 	public function test_get_formatted_order_items_contain_product_data() {
 		$order     = $this->create_order_with_product();
 		$formatted = $this->gtag->get_formatted_order( $order );
@@ -200,14 +292,12 @@ class DataFormatting extends EventsDataTest {
 		$order_item = array_values( $order->get_items() )[0];
 		$product    = $order_item->get_product();
 
-		// Values from get_formatted_product (merged)
 		$this->assertEquals( $product->get_id(), $item['id'] );
 		$this->assertEquals( $product->get_title(), $item['name'] );
 		$this->assertArrayHasKey( 'categories', $item );
 		$this->assertArrayHasKey( 'prices', $item );
 		$this->assertArrayHasKey( 'extensions', $item );
 
-		// Order-specific fields
 		$this->assertEquals( $order_item->get_quantity(), $item['quantity'] );
 		$this->assertEquals(
 			$this->gtag->get_formatted_price( $order_item->get_total() ),
@@ -215,8 +305,11 @@ class DataFormatting extends EventsDataTest {
 		);
 	}
 
-	// --- get_formatted_cart ---
-
+	/**
+	 * Test that a null cart returns an empty array.
+	 *
+	 * @return void
+	 */
 	public function test_get_formatted_cart_null_cart_returns_empty_array() {
 		$original_cart = WC()->cart;
 		try {
@@ -231,6 +324,11 @@ class DataFormatting extends EventsDataTest {
 		}
 	}
 
+	/**
+	 * Test that an empty (non-null) cart returns the expected structure.
+	 *
+	 * @return void
+	 */
 	public function test_get_formatted_cart_empty_cart() {
 		$formatted = $this->gtag->get_formatted_cart();
 
@@ -239,6 +337,11 @@ class DataFormatting extends EventsDataTest {
 		$this->assertArrayHasKey( 'totals', $formatted );
 	}
 
+	/**
+	 * Test that a cart with items returns correct product data and totals.
+	 *
+	 * @return void
+	 */
 	public function test_get_formatted_cart_with_items() {
 		$product = WC_Helper_Product::create_simple_product();
 		WC()->cart->add_to_cart( $product->get_id(), 2 );

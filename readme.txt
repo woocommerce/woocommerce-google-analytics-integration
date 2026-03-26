@@ -59,8 +59,4 @@ Duplicate Google Analytics code causes a conflict in tracking. Remove any other 
 * Update - Require WooCommerce 10.3+.
 * Update - Require WordPress 6.8+.
 
-= 2.1.19 - 2025-10-30 =
-* Fix - Add safe script tag encoding flags to all `wp_json_encode()` calls in inline scripts.
-* Update - Require WooCommerce 10.2+.
-
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce-google-analytics-integration/trunk/changelog.txt).

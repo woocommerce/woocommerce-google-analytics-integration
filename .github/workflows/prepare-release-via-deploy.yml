@@ -1,0 +1,63 @@
+name: 'Prepare New Release (via Woo Deploy)'
+run-name: Prepare New Release `release/${{ github.event.inputs.version }}` by @${{ github.actor }}
+
+# **What it does**: Creates the release branch and PR with a checklist for releases done via the Deploy workflow.
+# **Why we have it**: To support devs automating a few manual steps, and to leave a nice reference for consumers.
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version number to be released'
+        required: true
+
+jobs:
+  PrepareRelease:
+    name: Prepare Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Validate version format
+        env:
+          VERSION: ${{ github.event.inputs.version }}
+        run: |
+          if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9.]+)?$ ]]; then
+            echo "::error::Invalid version format '$VERSION'. Expected format: X.Y.Z (e.g., 2.1.22) or X.Y.Z-suffix (e.g., 2.1.22-beta.1)"
+            exit 1
+          fi
+
+      - name: Set release branch name
+        id: release-vars
+        env:
+          VERSION: ${{ github.event.inputs.version }}
+        run: echo "branch=release/${VERSION}" >> $GITHUB_OUTPUT
+
+      - name: Create release branch
+        env:
+          BRANCH_NAME: ${{ steps.release-vars.outputs.branch }}
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git checkout -b "${BRANCH_NAME}"
+          git commit --allow-empty -q -m "Start \`${BRANCH_NAME}\`."
+          git push --set-upstream origin "${BRANCH_NAME}"
+
+      - name: Create a pull request for the release
+        id: prepare-release-pr
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
+        with:
+          script: |
+            const { default: script } = await import( `${ process.env.GITHUB_WORKSPACE }/.github/workflows/scripts/create-release-pr.mjs` );
+            return await script( {
+              context,
+              github,
+              version: process.env.VERSION,
+            } );
+        env:
+          VERSION: ${{ github.event.inputs.version }}
+
+      - name: Generate summary
+        run: |
+          echo "Release PR created at ${{ fromJSON(steps.prepare-release-pr.outputs.result).html_url }}" >> $GITHUB_STEP_SUMMARY

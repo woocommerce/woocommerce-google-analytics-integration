@@ -1,0 +1,76 @@
+name: Deploy Product
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to deploy (e.g., 2.1.21)'
+        required: true
+        type: string
+      deploy_woo:
+        description: 'Deploy to Woo.com'
+        required: false
+        default: true
+        type: boolean
+      deploy_github:
+        description: 'Deploy to GitHub'
+        required: false
+        default: true
+        type: boolean
+      simulate:
+        description: 'Dry run mode'
+        required: false
+        default: true
+        type: boolean
+  workflow_call:
+    inputs:
+      version:
+        description: 'Version to deploy (e.g., 2.1.21)'
+        required: true
+        type: string
+      deploy_woo:
+        description: 'Deploy to Woo.com'
+        required: false
+        default: true
+        type: boolean
+      deploy_github:
+        description: 'Deploy to GitHub'
+        required: false
+        default: true
+        type: boolean
+      simulate:
+        description: 'Dry run mode'
+        required: false
+        default: true
+        type: boolean
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout the private action repository
+      - name: Checkout woo-product-deploy action
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          repository: woocommerce/woo-product-deploy
+          ref: trunk
+          path: ./.github/actions/woo-product-deploy
+          token: ${{ secrets.ORG_DEPLOY_SECRET }}  # Need PAT with access to the action repository
+
+      # Use the action we checked out
+      - name: Deploy Product
+        uses: ./.github/actions/woo-product-deploy
+        with:
+          repo_url: https://github.com/woocommerce/woocommerce-google-analytics-integration
+          branch: ${{ github.ref_name }}
+          version: ${{ inputs.version }}
+          node_version: '20'
+          npm_version: '10'
+          simulate: ${{ inputs.simulate }}
+          wccom_release: ${{ inputs.deploy_woo }}
+          github_release: ${{ inputs.deploy_github }}
+          deploy_pat: ${{ secrets.ORG_DEPLOY_SECRET }}
+          partner_user: ${{ secrets.ORG_PARTNER_USER }}
+          partner_secret: ${{ secrets.ORG_PARTNER_DEPLOY_SECRET }}
+          wccom_product_id: 1442927

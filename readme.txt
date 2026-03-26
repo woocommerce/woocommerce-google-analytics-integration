@@ -48,6 +48,15 @@ Duplicate Google Analytics code causes a conflict in tracking. Remove any other 
 
 == Changelog ==
 
+= 2.1.22 - 2026-03-26 =
+* Dev - Add AGENTS.md and CLAUDE.md for coding agent guidelines.
+* Dev - Add Woo Deploy workflow for streamlined releases.
+* Dev - Add WooCommerce beta compatibility testing skill.
+* Dev - Add deploy workflow and release preparation via Woo Deploy.
+* Dev - Add npm scripts to run PHPUnit tests via wp-env for simpler local development.
+* Dev - Expand PHP unit test coverage for data formatting and configuration methods.
+* Update - Require WooCommerce 10.5+.
+
 = 2.1.21 - 2026-02-10 =
 * Tweak - WC 10.5 compatibility.
 * Update - Require WooCommerce 10.4+.

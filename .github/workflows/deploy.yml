@@ -7,8 +7,8 @@ on:
         description: 'Version to deploy (e.g., 2.1.21)'
         required: true
         type: string
-      deploy_woo:
-        description: 'Deploy to Woo.com'
+      deploy_wporg:
+        description: 'Deploy to WordPress.org'
         required: false
         default: true
         type: boolean
@@ -28,8 +28,8 @@ on:
         description: 'Version to deploy (e.g., 2.1.21)'
         required: true
         type: string
-      deploy_woo:
-        description: 'Deploy to Woo.com'
+      deploy_wporg:
+        description: 'Deploy to WordPress.org'
         required: false
         default: true
         type: boolean
@@ -68,9 +68,8 @@ jobs:
           node_version: '20'
           npm_version: '10'
           simulate: ${{ inputs.simulate }}
-          wccom_release: ${{ inputs.deploy_woo }}
+          wporg_release: ${{ inputs.deploy_wporg }}
           github_release: ${{ inputs.deploy_github }}
           deploy_pat: ${{ secrets.ORG_DEPLOY_SECRET }}
           partner_user: ${{ secrets.ORG_PARTNER_USER }}
           partner_secret: ${{ secrets.ORG_PARTNER_DEPLOY_SECRET }}
-          wccom_product_id: 1442927

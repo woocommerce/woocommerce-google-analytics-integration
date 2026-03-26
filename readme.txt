@@ -3,7 +3,7 @@ Contributors: woocommerce, automattic, claudiosanches, bor0, royho, laurendaviss
 Tags: woocommerce, google analytics
 Requires at least: 6.8
 Tested up to: 6.9
-Stable tag: 2.1.21
+Stable tag: 2.1.22
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -48,6 +48,15 @@ Duplicate Google Analytics code causes a conflict in tracking. Remove any other 
 
 == Changelog ==
 
+= 2.1.22 - 2026-03-26 =
+* Dev - Add AGENTS.md and CLAUDE.md for coding agent guidelines.
+* Dev - Add Woo Deploy workflow for streamlined releases.
+* Dev - Add WooCommerce beta compatibility testing skill.
+* Dev - Add deploy workflow and release preparation via Woo Deploy.
+* Dev - Add npm scripts to run PHPUnit tests via wp-env for simpler local development.
+* Dev - Expand PHP unit test coverage for data formatting and configuration methods.
+* Update - Require WooCommerce 10.5+.
+
 = 2.1.21 - 2026-02-10 =
 * Tweak - WC 10.5 compatibility.
 * Update - Require WooCommerce 10.4+.
@@ -58,9 +67,5 @@ Duplicate Google Analytics code causes a conflict in tracking. Remove any other 
 * Tweak - WordPress 6.9 compatibility.
 * Update - Require WooCommerce 10.3+.
 * Update - Require WordPress 6.8+.
-
-= 2.1.19 - 2025-10-30 =
-* Fix - Add safe script tag encoding flags to all `wp_json_encode()` calls in inline scripts.
-* Update - Require WooCommerce 10.2+.
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce-google-analytics-integration/trunk/changelog.txt).

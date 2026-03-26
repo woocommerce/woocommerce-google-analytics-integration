@@ -7,6 +7,11 @@ on:
         description: 'Version to deploy (e.g., 2.1.21)'
         required: true
         type: string
+      deploy_wporg:
+        description: 'Deploy to WordPress.org'
+        required: false
+        default: true
+        type: boolean
       deploy_woo:
         description: 'Deploy to Woo.com'
         required: false
@@ -28,6 +33,11 @@ on:
         description: 'Version to deploy (e.g., 2.1.21)'
         required: true
         type: string
+      deploy_wporg:
+        description: 'Deploy to WordPress.org'
+        required: false
+        default: true
+        type: boolean
       deploy_woo:
         description: 'Deploy to Woo.com'
         required: false
@@ -68,6 +78,7 @@ jobs:
           node_version: '20'
           npm_version: '10'
           simulate: ${{ inputs.simulate }}
+          wporg_release: ${{ inputs.deploy_wporg }}
           wccom_release: ${{ inputs.deploy_woo }}
           github_release: ${{ inputs.deploy_github }}
           deploy_pat: ${{ secrets.ORG_DEPLOY_SECRET }}

@@ -26,7 +26,8 @@
   "overrides": {
     "@babel/runtime": "^7.27.6",
     "webpack-dev-server": "^5.2.2",
-    "node-forge": "^1.4.0"
+    "node-forge": "^1.4.0",
+    "lodash": "^4.17.24"
   },
   "assets": {
     "js": {

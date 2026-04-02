@@ -27,7 +27,8 @@
     "@babel/runtime": "^7.27.6",
     "webpack-dev-server": "^5.2.2",
     "node-forge": "^1.4.0",
-    "lodash": "^4.17.24"
+    "lodash": "^4.17.24",
+    "brace-expansion": "^1.1.13"
   },
   "assets": {
     "js": {

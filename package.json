@@ -30,7 +30,11 @@
     "lodash": "^4.17.24",
     "brace-expansion": "^1.1.13",
     "@isaacs/brace-expansion": "^5.0.1",
-    "minimatch": "^3.1.4"
+    "minimatch": "^3.1.4",
+    "yaml": "^1.10.3",
+    "docker-compose": {
+      "yaml": "^2.8.3"
+    }
   },
   "assets": {
     "js": {

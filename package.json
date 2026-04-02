@@ -34,7 +34,8 @@
     "yaml": "^1.10.3",
     "docker-compose": {
       "yaml": "^2.8.3"
-    }
+    },
+    "path-to-regexp": "^0.1.13"
   },
   "assets": {
     "js": {

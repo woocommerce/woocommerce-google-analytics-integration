@@ -38,7 +38,8 @@
     "path-to-regexp": "^0.1.13",
     "@typescript-eslint/typescript-estree": {
       "minimatch": "^9.0.7"
-    }
+    },
+    "terser-webpack-plugin": "^5.3.17"
   },
   "assets": {
     "js": {

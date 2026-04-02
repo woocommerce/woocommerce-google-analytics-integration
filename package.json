@@ -35,7 +35,10 @@
     "docker-compose": {
       "yaml": "^2.8.3"
     },
-    "path-to-regexp": "^0.1.13"
+    "path-to-regexp": "^0.1.13",
+    "@typescript-eslint/typescript-estree": {
+      "minimatch": "^9.0.7"
+    }
   },
   "assets": {
     "js": {

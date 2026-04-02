@@ -16,9 +16,9 @@
     "@playwright/test": "^1.56.1",
     "@wordpress/env": "^10.26.0",
     "@wordpress/eslint-plugin": "^19.0.1",
-    "@wordpress/scripts": "^31.6.0",
+    "@wordpress/scripts": "^31.8.0",
     "@wordpress/url": "^4.26.0",
-    "axios": "^1.12.2",
+    "axios": "^1.14.0",
     "eslint": "^8.3.0",
     "node-wp-i18n": "~1.2.8",
     "prettier": "npm:wp-prettier@^3.0.3"
@@ -26,7 +26,20 @@
   "overrides": {
     "@babel/runtime": "^7.27.6",
     "webpack-dev-server": "^5.2.2",
-    "node-forge": "^1.4.0"
+    "node-forge": "^1.4.0",
+    "lodash": "^4.17.24",
+    "brace-expansion": "^1.1.13",
+    "@isaacs/brace-expansion": "^5.0.1",
+    "minimatch": "^3.1.4",
+    "yaml": "^1.10.3",
+    "docker-compose": {
+      "yaml": "^2.8.3"
+    },
+    "path-to-regexp": "^0.1.13",
+    "@typescript-eslint/typescript-estree": {
+      "minimatch": "^9.0.7"
+    },
+    "terser-webpack-plugin": "^5.3.17"
   },
   "assets": {
     "js": {

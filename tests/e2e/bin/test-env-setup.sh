@@ -26,5 +26,10 @@ wp-env run tests-cli wp option update blogname 'WooCommerce E2E Test Suite'
 echo -e 'Adding basic WooCommerce settings... \n'
 wp-env run tests-cli wp wc payment_gateway update cod --enabled=1 --user=admin
 
+echo -e 'Disable default shipping methods \n'
+wp-env run tests-cli wp wc shipping_zone_method list 0 --field=instance_id --user=admin | while read -r id; do
+	wp-env run tests-cli wp wc shipping_zone_method delete 0 "$id" --force --user=admin
+done
+
 echo -e 'Set the store as live \n'
 wp-env run tests-cli wp option update woocommerce_coming_soon 'no'

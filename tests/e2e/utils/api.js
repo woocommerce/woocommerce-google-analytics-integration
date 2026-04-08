@@ -52,9 +52,9 @@ export async function createVariableProduct() {
 		.post( 'products', config.products.variable )
 		.then( ( response ) => response.data.id );
 
-	config.products.variations.map( async ( variation ) => {
+	for ( const variation of config.products.variations ) {
 		await api().post( `products/${ parentID }/variations`, variation );
-	} );
+	}
 
 	return parentID;
 }

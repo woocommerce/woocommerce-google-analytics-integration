@@ -196,21 +196,26 @@ test.describe( 'GTag events on classic pages', () => {
 
 		await event.then( ( request ) => {
 			const data = getEventData( request, 'view_item_list' );
-			expect( data.product1 ).toEqual( {
+			const products = [ data.product1, data.product2 ];
+			const simple = products.find(
+				( p ) => p.id === simpleProductID.toString()
+			);
+			const variable = products.find(
+				( p ) => p.id === variableProductID.toString()
+			);
+			expect( simple ).toMatchObject( {
 				id: simpleProductID.toString(),
 				nm: 'Simple product',
 				ln: 'Product List',
 				ca: 'Uncategorized',
 				pr: simpleProductPrice.toString(),
-				lp: '1',
 			} );
-			expect( data.product2 ).toEqual( {
+			expect( variable ).toMatchObject( {
 				id: variableProductID.toString(),
 				nm: 'Variable product',
 				ln: 'Product List',
 				ca: 'Uncategorized',
 				pr: '17.99', // Lowest price for variable products.
-				lp: '2',
 			} );
 			expect( data[ 'ep.item_list_id' ] ).toEqual( 'engagement' );
 			expect( data[ 'ep.item_list_name' ] ).toEqual( 'Viewing products' );

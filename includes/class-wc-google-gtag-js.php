@@ -53,13 +53,13 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 
 		$this->register_scripts();
 		// Setup frontend scripts
-		add_action( 'wp_enqueue_scripts', array( $this, 'enquque_tracker' ), 5 );
+		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_tracker' ), 5 );
 		add_action( 'wp_footer', array( $this, 'inline_script_data' ) );
 	}
 
 	/**
 	 * Register manager and tracker scripts.
-	 * Call early so other extensions could add inline date to it.
+	 * Call early so other extensions could add inline data to it.
 	 *
 	 * @return void
 	 */
@@ -128,11 +128,19 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 	 *
 	 * @return void
 	 */
-	public function enquque_tracker(): void {
+	public function enqueue_tracker(): void {
 		wp_enqueue_script( 'google-tag-manager' );
-		// tracker.js needs to be executed ASAP, the remaining bits for main.js could be deffered,
+		// tracker.js needs to be executed ASAP, the remaining bits for main.js could be deferred,
 		// but to reduce the traffic, we ship it all together.
 		wp_enqueue_script( $this->script_handle );
+	}
+
+	/**
+	 * @deprecated 2.2.0 Use enqueue_tracker() instead.
+	 */
+	public function enquque_tracker(): void {
+		_deprecated_function( __METHOD__, '2.2.0', 'WC_Google_Gtag_JS::enqueue_tracker' );
+		$this->enqueue_tracker();
 	}
 
 	/**

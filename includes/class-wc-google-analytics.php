@@ -38,6 +38,17 @@ class WC_Google_Analytics extends WC_Integration {
 		$this->init_form_fields();
 		$this->init_settings();
 
+		// Backfill any settings keys not yet stored in the database.
+		// On a fresh activation, maybe_set_defaults() writes a partial settings array before
+		// init_settings() runs. WC_Integration::init_settings() only applies defaults when no
+		// settings exist at all, so keys missing from a partial array would be absent from
+		// $this->settings. We fill them in here using the same fallback logic as get_option().
+		foreach ( $this->get_form_fields() as $key => $field ) {
+			if ( ! array_key_exists( $key, $this->settings ) ) {
+				$this->settings[ $key ] = $this->get_field_default( $field );
+			}
+		}
+
 		add_action( 'admin_notices', array( $this, 'universal_analytics_upgrade_notice' ) );
 
 		include_once 'class-wc-abstract-google-analytics-js.php';

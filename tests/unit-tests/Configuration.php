@@ -373,6 +373,48 @@ class Configuration extends EventsDataTest {
 	}
 
 	/**
+	 * Test that $this->settings is fully populated when the database contains only the partial
+	 * defaults written by maybe_set_defaults() on a fresh activation.
+	 *
+	 * @return void
+	 */
+	public function test_settings_are_complete_after_partial_activation_defaults() {
+		// Simulate what maybe_set_defaults() writes on a fresh install.
+		update_option( 'woocommerce_google_analytics_settings', [ 'ga_product_identifier' => 'product_id' ] );
+
+		$ga = new WC_Google_Analytics();
+
+		$reflection = new \ReflectionProperty( WC_Google_Analytics::class, 'settings' );
+		$reflection->setAccessible( true );
+		$settings = $reflection->getValue( $ga );
+
+		$expected_keys = [
+			'ga_product_identifier',
+			'ga_id',
+			'ga_support_display_advertising',
+			'ga_404_tracking_enabled',
+			'ga_linker_allow_incoming_enabled',
+			'ga_ecommerce_tracking_enabled',
+			'ga_event_tracking_enabled',
+			'ga_enhanced_remove_from_cart_enabled',
+			'ga_enhanced_product_impression_enabled',
+			'ga_enhanced_product_click_enabled',
+			'ga_enhanced_product_detail_view_enabled',
+			'ga_enhanced_checkout_process_enabled',
+			'ga_linker_cross_domains',
+		];
+
+		foreach ( $expected_keys as $key ) {
+			$this->assertArrayHasKey( $key, $settings, "Expected '{$key}' to be present in settings after construction with partial defaults." );
+		}
+
+		// The value set by maybe_set_defaults() should be preserved, not overwritten.
+		$this->assertEquals( 'product_id', $settings['ga_product_identifier'] );
+
+		delete_option( 'woocommerce_google_analytics_settings' );
+	}
+
+	/**
 	 * Call a protected or private method via reflection.
 	 *
 	 * @param mixed  $instance    The object instance to call the method on.

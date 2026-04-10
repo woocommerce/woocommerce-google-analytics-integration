@@ -163,12 +163,12 @@ class WCGoogleGtagJS extends EventsDataTest {
 	 * Test that the deprecated enquque_tracker() method delegates to enqueue_tracker()
 	 * and triggers a deprecation notice.
 	 *
+	 * @expectedDeprecated WC_Google_Gtag_JS::enquque_tracker
+	 *
 	 * @return void
 	 */
 	public function test_enquque_tracker_deprecation(): void {
 		$gtag = new WC_Google_Gtag_JS();
-
-		$this->setExpectedDeprecated( 'WC_Google_Gtag_JS::enquque_tracker' );
 
 		$gtag->enquque_tracker();
 

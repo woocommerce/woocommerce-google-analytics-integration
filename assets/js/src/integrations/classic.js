@@ -20,10 +20,19 @@ import { getProductFromID } from '../utils';
  * @param {Object}   data.product       - The single product object.
  * @param {Object}   data.added_to_cart - The product added to cart.
  * @param {Object}   data.order         - The order object.
+ * @param {string}   data.list_name     - The name of the product list for the current page context.
  */
 export function classicTracking(
 	getEventHandler,
-	{ events, cart, products, product, added_to_cart: addedToCart, order }
+	{
+		events,
+		cart,
+		products,
+		product,
+		added_to_cart: addedToCart,
+		order,
+		list_name: listName,
+	}
 ) {
 	// Instantly track the events listed in the `events` object.
 	Object.values( events ?? {} ).forEach( ( eventName ) => {
@@ -35,6 +44,7 @@ export function classicTracking(
 				products,
 				product,
 				order,
+				listName,
 			} );
 		}
 	} );

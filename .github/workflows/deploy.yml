@@ -76,7 +76,7 @@ jobs:
           branch: ${{ github.ref_name }}
           version: ${{ inputs.version }}
           node_version: '20'
-          npm_version: '10'
+          npm_version: '11'
           simulate: ${{ inputs.simulate }}
           wporg_release: ${{ inputs.deploy_wporg }}
           wccom_release: ${{ inputs.deploy_woo }}

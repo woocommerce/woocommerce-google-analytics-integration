@@ -31,6 +31,13 @@ jobs:
         uses: woocommerce/grow/prepare-node@actions-v2
         with:
           node-version-file: ".nvmrc"
+          install-deps: "no"
+
+      - name: Upgrade npm
+        run: npm install -g npm@11
+
+      - name: Install dependencies
+        run: npm ci --ignore-scripts
 
       - name: Prepare annotation formatter
         uses: woocommerce/grow/eslint-annotation@actions-v2

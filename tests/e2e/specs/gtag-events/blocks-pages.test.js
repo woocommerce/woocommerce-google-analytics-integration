@@ -382,8 +382,12 @@ test.describe( 'GTag events on block pages', () => {
 				pr: simpleProductPrice.toString(),
 				lp: '1',
 			} );
-			expect( data[ 'ep.item_list_id' ] ).toEqual( 'woocommerce_all_products' );
-			expect( data[ 'ep.item_list_name' ] ).toEqual( 'woocommerce/all-products' );
+			expect( data[ 'ep.item_list_id' ] ).toEqual(
+				'woocommerce_all_products'
+			);
+			expect( data[ 'ep.item_list_name' ] ).toEqual(
+				'woocommerce/all-products'
+			);
 		} );
 	} );
 

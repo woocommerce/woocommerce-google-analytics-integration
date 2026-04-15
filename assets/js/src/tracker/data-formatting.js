@@ -25,11 +25,11 @@ export const view_item_list = ( {
 	}
 
 	return {
-		item_list_id: 'engagement',
-		item_list_name: __(
-			'Viewing products',
-			'woocommerce-google-analytics-integration'
-		),
+		item_list_id: listName
+			.toLowerCase()
+			.replace( /[^a-z0-9]+/g, '_' )
+			.replace( /(^_+|_+$)/g, '' ),
+		item_list_name: listName,
 		items: products.map( ( product, index ) => ( {
 			...getProductImpressionObject( product, listName ),
 			index: index + 1,

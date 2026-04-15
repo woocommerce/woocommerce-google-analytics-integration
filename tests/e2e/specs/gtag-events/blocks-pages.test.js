@@ -79,8 +79,8 @@ test.describe( 'GTag events on block pages', () => {
 				pr: simpleProductPrice.toString(),
 				lp: '1',
 			} );
-			expect( data[ 'ep.item_list_id' ] ).toEqual( 'engagement' );
-			expect( data[ 'ep.item_list_name' ] ).toEqual( 'Viewing products' );
+			expect( data[ 'ep.item_list_id' ] ).toEqual( 'product_list' );
+			expect( data[ 'ep.item_list_name' ] ).toEqual( 'Product List' );
 		} );
 	} );
 
@@ -253,8 +253,8 @@ test.describe( 'GTag events on block pages', () => {
 				pr: simpleProductPrice.toString(),
 				lp: '1',
 			} );
-			expect( data[ 'ep.item_list_id' ] ).toEqual( 'engagement' );
-			expect( data[ 'ep.item_list_name' ] ).toEqual( 'Viewing products' );
+			expect( data[ 'ep.item_list_id' ] ).toEqual( 'product_list' );
+			expect( data[ 'ep.item_list_name' ] ).toEqual( 'Product List' );
 		} );
 	} );
 
@@ -333,8 +333,8 @@ test.describe( 'GTag events on block pages', () => {
 				pr: simpleProductPrice.toString(),
 				lp: '1',
 			} );
-			expect( data[ 'ep.item_list_id' ] ).toEqual( 'engagement' );
-			expect( data[ 'ep.item_list_name' ] ).toEqual( 'Viewing products' );
+			expect( data[ 'ep.item_list_id' ] ).toEqual( 'product_list' );
+			expect( data[ 'ep.item_list_name' ] ).toEqual( 'Product List' );
 		} );
 	} );
 
@@ -382,8 +382,12 @@ test.describe( 'GTag events on block pages', () => {
 				pr: simpleProductPrice.toString(),
 				lp: '1',
 			} );
-			expect( data[ 'ep.item_list_id' ] ).toEqual( 'engagement' );
-			expect( data[ 'ep.item_list_name' ] ).toEqual( 'Viewing products' );
+			expect( data[ 'ep.item_list_id' ] ).toEqual(
+				'woocommerce_all_products'
+			);
+			expect( data[ 'ep.item_list_name' ] ).toEqual(
+				'woocommerce/all-products'
+			);
 		} );
 	} );
 

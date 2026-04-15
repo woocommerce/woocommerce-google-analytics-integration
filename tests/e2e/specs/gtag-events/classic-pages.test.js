@@ -217,8 +217,8 @@ test.describe( 'GTag events on classic pages', () => {
 				ca: 'Uncategorized',
 				pr: '17.99', // Lowest price for variable products.
 			} );
-			expect( data[ 'ep.item_list_id' ] ).toEqual( 'engagement' );
-			expect( data[ 'ep.item_list_name' ] ).toEqual( 'Viewing products' );
+			expect( data[ 'ep.item_list_id' ] ).toEqual( 'product_list' );
+			expect( data[ 'ep.item_list_name' ] ).toEqual( 'Product List' );
 		} );
 	} );
 

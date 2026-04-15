@@ -86,6 +86,13 @@ abstract class WC_Abstract_Google_Analytics_JS {
 			5
 		);
 
+		add_action(
+			'wp_head',
+			function () {
+				$this->set_script_data( 'list_name', $this->get_list_name() );
+			}
+		);
+
 		add_filter(
 			'woocommerce_loop_add_to_cart_link',
 			function ( $button, $product ) {
@@ -116,6 +123,40 @@ abstract class WC_Abstract_Google_Analytics_JS {
 				}
 			}
 		);
+	}
+
+	/**
+	 * Returns the product list name for the current page context.
+	 * Used to populate item_list_name in view_item_list GA4 events for classic pages.
+	 *
+	 * @return string
+	 */
+	public function get_list_name(): string {
+		if ( is_shop() ) {
+			return __( 'Shop', 'woocommerce-google-analytics-integration' );
+		}
+
+		if ( is_product_category() ) {
+			return sprintf(
+				/* translators: %s: Product category name */
+				__( 'Category: %s', 'woocommerce-google-analytics-integration' ),
+				single_term_title( '', false )
+			);
+		}
+
+		if ( is_product_tag() ) {
+			return sprintf(
+				/* translators: %s: Product tag name */
+				__( 'Tag: %s', 'woocommerce-google-analytics-integration' ),
+				single_term_title( '', false )
+			);
+		}
+
+		if ( is_search() ) {
+			return __( 'Search Results', 'woocommerce-google-analytics-integration' );
+		}
+
+		return __( 'Product List', 'woocommerce-google-analytics-integration' );
 	}
 
 	/**

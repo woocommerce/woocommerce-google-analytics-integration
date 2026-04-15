@@ -61,11 +61,4 @@ Duplicate Google Analytics code causes a conflict in tracking. Remove any other 
 * Tweak - WC 10.5 compatibility.
 * Update - Require WooCommerce 10.4+.
 
-= 2.1.20 - 2026-01-14 =
-* Add WooCommerce 10.4+ Interactivity API Mini Cart compatibility.
-* Dev - updated vulnerable packages.
-* Tweak - WordPress 6.9 compatibility.
-* Update - Require WooCommerce 10.3+.
-* Update - Require WordPress 6.8+.
-
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce-google-analytics-integration/trunk/changelog.txt).

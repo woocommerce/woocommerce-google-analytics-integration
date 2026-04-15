@@ -1,6 +1,6 @@
 *** Changelog ***
 
-= 2.1.22 - 2026-03-26 =
+= 2.1.23 - 2026-04-15 =
 * Dev - Add AGENTS.md and CLAUDE.md for coding agent guidelines.
 * Dev - Add Woo Deploy workflow for streamlined releases.
 * Dev - Add WooCommerce beta compatibility testing skill.

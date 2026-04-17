@@ -369,6 +369,25 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 	}
 
 	/**
+	 * Returns events filtered by name.
+	 * 
+	 * @param string $event_name Name of the event to filter.
+	 * @return array
+	 */
+	public function get_events_by_name( $event_name ) {
+		$found_events = array();
+		$all_events = $this->script_data['events'];
+
+		foreach ( $all_events as $event ) {
+			if ( $event == $event_name ) {
+				$found_events[] = $event;
+			}
+		}
+
+		return $found_events;
+	}
+
+	/**
 	 * Get the class instance
 	 *
 	 * @param array $settings Settings

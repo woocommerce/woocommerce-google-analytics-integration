@@ -30,3 +30,4 @@ tests/e2e/test-results
 dist
 
 woocommerce-google-analytics-integration.zip
+.claude/settings.local.json

@@ -1,0 +1,32 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+language: en-US
+tone_instructions: 'Keep reviews concise. No filler praise or emoji. Focus on real issues only; if no issues, say so briefly.'
+
+reviews:
+  profile: chill
+  path_filters:
+    - 'includes/**/*.php'
+    - 'tests/**/*.php'
+    - 'assets/js/src/**/*.{js,jsx,ts,tsx}'
+    - 'woocommerce-google-analytics-integration.php'
+  path_instructions:
+    - path: '**/*.{php,html,js,jsx,ts,tsx}'
+      instructions: |
+        - Consider full file context before commenting; do not rely only on the diff.
+        - Use line numbers from the actual file, not from the diff.
+        - Only report issues you are certain about; if unsure, say so explicitly.
+        - Do not flag standard WordPress/WooCommerce patterns (e.g. $wpdb->posts interpolation, get_posts() with posts_per_page => -1 for bounded queries).
+        - Focus on real bugs, logic errors, security vulnerabilities, and missing edge cases — not stylistic preferences.
+        - Categorize each finding as: Bug, Security, Performance, or Suggestion.
+        - For each finding: give file path, line number, brief explanation of why it is a problem, and a concrete fix.
+        - If there are no real issues, say "No issues found"; do not invent problems to fill the review.
+  poem: false
+  in_progress_fortune: false
+  high_level_summary_instructions: "Write a brief summary listing the number of issues found and their categories (Bug, Security, Performance, Suggestion). If no issues, state 'No issues found.'"
+
+knowledge_base:
+  code_guidelines:
+    enabled: true
+    filePatterns:
+      - 'CLAUDE.md'
+      - 'AGENTS.md'

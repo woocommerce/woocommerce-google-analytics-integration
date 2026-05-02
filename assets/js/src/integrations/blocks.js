@@ -1,5 +1,9 @@
 import { removeAction } from '@wordpress/hooks';
-import { addUniqueAction, getProductFromID } from '../utils';
+import {
+	addUniqueAction,
+	getProductFromID,
+	cacheBlockProducts,
+} from '../utils';
 import { ACTION_PREFIX, NAMESPACE } from '../constants';
 
 const recentlyRemovedProducts = new Set();
@@ -1013,7 +1017,15 @@ export const blocksTracking = ( getEventHandler ) => {
 	addUniqueAction(
 		`${ ACTION_PREFIX }-product-list-render`,
 		NAMESPACE,
-		( data ) => safeTrackEvent( getEventHandler, 'view_item_list', data )
+		( data ) => {
+			// Cache block-rendered products so classic.js click handlers can look
+			// them up via getProductFromID when window.ga4w.data.products is empty
+			// (e.g. Product Collection block on the empty cart page).
+			if ( data?.products ) {
+				cacheBlockProducts( data.products );
+			}
+			safeTrackEvent( getEventHandler, 'view_item_list', data );
+		}
 	);
 
 	addUniqueAction(
@@ -1021,6 +1033,19 @@ export const blocksTracking = ( getEventHandler ) => {
 		NAMESPACE,
 		( data ) => safeTrackEvent( getEventHandler, 'select_content', data )
 	);
+
+	// Listen for the stable WooCommerce 9.4+ DOM event fired when a user clicks a
+	// product link inside a Product Collection block. The experimental
+	// product-view-link hook only fires for the All Products block; this event
+	// covers Product Collection. Product data is resolved via the block products
+	// cache populated above by product-list-render.
+	document.body.addEventListener( 'wc-blocks_viewed_product', ( event ) => {
+		const { productId } = event.detail ?? {};
+		if ( productId ) {
+			const product = getProductFromID( productId, [], null );
+			getEventHandler( 'select_content' )( { product } );
+		}
+	} );
 };
 
 /*

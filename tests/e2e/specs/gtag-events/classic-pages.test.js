@@ -15,6 +15,7 @@ import {
 import {
 	createClassicCartPage,
 	createClassicCheckoutPage,
+	createClassicEmptyCartPageWithProducts,
 	createClassicShopPage,
 } from '../../utils/create-page';
 import {
@@ -332,6 +333,49 @@ test.describe( 'GTag events on classic pages', () => {
 				simpleProductPrice.toString()
 			);
 			expect( data[ 'ep.payment_type' ] ).toBeTruthy();
+		} );
+	} );
+
+	test( 'View item list event is sent on empty cart page with products', async ( {
+		page,
+	} ) => {
+		await createClassicEmptyCartPageWithProducts();
+
+		const event = trackGtagEvent( page, 'view_item_list' );
+
+		// Navigate without adding any items — cart is empty.
+		await page.goto( 'classic-empty-cart-with-products?orderby=date' );
+
+		await event.then( ( request ) => {
+			const data = getEventData( request, 'view_item_list' );
+			expect( data[ 'ep.item_list_id' ] ).toEqual( 'engagement' );
+			expect( data[ 'ep.item_list_name' ] ).toEqual( 'Viewing products' );
+		} );
+	} );
+
+	test( 'Add to cart event is sent from empty cart page', async ( {
+		page,
+	} ) => {
+		await createClassicEmptyCartPageWithProducts();
+
+		const event = trackGtagEvent( page, 'add_to_cart' );
+
+		// Navigate without adding any items — cart is empty.
+		await page.goto( 'classic-empty-cart-with-products?orderby=date' );
+		const addToCart = `[data-product_id="${ simpleProductID }"]`;
+		const addToCartButton = await page.locator( addToCart ).first();
+		await addToCartButton.click();
+		await expect( addToCartButton ).toHaveClass( /added/ );
+
+		await event.then( ( request ) => {
+			const data = getEventData( request, 'add_to_cart' );
+			expect( data.product1 ).toEqual( {
+				id: simpleProductID.toString(),
+				nm: 'Simple product',
+				ca: 'Uncategorized',
+				qt: '1',
+				pr: simpleProductPrice.toString(),
+			} );
 		} );
 	} );
 

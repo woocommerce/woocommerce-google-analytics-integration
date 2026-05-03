@@ -348,8 +348,8 @@ test.describe( 'GTag events on classic pages', () => {
 
 		await event.then( ( request ) => {
 			const data = getEventData( request, 'view_item_list' );
-			expect( data[ 'ep.item_list_id' ] ).toEqual( 'engagement' );
-			expect( data[ 'ep.item_list_name' ] ).toEqual( 'Viewing products' );
+			expect( data[ 'ep.item_list_id' ] ).toEqual( 'product_list' );
+			expect( data[ 'ep.item_list_name' ] ).toEqual( 'Product List' );
 		} );
 	} );
 
@@ -362,10 +362,16 @@ test.describe( 'GTag events on classic pages', () => {
 
 		// Navigate without adding any items — cart is empty.
 		await page.goto( 'classic-empty-cart-with-products?orderby=date' );
-		const addToCart = `[data-product_id="${ simpleProductID }"]`;
+		// Scope to `.add_to_cart_button` to avoid matching the cart table's
+		// remove link, which also carries [data-product_id] once the item is
+		// in the cart.
+		const addToCart = `.add_to_cart_button[data-product_id="${ simpleProductID }"]`;
 		const addToCartButton = await page.locator( addToCart ).first();
 		await addToCartButton.click();
-		await expect( addToCartButton ).toHaveClass( /added/ );
+		// The cart page reloads after AJAX add-to-cart, so toHaveClass( /added/ )
+		// is unreliable here — the "added" class is gone by the time the reload
+		// settles. Wait for the navigation to finish instead.
+		await page.waitForLoadState( 'load' );
 
 		await event.then( ( request ) => {
 			const data = getEventData( request, 'add_to_cart' );

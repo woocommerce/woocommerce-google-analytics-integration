@@ -385,6 +385,34 @@ test.describe( 'GTag events on classic pages', () => {
 		} );
 	} );
 
+	test( 'Select content event is sent from empty cart page', async ( {
+		page,
+	} ) => {
+		await createClassicEmptyCartPageWithProducts();
+
+		const event = trackGtagEvent( page, 'select_content' );
+
+		// Navigate without adding any items — cart is empty.
+		await page.goto( 'classic-empty-cart-with-products?orderby=date' );
+
+		// Click the product title/image link — wc-blocks_viewed_product fires
+		// before the browser navigates away.
+		const productLink = page
+			.locator(
+				`li.post-${ simpleProductID } a.woocommerce-loop-product__link`
+			)
+			.first();
+		await Promise.all( [ event, productLink.click() ] );
+
+		await event.then( ( request ) => {
+			const data = getEventData( request, 'select_content' );
+			expect( data[ 'ep.content_type' ] ).toEqual( 'product' );
+			expect( data[ 'ep.content_id' ] ).toEqual(
+				simpleProductID.toString()
+			);
+		} );
+	} );
+
 	test( 'Purchase event is sent on order complete page', async ( {
 		page,
 	} ) => {

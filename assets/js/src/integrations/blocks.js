@@ -101,6 +101,8 @@ const wasRecentlyAdded = ( product ) =>
 		recentlyAdded.has( token )
 	);
 
+let viewedProductListenerAttached = false;
+
 /**
  * Get currency settings from our plugin's settings.
  *
@@ -1039,13 +1041,18 @@ export const blocksTracking = ( getEventHandler ) => {
 	// product-view-link hook only fires for the All Products block; this event
 	// covers Product Collection. Product data is resolved via the block products
 	// cache populated above by product-list-render.
-	document.body.addEventListener( 'wc-blocks_viewed_product', ( event ) => {
-		const { productId } = event.detail ?? {};
-		if ( productId ) {
-			const product = getProductFromID( productId, [], null );
-			getEventHandler( 'select_content' )( { product } );
-		}
-	} );
+	if ( ! viewedProductListenerAttached ) {
+		viewedProductListenerAttached = true;
+		document.body.addEventListener( 'wc-blocks_viewed_product', ( event ) => {
+			const { productId } = event.detail ?? {};
+			if ( productId ) {
+				const product = getProductFromID( productId, [], null );
+				safeTrackEvent( getEventHandler, 'select_content', {
+					product,
+				} );
+			}
+		} );
+	}
 };
 
 /*

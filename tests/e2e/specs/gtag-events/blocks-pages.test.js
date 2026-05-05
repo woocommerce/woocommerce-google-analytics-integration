@@ -74,13 +74,13 @@ test.describe( 'GTag events on block pages', () => {
 			expect( data.product1 ).toEqual( {
 				id: simpleProductID.toString(),
 				nm: 'Simple product',
-				ln: 'Product List',
+				ln: 'Shop',
 				ca: 'Uncategorized',
 				pr: simpleProductPrice.toString(),
 				lp: '1',
 			} );
-			expect( data[ 'ep.item_list_id' ] ).toEqual( 'product_list' );
-			expect( data[ 'ep.item_list_name' ] ).toEqual( 'Product List' );
+			expect( data[ 'ep.item_list_id' ] ).toEqual( 'shop' );
+			expect( data[ 'ep.item_list_name' ] ).toEqual( 'Shop' );
 		} );
 	} );
 

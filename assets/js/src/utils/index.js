@@ -14,6 +14,9 @@ const blockProductsCache = [];
  * @param {Object[]} products Array of product objects from WooCommerce Blocks.
  */
 export const cacheBlockProducts = ( products ) => {
+	if ( ! Array.isArray( products ) ) {
+		return;
+	}
 	products.forEach( ( product ) => {
 		if ( ! blockProductsCache.some( ( { id } ) => id === product.id ) ) {
 			blockProductsCache.push( product );

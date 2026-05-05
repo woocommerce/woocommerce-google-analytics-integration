@@ -37,7 +37,7 @@ test.describe( 'JavaScript file position', () => {
 
 		await event.then( ( request ) => {
 			const data = getEventData( request, 'view_item_list' );
-			expect( data[ 'ep.item_list_name' ] ).toEqual( 'Viewing products' );
+			expect( data[ 'ep.item_list_name' ] ).toEqual( 'Shop' );
 		} );
 	} );
 
@@ -56,7 +56,7 @@ test.describe( 'JavaScript file position', () => {
 
 		await event.then( ( request ) => {
 			const data = getEventData( request, 'view_item_list' );
-			expect( data[ 'ep.item_list_name' ] ).toEqual( 'Viewing products' );
+			expect( data[ 'ep.item_list_name' ] ).toEqual( 'Shop' );
 		} );
 	} );
 } );

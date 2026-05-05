@@ -350,6 +350,17 @@ test.describe( 'GTag events on classic pages', () => {
 			const data = getEventData( request, 'view_item_list' );
 			expect( data[ 'ep.item_list_id' ] ).toEqual( 'product_list' );
 			expect( data[ 'ep.item_list_name' ] ).toEqual( 'Product List' );
+			const products = [ data.product1, data.product2 ];
+			const simple = products.find(
+				( p ) => p?.id === simpleProductID.toString()
+			);
+			expect( simple ).toMatchObject( {
+				id: simpleProductID.toString(),
+				nm: 'Simple product',
+				ln: 'Product List',
+				ca: 'Uncategorized',
+				pr: simpleProductPrice.toString(),
+			} );
 		} );
 	} );
 

@@ -1,18 +1,8 @@
 import { addAction, removeAction } from '@wordpress/hooks';
 
-/**
- * Module-level cache for products rendered by WooCommerce Blocks (e.g. Product Collection block).
- * Populated by cacheBlockProducts when the product-list-render action fires.
- * Used as a fallback in getProductFromID so classic.js click handlers can track
- * events for products that weren't captured via the PHP woocommerce_loop_add_to_cart_link hook.
- */
+// Fallback for classic.js click handlers when window.ga4w.data.products is empty (e.g. empty cart page).
 const blockProductsCache = [];
 
-/**
- * Adds products to the block products cache, skipping any already present by ID.
- *
- * @param {Object[]} products Array of product objects from WooCommerce Blocks.
- */
 export const cacheBlockProducts = ( products ) => {
 	if ( ! Array.isArray( products ) ) {
 		return;

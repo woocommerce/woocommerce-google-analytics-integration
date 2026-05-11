@@ -343,7 +343,7 @@ abstract class WC_Abstract_Google_Analytics_JS {
 				'total_price'         => $this->get_formatted_price( $order->get_total() ),
 			),
 			'items'       => array_map(
-				function ( $item ) {
+				function ( WC_Order_Item_Product $item ) {
 					return array_merge(
 						$this->get_formatted_product( $item->get_product() ),
 						array(

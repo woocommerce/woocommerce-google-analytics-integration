@@ -12,7 +12,6 @@ use Automattic\WooCommerce\Admin\Features\OnboardingTasks\TaskLists;
  * Allows tracking code to be inserted into store pages.
  *
  * @class   WC_Google_Analytics
- * @extends WC_Integration
  */
 class WC_Google_Analytics extends WC_Integration {
 

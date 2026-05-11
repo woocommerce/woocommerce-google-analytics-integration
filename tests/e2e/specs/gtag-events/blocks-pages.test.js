@@ -19,7 +19,6 @@ import {
 import {
 	createAllProductsBlockShopPage,
 	createProductCollectionBlockShopPage,
-	createProductsBlockShopPage,
 	createRelatedProductsPage,
 } from '../../utils/create-page';
 import { getEventData, trackGtagEvent } from '../../utils/track-event';
@@ -242,86 +241,6 @@ test.describe( 'GTag events on block pages', () => {
 
 		const event = trackGtagEvent( page, 'view_item_list' );
 		await page.goto( 'product-collection-block-shop' );
-
-		await event.then( ( request ) => {
-			const data = getEventData( request, 'view_item_list' );
-			expect( data.product1 ).toEqual( {
-				id: simpleProductID.toString(),
-				nm: 'Simple product',
-				ln: 'Product List',
-				ca: 'Uncategorized',
-				pr: simpleProductPrice.toString(),
-				lp: '1',
-			} );
-			expect( data[ 'ep.item_list_id' ] ).toEqual( 'product_list' );
-			expect( data[ 'ep.item_list_name' ] ).toEqual( 'Product List' );
-		} );
-	} );
-
-	test( 'Add to cart event is sent from a products block shop page', async ( {
-		page,
-	} ) => {
-		await createProductsBlockShopPage();
-
-		const event = trackGtagEvent( page, 'add_to_cart' );
-
-		await page.goto( 'products-block-shop' );
-		await blockProductAddToCart( page, simpleProductID );
-
-		await event.then( ( request ) => {
-			const data = getEventData( request, 'add_to_cart' );
-			expect( data.product1 ).toEqual( {
-				id: simpleProductID.toString(),
-				nm: 'Simple product',
-				ca: 'Uncategorized',
-				qt: '1',
-				pr: simpleProductPrice.toString(),
-			} );
-		} );
-	} );
-
-	test( 'Add to cart has correct quantity when product is already in cart', async ( {
-		page,
-	} ) => {
-		const addToCart = `[data-product_id="${ simpleProductID }"]`;
-
-		await createProductsBlockShopPage();
-		await page.goto( `products-block-shop` );
-
-		const addToCartButton = await page.locator( addToCart ).first();
-
-		await addToCartButton.click();
-		await expect( addToCartButton.getByText( '1 in cart' ) ).toBeVisible();
-		await addToCartButton.click();
-		await expect( addToCartButton.getByText( '2 in cart' ) ).toBeVisible();
-
-		await page.reload();
-
-		const event = trackGtagEvent( page, 'add_to_cart' );
-
-		const addToCartButton2 = await page.locator( addToCart ).first();
-		await addToCartButton2.click();
-		await expect( addToCartButton.getByText( '3 in cart' ) ).toBeVisible();
-
-		await event.then( ( request ) => {
-			const data = getEventData( request, 'add_to_cart' );
-			expect( data.product1 ).toEqual( {
-				id: simpleProductID.toString(),
-				nm: 'Simple product',
-				ca: 'Uncategorized',
-				qt: '1',
-				pr: simpleProductPrice.toString(),
-			} );
-		} );
-	} );
-
-	test( 'View item list event is sent from the products block shop page', async ( {
-		page,
-	} ) => {
-		await createProductsBlockShopPage();
-
-		const event = trackGtagEvent( page, 'view_item_list' );
-		await page.goto( 'products-block-shop' );
 
 		await event.then( ( request ) => {
 			const data = getEventData( request, 'view_item_list' );

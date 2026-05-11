@@ -104,23 +104,6 @@ export async function createProductCollectionBlockShopPage() {
 }
 
 /**
- * Creates a shop page using the Products block.
- *
- * @return {number} Created page ID.
- */
-export async function createProductsBlockShopPage() {
-	const {
-		title,
-		pageContent,
-	} = require( './fixtures/products.fixture.json' );
-
-	return (
-		( await pageExistsByTitle( title ) ) ||
-		( await createPage( title, pageContent ) )
-	);
-}
-
-/**
  * Creates a shop page using the All Products block.
  *
  * @return {number} Created page ID.

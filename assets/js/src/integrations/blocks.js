@@ -2,11 +2,7 @@ import { removeAction } from '@wordpress/hooks';
 import { addUniqueAction, getProductFromID } from '../utils';
 import { ACTION_PREFIX, NAMESPACE } from '../constants';
 
-/*
- * Track whether the cart-remove-item hook fired recently.
- * Used to prevent duplicate remove_from_cart events.
- */
-let hookFiredRecently = false;
+const recentlyRemovedProducts = new Set();
 
 /**
  * Get currency settings from our plugin's settings.
@@ -35,6 +31,9 @@ const getCartData = () => {
 	// Fallback to static cart data from page load
 	return window.ga4w?.data?.cart;
 };
+
+const getProductDedupKey = ( product ) =>
+	product?.key ?? product?.id ?? product?.name;
 
 /**
  * Parse a price string into a numeric value using currency settings.
@@ -208,17 +207,12 @@ const trackMiniCartRemoval = ( getEventHandler ) => {
 		}
 
 		if ( product ) {
-			/*
-			 * Use setTimeout to allow the hook to fire first (if it's going to).
-			 * The hook sets hookFiredRecently=true synchronously, so by the time
-			 * this callback runs, we'll know if the hook handled it.
-			 */
+			const dedupKey = getProductDedupKey( product );
+
 			setTimeout( () => {
-				if ( ! hookFiredRecently ) {
+				if ( ! dedupKey || ! recentlyRemovedProducts.has( dedupKey ) ) {
 					getEventHandler( 'remove_from_cart' )( { product } );
 				}
-				// Reset the flag for the next removal
-				hookFiredRecently = false;
 			}, 0 );
 		}
 	} );
@@ -236,8 +230,16 @@ export const blocksTracking = ( getEventHandler ) => {
 		`${ ACTION_PREFIX }-cart-remove-item`,
 		NAMESPACE,
 		( data ) => {
-			// Mark that the hook fired to prevent duplicate events from click listener
-			hookFiredRecently = true;
+			const dedupKey = getProductDedupKey( data?.product );
+
+			if ( dedupKey ) {
+				recentlyRemovedProducts.add( dedupKey );
+				setTimeout(
+					() => recentlyRemovedProducts.delete( dedupKey ),
+					50
+				);
+			}
+
 			getEventHandler( 'remove_from_cart' )( data );
 		}
 	);

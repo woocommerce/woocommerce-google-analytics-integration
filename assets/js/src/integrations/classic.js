@@ -49,8 +49,6 @@ export function classicTracking(
 		}
 	} );
 
-	// Handle runtime cart events.
-	const oldAddedToCart = document.body.onadded_to_cart;
 	/**
 	 * Track the custom add to cart event dispatched by WooCommerce Core
 	 *
@@ -59,18 +57,12 @@ export function classicTracking(
 	 * @param {string}        cartHash  - A string representing the hash of the cart after the update.
 	 * @param {HTMLElement[]} button    - An array of HTML elements representing the add to cart button.
 	 */
-	document.body.onadded_to_cart = function (
-		e,
-		fragments,
-		cartHash,
-		button
-	) {
-		if ( typeof oldAddedToCart === 'function' ) {
-			oldAddedToCart.apply( this, arguments );
-		}
+	function handleAddedToCart( e, fragments, cartHash, button ) {
+		const buttonElement = button?.[ 0 ] ?? button;
+
 		// Get product ID from data attribute (archive pages) or value (single product pages).
 		const productID = parseInt(
-			button?.[ 0 ]?.dataset.product_id || button?.[ 0 ]?.value
+			buttonElement?.dataset.product_id || buttonElement?.value
 		);
 
 		if ( Number.isNaN( productID ) ) {
@@ -93,7 +85,20 @@ export function classicTracking(
 		}
 
 		getEventHandler( 'add_to_cart' )( { product: productToHandle } );
-	};
+	}
+
+	document.body.addEventListener( 'added_to_cart', ( event ) => {
+		const detail = Array.isArray( event.detail )
+			? event.detail
+			: [
+					event.detail?.fragments,
+					event.detail?.cartHash,
+					event.detail?.button,
+			  ];
+
+		handleAddedToCart( event, ...detail );
+	} );
+	window.jQuery?.( document.body ).on( 'added_to_cart', handleAddedToCart );
 
 	/**
 	 * Attaches click event listeners to all remove from cart links

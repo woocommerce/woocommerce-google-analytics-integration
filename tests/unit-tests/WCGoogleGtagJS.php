@@ -141,6 +141,55 @@ class WCGoogleGtagJS extends EventsDataTest {
 	}
 
 	/**
+	 * Test that product list data is capped to avoid oversized inline payloads.
+	 *
+	 * @return void
+	 */
+	public function test_product_list_data_is_limited(): void {
+		remove_all_filters( 'woocommerce_loop_add_to_cart_link' );
+
+		$gtag    = new WC_Google_Gtag_JS();
+		$product = WC_Helper_Product::create_simple_product();
+
+		for ( $i = 0; $i < 51; $i++ ) {
+			apply_filters( 'woocommerce_loop_add_to_cart_link', '', $product );
+		}
+
+		$script_data = json_decode( $gtag->get_script_data(), true );
+
+		$this->assertCount( 50, $script_data['products'] );
+	}
+
+	/**
+	 * Test that the product list data cap can be customized.
+	 *
+	 * @return void
+	 */
+	public function test_product_list_data_limit_is_filterable(): void {
+		remove_all_filters( 'woocommerce_loop_add_to_cart_link' );
+
+		add_filter(
+			'woocommerce_ga_max_product_list_items',
+			function () {
+				return 2;
+			}
+		);
+
+		$gtag    = new WC_Google_Gtag_JS();
+		$product = WC_Helper_Product::create_simple_product();
+
+		for ( $i = 0; $i < 3; $i++ ) {
+			apply_filters( 'woocommerce_loop_add_to_cart_link', '', $product );
+		}
+
+		remove_all_filters( 'woocommerce_ga_max_product_list_items' );
+
+		$script_data = json_decode( $gtag->get_script_data(), true );
+
+		$this->assertCount( 2, $script_data['products'] );
+	}
+
+	/**
 	 * Test the tracker_var filter `woocommerce_gtag_tracker_variable`
 	 *
 	 * @return void

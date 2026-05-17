@@ -93,10 +93,18 @@ abstract class WC_Abstract_Google_Analytics_JS {
 			}
 		);
 
+		$product_list_items = 0;
+
 		add_filter(
 			'woocommerce_loop_add_to_cart_link',
-			function ( $button, $product ) {
-				$this->append_script_data( 'products', $this->get_formatted_product( $product ) );
+			function ( $button, $product ) use ( &$product_list_items ) {
+				$max_product_list_items = absint( apply_filters( 'woocommerce_ga_max_product_list_items', 50 ) );
+
+				if ( $product_list_items < $max_product_list_items ) {
+					$this->append_script_data( 'products', $this->get_formatted_product( $product ) );
+					++$product_list_items;
+				}
+
 				return $button;
 			},
 			10,

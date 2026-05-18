@@ -87,6 +87,11 @@ export function classicTracking(
 		getEventHandler( 'add_to_cart' )( { product: productToHandle } );
 	}
 
+	// Behavior change vs. older versions: we no longer assign `document.body.onadded_to_cart`
+	// because that override pattern stomps on any handler set by another plugin (and is
+	// stomped by anything that runs after us). Sites that previously hooked in via
+	// `document.body.onadded_to_cart = ...` should migrate to `addEventListener` or jQuery
+	// `.on('added_to_cart', ...)` to coexist with this plugin.
 	document.body.addEventListener( 'added_to_cart', ( event ) => {
 		const detail = Array.isArray( event.detail )
 			? event.detail

@@ -108,10 +108,10 @@ class Configuration extends EventsDataTest {
 	 * @return void
 	 */
 	public function test_get_site_tag_config_linker_domains_rejects_invalid_domains() {
-		$gtag   = new WC_Google_Gtag_JS( [ 'ga_linker_cross_domains' => 'example.com, bad domain, https://example.net, sub.example.org, example, -bad.com, ok-store.co.uk' ] );
+		$gtag   = new WC_Google_Gtag_JS( [ 'ga_linker_cross_domains' => 'example.com, bad domain, https://example.net, sub.example.org, example, -bad.com, ok-store.co.uk, shop.xn--p1ai' ] );
 		$config = $gtag->get_site_tag_config();
 
-		$this->assertEquals( [ 'example.com', 'sub.example.org', 'ok-store.co.uk' ], $config['linker']['domains'] );
+		$this->assertEquals( [ 'example.com', 'sub.example.org', 'ok-store.co.uk', 'shop.xn--p1ai' ], $config['linker']['domains'] );
 	}
 
 	/**

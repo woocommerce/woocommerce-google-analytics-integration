@@ -313,8 +313,8 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 
 						// Validate the domain as ASCII RFC 1035 / RFC 1123 style. The lookahead caps the total length
 						// at the 253-character DNS limit; each label is 1-63 chars and starts/ends with alphanumerics;
-						// the TLD is 2-63 letters. Invalid entries (including XSS attempts) are silently dropped.
-						if ( preg_match( '/^(?=.{1,253}$)(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}$/i', $domain ) ) {
+						// the TLD is 2-63 ASCII chars to allow punycode domains. Invalid entries are silently dropped.
+						if ( preg_match( '/^(?=.{1,253}$)(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])$/i', $domain ) ) {
 							return esc_js( $domain );
 						}
 

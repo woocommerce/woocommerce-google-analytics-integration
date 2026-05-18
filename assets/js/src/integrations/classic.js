@@ -103,7 +103,7 @@ export function classicTracking(
 
 		handleAddedToCart( event, ...detail );
 	} );
-	window.jQuery?.( document.body ).on( 'added_to_cart', handleAddedToCart );
+	window.jQuery?.( document.body )?.on( 'added_to_cart', handleAddedToCart );
 
 	/**
 	 * Attaches click event listeners to all remove from cart links

@@ -285,13 +285,44 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 				'allow_google_signals' => 'yes' === $this->get( 'ga_support_display_advertising' ),
 				'logged_in'            => is_user_logged_in(),
 				'linker'               => array(
-					'domains'        => ! empty( $this->get( 'ga_linker_cross_domains' ) ) ? array_map( 'esc_js', explode( ',', $this->get( 'ga_linker_cross_domains' ) ) ) : array(),
+					'domains'        => $this->get_linker_domains(),
 					'allow_incoming' => 'yes' === $this->get( 'ga_linker_allow_incoming_enabled' ),
 				),
 				'custom_map'           => array(
 					'dimension1' => 'logged_in',
 				),
 			),
+		);
+	}
+
+	/**
+	 * Get validated cross-domain linker domains.
+	 *
+	 * @return array
+	 */
+	private function get_linker_domains(): array {
+		if ( empty( $this->get( 'ga_linker_cross_domains' ) ) ) {
+			return array();
+		}
+
+		return array_values(
+			array_filter(
+				array_map(
+					function ( string $domain ) {
+						$domain = trim( $domain );
+
+						// Validate the domain as ASCII RFC 1035 / RFC 1123 style. The lookahead caps the total length
+						// at the 253-character DNS limit; each label is 1-63 chars and starts/ends with alphanumerics;
+						// the TLD is 2-63 ASCII chars to allow punycode domains. Invalid entries are silently dropped.
+						if ( preg_match( '/^(?=.{1,253}$)(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])$/i', $domain ) ) {
+							return esc_js( $domain );
+						}
+
+						return null;
+					},
+					explode( ',', $this->get( 'ga_linker_cross_domains' ) )
+				)
+			)
 		);
 	}
 

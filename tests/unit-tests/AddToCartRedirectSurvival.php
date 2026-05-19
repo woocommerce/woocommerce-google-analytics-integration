@@ -23,6 +23,11 @@ class AddToCartRedirectSurvival extends EventsDataTest {
 	/** @var WC_Google_Gtag_JS */
 	private $gtag;
 
+	/**
+	 * Set up the gtag instance and ensure a clean WC session for each test.
+	 *
+	 * @return void
+	 */
 	public function set_up() {
 		parent::set_up();
 		$this->gtag = new WC_Google_Gtag_JS( [ 'ga_product_identifier' => 'product_id' ] );
@@ -35,6 +40,11 @@ class AddToCartRedirectSurvival extends EventsDataTest {
 		}
 	}
 
+	/**
+	 * Drop any pending session entry so it doesn't leak into the next test.
+	 *
+	 * @return void
+	 */
 	public function tear_down() {
 		if ( WC()->session ) {
 			WC()->session->__unset( '_ga_pending_added_to_cart' );
@@ -96,7 +106,10 @@ class AddToCartRedirectSurvival extends EventsDataTest {
 			'id'         => 999,
 			'name'       => 'Test Product',
 			'categories' => [],
-			'prices'     => [ 'price' => 1999, 'currency_minor_unit' => 2 ],
+			'prices'     => [
+				'price'               => 1999,
+				'currency_minor_unit' => 2,
+			],
 			'extensions' => [],
 			'quantity'   => 1,
 		];

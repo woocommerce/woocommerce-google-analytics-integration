@@ -23,6 +23,12 @@ abstract class WC_Abstract_Google_Analytics_JS {
 	/** @var string Developer ID */
 	public const DEVELOPER_ID = 'dOGY3NW';
 
+	/** @var string WC session key used to carry add_to_cart event data across an add-to-cart redirect. */
+	protected const PENDING_ADDED_TO_CART_SESSION_KEY = '_ga_pending_added_to_cart';
+
+	/** @var array|null Formatted product data captured during the current request's woocommerce_add_to_cart action. */
+	protected $pending_added_to_cart = null;
+
 	/**
 	 * Constructor
 	 * To be called from child classes to setup event data
@@ -77,14 +83,14 @@ abstract class WC_Abstract_Google_Analytics_JS {
 			}
 		);
 
-		add_action(
-			'woocommerce_add_to_cart',
-			function ( $cart_item_key, $product_id, $quantity, $variation_id, $variation ) {
-				$this->set_script_data( 'added_to_cart', $this->get_formatted_product( wc_get_product( $product_id ), $variation_id, $variation, $quantity ) );
-			},
-			10,
-			5
-		);
+		add_action( 'woocommerce_add_to_cart', array( $this, 'capture_added_to_cart' ), 10, 5 );
+
+		// When WC redirects after a successful classic add-to-cart, in-memory script data is lost before render.
+		// Stash the formatted product in the WC session so the next request can re-emit it. Issue #427 / STORMA-42.
+		add_filter( 'woocommerce_add_to_cart_redirect', array( $this, 'persist_added_to_cart_for_redirect' ) );
+
+		// On the redirected page, restore the captured event data and mark add_to_cart for firing.
+		add_action( 'wp_head', array( $this, 'restore_added_to_cart_from_session' ), 1 );
 
 		add_action(
 			'wp_head',
@@ -329,6 +335,60 @@ abstract class WC_Abstract_Google_Analytics_JS {
 		}
 
 		return $formatted;
+	}
+
+	/**
+	 * Capture the product added to the cart so it can either be rendered now
+	 * (no redirect) or persisted into the WC session (if WC will redirect).
+	 *
+	 * @param string     $cart_item_key Cart item key.
+	 * @param int        $product_id    Product ID being added.
+	 * @param int|string $quantity      Quantity added.
+	 * @param int        $variation_id  Variation ID (0 if not a variation).
+	 * @param array      $variation     Variation attributes.
+	 *
+	 * @return void
+	 */
+	public function capture_added_to_cart( $cart_item_key, $product_id, $quantity, $variation_id, $variation ): void {
+		$formatted = $this->get_formatted_product( wc_get_product( $product_id ), $variation_id, $variation, $quantity );
+		$this->set_script_data( 'added_to_cart', $formatted );
+		$this->pending_added_to_cart = $formatted;
+	}
+
+	/**
+	 * Persist the captured `added_to_cart` payload into the WC session immediately
+	 * before WC issues an add-to-cart redirect. The next page request will pick it
+	 * up via `restore_added_to_cart_from_session()` and fire the event.
+	 *
+	 * @param string $url Redirect URL (returned unchanged).
+	 *
+	 * @return string
+	 */
+	public function persist_added_to_cart_for_redirect( $url ) {
+		if ( $this->pending_added_to_cart && WC()->session ) {
+			WC()->session->set( self::PENDING_ADDED_TO_CART_SESSION_KEY, $this->pending_added_to_cart );
+		}
+		return $url;
+	}
+
+	/**
+	 * Restore an `added_to_cart` payload that was stashed before a redirect,
+	 * append `add_to_cart` to the events array, and consume the session key
+	 * so the event only fires once.
+	 *
+	 * @return void
+	 */
+	public function restore_added_to_cart_from_session(): void {
+		if ( ! WC()->session ) {
+			return;
+		}
+		$pending = WC()->session->get( self::PENDING_ADDED_TO_CART_SESSION_KEY );
+		if ( ! $pending ) {
+			return;
+		}
+		$this->set_script_data( 'added_to_cart', $pending );
+		$this->append_script_data( 'events', 'add_to_cart' );
+		WC()->session->__unset( self::PENDING_ADDED_TO_CART_SESSION_KEY );
 	}
 
 	/**

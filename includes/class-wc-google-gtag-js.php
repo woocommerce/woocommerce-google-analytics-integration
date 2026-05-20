@@ -301,7 +301,17 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 	 * @return array
 	 */
 	private function get_linker_domains(): array {
-		if ( empty( $this->get( 'ga_linker_cross_domains' ) ) ) {
+		return self::parse_linker_domains( (string) $this->get( 'ga_linker_cross_domains' ) );
+	}
+
+	/**
+	 * Get validated cross-domain linker domains from a comma-separated setting.
+	 *
+	 * @param string $domains Comma-separated domains.
+	 * @return array
+	 */
+	public static function parse_linker_domains( string $domains ): array {
+		if ( empty( $domains ) ) {
 			return array();
 		}
 
@@ -315,12 +325,12 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 						// at the 253-character DNS limit; each label is 1-63 chars and starts/ends with alphanumerics;
 						// the TLD is 2-63 ASCII chars to allow punycode domains. Invalid entries are silently dropped.
 						if ( preg_match( '/^(?=.{1,253}$)(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])$/i', $domain ) ) {
-							return esc_js( $domain );
+							return strtolower( $domain );
 						}
 
 						return null;
 					},
-					explode( ',', $this->get( 'ga_linker_cross_domains' ) )
+					explode( ',', $domains )
 				)
 			)
 		);
@@ -331,9 +341,8 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 	 *
 	 * @return array
 	 */
-	public static function get_enabled_events(): array {
-		$events   = array();
-		$settings = array(
+	public static function get_event_settings_map(): array {
+		return array(
 			'purchase'         => 'ga_ecommerce_tracking_enabled',
 			'add_to_cart'      => 'ga_event_tracking_enabled',
 			'remove_from_cart' => 'ga_enhanced_remove_from_cart_enabled',
@@ -342,14 +351,33 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 			'view_item'        => 'ga_enhanced_product_detail_view_enabled',
 			'begin_checkout'   => 'ga_enhanced_checkout_process_enabled',
 		);
+	}
 
-		foreach ( $settings as $event => $setting_name ) {
-			if ( 'yes' === self::get( $setting_name ) ) {
+	/**
+	 * Get an array containing enabled event names for a settings array.
+	 *
+	 * @param array $settings Analytics settings.
+	 * @return array
+	 */
+	public static function get_enabled_events_from_settings( array $settings ): array {
+		$events = array();
+
+		foreach ( self::get_event_settings_map() as $event => $setting_name ) {
+			if ( 'yes' === ( $settings[ $setting_name ] ?? null ) ) {
 				$events[] = $event;
 			}
 		}
 
 		return $events;
+	}
+
+	/**
+	 * Get an array containing the names of all enabled events.
+	 *
+	 * @return array
+	 */
+	public static function get_enabled_events(): array {
+		return self::get_enabled_events_from_settings( (array) self::$settings );
 	}
 
 	/**

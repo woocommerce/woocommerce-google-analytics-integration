@@ -76,6 +76,8 @@ if ( ! class_exists( 'WC_Google_Analytics_Integration' ) ) {
 			// Checks which WooCommerce is installed.
 			if ( class_exists( 'WC_Integration' ) && defined( 'WOOCOMMERCE_VERSION' ) && version_compare( WOOCOMMERCE_VERSION, WC_GOOGLE_ANALYTICS_INTEGRATION_MIN_WC_VER, '>=' ) ) {
 				include_once 'includes/class-wc-google-analytics.php';
+				include_once 'includes/class-wc-google-analytics-abilities.php';
+				WC_Google_Analytics_Abilities::init();
 
 				// Register the integration.
 				add_filter( 'woocommerce_integrations', array( $this, 'add_integration' ) );

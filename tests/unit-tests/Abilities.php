@@ -130,6 +130,19 @@ class Abilities extends WP_UnitTestCase {
 		$this->assertArrayNotHasKey( 'expose_in_deprecated_woocommerce_mcp', $meta );
 		$this->assertSame( array(), $ability->get_input_schema() );
 		$this->assertFalse( $ability->get_output_schema()['additionalProperties'] );
+		$this->assertSame( array( 'allow_incoming', 'domains' ), $ability->get_output_schema()['properties']['linker']['required'] );
+		$this->assertSame(
+			array(
+				'purchase',
+				'add_to_cart',
+				'remove_from_cart',
+				'view_item_list',
+				'select_content',
+				'view_item',
+				'begin_checkout',
+			),
+			$ability->get_output_schema()['properties']['event_tracking']['required']
+		);
 	}
 
 	/**

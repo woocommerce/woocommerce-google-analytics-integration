@@ -7,6 +7,10 @@ defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Abilities\AbilityDefinition;
 
+if ( ! interface_exists( AbilityDefinition::class ) ) {
+	return;
+}
+
 /**
  * Registers the read-only Google Analytics tracking settings ability.
  */
@@ -148,11 +152,13 @@ class WC_Google_Analytics_Get_Tracking_Settings_Ability implements AbilityDefini
 							),
 						),
 					),
+					'required'             => array( 'allow_incoming', 'domains' ),
 					'additionalProperties' => false,
 				),
 				'event_tracking'              => array(
 					'type'                 => 'object',
 					'properties'           => self::get_event_tracking_schema_properties(),
+					'required'             => self::get_event_names(),
 					'additionalProperties' => false,
 				),
 				'enabled_events'              => array(

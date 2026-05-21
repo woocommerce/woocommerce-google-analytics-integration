@@ -65,7 +65,9 @@ class WC_Google_Analytics_Get_Tracking_Settings_Ability implements AbilityDefini
 			return $integration;
 		}
 
-		return $integration->get_tracking_settings_for_ability();
+		$service = new WC_Google_Analytics_Tracking_Settings_Service( $integration );
+
+		return $service->get_tracking_settings();
 	}
 
 	/**

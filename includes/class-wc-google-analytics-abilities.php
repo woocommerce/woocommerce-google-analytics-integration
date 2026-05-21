@@ -20,6 +20,7 @@ class WC_Google_Analytics_Abilities {
 			return;
 		}
 
+		require_once __DIR__ . '/class-wc-google-analytics-tracking-settings-service.php';
 		require_once __DIR__ . '/abilities/class-wc-google-analytics-get-tracking-settings-ability.php';
 
 		add_filter( 'woocommerce_ability_definition_classes', array( __CLASS__, 'add_ability_definition_classes' ) );

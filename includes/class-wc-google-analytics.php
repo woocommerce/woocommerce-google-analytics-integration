@@ -320,7 +320,7 @@ class WC_Google_Analytics extends WC_Integration {
 		$measurement_id = (string) $this->get_option( 'ga_id' );
 		$event_tracking = array();
 
-		foreach ( WC_Google_Gtag_JS::get_event_settings_map() as $event_name => $setting_name ) {
+		foreach ( self::get_event_settings_map() as $event_name => $setting_name ) {
 			$event_tracking[ $event_name ] = $this->is_setting_enabled( $setting_name );
 		}
 
@@ -333,11 +333,76 @@ class WC_Google_Analytics extends WC_Integration {
 			'track_404_enabled'           => $this->is_setting_enabled( 'ga_404_tracking_enabled' ),
 			'linker'                      => array(
 				'allow_incoming' => $this->is_setting_enabled( 'ga_linker_allow_incoming_enabled' ),
-				'domains'        => WC_Google_Gtag_JS::parse_linker_domains( (string) $this->get_option( 'ga_linker_cross_domains' ) ),
+				'domains'        => self::parse_linker_domains_for_ability( (string) $this->get_option( 'ga_linker_cross_domains' ) ),
 			),
 			'event_tracking'              => $event_tracking,
-			'enabled_events'              => WC_Google_Gtag_JS::get_enabled_events_from_settings( $this->settings ),
+			'enabled_events'              => self::get_enabled_events_from_settings( $this->settings ),
 			'plugin_version'              => WC_GOOGLE_ANALYTICS_INTEGRATION_VERSION,
+		);
+	}
+
+	/**
+	 * Get the event setting map for the ability projection.
+	 *
+	 * @return array
+	 */
+	private static function get_event_settings_map(): array {
+		return array(
+			'purchase'         => 'ga_ecommerce_tracking_enabled',
+			'add_to_cart'      => 'ga_event_tracking_enabled',
+			'remove_from_cart' => 'ga_enhanced_remove_from_cart_enabled',
+			'view_item_list'   => 'ga_enhanced_product_impression_enabled',
+			'select_content'   => 'ga_enhanced_product_click_enabled',
+			'view_item'        => 'ga_enhanced_product_detail_view_enabled',
+			'begin_checkout'   => 'ga_enhanced_checkout_process_enabled',
+		);
+	}
+
+	/**
+	 * Get enabled event names for the provided settings.
+	 *
+	 * @param array $settings Analytics settings.
+	 * @return array
+	 */
+	private static function get_enabled_events_from_settings( array $settings ): array {
+		$events = array();
+
+		foreach ( self::get_event_settings_map() as $event => $setting_name ) {
+			if ( 'yes' === ( $settings[ $setting_name ] ?? null ) ) {
+				$events[] = $event;
+			}
+		}
+
+		return $events;
+	}
+
+	/**
+	 * Parse linker domains for ability output without changing storefront gtag serialization.
+	 *
+	 * @param string $domains Comma-separated domains.
+	 * @return array
+	 */
+	private static function parse_linker_domains_for_ability( string $domains ): array {
+		if ( empty( $domains ) ) {
+			return array();
+		}
+
+		return array_values(
+			array_filter(
+				array_map(
+					static function ( string $domain ) {
+						$domain = trim( $domain );
+
+						// Keep the same domain validation as the storefront gtag path, but return API data instead of JS-escaped data.
+						if ( preg_match( '/^(?=.{1,253}$)(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])$/i', $domain ) ) {
+							return strtolower( $domain );
+						}
+
+						return null;
+					},
+					explode( ',', $domains )
+				)
+			)
 		);
 	}
 

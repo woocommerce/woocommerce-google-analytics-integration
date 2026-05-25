@@ -18,18 +18,22 @@
     "@wordpress/eslint-plugin": "^19.0.1",
     "@wordpress/scripts": "^31.8.0",
     "@wordpress/url": "^4.26.0",
-    "axios": "^1.15.0",
+    "axios": "^1.15.2",
     "eslint": "^8.3.0",
     "node-wp-i18n": "~1.2.8",
     "prettier": "npm:wp-prettier@^3.0.3"
   },
   "overrides": {
     "@babel/runtime": "^7.27.6",
-    "webpack-dev-server": "^5.2.2",
-    "node-forge": "^1.4.0",
+    "webpack-dev-server": "^5.2.4",
     "lodash": "^4.17.24",
+    "qs": "^6.15.2",
+    "socks": {
+      ".": "2.8.9",
+      "ip-address": "10.1.1"
+    },
+    "uuid": "11.1.1",
     "brace-expansion": "^1.1.13",
-    "@isaacs/brace-expansion": "^5.0.1",
     "minimatch": "^3.1.4",
     "yaml": "^1.10.3",
     "docker-compose": {

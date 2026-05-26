@@ -8,9 +8,9 @@
  * Version: 2.1.23
  * WC requires at least: 10.6
  * WC tested up to: 10.7
- * Requires at least: 6.8
+ * Requires at least: 6.9
  * Requires Plugins: woocommerce
- * Tested up to: 6.9
+ * Tested up to: 7.0
  * Requires PHP: 7.4
  * License: GPLv3
  * License URI: https://www.gnu.org/licenses/gpl-3.0.html

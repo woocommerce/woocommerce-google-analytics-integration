@@ -7,7 +7,7 @@
  * Author URI: https://woocommerce.com
  * Version: 2.1.23
  * WC requires at least: 10.6
- * WC tested up to: 10.7
+ * WC tested up to: 10.8
  * Requires at least: 6.9
  * Requires Plugins: woocommerce
  * Tested up to: 7.0

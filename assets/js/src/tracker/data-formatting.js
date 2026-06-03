@@ -63,13 +63,11 @@ export const remove_from_cart = ( { product, quantity = 1 } ) => {
 	};
 };
 
-/**
- * Formats data for the begin_checkout event
- *
- * @param {Object} params           The function params
- * @param {Object} params.storeCart The cart object
- */
-export const begin_checkout = ( { storeCart } ) => {
+const getCheckoutData = ( storeCart ) => {
+	if ( ! storeCart?.items?.length ) {
+		return false;
+	}
+
 	return {
 		currency: storeCart.totals.currency_code,
 		value: formatPrice(
@@ -79,6 +77,52 @@ export const begin_checkout = ( { storeCart } ) => {
 		...getCartCoupon( storeCart ),
 		items: storeCart.items.map( getProductFieldObject ),
 	};
+};
+
+/**
+ * Formats data for the begin_checkout event
+ *
+ * @param {Object} params           The function params
+ * @param {Object} params.storeCart The cart object
+ */
+export const begin_checkout = ( { storeCart } ) => {
+	return getCheckoutData( storeCart );
+};
+
+/**
+ * Formats data for the add_shipping_info event
+ *
+ * @param {Object} params              The function params
+ * @param {Object} params.storeCart    The cart object
+ * @param {string} params.shippingTier The selected shipping tier.
+ */
+export const add_shipping_info = ( { storeCart, shippingTier } ) => {
+	const checkoutData = getCheckoutData( storeCart );
+
+	return checkoutData
+		? {
+				...checkoutData,
+				...( shippingTier ? { shipping_tier: shippingTier } : {} ),
+		  }
+		: false;
+};
+
+/**
+ * Formats data for the add_payment_info event
+ *
+ * @param {Object} params             The function params
+ * @param {Object} params.storeCart   The cart object
+ * @param {string} params.paymentType The selected payment type.
+ */
+export const add_payment_info = ( { storeCart, paymentType } ) => {
+	const checkoutData = getCheckoutData( storeCart );
+
+	return checkoutData
+		? {
+				...checkoutData,
+				...( paymentType ? { payment_type: paymentType } : {} ),
+		  }
+		: false;
 };
 
 /**

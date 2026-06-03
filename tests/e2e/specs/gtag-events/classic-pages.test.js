@@ -303,6 +303,38 @@ test.describe( 'GTag events on classic pages', () => {
 		} );
 	} );
 
+	test( 'Add payment info event is sent when changing payment method on classic checkout', async ( {
+		page,
+	} ) => {
+		await createClassicCheckoutPage();
+		await simpleProductAddToCart( page, simpleProductID );
+
+		const event = trackGtagEvent( page, 'add_payment_info' );
+		await page.goto( 'classic-checkout' );
+
+		// Simulate a user changing the payment method radio. We don't depend
+		// on the exact set of enabled gateways — just trigger a `change` on the
+		// first available payment_method input.
+		await page.evaluate( () => {
+			const input = document.querySelector(
+				'input[name="payment_method"]'
+			);
+			if ( input ) {
+				input.checked = true;
+				input.dispatchEvent( new Event( 'change', { bubbles: true } ) );
+			}
+		} );
+
+		await event.then( ( request ) => {
+			const data = getEventData( request, 'add_payment_info' );
+			expect( data.cu ).toEqual( 'USD' );
+			expect( data[ 'epn.value' ] ).toEqual(
+				simpleProductPrice.toString()
+			);
+			expect( data[ 'ep.payment_type' ] ).toBeTruthy();
+		} );
+	} );
+
 	test( 'Purchase event is sent on order complete page', async ( {
 		page,
 	} ) => {

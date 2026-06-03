@@ -3,6 +3,8 @@ import { addUniqueAction, getProductFromID } from '../utils';
 import { ACTION_PREFIX, NAMESPACE } from '../constants';
 
 const recentlyRemovedProducts = new Set();
+let addShippingInfoTracked = false;
+let addPaymentInfoTracked = false;
 
 /*
  * Track recently dispatched add_to_cart events so the cart-add-item hook and
@@ -130,6 +132,45 @@ const getCartData = () => {
 
 const getProductDedupKey = ( product ) =>
 	product?.key ?? product?.id ?? product?.name;
+
+const getCheckoutCartData = ( storeCart ) =>
+	storeCart?.items?.length > 0 ? storeCart : window.ga4w?.data?.cart;
+
+const getActivePaymentMethod = () =>
+	window.wp?.data?.select?.( 'wc/store/payment' )?.getActivePaymentMethod?.();
+
+const getAllShippingRates = ( storeCart ) =>
+	storeCart?.shipping_rates?.flatMap(
+		( shippingPackage ) => shippingPackage.shipping_rates ?? []
+	) ?? [];
+
+const findShippingRateName = ( storeCart, rateId ) =>
+	getAllShippingRates( storeCart ).find(
+		( shippingRate ) => shippingRate.rate_id === rateId
+	)?.name;
+
+// Returns the human-readable name of the selected shipping rate when available
+// (GA4's `shipping_tier` is meant to be the user-facing tier label, e.g. "Free
+// Shipping" — not the machine rate id "free_shipping:1"). Falls back to the
+// rate id if no name is available.
+const getSelectedShippingRate = ( storeCart ) => {
+	const selected = getAllShippingRates( storeCart ).find(
+		( shippingRate ) => shippingRate.selected
+	);
+
+	return selected?.name ?? selected?.rate_id;
+};
+
+const trackCheckoutEvent = ( eventName, getEventHandler, data = {} ) => {
+	const storeCart = getCheckoutCartData( data.storeCart );
+
+	if ( ! storeCart?.items?.length ) {
+		return false;
+	}
+
+	safeTrackEvent( getEventHandler, eventName, { ...data, storeCart } );
+	return true;
+};
 
 /**
  * Parse a price string into a numeric value using currency settings.
@@ -838,29 +879,76 @@ export const blocksTracking = ( getEventHandler ) => {
 		`${ ACTION_PREFIX }-checkout-render-checkout-form`,
 		NAMESPACE,
 		( data ) => {
-			try {
-				/*
-				 * WooCommerce 10.4+ may fire this event before cart data is fully loaded.
-				 * If storeCart is empty or missing items, fall back to the cart data
-				 * provided by the server via window.ga4w.data.cart.
-				 */
-				const storeCart = data?.storeCart;
-				const cartData =
-					storeCart?.items?.length > 0
-						? storeCart
-						: window.ga4w?.data?.cart;
+			addShippingInfoTracked = false;
+			addPaymentInfoTracked = false;
+			trackCheckoutEvent( 'begin_checkout', getEventHandler, data );
+		}
+	);
 
-				if ( cartData ) {
-					safeTrackEvent( getEventHandler, 'begin_checkout', {
-						storeCart: cartData,
-					} );
+	addUniqueAction(
+		`${ ACTION_PREFIX }-checkout-set-selected-shipping-rate`,
+		NAMESPACE,
+		( data ) => {
+			const storeCart = getCheckoutCartData( data.storeCart );
+			addShippingInfoTracked = trackCheckoutEvent(
+				'add_shipping_info',
+				getEventHandler,
+				{
+					...data,
+					shippingTier:
+						findShippingRateName(
+							storeCart,
+							data.shippingRateId
+						) ?? data.shippingRateId,
 				}
-			} catch ( error ) {
-				warnTrackingError(
-					'could not process begin_checkout tracking.',
-					error
+			);
+		}
+	);
+
+	addUniqueAction(
+		`${ ACTION_PREFIX }-checkout-set-active-payment-method`,
+		NAMESPACE,
+		( data ) => {
+			addPaymentInfoTracked = trackCheckoutEvent(
+				'add_payment_info',
+				getEventHandler,
+				{
+					...data,
+					paymentType: data.paymentMethodSlug,
+				}
+			);
+		}
+	);
+
+	addUniqueAction(
+		`${ ACTION_PREFIX }-checkout-submit`,
+		NAMESPACE,
+		( data ) => {
+			const shippingTier = getSelectedShippingRate( data.storeCart );
+
+			if ( ! addShippingInfoTracked && shippingTier ) {
+				addShippingInfoTracked = trackCheckoutEvent(
+					'add_shipping_info',
+					getEventHandler,
+					{
+						...data,
+						shippingTier,
+					}
 				);
 			}
+
+			if ( addPaymentInfoTracked ) {
+				return;
+			}
+
+			addPaymentInfoTracked = trackCheckoutEvent(
+				'add_payment_info',
+				getEventHandler,
+				{
+					...data,
+					paymentType: getActivePaymentMethod(),
+				}
+			);
 		}
 	);
 

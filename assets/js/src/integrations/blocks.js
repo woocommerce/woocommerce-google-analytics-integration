@@ -101,7 +101,7 @@ const wasRecentlyAdded = ( product ) =>
 		recentlyAdded.has( token )
 	);
 
-let viewedProductListenerAttached = false;
+let viewedProductListener = null;
 
 /**
  * Get currency settings from our plugin's settings.
@@ -1041,30 +1041,36 @@ export const blocksTracking = ( getEventHandler ) => {
 	// product-view-link hook only fires for the All Products block; this event
 	// covers Product Collection. Product data is resolved via the block products
 	// cache populated above by product-list-render.
-	if ( ! viewedProductListenerAttached ) {
-		viewedProductListenerAttached = true;
-		document.body.addEventListener(
+	if ( viewedProductListener ) {
+		document.body.removeEventListener(
 			'wc-blocks_viewed_product',
-			( event ) => {
-				const { productId } = event.detail ?? {};
-				const productIdString = String( productId ?? '' );
-				if ( /^[1-9]\d*$/.test( productIdString ) ) {
-					const normalizedProductId = parseInt(
-						productIdString,
-						10
-					).toString();
-					const product = getProductFromID(
-						normalizedProductId,
-						[],
-						null
-					) ?? { id: normalizedProductId };
-					safeTrackEvent( getEventHandler, 'select_content', {
-						product,
-					} );
-				}
-			}
+			viewedProductListener
 		);
 	}
+
+	viewedProductListener = ( event ) => {
+		const { productId } = event.detail ?? {};
+		const productIdString = String( productId ?? '' );
+		if ( /^[1-9]\d*$/.test( productIdString ) ) {
+			const normalizedProductId = parseInt(
+				productIdString,
+				10
+			).toString();
+			const product = getProductFromID(
+				normalizedProductId,
+				[],
+				null
+			) ?? { id: normalizedProductId };
+			safeTrackEvent( getEventHandler, 'select_content', {
+				product,
+			} );
+		}
+	};
+
+	document.body.addEventListener(
+		'wc-blocks_viewed_product',
+		viewedProductListener
+	);
 };
 
 /*

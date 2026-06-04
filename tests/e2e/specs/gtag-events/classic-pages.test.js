@@ -36,6 +36,7 @@ test.describe( 'GTag events on classic pages', () => {
 		await setSettings();
 		variableProductID = await createVariableProduct();
 		simpleProductID = await createSimpleProduct();
+		await createClassicEmptyCartPageWithProducts();
 	} );
 
 	test.afterAll( async () => {
@@ -340,8 +341,6 @@ test.describe( 'GTag events on classic pages', () => {
 	test( 'View item list event is sent on empty cart page with products', async ( {
 		page,
 	} ) => {
-		await createClassicEmptyCartPageWithProducts();
-
 		const event = trackGtagEvent( page, 'view_item_list' );
 
 		// Navigate without adding any items — cart is empty.
@@ -370,8 +369,6 @@ test.describe( 'GTag events on classic pages', () => {
 	test( 'Add to cart event is sent from empty cart page', async ( {
 		page,
 	} ) => {
-		await createClassicEmptyCartPageWithProducts();
-
 		const event = trackGtagEvent( page, 'add_to_cart' );
 
 		// Navigate without adding any items — cart is empty.
@@ -395,8 +392,6 @@ test.describe( 'GTag events on classic pages', () => {
 	test( 'Select content event is sent from empty cart page', async ( {
 		page,
 	} ) => {
-		await createClassicEmptyCartPageWithProducts();
-
 		const listEvent = trackGtagEvent( page, 'view_item_list' );
 
 		// Navigate without adding any items — cart is empty.

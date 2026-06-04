@@ -339,8 +339,19 @@ abstract class WC_Abstract_Google_Analytics_JS {
 	 * @return array
 	 */
 	public function get_formatted_order( $order ): array {
+		/**
+		 * Filter the order identifier sent to Google Analytics as `transaction_id`.
+		 *
+		 * Defaults to `WC_Abstract_Order::get_order_number()`, which honors sequential
+		 * and custom order number plugins via the `woocommerce_order_number` filter.
+		 *
+		 * @param string            $order_id Order identifier sent to GA.
+		 * @param WC_Abstract_Order $order    Order being formatted.
+		 */
+		$order_id = apply_filters( 'woocommerce_ga_order_id', $order->get_order_number(), $order );
+
 		return array(
-			'id'          => $order->get_id(),
+			'id'          => $order_id,
 			'affiliation' => get_bloginfo( 'name' ),
 			'totals'      => array(
 				'currency_code'       => $order->get_currency(),

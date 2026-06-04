@@ -248,16 +248,61 @@ class DataFormatting extends EventsDataTest {
 	}
 
 	/**
-	 * Test that order ID and blog name affiliation are returned.
+	 * Test that the WooCommerce order number and blog name affiliation are returned.
 	 *
 	 * @return void
 	 */
-	public function test_get_formatted_order_returns_id_and_affiliation() {
+	public function test_get_formatted_order_returns_order_number_and_affiliation() {
 		$order     = $this->create_order_with_product();
 		$formatted = $this->gtag->get_formatted_order( $order );
 
-		$this->assertEquals( $order->get_id(), $formatted['id'] );
+		$this->assertEquals( $order->get_order_number(), $formatted['id'] );
 		$this->assertEquals( get_bloginfo( 'name' ), $formatted['affiliation'] );
+	}
+
+	/**
+	 * Test that a custom order number (e.g., from a sequential order numbers plugin)
+	 * is honored via the woocommerce_order_number filter.
+	 *
+	 * @return void
+	 */
+	public function test_get_formatted_order_honors_woocommerce_order_number_filter() {
+		$order  = $this->create_order_with_product();
+		$custom = 'CUSTOM-' . $order->get_id();
+
+		$callback = function ( $order_number, $passed_order ) use ( $order, $custom ) {
+			return $passed_order->get_id() === $order->get_id() ? $custom : $order_number;
+		};
+		add_filter( 'woocommerce_order_number', $callback, 10, 2 );
+
+		try {
+			$formatted = $this->gtag->get_formatted_order( $order );
+			$this->assertEquals( $custom, $formatted['id'] );
+		} finally {
+			remove_filter( 'woocommerce_order_number', $callback, 10 );
+		}
+	}
+
+	/**
+	 * Test that the woocommerce_ga_order_id filter overrides the order identifier
+	 * sent to GA without affecting WooCommerce's order number elsewhere.
+	 *
+	 * @return void
+	 */
+	public function test_get_formatted_order_honors_woocommerce_ga_order_id_filter() {
+		$order = $this->create_order_with_product();
+
+		$callback = function () {
+			return 'GA-OVERRIDE';
+		};
+		add_filter( 'woocommerce_ga_order_id', $callback );
+
+		try {
+			$formatted = $this->gtag->get_formatted_order( $order );
+			$this->assertEquals( 'GA-OVERRIDE', $formatted['id'] );
+		} finally {
+			remove_filter( 'woocommerce_ga_order_id', $callback );
+		}
 	}
 
 	/**

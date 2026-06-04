@@ -44,31 +44,47 @@ class WCGoogleGtagJS extends EventsDataTest {
 	 * @return void
 	 */
 	public function test_get_product_identifier() {
-		$mock_sku = $this->getMockBuilder( WC_Google_Gtag_JS::class )
-						 ->setMethods( array( '__construct' ) )
-						 ->setConstructorArgs( array( array( 'ga_product_identifier' => 'product_sku' ) ) )
-						 ->getMock();
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_sku( 'TEST-SKU-123' );
+		$product->save();
 
-		$this->assertEquals( $this->get_product()->get_sku(), $mock_sku::get_product_identifier( $this->get_product() ) );
+		$gtag_sku = new WC_Google_Gtag_JS( array( 'ga_product_identifier' => 'product_sku' ) );
 
-		$this->get_product()->set_sku( '' );
-		$this->assertEquals( '#' . $this->get_product()->get_id(), $mock_sku::get_product_identifier( $this->get_product() ) );
+		$this->assertEquals( $product->get_sku(), $gtag_sku->get_product_identifier_for_product( $product ) );
 
-		$mock_id = $this->getMockBuilder( WC_Google_Gtag_JS::class )
-						->setMethods( array( '__construct' ) )
-						->setConstructorArgs( array( array( 'ga_product_identifier' => 'product_id' ) ) )
-						->getMock();
+		$product->set_sku( '' );
+		$product->save();
+		$this->assertEquals( '#' . $product->get_id(), $gtag_sku->get_product_identifier_for_product( $product ) );
 
-		$this->assertEquals( $this->get_product()->get_id(), $mock_id::get_product_identifier( $this->get_product() ) );
+		$gtag_id = new WC_Google_Gtag_JS( array( 'ga_product_identifier' => 'product_id' ) );
 
-		add_filter(
-			'woocommerce_ga_product_identifier',
-			function ( $product ) {
-				return 'filtered';
-			}
-		);
+		$this->assertEquals( $product->get_id(), $gtag_id->get_product_identifier_for_product( $product ) );
 
-		$this->assertEquals( 'filtered', $mock_id::get_product_identifier( $this->get_product() ) );
+		$callback = function () {
+			return 'filtered';
+		};
+		add_filter( 'woocommerce_ga_product_identifier', $callback );
+
+		try {
+			$this->assertEquals( 'filtered', $gtag_id->get_product_identifier_for_product( $product ) );
+		} finally {
+			remove_filter( 'woocommerce_ga_product_identifier', $callback );
+		}
+	}
+
+	/**
+	 * Test that the static product identifier wrapper still uses the current instance settings.
+	 *
+	 * @return void
+	 */
+	public function test_static_get_product_identifier_uses_current_instance_settings() {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_sku( 'STATIC-SKU-123' );
+		$product->save();
+
+		new WC_Google_Gtag_JS( array( 'ga_product_identifier' => 'product_sku' ) );
+
+		$this->assertEquals( 'STATIC-SKU-123', WC_Google_Gtag_JS::get_product_identifier( $product ) );
 	}
 
 	/**
@@ -243,7 +259,18 @@ class WCGoogleGtagJS extends EventsDataTest {
 
 		foreach ( $settings as $option_name => $expected_events ) {
 			$gtag = new WC_Google_Gtag_JS( array( $option_name => 'yes' ) );
-			$this->assertEquals( $expected_events, $gtag->get_enabled_events() );
+			$this->assertEquals( $expected_events, $gtag->get_enabled_events_for_settings() );
 		}
+	}
+
+	/**
+	 * Test that the static enabled-events wrapper still uses the current instance settings.
+	 *
+	 * @return void
+	 */
+	public function test_static_get_enabled_events_uses_current_instance_settings(): void {
+		new WC_Google_Gtag_JS( array( 'ga_event_tracking_enabled' => 'yes' ) );
+
+		$this->assertEquals( array( 'add_to_cart' ), WC_Google_Gtag_JS::get_enabled_events() );
 	}
 }

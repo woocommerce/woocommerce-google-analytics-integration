@@ -18,7 +18,7 @@ abstract class WC_Abstract_Google_Analytics_JS {
 	protected static $instance;
 
 	/** @var array $settings Inherited Analytics settings */
-	protected static $settings;
+	protected $settings = array();
 
 	/** @var string Developer ID */
 	public const DEVELOPER_ID = 'dOGY3NW';
@@ -120,7 +120,7 @@ abstract class WC_Abstract_Google_Analytics_JS {
 		add_action(
 			'woocommerce_thankyou',
 			function ( $order_id ) {
-				if ( 'yes' === self::get( 'ga_ecommerce_tracking_enabled' ) ) {
+				if ( 'yes' === $this->get_setting( 'ga_ecommerce_tracking_enabled' ) ) {
 					$order = wc_get_order( $order_id );
 					if ( $order && $order->get_meta( '_ga_tracked' ) !== '1' ) {
 						// Check order key.
@@ -174,22 +174,24 @@ abstract class WC_Abstract_Google_Analytics_JS {
 	}
 
 	/**
-	 * Return one of our settings
+	 * Return one of our settings.
 	 *
 	 * @param string $setting Key/name for the setting.
 	 *
-	 * @return string|null Value of the setting or null if not found
+	 * @return mixed|null Value of the setting or null if not found.
 	 */
-	protected static function get( $setting ): ?string {
-		return self::$settings[ $setting ] ?? null;
+	protected function get_setting( string $setting ) {
+		return $this->settings[ $setting ] ?? null;
 	}
 
 	/**
-	 * Generic GA snippet for opt out
+	 * Generic GA snippet for opt out.
+	 *
+	 * @return void
 	 */
-	public static function load_opt_out(): void {
+	public function load_opt_out_script(): void {
 		$code = "
-			var gaProperty = '" . esc_js( self::get( 'ga_id' ) ) . "';
+			var gaProperty = '" . esc_js( $this->get_setting( 'ga_id' ) ) . "';
 			var disableStr = 'ga-disable-' + gaProperty;
 			if ( document.cookie.indexOf( disableStr + '=true' ) > -1 ) {
 				window[disableStr] = true;
@@ -205,16 +207,25 @@ abstract class WC_Abstract_Google_Analytics_JS {
 	}
 
 	/**
-	 * Get item identifier from product data
+	 * Compatibility wrapper for the formerly static opt-out loader.
+	 *
+	 * @return void
+	 */
+	public static function load_opt_out(): void {
+		static::get_compatibility_instance()->load_opt_out_script();
+	}
+
+	/**
+	 * Get item identifier from product data.
 	 *
 	 * @param WC_Product $product WC_Product Object.
 	 *
 	 * @return string
 	 */
-	public static function get_product_identifier( WC_Product $product ): string {
+	public function get_product_identifier_for_product( WC_Product $product ): string {
 		$identifier = $product->is_type( 'variation' ) ? $product->get_parent_id() : $product->get_id();
 
-		if ( 'product_sku' === self::get( 'ga_product_identifier' ) ) {
+		if ( 'product_sku' === $this->get_setting( 'ga_product_identifier' ) ) {
 			if ( ! empty( $product->get_sku() ) ) {
 				$identifier = $product->get_sku();
 			} else {
@@ -223,6 +234,17 @@ abstract class WC_Abstract_Google_Analytics_JS {
 		}
 
 		return apply_filters( 'woocommerce_ga_product_identifier', $identifier, $product );
+	}
+
+	/**
+	 * Compatibility wrapper for the formerly static product identifier formatter.
+	 *
+	 * @param WC_Product $product WC_Product Object.
+	 *
+	 * @return string
+	 */
+	public static function get_product_identifier( WC_Product $product ): string {
+		return static::get_compatibility_instance()->get_product_identifier_for_product( $product );
 	}
 
 	/**
@@ -305,7 +327,7 @@ abstract class WC_Abstract_Google_Analytics_JS {
 			),
 			'extensions' => array(
 				'woocommerce_google_analytics_integration' => array(
-					'identifier' => $this->get_product_identifier( $product ),
+					'identifier' => $this->get_product_identifier_for_product( $product ),
 				),
 			),
 		);
@@ -490,8 +512,17 @@ abstract class WC_Abstract_Google_Analytics_JS {
 		$product = is_a( $product, 'WC_Product' ) ? $product : $product['data'];
 
 		return array(
-			'identifier' => (string) $this->get_product_identifier( $product ),
+			'identifier' => (string) $this->get_product_identifier_for_product( $product ),
 		);
+	}
+
+	/**
+	 * Return the current instance for compatibility wrappers.
+	 *
+	 * @return WC_Abstract_Google_Analytics_JS
+	 */
+	protected static function get_compatibility_instance(): WC_Abstract_Google_Analytics_JS {
+		return static::$instance ?? static::get_instance();
 	}
 
 	/**

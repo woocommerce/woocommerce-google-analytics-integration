@@ -350,7 +350,9 @@ export function classicTracking(
 			} );
 		} );
 
-	// Handle select_content and add_to_cart in Products (Beta) block, Product Collection (Beta) block.
+	// Handle select_content and add_to_cart in Products (Beta) block, and
+	// add_to_cart in Product Collection. Product Collection select_content is
+	// tracked through the stable wc-blocks_viewed_product DOM event.
 	// Attach click event listeners to a whole product card, as some links may not have the product_id data attribute.
 	document
 		.querySelectorAll(
@@ -395,7 +397,10 @@ export function classicTracking(
 							cart
 						),
 					} );
-				} else if ( viewLink || button || nameLink ) {
+				} else if (
+					! productCard.closest( '.wc-block-product-template' ) &&
+					( viewLink || button || nameLink )
+				) {
 					// Product image or add-to-cart-like button.
 					getEventHandler( 'select_content' )( {
 						product: getProductFromID(

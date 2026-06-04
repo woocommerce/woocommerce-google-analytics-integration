@@ -3,12 +3,25 @@ import { addAction, removeAction } from '@wordpress/hooks';
 // Fallback for classic.js click handlers when window.ga4w.data.products is empty (e.g. empty cart page).
 const blockProductsCache = [];
 
+const hasMatchingProductId = ( id, search ) =>
+	id !== undefined &&
+	id !== null &&
+	search !== undefined &&
+	search !== null &&
+	String( id ) === String( search );
+
 export const cacheBlockProducts = ( products ) => {
 	if ( ! Array.isArray( products ) ) {
 		return;
 	}
 	products.forEach( ( product ) => {
-		if ( ! blockProductsCache.some( ( { id } ) => id === product.id ) ) {
+		if (
+			product?.id !== undefined &&
+			product?.id !== null &&
+			! blockProductsCache.some( ( { id } ) =>
+				hasMatchingProductId( id, product.id )
+			)
+		) {
 			blockProductsCache.push( product );
 		}
 	} );
@@ -193,8 +206,10 @@ const formatCategoryKey = ( index ) => {
  */
 export const getProductFromID = ( search, products, cart ) => {
 	return (
-		products?.find( ( { id } ) => id === search ) ??
-		cart?.items?.find( ( { id } ) => id === search ) ??
-		blockProductsCache.find( ( { id } ) => id === search )
+		products?.find( ( { id } ) => hasMatchingProductId( id, search ) ) ??
+		cart?.items?.find( ( { id } ) => hasMatchingProductId( id, search ) ) ??
+		blockProductsCache.find( ( { id } ) =>
+			hasMatchingProductId( id, search )
+		)
 	);
 };

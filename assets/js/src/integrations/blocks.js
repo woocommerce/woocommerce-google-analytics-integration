@@ -1043,15 +1043,27 @@ export const blocksTracking = ( getEventHandler ) => {
 	// cache populated above by product-list-render.
 	if ( ! viewedProductListenerAttached ) {
 		viewedProductListenerAttached = true;
-		document.body.addEventListener( 'wc-blocks_viewed_product', ( event ) => {
-			const { productId } = event.detail ?? {};
-			if ( productId ) {
-				const product = getProductFromID( productId, [], null );
-				safeTrackEvent( getEventHandler, 'select_content', {
-					product,
-				} );
+		document.body.addEventListener(
+			'wc-blocks_viewed_product',
+			( event ) => {
+				const { productId } = event.detail ?? {};
+				const productIdString = String( productId ?? '' );
+				if ( /^[1-9]\d*$/.test( productIdString ) ) {
+					const normalizedProductId = parseInt(
+						productIdString,
+						10
+					).toString();
+					const product = getProductFromID(
+						normalizedProductId,
+						[],
+						null
+					) ?? { id: normalizedProductId };
+					safeTrackEvent( getEventHandler, 'select_content', {
+						product,
+					} );
+				}
 			}
-		} );
+		);
 	}
 };
 

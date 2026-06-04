@@ -19,6 +19,7 @@ import {
 	createClassicShopPage,
 } from '../../utils/create-page';
 import {
+	blockProductAddToCart,
 	checkout,
 	simpleProductAddToCart,
 	variableProductAddToCart,
@@ -344,7 +345,9 @@ test.describe( 'GTag events on classic pages', () => {
 		const event = trackGtagEvent( page, 'view_item_list' );
 
 		// Navigate without adding any items — cart is empty.
-		await page.goto( 'classic-empty-cart-with-products?orderby=date' );
+		await page.goto(
+			'classic-empty-cart-with-product-collection?orderby=date'
+		);
 
 		await event.then( ( request ) => {
 			const data = getEventData( request, 'view_item_list' );
@@ -372,17 +375,10 @@ test.describe( 'GTag events on classic pages', () => {
 		const event = trackGtagEvent( page, 'add_to_cart' );
 
 		// Navigate without adding any items — cart is empty.
-		await page.goto( 'classic-empty-cart-with-products?orderby=date' );
-		// Scope to `.add_to_cart_button` to avoid matching the cart table's
-		// remove link, which also carries [data-product_id] once the item is
-		// in the cart.
-		const addToCart = `.add_to_cart_button[data-product_id="${ simpleProductID }"]`;
-		const addToCartButton = await page.locator( addToCart ).first();
-		await addToCartButton.click();
-		// The cart page reloads after AJAX add-to-cart, so toHaveClass( /added/ )
-		// is unreliable here — the "added" class is gone by the time the reload
-		// settles. Wait for the navigation to finish instead.
-		await page.waitForLoadState( 'load' );
+		await page.goto(
+			'classic-empty-cart-with-product-collection?orderby=date'
+		);
+		await blockProductAddToCart( page, simpleProductID );
 
 		await event.then( ( request ) => {
 			const data = getEventData( request, 'add_to_cart' );
@@ -401,16 +397,20 @@ test.describe( 'GTag events on classic pages', () => {
 	} ) => {
 		await createClassicEmptyCartPageWithProducts();
 
-		const event = trackGtagEvent( page, 'select_content' );
+		const listEvent = trackGtagEvent( page, 'view_item_list' );
 
 		// Navigate without adding any items — cart is empty.
-		await page.goto( 'classic-empty-cart-with-products?orderby=date' );
+		await page.goto(
+			'classic-empty-cart-with-product-collection?orderby=date'
+		);
+		await listEvent;
 
-		// Click the product title/image link — wc-blocks_viewed_product fires
+		// Click the product image link — wc-blocks_viewed_product fires
 		// before the browser navigates away.
+		const event = trackGtagEvent( page, 'select_content' );
 		const productLink = page
 			.locator(
-				`li.post-${ simpleProductID } a.woocommerce-loop-product__link`
+				`li.post-${ simpleProductID } .wc-block-components-product-image a`
 			)
 			.first();
 		await Promise.all( [ event, productLink.click() ] );

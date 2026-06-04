@@ -118,7 +118,10 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 				'google-tag-manager',
 			),
 			Plugin::get_instance()->get_js_asset_version( 'main' ),
-			true
+			array(
+				'in_footer' => true,
+				'strategy'  => 'defer',
+			)
 		);
 	}
 
@@ -130,8 +133,8 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 	 */
 	public function enqueue_tracker(): void {
 		wp_enqueue_script( 'google-tag-manager' );
-		// tracker.js needs to be executed ASAP, the remaining bits for main.js could be deferred,
-		// but to reduce the traffic, we ship it all together.
+		// Keep the tracker bundle in the classic script queue so inline data and
+		// classic WordPress package dependencies remain compatible.
 		wp_enqueue_script( $this->script_handle );
 	}
 

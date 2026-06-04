@@ -31,6 +31,7 @@ class WCGoogleGtagJS extends EventsDataTest {
 		$this->assertEquals( true, wp_script_is( $gtag->script_handle, 'enqueued' ), '`…-main` script was not enqueued' );
 		$registered_url = wp_scripts()->registered[ $gtag->script_handle ]->src;
 		$this->assertStringContainsString( 'assets/js/build/main.js', $registered_url, 'The script does not point to the correct URL' );
+		$this->assertEquals( 'defer', wp_scripts()->get_data( $gtag->script_handle, 'strategy' ), 'The script should request WordPress defer loading.' );
 	}
 
 	/**

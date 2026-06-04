@@ -1,5 +1,64 @@
 import { getProductFromID } from '../utils';
 
+const checkoutPaymentMethodSelector = 'input[name="payment_method"]';
+const checkoutShippingMethodSelector =
+	'input[name^="shipping_method"], select[name^="shipping_method"]';
+
+const getSelectedCheckoutOption = ( selector ) =>
+	Array.from( document.querySelectorAll( selector ) ).find(
+		( element ) => element.checked || element.tagName === 'SELECT'
+	);
+
+// Return the user-facing label for a shipping or payment input. For radios,
+// WooCommerce renders the human label as the text content of the associated
+// <label for="..."> element. For selects we fall back to the selected option's
+// text. The raw `value` (e.g. "free_shipping:1") is kept as a last resort so we
+// never emit an empty `shipping_tier`/`payment_type`.
+const getCheckoutOptionLabel = ( element ) => {
+	if ( ! element ) {
+		return undefined;
+	}
+
+	if ( element.tagName === 'SELECT' ) {
+		const selectedOption = element.options[ element.selectedIndex ];
+		return selectedOption?.text?.trim() || element.value;
+	}
+
+	const label = element.labels?.[ 0 ] || element.closest( 'label' );
+
+	return label?.textContent?.trim() || element.value;
+};
+
+// Return the shipping tier name without the price suffix. WooCommerce renders
+// shipping labels as "Flat rate: $4.00", with the cost wrapped in a
+// `.woocommerce-Price-amount` element. GA4's `shipping_tier` is the tier name
+// (e.g. "Flat rate"), not the price — and dropping the cost also keeps it
+// consistent with the block checkout, which reports the Store API rate name.
+const getShippingTierLabel = ( element ) => {
+	if ( ! element ) {
+		return undefined;
+	}
+
+	const label = element.labels?.[ 0 ] || element.closest( 'label' );
+
+	if ( label ) {
+		const clone = label.cloneNode( true );
+		clone
+			.querySelectorAll( '.woocommerce-Price-amount' )
+			.forEach( ( node ) => node.remove() );
+
+		// With the price removed we are left with "Flat rate:" — drop the
+		// trailing separator and whitespace.
+		const tier = clone.textContent.replace( /[\s:]+$/, '' ).trim();
+
+		if ( tier ) {
+			return tier;
+		}
+	}
+
+	return getCheckoutOptionLabel( element );
+};
+
 /**
  * The Google Analytics integration for classic WooCommerce pages
  * triggers events using three different methods.
@@ -34,6 +93,25 @@ export function classicTracking(
 		list_name: listName,
 	}
 ) {
+	let shippingInfoTracked = false;
+	let paymentInfoTracked = false;
+
+	const trackShippingInfo = ( shippingTier ) => {
+		shippingInfoTracked = true;
+		getEventHandler( 'add_shipping_info' )( {
+			storeCart: cart,
+			shippingTier,
+		} );
+	};
+
+	const trackPaymentInfo = ( paymentType ) => {
+		paymentInfoTracked = true;
+		getEventHandler( 'add_payment_info' )( {
+			storeCart: cart,
+			paymentType,
+		} );
+	};
+
 	// Instantly track the events listed in the `events` object.
 	Object.values( events ?? {} ).forEach( ( eventName ) => {
 		if ( eventName === 'add_to_cart' ) {
@@ -48,6 +126,59 @@ export function classicTracking(
 			} );
 		}
 	} );
+
+	document.body.addEventListener( 'change', ( event ) => {
+		if ( ! cart?.items?.length ) {
+			return;
+		}
+
+		// Only react to changes inside the classic checkout form. The cart page
+		// shipping calculator uses the same `shipping_method[*]` input names, so
+		// without this scope a shipping change on the cart page would emit a
+		// spurious add_shipping_info event. This mirrors the submit handler,
+		// which also only operates on `form.checkout`.
+		if ( ! event.target.closest?.( 'form.checkout' ) ) {
+			return;
+		}
+
+		if ( event.target.matches( checkoutShippingMethodSelector ) ) {
+			trackShippingInfo( getShippingTierLabel( event.target ) );
+		}
+
+		if ( event.target.matches( checkoutPaymentMethodSelector ) ) {
+			trackPaymentInfo( getCheckoutOptionLabel( event.target ) );
+		}
+	} );
+
+	document
+		.querySelector( 'form.checkout' )
+		?.addEventListener( 'submit', () => {
+			if ( ! cart?.items?.length ) {
+				return;
+			}
+
+			if ( ! shippingInfoTracked ) {
+				const shippingElement = getSelectedCheckoutOption(
+					checkoutShippingMethodSelector
+				);
+
+				if ( shippingElement ) {
+					trackShippingInfo(
+						getShippingTierLabel( shippingElement )
+					);
+				}
+			}
+
+			if ( ! paymentInfoTracked ) {
+				trackPaymentInfo(
+					getCheckoutOptionLabel(
+						getSelectedCheckoutOption(
+							checkoutPaymentMethodSelector
+						)
+					)
+				);
+			}
+		} );
 
 	/**
 	 * Track the custom add to cart event dispatched by WooCommerce Core

@@ -334,13 +334,15 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 	public static function get_enabled_events(): array {
 		$events   = array();
 		$settings = array(
-			'purchase'         => 'ga_ecommerce_tracking_enabled',
-			'add_to_cart'      => 'ga_event_tracking_enabled',
-			'remove_from_cart' => 'ga_enhanced_remove_from_cart_enabled',
-			'view_item_list'   => 'ga_enhanced_product_impression_enabled',
-			'select_content'   => 'ga_enhanced_product_click_enabled',
-			'view_item'        => 'ga_enhanced_product_detail_view_enabled',
-			'begin_checkout'   => 'ga_enhanced_checkout_process_enabled',
+			'purchase'          => 'ga_ecommerce_tracking_enabled',
+			'add_to_cart'       => 'ga_event_tracking_enabled',
+			'remove_from_cart'  => 'ga_enhanced_remove_from_cart_enabled',
+			'view_item_list'    => 'ga_enhanced_product_impression_enabled',
+			'select_content'    => 'ga_enhanced_product_click_enabled',
+			'view_item'         => 'ga_enhanced_product_detail_view_enabled',
+			'begin_checkout'    => 'ga_enhanced_checkout_process_enabled',
+			'add_shipping_info' => 'ga_enhanced_checkout_process_enabled',
+			'add_payment_info'  => 'ga_enhanced_checkout_process_enabled',
 		);
 
 		foreach ( $settings as $event => $setting_name ) {

@@ -520,6 +520,74 @@ test.describe( 'GTag events on block pages', () => {
 		} );
 	} );
 
+	test( 'Add shipping info event is sent from a checkout page', async ( {
+		page,
+	} ) => {
+		await simpleProductAddToCart( page, simpleProductID );
+		await page.goto( 'checkout' );
+
+		const event = trackGtagEvent( page, 'add_shipping_info' );
+		await page.evaluate( () => {
+			window.wp.hooks.doAction(
+				'experimental__woocommerce_blocks-checkout-set-selected-shipping-rate',
+				{
+					shippingRateId: 'free_shipping:1',
+					storeCart: window.ga4w.data.cart,
+				}
+			);
+		} );
+
+		await event.then( ( request ) => {
+			const data = getEventData( request, 'add_shipping_info' );
+			expect( data.product1 ).toMatchObject( {
+				id: simpleProductID.toString(),
+				nm: 'Simple product',
+				qt: '1',
+				pr: simpleProductPrice.toString(),
+			} );
+			expect( data[ 'ep.shipping_tier' ] ).toEqual( 'free_shipping:1' );
+			expect( data.cu ).toEqual( 'USD' );
+			expect( data[ 'epn.value' ] ).toEqual(
+				simpleProductPrice.toString()
+			);
+		} );
+	} );
+
+	test( 'Add payment info event is sent from a checkout page', async ( {
+		page,
+	} ) => {
+		await simpleProductAddToCart( page, simpleProductID );
+		await page.goto( 'checkout' );
+
+		const event = trackGtagEvent( page, 'add_payment_info' );
+		await page.evaluate( () => {
+			window.wp.hooks.doAction(
+				'experimental__woocommerce_blocks-checkout-set-active-payment-method',
+				{
+					paymentMethodSlug: 'cod',
+					storeCart: window.ga4w.data.cart,
+				}
+			);
+		} );
+
+		await event.then( ( request ) => {
+			const data = getEventData( request, 'add_payment_info' );
+			expect( data.product1 ).toMatchObject( {
+				id: simpleProductID.toString(),
+				nm: 'Simple product',
+				qt: '1',
+				pr: simpleProductPrice.toString(),
+			} );
+			// The slug 'cod' is resolved to the gateway's human-readable title,
+			// matching the label the classic checkout reports.
+			expect( data[ 'ep.payment_type' ] ).toEqual( 'Cash on delivery' );
+			expect( data.cu ).toEqual( 'USD' );
+			expect( data[ 'epn.value' ] ).toEqual(
+				simpleProductPrice.toString()
+			);
+		} );
+	} );
+
 	test( 'Add to cart event is sent from a product collection block shop page', async ( {
 		page,
 	} ) => {

@@ -232,18 +232,18 @@ class WCGoogleGtagJS extends EventsDataTest {
 	 */
 	public function test_get_enabled_events(): void {
 		$settings = array(
-			'purchase'         => 'ga_ecommerce_tracking_enabled',
-			'add_to_cart'      => 'ga_event_tracking_enabled',
-			'remove_from_cart' => 'ga_enhanced_remove_from_cart_enabled',
-			'view_item_list'   => 'ga_enhanced_product_impression_enabled',
-			'select_content'   => 'ga_enhanced_product_click_enabled',
-			'view_item'        => 'ga_enhanced_product_detail_view_enabled',
-			'begin_checkout'   => 'ga_enhanced_checkout_process_enabled',
+			'ga_ecommerce_tracking_enabled'           => array( 'purchase' ),
+			'ga_event_tracking_enabled'               => array( 'add_to_cart' ),
+			'ga_enhanced_remove_from_cart_enabled'    => array( 'remove_from_cart' ),
+			'ga_enhanced_product_impression_enabled'  => array( 'view_item_list' ),
+			'ga_enhanced_product_click_enabled'       => array( 'select_content' ),
+			'ga_enhanced_product_detail_view_enabled' => array( 'view_item' ),
+			'ga_enhanced_checkout_process_enabled'    => array( 'begin_checkout', 'add_shipping_info', 'add_payment_info' ),
 		);
 
-		foreach ( $settings as $event => $option_name ) {
+		foreach ( $settings as $option_name => $expected_events ) {
 			$gtag = new WC_Google_Gtag_JS( array( $option_name => 'yes' ) );
-			$this->assertEquals( $gtag->get_enabled_events(), array( $event ) );
+			$this->assertEquals( $expected_events, $gtag->get_enabled_events() );
 		}
 	}
 }

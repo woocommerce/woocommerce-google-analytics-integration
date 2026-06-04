@@ -43,4 +43,26 @@ test.describe( '`woocommerce-google-analytics-integration`', () => {
 			page.locator( '#woocommerce-google-analytics-integration-js-after' )
 		).toHaveJSProperty( '__test__inlineSnippet', 'works' );
 	} );
+
+	test( 'Exposes formatters and utilities globally', async ( { page } ) => {
+		await page.goto( 'shop' );
+
+		const exposedApi = await page.evaluate( () => ( {
+			globalFormatter:
+				typeof window.wcGoogleAnalyticsIntegration?.formatters
+					?.add_to_cart,
+			globalUtility:
+				typeof window.wcGoogleAnalyticsIntegration?.utils
+					?.getProductFieldObject,
+			ga4wFormatter: typeof window.ga4w?.formatters?.add_to_cart,
+			ga4wUtility: typeof window.ga4w?.utils?.getProductFieldObject,
+		} ) );
+
+		expect( exposedApi ).toEqual( {
+			globalFormatter: 'function',
+			globalUtility: 'function',
+			ga4wFormatter: 'function',
+			ga4wUtility: 'function',
+		} );
+	} );
 } );

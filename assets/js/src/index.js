@@ -1,10 +1,19 @@
 import { setupEventHandlers } from './tracker';
+import * as formatters from './tracker/data-formatting';
+import * as utils from './utils';
 import { classicTracking } from './integrations/classic';
 import { blocksTracking } from './integrations/blocks';
 import {
 	setCurrentConsentState,
 	addConsentStateChangeEventListener,
 } from './integrations/wp-consent-api';
+
+const publicApi = { formatters, utils };
+
+window.wcGoogleAnalyticsIntegration = {
+	...( window.wcGoogleAnalyticsIntegration ?? {} ),
+	...publicApi,
+};
 
 // Wait for 'ga4w:ready' event if `window.ga4w` is not there yet.
 if ( window.ga4w ) {
@@ -21,6 +30,8 @@ if ( window.ga4w ) {
 }
 
 function initializeTracking() {
+	Object.assign( window.ga4w, publicApi );
+
 	setCurrentConsentState( window.ga4w.settings );
 	addConsentStateChangeEventListener( window.ga4w.settings );
 

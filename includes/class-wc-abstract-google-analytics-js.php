@@ -85,9 +85,10 @@ abstract class WC_Abstract_Google_Analytics_JS {
 
 		add_action( 'woocommerce_add_to_cart', array( $this, 'capture_added_to_cart' ), 10, 5 );
 
-		// When WC redirects after a successful classic add-to-cart, in-memory script data is lost before render.
+		// When WC redirects after a successful add-to-cart, in-memory script data is lost before render.
 		// Stash the formatted product in the WC session so the next request can re-emit it. Issue #427 / STORMA-42.
 		add_filter( 'woocommerce_add_to_cart_redirect', array( $this, 'persist_added_to_cart_for_redirect' ) );
+		add_action( 'woocommerce_ajax_added_to_cart', array( $this, 'persist_added_to_cart_for_ajax_redirect' ) );
 
 		// On the redirected page, restore the captured event data and mark add_to_cart for firing.
 		add_action( 'wp_head', array( $this, 'restore_added_to_cart_from_session' ), 1 );
@@ -356,19 +357,44 @@ abstract class WC_Abstract_Google_Analytics_JS {
 	}
 
 	/**
-	 * Persist the captured `added_to_cart` payload into the WC session immediately
-	 * before WC issues an add-to-cart redirect. The next page request will pick it
-	 * up via `restore_added_to_cart_from_session()` and fire the event.
+	 * Persist the captured `added_to_cart` payload into the WC session when a
+	 * classic add-to-cart request is going to redirect. The next page request
+	 * will pick it up via `restore_added_to_cart_from_session()` and fire the
+	 * event.
 	 *
-	 * @param string $url Redirect URL (returned unchanged).
+	 * @param string|false $url Redirect URL (returned unchanged).
 	 *
-	 * @return string
+	 * @return string|false
 	 */
 	public function persist_added_to_cart_for_redirect( $url ) {
+		if ( $url || 'yes' === get_option( 'woocommerce_cart_redirect_after_add' ) ) {
+			$this->persist_pending_added_to_cart();
+		}
+		return $url;
+	}
+
+	/**
+	 * Persist the captured `added_to_cart` payload when WooCommerce's legacy
+	 * AJAX add-to-cart handler will redirect the browser before it fires the
+	 * `added_to_cart` JavaScript event.
+	 *
+	 * @return void
+	 */
+	public function persist_added_to_cart_for_ajax_redirect(): void {
+		if ( 'yes' === get_option( 'woocommerce_cart_redirect_after_add' ) ) {
+			$this->persist_pending_added_to_cart();
+		}
+	}
+
+	/**
+	 * Persist the pending add-to-cart payload into the WC session.
+	 *
+	 * @return void
+	 */
+	private function persist_pending_added_to_cart(): void {
 		if ( $this->pending_added_to_cart && WC()->session ) {
 			WC()->session->set( self::PENDING_ADDED_TO_CART_SESSION_KEY, $this->pending_added_to_cart );
 		}
-		return $url;
 	}
 
 	/**

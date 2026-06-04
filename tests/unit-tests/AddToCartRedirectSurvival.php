@@ -23,6 +23,9 @@ class AddToCartRedirectSurvival extends EventsDataTest {
 	/** @var WC_Google_Gtag_JS */
 	private $gtag;
 
+	/** @var string */
+	private $cart_redirect_after_add;
+
 	/**
 	 * Set up the gtag instance and ensure a clean WC session for each test.
 	 *
@@ -30,7 +33,8 @@ class AddToCartRedirectSurvival extends EventsDataTest {
 	 */
 	public function set_up() {
 		parent::set_up();
-		$this->gtag = new WC_Google_Gtag_JS( [ 'ga_product_identifier' => 'product_id' ] );
+		$this->gtag                    = new WC_Google_Gtag_JS( [ 'ga_product_identifier' => 'product_id' ] );
+		$this->cart_redirect_after_add = get_option( 'woocommerce_cart_redirect_after_add', 'no' );
 
 		if ( WC()->session === null && class_exists( 'WC_Session_Handler' ) ) {
 			WC()->initialize_session();
@@ -49,6 +53,7 @@ class AddToCartRedirectSurvival extends EventsDataTest {
 		if ( WC()->session ) {
 			WC()->session->__unset( '_ga_pending_added_to_cart' );
 		}
+		update_option( 'woocommerce_cart_redirect_after_add', $this->cart_redirect_after_add );
 		parent::tear_down();
 	}
 
@@ -79,9 +84,69 @@ class AddToCartRedirectSurvival extends EventsDataTest {
 	}
 
 	/**
-	 * Without the redirect filter firing (e.g. AJAX or Store API add), nothing
-	 * is persisted to session — otherwise a subsequent unrelated page load
-	 * would over-fire add_to_cart.
+	 * If WC applies the redirect filter but does not actually redirect, nothing
+	 * is persisted to session — otherwise the same page load would over-fire
+	 * add_to_cart.
+	 *
+	 * @return void
+	 */
+	public function test_redirect_filter_does_not_persist_without_redirect_destination_or_option() {
+		update_option( 'woocommerce_cart_redirect_after_add', 'no' );
+
+		$product = WC_Helper_Product::create_simple_product();
+		$this->gtag->capture_added_to_cart( 'mock-key', $product->get_id(), 1, 0, [] );
+		$this->gtag->append_script_data( 'events', 'add_to_cart' );
+		$this->gtag->persist_added_to_cart_for_redirect( false );
+		$this->gtag->restore_added_to_cart_from_session();
+
+		$data = $this->script_data();
+
+		$this->assertEmpty( WC()->session->get( '_ga_pending_added_to_cart' ) );
+		$this->assertEquals( [ 'add_to_cart' ], $data['events'] );
+	}
+
+	/**
+	 * When WC redirects via the global cart redirect option, the redirect filter
+	 * receives an empty URL before WC checks the option. The pending product
+	 * still needs to survive to the redirected cart page.
+	 *
+	 * @return void
+	 */
+	public function test_redirect_filter_persists_when_wc_redirect_option_enabled() {
+		update_option( 'woocommerce_cart_redirect_after_add', 'yes' );
+
+		$product = WC_Helper_Product::create_simple_product();
+		$this->gtag->capture_added_to_cart( 'mock-key', $product->get_id(), 1, 0, [] );
+		$this->gtag->persist_added_to_cart_for_redirect( false );
+
+		$pending = WC()->session->get( '_ga_pending_added_to_cart' );
+		$this->assertIsArray( $pending );
+		$this->assertSame( $product->get_id(), $pending['id'] );
+	}
+
+	/**
+	 * AJAX adds with WC's redirect-after-add option enabled redirect in
+	 * WooCommerce's frontend JS before the `added_to_cart` event fires, so they
+	 * need the same one-shot session handoff.
+	 *
+	 * @return void
+	 */
+	public function test_ajax_redirect_persists_when_wc_redirect_option_enabled() {
+		update_option( 'woocommerce_cart_redirect_after_add', 'yes' );
+
+		$product = WC_Helper_Product::create_simple_product();
+		$this->gtag->capture_added_to_cart( 'mock-key', $product->get_id(), 1, 0, [] );
+		$this->gtag->persist_added_to_cart_for_ajax_redirect();
+
+		$pending = WC()->session->get( '_ga_pending_added_to_cart' );
+		$this->assertIsArray( $pending );
+		$this->assertSame( $product->get_id(), $pending['id'] );
+	}
+
+	/**
+	 * Without a redirecting path (e.g. Store API add), nothing is persisted to
+	 * session — otherwise a subsequent unrelated page load would over-fire
+	 * add_to_cart.
 	 *
 	 * @return void
 	 */

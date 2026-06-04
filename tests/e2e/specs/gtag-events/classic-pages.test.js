@@ -15,9 +15,11 @@ import {
 import {
 	createClassicCartPage,
 	createClassicCheckoutPage,
+	createClassicEmptyCartPageWithProducts,
 	createClassicShopPage,
 } from '../../utils/create-page';
 import {
+	blockProductAddToCart,
 	checkout,
 	simpleProductAddToCart,
 	variableProductAddToCart,
@@ -34,6 +36,7 @@ test.describe( 'GTag events on classic pages', () => {
 		await setSettings();
 		variableProductID = await createVariableProduct();
 		simpleProductID = await createSimpleProduct();
+		await createClassicEmptyCartPageWithProducts();
 	} );
 
 	test.afterAll( async () => {
@@ -332,6 +335,87 @@ test.describe( 'GTag events on classic pages', () => {
 				simpleProductPrice.toString()
 			);
 			expect( data[ 'ep.payment_type' ] ).toBeTruthy();
+		} );
+	} );
+
+	test( 'View item list event is sent on empty cart page with products', async ( {
+		page,
+	} ) => {
+		const event = trackGtagEvent( page, 'view_item_list' );
+
+		// Navigate without adding any items — cart is empty.
+		await page.goto(
+			'classic-empty-cart-with-product-collection?orderby=date'
+		);
+
+		await event.then( ( request ) => {
+			const data = getEventData( request, 'view_item_list' );
+			expect( data[ 'ep.item_list_id' ] ).toEqual( 'product_list' );
+			expect( data[ 'ep.item_list_name' ] ).toEqual( 'Product List' );
+			const products = [ data.product1, data.product2 ];
+			const simple = products.find(
+				( p ) => p?.id === simpleProductID.toString()
+			);
+			expect( simple ).toMatchObject( {
+				id: simpleProductID.toString(),
+				nm: 'Simple product',
+				ln: 'Product List',
+				ca: 'Uncategorized',
+				pr: simpleProductPrice.toString(),
+			} );
+		} );
+	} );
+
+	test( 'Add to cart event is sent from empty cart page', async ( {
+		page,
+	} ) => {
+		const event = trackGtagEvent( page, 'add_to_cart' );
+
+		// Navigate without adding any items — cart is empty.
+		await page.goto(
+			'classic-empty-cart-with-product-collection?orderby=date'
+		);
+		await blockProductAddToCart( page, simpleProductID );
+
+		await event.then( ( request ) => {
+			const data = getEventData( request, 'add_to_cart' );
+			expect( data.product1 ).toEqual( {
+				id: simpleProductID.toString(),
+				nm: 'Simple product',
+				ca: 'Uncategorized',
+				qt: '1',
+				pr: simpleProductPrice.toString(),
+			} );
+		} );
+	} );
+
+	test( 'Select content event is sent from empty cart page', async ( {
+		page,
+	} ) => {
+		const listEvent = trackGtagEvent( page, 'view_item_list' );
+
+		// Navigate without adding any items — cart is empty.
+		await page.goto(
+			'classic-empty-cart-with-product-collection?orderby=date'
+		);
+		await listEvent;
+
+		// Click the product image link — wc-blocks_viewed_product fires
+		// before the browser navigates away.
+		const event = trackGtagEvent( page, 'select_content' );
+		const productLink = page
+			.locator(
+				`li.post-${ simpleProductID } .wc-block-components-product-image a`
+			)
+			.first();
+		await Promise.all( [ event, productLink.click() ] );
+
+		await event.then( ( request ) => {
+			const data = getEventData( request, 'select_content' );
+			expect( data[ 'ep.content_type' ] ).toEqual( 'product' );
+			expect( data[ 'ep.content_id' ] ).toEqual(
+				simpleProductID.toString()
+			);
 		} );
 	} );
 

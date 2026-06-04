@@ -1,5 +1,32 @@
 import { addAction, removeAction } from '@wordpress/hooks';
 
+// Fallback for classic.js click handlers when window.ga4w.data.products is empty (e.g. empty cart page).
+const blockProductsCache = [];
+
+const hasMatchingProductId = ( id, search ) =>
+	id !== undefined &&
+	id !== null &&
+	search !== undefined &&
+	search !== null &&
+	String( id ) === String( search );
+
+export const cacheBlockProducts = ( products ) => {
+	if ( ! Array.isArray( products ) ) {
+		return;
+	}
+	products.forEach( ( product ) => {
+		if (
+			product?.id !== undefined &&
+			product?.id !== null &&
+			! blockProductsCache.some( ( { id } ) =>
+				hasMatchingProductId( id, product.id )
+			)
+		) {
+			blockProductsCache.push( product );
+		}
+	} );
+};
+
 /**
  * Formats data into the productFieldObject shape.
  *
@@ -170,16 +197,19 @@ const formatCategoryKey = ( index ) => {
 };
 
 /**
- * Searches through the global wcgaiData.products object to find a single product by its ID
+ * Searches available product sources to find a single product by ID.
  *
- * @param {number}   search   The ID of the product to search for
- * @param {Object[]} products The array of available products
- * @param {Object}   cart     The cart object
+ * @param {number|string} search   The ID of the product to search for
+ * @param {Object[]}      products The array of available products
+ * @param {Object}        cart     The cart object
  * @return {Object|undefined} The product object or undefined if not found
  */
 export const getProductFromID = ( search, products, cart ) => {
 	return (
-		products?.find( ( { id } ) => id === search ) ??
-		cart?.items?.find( ( { id } ) => id === search )
+		products?.find( ( { id } ) => hasMatchingProductId( id, search ) ) ??
+		cart?.items?.find( ( { id } ) => hasMatchingProductId( id, search ) ) ??
+		blockProductsCache.find( ( { id } ) =>
+			hasMatchingProductId( id, search )
+		)
 	);
 };

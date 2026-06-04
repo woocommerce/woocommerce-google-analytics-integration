@@ -72,6 +72,26 @@ export async function createClassicCheckoutPage() {
 }
 
 /**
+ * Creates a classic empty-cart page that also shows a Product Collection block.
+ * Used to test that events (view_item_list, add_to_cart, select_content) fire correctly
+ * when the cart is empty but products are visible on the page.
+ *
+ * @return {number} Created page ID.
+ */
+export async function createClassicEmptyCartPageWithProducts() {
+	const title = 'Classic Empty Cart With Product Collection';
+	const {
+		pageContent,
+	} = require( './fixtures/product-collection.fixture.json' );
+	const content = `[woocommerce_cart]\n${ pageContent }`;
+
+	return (
+		( await pageExistsByTitle( title ) ) ||
+		( await createPage( title, content ) )
+	);
+}
+
+/**
  * Creates a classic shop page using shortcodes.
  *
  * @return {number} Created page ID.

@@ -20,7 +20,7 @@ export const view_item_list = ( {
 	products,
 	listName = __( 'Product List', 'woocommerce-google-analytics-integration' ),
 } ) => {
-	if ( products.length === 0 ) {
+	if ( ! products?.length ) {
 		return false;
 	}
 

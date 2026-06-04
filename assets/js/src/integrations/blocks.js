@@ -139,10 +139,41 @@ const getCheckoutCartData = ( storeCart ) =>
 const getActivePaymentMethod = () =>
 	window.wp?.data?.select?.( 'wc/store/payment' )?.getActivePaymentMethod?.();
 
-const getAllShippingRates = ( storeCart ) =>
-	storeCart?.shipping_rates?.flatMap(
+// The live cart from the Blocks data store. This is the source of truth for the
+// available shipping rates (with their human-readable names) — the set-selected
+// shipping-rate hook only carries the rate id, and the static server cart has no
+// rates at all, which is why we previously leaked the machine rate id as
+// shipping_tier.
+const getStoreCartData = () =>
+	window.wp?.data?.select?.( 'wc/store/cart' )?.getCartData?.();
+
+// The Blocks data store exposes the shipping packages under the camelCased
+// `shippingRates`, while hook payloads and the static server cart use the
+// snake_cased `shipping_rates`. Each package's inner rate array (and the rate
+// fields rate_id / name / selected) is snake_cased in both. Normalise so we can
+// read the rates from whichever source actually has them.
+const getShippingPackages = ( cart ) =>
+	cart?.shippingRates ?? cart?.shipping_rates ?? [];
+
+// Resolve the user-facing payment method title (e.g. "Cash on delivery") from
+// the server-provided gateway data, keyed by the payment method slug. This is
+// the same `WC_Payment_Gateway::get_title()` value the classic checkout renders
+// in its radio labels, so both checkout types report a consistent payment_type.
+// Falls back to the slug if the title is unavailable.
+const getPaymentTypeLabel = ( slug ) =>
+	window.wc?.wcSettings?.getSetting?.( 'paymentMethodData' )?.[ slug ]
+		?.title || slug;
+
+const getAllShippingRates = ( storeCart ) => {
+	const livePackages = getShippingPackages( getStoreCartData() );
+	const packages = livePackages.length
+		? livePackages
+		: getShippingPackages( storeCart );
+
+	return packages.flatMap(
 		( shippingPackage ) => shippingPackage.shipping_rates ?? []
-	) ?? [];
+	);
+};
 
 const findShippingRateName = ( storeCart, rateId ) =>
 	getAllShippingRates( storeCart ).find(
@@ -914,7 +945,7 @@ export const blocksTracking = ( getEventHandler ) => {
 				getEventHandler,
 				{
 					...data,
-					paymentType: data.paymentMethodSlug,
+					paymentType: getPaymentTypeLabel( data.paymentMethodSlug ),
 				}
 			);
 		}
@@ -946,7 +977,9 @@ export const blocksTracking = ( getEventHandler ) => {
 				getEventHandler,
 				{
 					...data,
-					paymentType: getActivePaymentMethod(),
+					paymentType: getPaymentTypeLabel(
+						getActivePaymentMethod()
+					),
 				}
 			);
 		}

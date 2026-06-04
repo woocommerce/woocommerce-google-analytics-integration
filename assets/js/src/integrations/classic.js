@@ -29,6 +29,36 @@ const getCheckoutOptionLabel = ( element ) => {
 	return label?.textContent?.trim() || element.value;
 };
 
+// Return the shipping tier name without the price suffix. WooCommerce renders
+// shipping labels as "Flat rate: $4.00", with the cost wrapped in a
+// `.woocommerce-Price-amount` element. GA4's `shipping_tier` is the tier name
+// (e.g. "Flat rate"), not the price — and dropping the cost also keeps it
+// consistent with the block checkout, which reports the Store API rate name.
+const getShippingTierLabel = ( element ) => {
+	if ( ! element ) {
+		return undefined;
+	}
+
+	const label = element.labels?.[ 0 ] || element.closest( 'label' );
+
+	if ( label ) {
+		const clone = label.cloneNode( true );
+		clone
+			.querySelectorAll( '.woocommerce-Price-amount' )
+			.forEach( ( node ) => node.remove() );
+
+		// With the price removed we are left with "Flat rate:" — drop the
+		// trailing separator and whitespace.
+		const tier = clone.textContent.replace( /[\s:]+$/, '' ).trim();
+
+		if ( tier ) {
+			return tier;
+		}
+	}
+
+	return getCheckoutOptionLabel( element );
+};
+
 /**
  * The Google Analytics integration for classic WooCommerce pages
  * triggers events using three different methods.
@@ -112,7 +142,7 @@ export function classicTracking(
 		}
 
 		if ( event.target.matches( checkoutShippingMethodSelector ) ) {
-			trackShippingInfo( getCheckoutOptionLabel( event.target ) );
+			trackShippingInfo( getShippingTierLabel( event.target ) );
 		}
 
 		if ( event.target.matches( checkoutPaymentMethodSelector ) ) {
@@ -134,7 +164,7 @@ export function classicTracking(
 
 				if ( shippingElement ) {
 					trackShippingInfo(
-						getCheckoutOptionLabel( shippingElement )
+						getShippingTierLabel( shippingElement )
 					);
 				}
 			}

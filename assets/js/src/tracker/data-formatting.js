@@ -68,12 +68,34 @@ const getCheckoutData = ( storeCart ) => {
 		return false;
 	}
 
+	const totals = storeCart.totals;
+
+	/*
+	 * Per the GA4 spec, `value` is the sum of (price × quantity) for all items
+	 * and must NOT include shipping or tax. WooCommerce's `total_price` bundles
+	 * shipping and tax, so summing the per-line totals instead keeps `value`
+	 * stable across the whole checkout funnel (begin_checkout vs
+	 * add_shipping_info / add_payment_info) and between the block and classic
+	 * checkouts — which otherwise read carts in different states (live vs
+	 * page-load) and shapes.
+	 *
+	 * Each line total is already net of discounts and tax. The live cart exposes
+	 * it as `item.totals.line_total` (with `prices.price` being the unit price),
+	 * while the static server cart has no `totals` and stores the line total
+	 * directly in `prices.price` — both in minor units, summed as integers to
+	 * avoid floating-point drift.
+	 * https://developers.google.com/analytics/devguides/collection/ga4/reference/events#add_shipping_info
+	 */
+	const value = storeCart.items.reduce(
+		( total, item ) =>
+			total +
+			parseInt( item.totals?.line_total ?? item.prices.price, 10 ),
+		0
+	);
+
 	return {
-		currency: storeCart.totals.currency_code,
-		value: formatPrice(
-			storeCart.totals.total_price,
-			storeCart.totals.currency_minor_unit
-		),
+		currency: totals.currency_code,
+		value: formatPrice( value, totals.currency_minor_unit ),
 		...getCartCoupon( storeCart ),
 		items: storeCart.items.map( getProductFieldObject ),
 	};

@@ -578,7 +578,9 @@ test.describe( 'GTag events on block pages', () => {
 				qt: '1',
 				pr: simpleProductPrice.toString(),
 			} );
-			expect( data[ 'ep.payment_type' ] ).toEqual( 'cod' );
+			// The slug 'cod' is resolved to the gateway's human-readable title,
+			// matching the label the classic checkout reports.
+			expect( data[ 'ep.payment_type' ] ).toEqual( 'Cash on delivery' );
 			expect( data.cu ).toEqual( 'USD' );
 			expect( data[ 'epn.value' ] ).toEqual(
 				simpleProductPrice.toString()

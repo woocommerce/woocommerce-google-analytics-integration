@@ -16,12 +16,12 @@ export const setCurrentConsentState = ( {
 
 		for ( const [ category, types ] of Object.entries( consentMap ) ) {
 			if (
-				// eslint-disable-next-line camelcase, no-undef -- `consent_api_get_cookie` is defined by the WP Consent API plugin.
+				// eslint-disable-next-line no-undef -- `consent_api_get_cookie` is defined by the WP Consent API plugin.
 				consent_api_get_cookie(
 					window.consent_api.cookie_prefix + '_' + category
 				) !== ''
 			) {
-				// eslint-disable-next-line camelcase, no-undef -- `wp_has_consent` is defined by the WP Consent API plugin.
+				// eslint-disable-next-line no-undef -- `wp_has_consent` is defined by the WP Consent API plugin.
 				const hasConsent = wp_has_consent( category )
 					? 'granted'
 					: 'denied';

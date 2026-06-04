@@ -92,6 +92,181 @@ export async function blockProductAddToCart( page, productID ) {
 }
 
 /**
+ * Waits for the plugin's Store API fetch interceptor to be installed.
+ *
+ * The interceptor wraps `window.fetch` from within `blocksTracking()`, which
+ * runs once `window.ga4w` is ready. We detect the wrap without relying on the
+ * function name (which a production build may minify) by checking that
+ * `window.fetch` is no longer the browser's native implementation.
+ *
+ * @param {Page} page
+ */
+export async function waitForStoreApiInterceptor( page ) {
+	await page.waitForFunction(
+		() =>
+			!! window.ga4w &&
+			! window.fetch.toString().includes( 'native code' )
+	);
+}
+
+/**
+ * Adds a product to the cart through the Store API, mirroring how the
+ * Interactivity API powered add-to-cart blocks (WooCommerce 10.4+) add items.
+ *
+ * Waits for the fetch interceptor first, and authenticates the request with a
+ * Store API nonce read from a GET /cart response header — the nonce is not
+ * reliably exposed on the page (e.g. `wcSettings.storeApiNonce`) for all page
+ * types, so reading it from the response header is the robust approach.
+ *
+ * @param {Page}   page
+ * @param {number} productID
+ * @param {number} [quantity=1]
+ */
+export async function storeApiAddToCart( page, productID, quantity = 1 ) {
+	await waitForStoreApiInterceptor( page );
+
+	await page.evaluate(
+		async ( { id, qty } ) => {
+			const cartResponse = await window.fetch(
+				'/wp-json/wc/store/v1/cart'
+			);
+			const nonce =
+				cartResponse.headers.get( 'Nonce' ) ||
+				cartResponse.headers.get( 'X-WC-Store-API-Nonce' );
+
+			const response = await window.fetch(
+				'/wp-json/wc/store/v1/cart/add-item',
+				{
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+						...( nonce ? { Nonce: nonce } : {} ),
+					},
+					body: JSON.stringify( { id, quantity: qty } ),
+				}
+			);
+
+			if ( ! response.ok ) {
+				throw new Error( await response.text() );
+			}
+		},
+		{ id: productID, qty: quantity }
+	);
+}
+
+/**
+ * Adds a product to the cart through the Store API batch endpoint, mirroring how
+ * the Interactivity API powered add-to-cart blocks (WooCommerce 10.4+) bundle
+ * their cart mutations into a single `/wc/store/v1/batch` request.
+ *
+ * @param {Page}   page
+ * @param {number} productID
+ * @param {number} [quantity=1]
+ */
+export async function storeApiBatchAddToCart( page, productID, quantity = 1 ) {
+	await waitForStoreApiInterceptor( page );
+
+	await page.evaluate(
+		async ( { id, qty } ) => {
+			const cartResponse = await window.fetch(
+				'/wp-json/wc/store/v1/cart'
+			);
+			const nonce =
+				cartResponse.headers.get( 'Nonce' ) ||
+				cartResponse.headers.get( 'X-WC-Store-API-Nonce' );
+
+			const response = await window.fetch( '/wp-json/wc/store/v1/batch', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+					...( nonce ? { Nonce: nonce } : {} ),
+				},
+				body: JSON.stringify( {
+					requests: [
+						{
+							method: 'POST',
+							path: '/wc/store/v1/cart/add-item',
+							// Store API verifies the nonce per sub-request, so it
+							// must be repeated here, not only on the batch request.
+							headers: nonce ? { Nonce: nonce } : {},
+							body: { id, quantity: qty },
+						},
+					],
+				} ),
+			} );
+
+			if ( ! response.ok ) {
+				throw new Error( await response.text() );
+			}
+		},
+		{ id: productID, qty: quantity }
+	);
+}
+
+/**
+ * Raises the quantity of a cart item through the Store API batch endpoint,
+ * mirroring how the Interactivity API powered add-to-cart blocks increase the
+ * quantity of a product that is already in the cart (a `cart/update-item`
+ * request carrying the new total quantity).
+ *
+ * @param {Page}   page
+ * @param {number} productID
+ * @param {number} increaseBy How many units to add on top of the current quantity.
+ */
+export async function storeApiBatchIncreaseCartQuantity(
+	page,
+	productID,
+	increaseBy = 1
+) {
+	await waitForStoreApiInterceptor( page );
+
+	await page.evaluate(
+		async ( { id, delta } ) => {
+			const cartResponse = await window.fetch(
+				'/wp-json/wc/store/v1/cart'
+			);
+			const nonce =
+				cartResponse.headers.get( 'Nonce' ) ||
+				cartResponse.headers.get( 'X-WC-Store-API-Nonce' );
+			const cart = await cartResponse.json();
+			const item = cart.items.find(
+				( cartItem ) => parseInt( cartItem.id, 10 ) === id
+			);
+
+			if ( ! item ) {
+				throw new Error( `Product ${ id } is not in the cart` );
+			}
+
+			const response = await window.fetch( '/wp-json/wc/store/v1/batch', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+					...( nonce ? { Nonce: nonce } : {} ),
+				},
+				body: JSON.stringify( {
+					requests: [
+						{
+							method: 'POST',
+							path: '/wc/store/v1/cart/update-item',
+							headers: nonce ? { Nonce: nonce } : {},
+							body: {
+								key: item.key,
+								quantity: item.quantity + delta,
+							},
+						},
+					],
+				} ),
+			} );
+
+			if ( ! response.ok ) {
+				throw new Error( await response.text() );
+			}
+		},
+		{ id: productID, delta: increaseBy }
+	);
+}
+
+/**
  * Perform checkout steps to purchase a product.
  *
  * @param {Page} page

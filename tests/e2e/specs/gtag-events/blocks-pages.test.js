@@ -15,6 +15,10 @@ import {
 	blockProductAddToCart,
 	relatedProductAddToCart,
 	simpleProductAddToCart,
+	storeApiAddToCart,
+	storeApiBatchAddToCart,
+	storeApiBatchIncreaseCartQuantity,
+	waitForStoreApiInterceptor,
 } from '../../utils/customer';
 import {
 	createAllProductsBlockShopPage,
@@ -58,6 +62,310 @@ test.describe( 'GTag events on block pages', () => {
 				pr: simpleProductPrice.toString(),
 			} );
 		} );
+	} );
+
+	test( 'Add to cart event is sent after a Store API add item request', async ( {
+		page,
+	} ) => {
+		await page.goto( 'shop?orderby=date' );
+
+		const event = trackGtagEvent( page, 'add_to_cart' );
+		await storeApiAddToCart( page, simpleProductID );
+
+		await event.then( ( request ) => {
+			const data = getEventData( request, 'add_to_cart' );
+			// The interceptor reports the item from the Store API add-item
+			// response, which carries id/name/quantity/price. Categories are
+			// not part of that cart item payload, so they are not asserted.
+			expect( data.product1 ).toMatchObject( {
+				id: simpleProductID.toString(),
+				nm: 'Simple product',
+				qt: '1',
+				pr: simpleProductPrice.toString(),
+			} );
+		} );
+	} );
+
+	test( 'Add to cart event is sent after a Store API batch add item request', async ( {
+		page,
+	} ) => {
+		await page.goto( 'shop?orderby=date' );
+
+		const event = trackGtagEvent( page, 'add_to_cart' );
+		await storeApiBatchAddToCart( page, simpleProductID );
+
+		await event.then( ( request ) => {
+			const data = getEventData( request, 'add_to_cart' );
+			// The interceptor reports the item from the batched Store API
+			// add-item response, which carries id/name/quantity/price.
+			// Categories are not part of that cart item payload, so they are
+			// not asserted.
+			expect( data.product1 ).toMatchObject( {
+				id: simpleProductID.toString(),
+				nm: 'Simple product',
+				qt: '1',
+				pr: simpleProductPrice.toString(),
+			} );
+		} );
+	} );
+
+	test( 'Add to cart event is sent when a Store API batch update-item increases the quantity', async ( {
+		page,
+	} ) => {
+		// Use a dedicated product so a polluted cart can't break the seeding
+		// click below (which expects the product to go from 0 to "1 in cart").
+		const updateProductID = await createSimpleProduct();
+		await page.goto( 'shop?orderby=date' );
+
+		// Seed through the block so the cart store the interceptor reads
+		// (wc/store/cart) holds the current quantity — the same source the real
+		// Interactivity API add-to-cart flow keeps in sync. Wait for the seed's
+		// own add_to_cart to flush so the assertion below tracks the update, not
+		// the seed (and so the de-dup window has passed before the update).
+		const seedEvent = trackGtagEvent( page, 'add_to_cart' );
+		await blockProductAddToCart( page, updateProductID );
+		await seedEvent;
+
+		const event = trackGtagEvent( page, 'add_to_cart' );
+		// Raise the quantity by 2 via update-item; the event must report the
+		// added delta (2), not the new total quantity.
+		await storeApiBatchIncreaseCartQuantity( page, updateProductID, 2 );
+
+		await event.then( ( request ) => {
+			const data = getEventData( request, 'add_to_cart' );
+			expect( data.product1 ).toMatchObject( {
+				id: updateProductID.toString(),
+				nm: 'Simple product',
+				qt: '2',
+				// Price reflects the two added units (the scaled line total).
+				pr: ( simpleProductPrice * 2 ).toString(),
+			} );
+		} );
+	} );
+
+	test( 'Add to cart event fires exactly once when both cart-add-item hook and Store API add fire for the same product', async ( {
+		page,
+	} ) => {
+		await page.goto( 'shop?orderby=date' );
+		await waitForStoreApiInterceptor( page );
+
+		// Count add_to_cart events. GA4 sends a single event in the query string
+		// (`en=add_to_cart`) but batches multiple events into the POST body
+		// (newline-separated), so we inspect both to count reliably.
+		const addToCartEvents = [];
+		page.on( 'request', ( request ) => {
+			const url = request.url();
+			if ( ! url.includes( 'google-analytics.com/g/collect' ) ) {
+				return;
+			}
+
+			if ( new URL( url ).searchParams.get( 'en' ) === 'add_to_cart' ) {
+				addToCartEvents.push( url );
+				return;
+			}
+
+			( request.postData() || '' ).split( /\r?\n/ ).forEach( ( line ) => {
+				if (
+					new URLSearchParams( line ).get( 'en' ) === 'add_to_cart'
+				) {
+					addToCartEvents.push( line );
+				}
+			} );
+		} );
+
+		// Resolves once the first add_to_cart event has actually been sent to
+		// GA4, which also tells us gtag has flushed (it can load after the page).
+		const firstAddToCart = trackGtagEvent( page, 'add_to_cart' );
+
+		// Drive both code paths for the same product: the cart-add-item hook
+		// (All Products Block path) and a real Store API add (Interactivity API
+		// path). The nonce is fetched up front so the hook and the add-item
+		// request fall within the de-dup window.
+		await page.evaluate( async ( productID ) => {
+			const cartResponse = await window.fetch(
+				'/wp-json/wc/store/v1/cart'
+			);
+			const nonce =
+				cartResponse.headers.get( 'Nonce' ) ||
+				cartResponse.headers.get( 'X-WC-Store-API-Nonce' );
+
+			window.wp.hooks.doAction(
+				'experimental__woocommerce_blocks-cart-add-item',
+				{
+					product: {
+						id: productID,
+						name: 'Simple product',
+						categories: [ { name: 'Uncategorized' } ],
+						quantity: 1,
+						prices: { price: 0, currency_minor_unit: 2 },
+					},
+				}
+			);
+
+			const response = await window.fetch(
+				'/wp-json/wc/store/v1/cart/add-item',
+				{
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+						...( nonce ? { Nonce: nonce } : {} ),
+					},
+					body: JSON.stringify( { id: productID, quantity: 1 } ),
+				}
+			);
+
+			if ( ! response.ok ) {
+				throw new Error( await response.text() );
+			}
+		}, simpleProductID );
+
+		// Wait for the first add_to_cart event to be sent, then allow time for a
+		// (de-duplicated) second one from the fetch interceptor's setTimeout(0).
+		await firstAddToCart;
+		await page.waitForTimeout( 1000 );
+
+		expect( addToCartEvents.length ).toBe( 1 );
+	} );
+
+	test( 'Store API add item request succeeds when tracking cart data is corrupted', async ( {
+		page,
+	} ) => {
+		const safetyProductID = await createSimpleProduct();
+		await page.goto( 'shop?orderby=date' );
+		await waitForStoreApiInterceptor( page );
+
+		const pageErrors = [];
+		page.on( 'pageerror', ( error ) => pageErrors.push( error.message ) );
+
+		const responseOk = await page.evaluate( async ( productID ) => {
+			const cartResponse = await window.fetch(
+				'/wp-json/wc/store/v1/cart'
+			);
+			const nonce =
+				cartResponse.headers.get( 'Nonce' ) ||
+				cartResponse.headers.get( 'X-WC-Store-API-Nonce' );
+			const originalSelect = window.wp?.data?.select;
+
+			if ( window.wp?.data ) {
+				window.wp.data.select = () => {
+					throw new Error( 'Corrupted cart store' );
+				};
+			}
+
+			const originalGa4wDataDescriptor = Object.getOwnPropertyDescriptor(
+				window.ga4w,
+				'data'
+			);
+			Object.defineProperty( window.ga4w, 'data', {
+				configurable: true,
+				get() {
+					throw new Error( 'Corrupted tracking data' );
+				},
+			} );
+
+			let addResponseOk;
+			let addedItemKey;
+			try {
+				const response = await window.fetch(
+					'/wp-json/wc/store/v1/cart/add-item',
+					{
+						method: 'POST',
+						headers: {
+							'Content-Type': 'application/json',
+							...( nonce ? { Nonce: nonce } : {} ),
+						},
+						body: JSON.stringify( {
+							id: productID,
+							quantity: 1,
+						} ),
+					}
+				);
+
+				addResponseOk = response.ok;
+				if ( response.ok ) {
+					const cart = await response.clone().json();
+					addedItemKey = cart.items.find(
+						( item ) => parseInt( item.id, 10 ) === productID
+					)?.key;
+				}
+			} finally {
+				if ( window.wp?.data && originalSelect ) {
+					window.wp.data.select = originalSelect;
+				}
+
+				Object.defineProperty(
+					window.ga4w,
+					'data',
+					originalGa4wDataDescriptor
+				);
+			}
+
+			if ( addedItemKey ) {
+				await window.fetch( '/wp-json/wc/store/v1/cart/remove-item', {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+						...( nonce ? { Nonce: nonce } : {} ),
+					},
+					body: JSON.stringify( { key: addedItemKey } ),
+				} );
+			}
+
+			return addResponseOk;
+		}, safetyProductID );
+
+		await page.waitForTimeout( 100 );
+
+		expect( responseOk ).toBe( true );
+		expect( pageErrors ).toEqual( [] );
+	} );
+
+	test( 'Blocks add and checkout hooks tolerate malformed tracking payloads', async ( {
+		page,
+	} ) => {
+		await page.goto( 'shop?orderby=date' );
+
+		const pageErrors = [];
+		page.on( 'pageerror', ( error ) => pageErrors.push( error.message ) );
+
+		const hooksReturned = await page.evaluate( () => {
+			const product = {};
+			Object.defineProperties( product, {
+				id: {
+					get() {
+						throw new Error( 'Corrupted product ID' );
+					},
+				},
+				name: {
+					get() {
+						throw new Error( 'Corrupted product name' );
+					},
+				},
+			} );
+
+			const checkoutData = {};
+			Object.defineProperty( checkoutData, 'storeCart', {
+				get() {
+					throw new Error( 'Corrupted checkout cart' );
+				},
+			} );
+
+			window.wp.hooks.doAction(
+				'experimental__woocommerce_blocks-cart-add-item',
+				{ product }
+			);
+			window.wp.hooks.doAction(
+				'experimental__woocommerce_blocks-checkout-render-checkout-form',
+				checkoutData
+			);
+
+			return true;
+		} );
+
+		await page.waitForTimeout( 100 );
+
+		expect( hooksReturned ).toBe( true );
+		expect( pageErrors ).toEqual( [] );
 	} );
 
 	test( 'View item list event is sent from the shop page', async ( {

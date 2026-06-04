@@ -6,6 +6,7 @@ use WC_Google_Gtag_JS;
 use WC_Helper_Product;
 use WC_Helper_Customer;
 use WC_Helper_Order;
+use WC_Product_Simple;
 
 /**
  * Unit tests for data formatting methods on WC_Abstract_Google_Analytics_JS
@@ -149,7 +150,30 @@ class DataFormatting extends EventsDataTest {
 		$formatted = $this->gtag->get_formatted_product( $variation_product, $variation_id );
 
 		$expected_price = $this->gtag->get_formatted_price( $variation->get_price() );
+		$this->assertEquals( $variation_product->get_id(), $formatted['id'] );
 		$this->assertEquals( $expected_price, $formatted['prices']['price'] );
+	}
+
+	/**
+	 * Test that bundle products use their minimum bundle price when Product Bundles exposes it.
+	 *
+	 * @return void
+	 */
+	public function test_get_formatted_product_bundle_uses_minimum_bundle_price() {
+		$product = WC_Helper_Product::create_simple_product();
+		$bundle  = $this->getMockBuilder( WC_Product_Simple::class )
+			->setConstructorArgs( [ $product->get_id() ] )
+			->onlyMethods( [ 'get_type' ] )
+			->addMethods( [ 'get_bundle_price' ] )
+			->getMock();
+		$bundle->method( 'get_type' )->willReturn( 'bundle' );
+		$bundle->method( 'get_bundle_price' )->with( 'min' )->willReturn( '12.34' );
+
+		$formatted = $this->gtag->get_formatted_product( $bundle );
+
+		$this->assertEquals( $product->get_id(), $formatted['id'] );
+		$this->assertEquals( $product->get_title(), $formatted['name'] );
+		$this->assertEquals( 1234, $formatted['prices']['price'] );
 	}
 
 	/**

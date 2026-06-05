@@ -455,7 +455,7 @@ export function classicTracking(
 	// Attach click event listeners to a whole product card, as some links may not have the product_id data attribute.
 	document
 		.querySelectorAll(
-			'.products-block-post-template .product, .wc-block-product-template .product'
+			'.products-block-post-template .product, .wc-block-product-template .product, .wc-block-grid__product'
 		)
 		?.forEach( ( productCard ) => {
 			// Get the Product ID from a child node containing the relevant attribute
@@ -471,7 +471,7 @@ export function classicTracking(
 				const target = event.target;
 				// `product-view-link` has no serilized HTML identifier/selector, so we look for the parent block element.
 				const viewLink = target.closest(
-					'.wc-block-components-product-image a'
+					'.wc-block-components-product-image a, .wc-block-grid__product-link'
 				);
 
 				// Catch name click

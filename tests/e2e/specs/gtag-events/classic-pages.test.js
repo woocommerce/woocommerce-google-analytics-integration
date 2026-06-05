@@ -360,6 +360,30 @@ test.describe( 'GTag events on classic pages', () => {
 		} );
 	} );
 
+	test( 'Add to cart event is sent when increasing quantity on a classic cart page', async ( {
+		page,
+	} ) => {
+		await createClassicCartPage();
+		await simpleProductAddToCart( page, simpleProductID );
+		await page.goto( 'classic-cart' );
+
+		await page.locator( '.quantity input.qty' ).first().fill( '3' );
+
+		const event = trackGtagEvent( page, 'add_to_cart' );
+		await page.locator( 'button[name="update_cart"]' ).click();
+
+		await event.then( ( request ) => {
+			const data = getEventData( request, 'add_to_cart' );
+			expect( data.product1 ).toEqual( {
+				id: simpleProductID.toString(),
+				nm: 'Simple product',
+				ca: 'Uncategorized',
+				qt: '2',
+				pr: simpleProductPrice.toString(),
+			} );
+		} );
+	} );
+
 	test( 'Begin checkout event is sent from a classic checkout page', async ( {
 		page,
 	} ) => {

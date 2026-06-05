@@ -576,6 +576,46 @@ test.describe( 'GTag events on classic pages', () => {
 		} );
 	} );
 
+	test( 'Add to cart events are sent for each grouped product child added to cart', async ( {
+		page,
+	} ) => {
+		const groupedProduct = await createGroupedProduct();
+		const trackedRequests = [];
+		page.on( 'request', ( request ) => {
+			if ( request.url().includes( 'google-analytics.com/g/collect' ) ) {
+				trackedRequests.push( request );
+			}
+		} );
+
+		await page.goto( `?p=${ groupedProduct.id }` );
+
+		for ( const child of groupedProduct.children.slice( 0, 2 ) ) {
+			await page
+				.locator( `input[name="quantity[${ child.id }]"]` )
+				.fill( '1' );
+		}
+
+		const event = trackGtagEvent( page, 'add_to_cart' );
+		await page.locator( '.single_add_to_cart_button' ).click();
+		await event;
+		await page.waitForTimeout( 1000 );
+
+		const events = trackedRequests.flatMap( ( request ) =>
+			getAllEventData( request, 'add_to_cart' )
+		);
+		const trackedProducts = events.map( ( data ) => data.product1 );
+
+		for ( const child of groupedProduct.children.slice( 0, 2 ) ) {
+			expect( trackedProducts ).toContainEqual( {
+				id: child.id.toString(),
+				nm: child.name,
+				ca: 'Uncategorized',
+				qt: '1',
+				pr: parseFloat( child.price ).toString(),
+			} );
+		}
+	} );
+
 	test( 'Purchase event is sent on order complete page', async ( {
 		page,
 	} ) => {

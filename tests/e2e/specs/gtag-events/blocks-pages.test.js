@@ -737,6 +737,29 @@ test.describe( 'GTag events on block pages', () => {
 		} );
 	} );
 
+	test( 'Select content event is sent from the all products block shop page', async ( {
+		page,
+	} ) => {
+		await createAllProductsBlockShopPage();
+
+		const listEvent = trackGtagEvent( page, 'view_item_list' );
+		await page.goto( 'all-products-block-shop' );
+		await listEvent;
+
+		const event = trackGtagEvent( page, 'select_content' );
+		const productLink = page
+			.getByRole( 'link', { name: 'Simple product' } )
+			.first();
+
+		await Promise.all( [ event, productLink.click() ] );
+
+		await event.then( ( request ) => {
+			const data = getEventData( request, 'select_content' );
+			expect( data[ 'ep.content_type' ] ).toEqual( 'product' );
+			expect( data[ 'ep.content_id' ] ).toBeTruthy();
+		} );
+	} );
+
 	// Related products are blocks even though they are on a regular single product page.
 	test( 'Add to cart event is sent from related product on single product page', async ( {
 		page,

@@ -44,31 +44,47 @@ class WCGoogleGtagJS extends EventsDataTest {
 	 * @return void
 	 */
 	public function test_get_product_identifier() {
-		$mock_sku = $this->getMockBuilder( WC_Google_Gtag_JS::class )
-						 ->setMethods( array( '__construct' ) )
-						 ->setConstructorArgs( array( array( 'ga_product_identifier' => 'product_sku' ) ) )
-						 ->getMock();
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_sku( 'TEST-SKU-123' );
+		$product->save();
 
-		$this->assertEquals( $this->get_product()->get_sku(), $mock_sku::get_product_identifier( $this->get_product() ) );
+		$gtag_sku = new WC_Google_Gtag_JS( array( 'ga_product_identifier' => 'product_sku' ) );
 
-		$this->get_product()->set_sku( '' );
-		$this->assertEquals( '#' . $this->get_product()->get_id(), $mock_sku::get_product_identifier( $this->get_product() ) );
+		$this->assertEquals( $product->get_sku(), $gtag_sku->get_product_identifier_for_product( $product ) );
 
-		$mock_id = $this->getMockBuilder( WC_Google_Gtag_JS::class )
-						->setMethods( array( '__construct' ) )
-						->setConstructorArgs( array( array( 'ga_product_identifier' => 'product_id' ) ) )
-						->getMock();
+		$product->set_sku( '' );
+		$product->save();
+		$this->assertEquals( '#' . $product->get_id(), $gtag_sku->get_product_identifier_for_product( $product ) );
 
-		$this->assertEquals( $this->get_product()->get_id(), $mock_id::get_product_identifier( $this->get_product() ) );
+		$gtag_id = new WC_Google_Gtag_JS( array( 'ga_product_identifier' => 'product_id' ) );
 
-		add_filter(
-			'woocommerce_ga_product_identifier',
-			function ( $product ) {
-				return 'filtered';
-			}
-		);
+		$this->assertEquals( $product->get_id(), $gtag_id->get_product_identifier_for_product( $product ) );
 
-		$this->assertEquals( 'filtered', $mock_id::get_product_identifier( $this->get_product() ) );
+		$callback = function () {
+			return 'filtered';
+		};
+		add_filter( 'woocommerce_ga_product_identifier', $callback );
+
+		try {
+			$this->assertEquals( 'filtered', $gtag_id->get_product_identifier_for_product( $product ) );
+		} finally {
+			remove_filter( 'woocommerce_ga_product_identifier', $callback );
+		}
+	}
+
+	/**
+	 * Test that the static product identifier wrapper still uses the current instance settings.
+	 *
+	 * @return void
+	 */
+	public function test_static_get_product_identifier_uses_current_instance_settings() {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_sku( 'STATIC-SKU-123' );
+		$product->save();
+
+		new WC_Google_Gtag_JS( array( 'ga_product_identifier' => 'product_sku' ) );
+
+		$this->assertEquals( 'STATIC-SKU-123', WC_Google_Gtag_JS::get_product_identifier( $product ) );
 	}
 
 	/**
@@ -243,7 +259,86 @@ class WCGoogleGtagJS extends EventsDataTest {
 
 		foreach ( $settings as $option_name => $expected_events ) {
 			$gtag = new WC_Google_Gtag_JS( array( $option_name => 'yes' ) );
-			$this->assertEquals( $expected_events, $gtag->get_enabled_events() );
+			$this->assertEquals( $expected_events, $gtag->get_enabled_events_for_settings() );
 		}
+	}
+
+	/**
+	 * Test that the static enabled-events wrapper still uses the current instance settings.
+	 *
+	 * @return void
+	 */
+	public function test_static_get_enabled_events_uses_current_instance_settings(): void {
+		new WC_Google_Gtag_JS( array( 'ga_event_tracking_enabled' => 'yes' ) );
+
+		$this->assertEquals( array( 'add_to_cart' ), WC_Google_Gtag_JS::get_enabled_events() );
+	}
+
+	/**
+	 * Test that a static compatibility wrapper does not bootstrap full tracking
+	 * (register/enqueue scripts, install a live singleton) when no instance exists yet.
+	 *
+	 * @return void
+	 */
+	public function test_static_wrapper_does_not_bootstrap_tracking_without_instance(): void {
+		$this->reset_gtag_instance();
+		// Clear any registration left over from earlier tests.
+		wp_deregister_script( 'google-tag-manager' );
+
+		$product = WC_Helper_Product::create_simple_product();
+
+		// Reading a setting through the static wrapper must work without side effects.
+		$this->assertEquals( $product->get_id(), WC_Google_Gtag_JS::get_product_identifier( $product ) );
+
+		// register_scripts() (run only by the constructor) would re-register this handle,
+		// and the constructor would install the singleton — neither should happen here.
+		$this->assertFalse( wp_script_is( 'google-tag-manager', 'registered' ), 'Static wrapper should not register the gtag script' );
+		$this->assertNull( $this->get_gtag_instance(), 'Static wrapper should not install a live singleton' );
+	}
+
+	/**
+	 * Test that rehydrating an existing instance with new settings re-registers the
+	 * scripts so the baked-in `ga_id` reflects the updated settings.
+	 *
+	 * @return void
+	 */
+	public function test_get_instance_rehydration_reregisters_scripts(): void {
+		$this->reset_gtag_instance();
+		wp_deregister_script( 'google-tag-manager' );
+
+		// Bootstrap with empty settings: the GTM URL carries no measurement id.
+		WC_Google_Gtag_JS::get_instance();
+		$this->assertStringNotContainsString( 'id=G-', wp_scripts()->registered['google-tag-manager']->src );
+
+		// The integration later supplies the real settings.
+		WC_Google_Gtag_JS::get_instance( array( 'ga_id' => 'G-1234567890' ) );
+
+		$this->assertStringContainsString(
+			'id=G-1234567890',
+			wp_scripts()->registered['google-tag-manager']->src,
+			'Rehydration should re-register the gtag script with the new ga_id'
+		);
+	}
+
+	/**
+	 * Reset the shared tracking singleton so a test can exercise the no-instance path.
+	 *
+	 * @return void
+	 */
+	private function reset_gtag_instance(): void {
+		$property = new \ReflectionProperty( \WC_Abstract_Google_Analytics_JS::class, 'instance' );
+		$property->setAccessible( true );
+		$property->setValue( null, null );
+	}
+
+	/**
+	 * Read the shared tracking singleton.
+	 *
+	 * @return \WC_Abstract_Google_Analytics_JS|null
+	 */
+	private function get_gtag_instance() {
+		$property = new \ReflectionProperty( \WC_Abstract_Google_Analytics_JS::class, 'instance' );
+		$property->setAccessible( true );
+		return $property->getValue();
 	}
 }

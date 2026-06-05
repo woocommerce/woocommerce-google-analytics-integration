@@ -46,8 +46,10 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 	 * @param array $settings Settings
 	 */
 	public function __construct( $settings = array() ) {
+		$this->settings = $settings;
+		self::$instance = $this;
+
 		parent::__construct();
-		self::$settings = $settings;
 
 		$this->map_hooks();
 
@@ -64,9 +66,17 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 	 * @return void
 	 */
 	private function register_scripts(): void {
+		// Deregister first so this can be safely re-run when settings change after
+		// construction (see get_instance() rehydration). The `ga_id` baked into the
+		// GTM URL and the gtag `config` snippet must reflect the current settings.
+		// These are no-ops when nothing has been registered yet.
+		wp_deregister_script( 'google-tag-manager' );
+		wp_deregister_script( $this->gtag_script_handle );
+		wp_deregister_script( $this->script_handle );
+
 		wp_register_script(
 			'google-tag-manager',
-			'https://www.googletagmanager.com/gtag/js?id=' . self::get( 'ga_id' ),
+			'https://www.googletagmanager.com/gtag/js?id=' . $this->get_setting( 'ga_id' ),
 			array(),
 			null,
 			array(
@@ -99,7 +109,7 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 					%2$s("js", new Date());
 					%2$s("set", "developer_id.%3$s", true);
 					%2$s("config", "%1$s", %5$s);',
-					esc_js( $this->get( 'ga_id' ) ),
+					esc_js( $this->get_setting( 'ga_id' ) ),
 					esc_js( $this->tracker_function_name() ),
 					esc_js( static::DEVELOPER_ID ),
 					wp_json_encode( $this->get_consent_modes(), JSON_HEX_TAG | JSON_UNESCAPED_SLASHES ),
@@ -167,8 +177,8 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 				wp_json_encode(
 					array(
 						'tracker_function_name' => $this->tracker_function_name(),
-						'events'                => $this->get_enabled_events(),
-						'identifier'            => $this->get( 'ga_product_identifier' ),
+						'events'                => $this->get_enabled_events_for_settings(),
+						'identifier'            => $this->get_setting( 'ga_product_identifier' ),
 						'currency'              => array(
 							'decimalSeparator'  => wc_get_price_decimal_separator(),
 							'thousandSeparator' => wc_get_price_thousand_separator(),
@@ -281,12 +291,12 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 		return apply_filters(
 			'woocommerce_ga_gtag_config',
 			array(
-				'track_404'            => 'yes' === $this->get( 'ga_404_tracking_enabled' ),
-				'allow_google_signals' => 'yes' === $this->get( 'ga_support_display_advertising' ),
+				'track_404'            => 'yes' === $this->get_setting( 'ga_404_tracking_enabled' ),
+				'allow_google_signals' => 'yes' === $this->get_setting( 'ga_support_display_advertising' ),
 				'logged_in'            => is_user_logged_in(),
 				'linker'               => array(
 					'domains'        => $this->get_linker_domains(),
-					'allow_incoming' => 'yes' === $this->get( 'ga_linker_allow_incoming_enabled' ),
+					'allow_incoming' => 'yes' === $this->get_setting( 'ga_linker_allow_incoming_enabled' ),
 				),
 				'custom_map'           => array(
 					'dimension1' => 'logged_in',
@@ -301,7 +311,7 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 	 * @return array
 	 */
 	private function get_linker_domains(): array {
-		if ( empty( $this->get( 'ga_linker_cross_domains' ) ) ) {
+		if ( empty( $this->get_setting( 'ga_linker_cross_domains' ) ) ) {
 			return array();
 		}
 
@@ -320,7 +330,7 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 
 						return null;
 					},
-					explode( ',', $this->get( 'ga_linker_cross_domains' ) )
+					explode( ',', $this->get_setting( 'ga_linker_cross_domains' ) )
 				)
 			)
 		);
@@ -331,7 +341,7 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 	 *
 	 * @return array
 	 */
-	public static function get_enabled_events(): array {
+	public function get_enabled_events_for_settings(): array {
 		$events   = array();
 		$settings = array(
 			'purchase'          => 'ga_ecommerce_tracking_enabled',
@@ -346,12 +356,21 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 		);
 
 		foreach ( $settings as $event => $setting_name ) {
-			if ( 'yes' === self::get( $setting_name ) ) {
+			if ( 'yes' === $this->get_setting( $setting_name ) ) {
 				$events[] = $event;
 			}
 		}
 
 		return $events;
+	}
+
+	/**
+	 * Compatibility wrapper for the formerly static enabled-events formatter.
+	 *
+	 * @return array
+	 */
+	public static function get_enabled_events(): array {
+		return static::get_compatibility_instance()->get_enabled_events_for_settings();
 	}
 
 	/**
@@ -418,6 +437,13 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 	public static function get_instance( $settings = array() ): WC_Abstract_Google_Analytics_JS {
 		if ( null === self::$instance ) {
 			self::$instance = new self( $settings );
+		} elseif ( ! empty( $settings ) ) {
+			// A direct get_instance() call may have bootstrapped the instance with empty
+			// settings before the integration supplied the real ones. Rehydrate so later
+			// reads (e.g. enabled events, product identifier) reflect the current settings,
+			// and re-register the scripts so the baked-in ga_id / config match them too.
+			self::$instance->settings = $settings;
+			self::$instance->register_scripts();
 		}
 
 		return self::$instance;

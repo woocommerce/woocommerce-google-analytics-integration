@@ -418,6 +418,51 @@ test.describe( 'GTag events on classic pages', () => {
 		} );
 	} );
 
+	test( 'Add shipping info event is sent when changing shipping method on classic checkout', async ( {
+		page,
+	} ) => {
+		await createClassicCheckoutPage();
+		await simpleProductAddToCart( page, simpleProductID );
+
+		await page.goto( 'classic-checkout' );
+		await page.locator( 'form.checkout' ).waitFor();
+
+		const event = trackGtagEvent( page, 'add_shipping_info' );
+		await page.evaluate( () => {
+			const shipping = document.querySelector(
+				'form.checkout input[name^="shipping_method"], form.checkout select[name^="shipping_method"]'
+			);
+
+			if ( ! shipping ) {
+				throw new Error( 'Shipping method field was not found.' );
+			}
+
+			if ( shipping.tagName === 'SELECT' ) {
+				shipping.selectedIndex = 0;
+			} else {
+				shipping.checked = true;
+			}
+
+			shipping.dispatchEvent( new Event( 'change', { bubbles: true } ) );
+		} );
+
+		await event.then( ( request ) => {
+			const data = getEventData( request, 'add_shipping_info' );
+			expect( data.product1 ).toEqual( {
+				id: simpleProductID.toString(),
+				nm: 'Simple product',
+				ca: 'Uncategorized',
+				qt: '1',
+				pr: simpleProductPrice.toString(),
+			} );
+			expect( data.cu ).toEqual( 'USD' );
+			expect( data[ 'epn.value' ] ).toEqual(
+				simpleProductPrice.toString()
+			);
+			expect( data[ 'ep.shipping_tier' ] ).toBeTruthy();
+		} );
+	} );
+
 	test( 'Add payment info event is sent when changing payment method on classic checkout', async ( {
 		page,
 	} ) => {

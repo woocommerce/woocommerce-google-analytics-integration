@@ -31,11 +31,6 @@ const publicApi = {
 	},
 };
 
-window.wcGoogleAnalyticsIntegration = {
-	...( window.wcGoogleAnalyticsIntegration ?? {} ),
-	...publicApi,
-};
-
 // Wait for 'ga4w:ready' event if `window.ga4w` is not there yet.
 if ( window.ga4w ) {
 	initializeTracking();
@@ -51,6 +46,13 @@ if ( window.ga4w ) {
 }
 
 function initializeTracking() {
+	// Expose the public API once window.ga4w (settings + data) is ready, so
+	// helpers such as getProductId resolve the configured identifier correctly
+	// instead of falling back to the numeric product ID.
+	window.wcGoogleAnalyticsIntegration = {
+		...( window.wcGoogleAnalyticsIntegration ?? {} ),
+		...publicApi,
+	};
 	Object.assign( window.ga4w, publicApi );
 
 	setCurrentConsentState( window.ga4w.settings );

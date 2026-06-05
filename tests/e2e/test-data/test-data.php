@@ -31,6 +31,18 @@ function register_routes() {
 			],
 		],
 	);
+
+	register_rest_route(
+		'wc/v3',
+		'ga4w-test/options',
+		[
+			[
+				'methods'             => 'POST',
+				'callback'            => __NAMESPACE__ . '\set_options',
+				'permission_callback' => __NAMESPACE__ . '\permissions',
+			],
+		],
+	);
 }
 
 /**
@@ -63,6 +75,29 @@ function set_settings() {
  */
 function clear_settings() {
 	delete_option( 'woocommerce_google_analytics_settings' );
+}
+
+/**
+ * Set whitelisted options used by E2E tests.
+ *
+ * @param \WP_REST_Request $request Request object.
+ */
+function set_options( $request ) {
+	$options = $request->get_json_params();
+	$allowed = [
+		'woocommerce_cart_redirect_after_add',
+		'woocommerce_calc_taxes',
+		'woocommerce_prices_include_tax',
+		'woocommerce_tax_based_on',
+	];
+
+	foreach ( $allowed as $option_name ) {
+		if ( array_key_exists( $option_name, $options ) ) {
+			update_option( $option_name, sanitize_text_field( $options[ $option_name ] ) );
+		}
+	}
+
+	return rest_ensure_response( [ 'success' => true ] );
 }
 
 /**

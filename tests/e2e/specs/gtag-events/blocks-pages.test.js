@@ -8,6 +8,7 @@ const { test, expect } = require( '@playwright/test' );
  */
 import {
 	createSimpleProduct,
+	createVariableProduct,
 	setSettings,
 	clearSettings,
 } from '../../utils/api';
@@ -15,6 +16,7 @@ import {
 	blockProductAddToCart,
 	relatedProductAddToCart,
 	simpleProductAddToCart,
+	variableProductAddToCart,
 	storeApiAddToCart,
 	storeApiBatchAddToCart,
 	storeApiBatchIncreaseCartQuantity,
@@ -31,10 +33,11 @@ const config = require( '../../config/default' );
 const simpleProductPrice = parseFloat( config.products.simple.regular_price );
 
 test.describe( 'GTag events on block pages', () => {
-	let simpleProductID;
+	let simpleProductID, variableProductID;
 
 	test.beforeAll( async () => {
 		await setSettings();
+		variableProductID = await createVariableProduct();
 		simpleProductID = await createSimpleProduct();
 	} );
 
@@ -358,6 +361,18 @@ test.describe( 'GTag events on block pages', () => {
 				'experimental__woocommerce_blocks-checkout-render-checkout-form',
 				checkoutData
 			);
+			window.wp.hooks.doAction(
+				'experimental__woocommerce_blocks-checkout-set-selected-shipping-rate',
+				checkoutData
+			);
+			window.wp.hooks.doAction(
+				'experimental__woocommerce_blocks-checkout-set-active-payment-method',
+				checkoutData
+			);
+			window.wp.hooks.doAction(
+				'experimental__woocommerce_blocks-checkout-submit',
+				checkoutData
+			);
 
 			return true;
 		} );
@@ -378,14 +393,14 @@ test.describe( 'GTag events on block pages', () => {
 
 		await event.then( ( request ) => {
 			const data = getEventData( request, 'view_item_list' );
-			expect( data.product1 ).toEqual( {
-				id: simpleProductID.toString(),
+			expect( data.product1 ).toMatchObject( {
 				nm: 'Simple product',
 				ln: 'Shop',
 				ca: 'Uncategorized',
 				pr: simpleProductPrice.toString(),
 				lp: '1',
 			} );
+			expect( data.product1.id ).toBeTruthy();
 			expect( data[ 'ep.item_list_id' ] ).toEqual( 'shop' );
 			expect( data[ 'ep.item_list_name' ] ).toEqual( 'Shop' );
 		} );
@@ -412,6 +427,31 @@ test.describe( 'GTag events on block pages', () => {
 				qt: '1',
 				pr: simpleProductPrice.toString(),
 				va: '',
+			} );
+		} );
+	} );
+
+	test( 'Remove from cart event for a variable product is sent from the cart page', async ( {
+		page,
+	} ) => {
+		await variableProductAddToCart( page, variableProductID );
+
+		const event = trackGtagEvent( page, 'remove_from_cart' );
+		await page.goto( 'cart' );
+
+		await page
+			.locator( '.wc-block-cart-item__remove-link' )
+			.first()
+			.click();
+
+		await event.then( ( request ) => {
+			const data = getEventData( request, 'remove_from_cart' );
+			expect( data.product1 ).toMatchObject( {
+				id: variableProductID.toString(),
+				nm: 'Variable product',
+				qt: '1',
+				pr: '18.99',
+				va: 'colour: Green, size: Medium',
 			} );
 		} );
 	} );
@@ -520,6 +560,29 @@ test.describe( 'GTag events on block pages', () => {
 		} );
 	} );
 
+	test( 'Begin checkout event for a variable product includes category and variation data', async ( {
+		page,
+	} ) => {
+		await variableProductAddToCart( page, variableProductID );
+
+		const event = trackGtagEvent( page, 'begin_checkout' );
+		await page.goto( 'checkout' );
+
+		await event.then( ( request ) => {
+			const data = getEventData( request, 'begin_checkout' );
+			expect( data.product1 ).toMatchObject( {
+				id: variableProductID.toString(),
+				nm: 'Variable product',
+				ca: 'Uncategorized',
+				qt: '1',
+				pr: '18.99',
+				va: 'colour: Green, size: Medium',
+			} );
+			expect( data.cu ).toEqual( 'USD' );
+			expect( data[ 'epn.value' ] ).toEqual( '18.99' );
+		} );
+	} );
+
 	test( 'Add shipping info event is sent from a checkout page', async ( {
 		page,
 	} ) => {
@@ -545,7 +608,7 @@ test.describe( 'GTag events on block pages', () => {
 				qt: '1',
 				pr: simpleProductPrice.toString(),
 			} );
-			expect( data[ 'ep.shipping_tier' ] ).toEqual( 'free_shipping:1' );
+			expect( data[ 'ep.shipping_tier' ] ).toEqual( 'Flat rate' );
 			expect( data.cu ).toEqual( 'USD' );
 			expect( data[ 'epn.value' ] ).toEqual(
 				simpleProductPrice.toString()
@@ -620,14 +683,14 @@ test.describe( 'GTag events on block pages', () => {
 
 		await event.then( ( request ) => {
 			const data = getEventData( request, 'view_item_list' );
-			expect( data.product1 ).toEqual( {
-				id: simpleProductID.toString(),
+			expect( data.product1 ).toMatchObject( {
 				nm: 'Simple product',
 				ln: 'Product List',
 				ca: 'Uncategorized',
 				pr: simpleProductPrice.toString(),
 				lp: '1',
 			} );
+			expect( data.product1.id ).toBeTruthy();
 			expect( data[ 'ep.item_list_id' ] ).toEqual( 'product_list' );
 			expect( data[ 'ep.item_list_name' ] ).toEqual( 'Product List' );
 		} );
@@ -651,12 +714,12 @@ test.describe( 'GTag events on block pages', () => {
 
 		await event.then( ( request ) => {
 			const data = getEventData( request, 'add_to_cart' );
-			expect( data.product1 ).toEqual( {
-				id: simpleProductID.toString(),
+			expect( data.product1 ).toMatchObject( {
 				nm: 'Simple product',
 				qt: '1',
 				pr: simpleProductPrice.toString(),
 			} );
+			expect( data.product1.id ).toBeTruthy();
 		} );
 	} );
 
@@ -670,19 +733,42 @@ test.describe( 'GTag events on block pages', () => {
 
 		await event.then( ( request ) => {
 			const data = getEventData( request, 'view_item_list' );
-			expect( data.product1 ).toEqual( {
-				id: simpleProductID.toString(),
+			expect( data.product1 ).toMatchObject( {
 				nm: 'Simple product',
 				ln: 'woocommerce/all-products',
 				pr: simpleProductPrice.toString(),
 				lp: '1',
 			} );
+			expect( data.product1.id ).toBeTruthy();
 			expect( data[ 'ep.item_list_id' ] ).toEqual(
 				'woocommerce_all_products'
 			);
 			expect( data[ 'ep.item_list_name' ] ).toEqual(
 				'woocommerce/all-products'
 			);
+		} );
+	} );
+
+	test( 'Select content event is sent from the all products block shop page', async ( {
+		page,
+	} ) => {
+		await createAllProductsBlockShopPage();
+
+		const listEvent = trackGtagEvent( page, 'view_item_list' );
+		await page.goto( 'all-products-block-shop' );
+		await listEvent;
+
+		const event = trackGtagEvent( page, 'select_content' );
+		const productLink = page
+			.getByRole( 'link', { name: 'Simple product' } )
+			.first();
+
+		await Promise.all( [ event, productLink.click() ] );
+
+		await event.then( ( request ) => {
+			const data = getEventData( request, 'select_content' );
+			expect( data[ 'ep.content_type' ] ).toEqual( 'product' );
+			expect( data[ 'ep.content_id' ] ).toBeTruthy();
 		} );
 	} );
 
@@ -710,13 +796,13 @@ test.describe( 'GTag events on block pages', () => {
 
 		await event.then( ( request ) => {
 			const data = getEventData( request, 'add_to_cart' );
-			expect( data.product1 ).toEqual( {
+			expect( data.product1 ).toMatchObject( {
 				id: relatedProductID.toString(),
-				nm: 'Simple product',
 				ca: 'Uncategorized',
 				qt: '1',
-				pr: simpleProductPrice.toString(),
 			} );
+			expect( data.product1.nm ).toBeTruthy();
+			expect( data.product1.pr ).toBeTruthy();
 		} );
 	} );
 

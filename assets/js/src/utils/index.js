@@ -27,6 +27,23 @@ export const cacheBlockProducts = ( products ) => {
 	} );
 };
 
+const formatVariation = ( variation ) => {
+	if ( ! Array.isArray( variation ) ) {
+		return variation;
+	}
+
+	return variation
+		.map( ( { attribute, value } ) => {
+			if ( ! attribute || ! value ) {
+				return null;
+			}
+
+			return `${ attribute.toLowerCase() }: ${ value }`;
+		} )
+		.filter( Boolean )
+		.join( ', ' );
+};
+
 /**
  * Formats data into the productFieldObject shape.
  *
@@ -39,7 +56,7 @@ export const cacheBlockProducts = ( products ) => {
 export const getProductFieldObject = ( product, quantity ) => {
 	const variantData = {};
 	if ( product.variation ) {
-		variantData.item_variant = product.variation;
+		variantData.item_variant = formatVariation( product.variation );
 	}
 
 	const data = {

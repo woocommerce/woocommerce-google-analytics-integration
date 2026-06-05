@@ -8,7 +8,28 @@ import {
 	addConsentStateChangeEventListener,
 } from './integrations/wp-consent-api';
 
-const publicApi = { formatters, utils };
+/*
+ * Public JavaScript API, exposed on `window.wcGoogleAnalyticsIntegration` and
+ * mirrored onto `window.ga4w`. This is the supported extension surface:
+ *
+ * - `formatters`: the GA4 event formatters (`add_to_cart`, `view_item`,
+ *   `purchase`, …) used to build event payloads.
+ * - `utils`: the product/cart formatting helpers used to shape that data.
+ *
+ * Only the helpers below are part of the contract. Internal plumbing (e.g.
+ * `addUniqueAction`, `cacheBlockProducts`) is intentionally not exposed so it
+ * can change without breaking integrations.
+ */
+const publicApi = {
+	formatters,
+	utils: {
+		getProductFieldObject: utils.getProductFieldObject,
+		getProductImpressionObject: utils.getProductImpressionObject,
+		formatPrice: utils.formatPrice,
+		getProductId: utils.getProductId,
+		getCartCoupon: utils.getCartCoupon,
+	},
+};
 
 window.wcGoogleAnalyticsIntegration = {
 	...( window.wcGoogleAnalyticsIntegration ?? {} ),

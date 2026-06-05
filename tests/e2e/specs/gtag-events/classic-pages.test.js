@@ -661,4 +661,68 @@ test.describe( 'GTag events on classic pages', () => {
 			expect( data[ 'epn.shipping' ] ).toEqual( shipping.toString() );
 		} );
 	} );
+
+	test( 'Begin checkout and purchase events use discounted item price', async ( {
+		page,
+	} ) => {
+		const couponCode = await createPercentageCoupon();
+		const discountedPrice = ( simpleProductPrice - 2 ).toFixed( 2 );
+
+		await simpleProductAddToCart( page, simpleProductID );
+		await page.goto( 'cart' );
+		await page.evaluate( async ( code ) => {
+			const cartResponse = await window.fetch(
+				'/wp-json/wc/store/v1/cart'
+			);
+			const nonce =
+				cartResponse.headers.get( 'Nonce' ) ||
+				cartResponse.headers.get( 'X-WC-Store-API-Nonce' );
+
+			const response = await window.fetch(
+				'/wp-json/wc/store/v1/cart/apply-coupon',
+				{
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+						...( nonce ? { Nonce: nonce } : {} ),
+					},
+					body: JSON.stringify( { code } ),
+				}
+			);
+
+			if ( ! response.ok ) {
+				throw new Error( await response.text() );
+			}
+		}, couponCode );
+
+		const beginCheckoutEvent = trackGtagEvent( page, 'begin_checkout' );
+		await page.goto( 'checkout' );
+
+		await beginCheckoutEvent.then( ( request ) => {
+			const data = getEventData( request, 'begin_checkout' );
+			expect( data.product1 ).toMatchObject( {
+				id: simpleProductID.toString(),
+				nm: 'Simple product',
+				qt: '1',
+				pr: discountedPrice,
+			} );
+			expect( data[ 'epn.value' ] ).toEqual( discountedPrice );
+		} );
+
+		const purchaseEvent = trackGtagEvent( page, 'purchase', 'checkout' );
+		await checkout( page );
+
+		await purchaseEvent.then( ( request ) => {
+			const data = getEventData( request, 'purchase' );
+			expect( data.product1 ).toMatchObject( {
+				id: simpleProductID.toString(),
+				nm: 'Simple product',
+				ca: 'Uncategorized',
+				qt: '1',
+				pr: discountedPrice,
+				ds: '2',
+			} );
+		} );
+	} );
+
 } );

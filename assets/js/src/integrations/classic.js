@@ -329,9 +329,24 @@ export function classicTracking(
 			}
 		}
 
-		return Number.isNaN( productID )
-			? undefined
-			: getProductFromID( productID, cart?.items, { items: products } );
+		if ( Number.isNaN( productID ) ) {
+			return undefined;
+		}
+
+		// Variations of the same parent share the parent's `id`, so when more
+		// than one cart line maps to this `productID` we can't tell them apart
+		// by ID alone. Bail out rather than risk attributing the change to the
+		// wrong variation's price and attributes.
+		const matchingItems =
+			cart?.items?.filter(
+				( { id } ) => String( id ) === String( productID )
+			) ?? [];
+
+		if ( matchingItems.length > 1 ) {
+			return undefined;
+		}
+
+		return getProductFromID( productID, cart?.items, { items: products } );
 	}
 
 	document

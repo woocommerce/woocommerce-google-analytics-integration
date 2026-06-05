@@ -206,13 +206,18 @@ export function classicTracking(
 			buttonElement?.dataset.product_id || buttonElement?.value
 		);
 
-		let productToHandle;
 		if ( Number.isNaN( productID ) ) {
-			productToHandle = addedToCart ?? product;
+			const fallback = addedToCart ?? product;
 
-			if ( productToHandle ) {
-				getEventHandler( 'add_to_cart' )( {
-					product: productToHandle,
+			if ( fallback ) {
+				const addedProducts = Array.isArray( fallback )
+					? fallback
+					: [ fallback ];
+
+				addedProducts.filter( Boolean ).forEach( ( addedProduct ) => {
+					getEventHandler( 'add_to_cart' )( {
+						product: addedProduct,
+					} );
 				} );
 				return;
 			}
@@ -225,7 +230,7 @@ export function classicTracking(
 		}
 
 		// If the current product doesn't match search by ID.
-		productToHandle =
+		const productToHandle =
 			product?.id === productID
 				? product
 				: getProductFromID( productID, products, cart );

@@ -684,6 +684,40 @@ test.describe( 'GTag events on classic pages', () => {
 		} );
 	} );
 
+	test( 'Purchase event includes tax total when tax is charged', async ( {
+		page,
+	} ) => {
+		await setOptions( {
+			woocommerce_calc_taxes: 'yes',
+			woocommerce_prices_include_tax: 'no',
+			woocommerce_tax_based_on: 'billing',
+		} );
+		const taxRateID = await createCaliforniaTaxRate();
+
+		try {
+			await simpleProductAddToCart( page, simpleProductID );
+
+			const event = trackGtagEvent( page, 'purchase', 'checkout' );
+			await checkout( page );
+
+			await event.then( ( request ) => {
+				const data = getEventData( request, 'purchase' );
+				expect( data.product1 ).toMatchObject( {
+					id: simpleProductID.toString(),
+					nm: 'Simple product',
+					ca: 'Uncategorized',
+					qt: '1',
+					pr: simpleProductPrice.toString(),
+				} );
+				expect( data[ 'epn.tax' ] ).toEqual( '1' );
+				expect( data[ 'epn.shipping' ] ).toEqual( '10' );
+			} );
+		} finally {
+			await deleteTaxRate( taxRateID );
+			await setOptions( { woocommerce_calc_taxes: 'no' } );
+		}
+	} );
+
 	test( 'Begin checkout and purchase events use discounted item price', async ( {
 		page,
 	} ) => {
@@ -746,5 +780,4 @@ test.describe( 'GTag events on classic pages', () => {
 			} );
 		} );
 	} );
-
 } );

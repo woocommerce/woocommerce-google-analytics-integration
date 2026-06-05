@@ -429,6 +429,11 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 	public static function get_instance( $settings = array() ): WC_Abstract_Google_Analytics_JS {
 		if ( null === self::$instance ) {
 			self::$instance = new self( $settings );
+		} elseif ( ! empty( $settings ) ) {
+			// A static compatibility wrapper may have bootstrapped the instance with empty
+			// settings before the integration supplied the real ones. Rehydrate so later
+			// reads (e.g. enabled events, product identifier) reflect the current settings.
+			self::$instance->settings = $settings;
 		}
 
 		return self::$instance;

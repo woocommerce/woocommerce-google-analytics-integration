@@ -174,6 +174,28 @@ test.describe( 'GTag events on classic pages', () => {
 		} );
 	} );
 
+	test( 'Add to cart event uses the final cart item price', async ( {
+		page,
+	} ) => {
+		const finalPrice = '4.99';
+		const event = trackGtagEvent( page, 'add_to_cart' );
+
+		await page.goto(
+			`/?add-to-cart=${ simpleProductID }&ga4w_e2e_cart_item_price=${ finalPrice }`
+		);
+
+		await event.then( ( request ) => {
+			const data = getEventData( request, 'add_to_cart' );
+			expect( data.product1 ).toEqual( {
+				id: simpleProductID.toString(),
+				nm: 'Simple product',
+				ca: 'Uncategorized',
+				qt: '1',
+				pr: finalPrice,
+			} );
+		} );
+	} );
+
 	test( 'Add to cart event is sent after redirecting to the cart page', async ( {
 		page,
 	} ) => {

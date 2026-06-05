@@ -1,10 +1,35 @@
 import { setupEventHandlers } from './tracker';
+import * as formatters from './tracker/data-formatting';
+import * as utils from './utils';
 import { classicTracking } from './integrations/classic';
 import { blocksTracking } from './integrations/blocks';
 import {
 	setCurrentConsentState,
 	addConsentStateChangeEventListener,
 } from './integrations/wp-consent-api';
+
+/*
+ * Public JavaScript API, exposed on `window.wcGoogleAnalyticsIntegration` and
+ * mirrored onto `window.ga4w`. This is the supported extension surface:
+ *
+ * - `formatters`: the GA4 event formatters (`add_to_cart`, `view_item`,
+ *   `purchase`, …) used to build event payloads.
+ * - `utils`: the product/cart formatting helpers used to shape that data.
+ *
+ * Only the helpers below are part of the contract. Internal plumbing (e.g.
+ * `addUniqueAction`, `cacheBlockProducts`) is intentionally not exposed so it
+ * can change without breaking integrations.
+ */
+const publicApi = {
+	formatters,
+	utils: {
+		getProductFieldObject: utils.getProductFieldObject,
+		getProductImpressionObject: utils.getProductImpressionObject,
+		formatPrice: utils.formatPrice,
+		getProductId: utils.getProductId,
+		getCartCoupon: utils.getCartCoupon,
+	},
+};
 
 // Wait for 'ga4w:ready' event if `window.ga4w` is not there yet.
 if ( window.ga4w ) {
@@ -21,6 +46,15 @@ if ( window.ga4w ) {
 }
 
 function initializeTracking() {
+	// Expose the public API once window.ga4w (settings + data) is ready, so
+	// helpers such as getProductId resolve the configured identifier correctly
+	// instead of falling back to the numeric product ID.
+	window.wcGoogleAnalyticsIntegration = {
+		...( window.wcGoogleAnalyticsIntegration ?? {} ),
+		...publicApi,
+	};
+	Object.assign( window.ga4w, publicApi );
+
 	setCurrentConsentState( window.ga4w.settings );
 	addConsentStateChangeEventListener( window.ga4w.settings );
 

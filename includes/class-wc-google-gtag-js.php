@@ -66,6 +66,14 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 	 * @return void
 	 */
 	private function register_scripts(): void {
+		// Deregister first so this can be safely re-run when settings change after
+		// construction (see get_instance() rehydration). The `ga_id` baked into the
+		// GTM URL and the gtag `config` snippet must reflect the current settings.
+		// These are no-ops when nothing has been registered yet.
+		wp_deregister_script( 'google-tag-manager' );
+		wp_deregister_script( $this->gtag_script_handle );
+		wp_deregister_script( $this->script_handle );
+
 		wp_register_script(
 			'google-tag-manager',
 			'https://www.googletagmanager.com/gtag/js?id=' . $this->get_setting( 'ga_id' ),
@@ -430,10 +438,12 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 		if ( null === self::$instance ) {
 			self::$instance = new self( $settings );
 		} elseif ( ! empty( $settings ) ) {
-			// A static compatibility wrapper may have bootstrapped the instance with empty
+			// A direct get_instance() call may have bootstrapped the instance with empty
 			// settings before the integration supplied the real ones. Rehydrate so later
-			// reads (e.g. enabled events, product identifier) reflect the current settings.
+			// reads (e.g. enabled events, product identifier) reflect the current settings,
+			// and re-register the scripts so the baked-in ga_id / config match them too.
 			self::$instance->settings = $settings;
+			self::$instance->register_scripts();
 		}
 
 		return self::$instance;

@@ -934,19 +934,27 @@ export const blocksTracking = ( getEventHandler ) => {
 		`${ ACTION_PREFIX }-checkout-set-selected-shipping-rate`,
 		NAMESPACE,
 		( data ) => {
-			const storeCart = getCheckoutCartData( data.storeCart );
-			addShippingInfoTracked = trackCheckoutEvent(
-				'add_shipping_info',
-				getEventHandler,
-				{
-					...data,
-					shippingTier:
-						findShippingRateName(
-							storeCart,
-							data.shippingRateId
-						) ?? data.shippingRateId,
-				}
-			);
+			try {
+				const storeCart = getCheckoutCartData( data.storeCart );
+				const shippingRateId = data.shippingRateId;
+
+				addShippingInfoTracked = trackCheckoutEvent(
+					'add_shipping_info',
+					getEventHandler,
+					{
+						...data,
+						shippingTier:
+							findShippingRateName( storeCart, shippingRateId ) ??
+							shippingRateId,
+					}
+				);
+			} catch ( error ) {
+				addShippingInfoTracked = false;
+				warnTrackingError(
+					'could not prepare the add_shipping_info event.',
+					error
+				);
+			}
 		}
 	);
 
@@ -954,14 +962,24 @@ export const blocksTracking = ( getEventHandler ) => {
 		`${ ACTION_PREFIX }-checkout-set-active-payment-method`,
 		NAMESPACE,
 		( data ) => {
-			addPaymentInfoTracked = trackCheckoutEvent(
-				'add_payment_info',
-				getEventHandler,
-				{
-					...data,
-					paymentType: getPaymentTypeLabel( data.paymentMethodSlug ),
-				}
-			);
+			try {
+				addPaymentInfoTracked = trackCheckoutEvent(
+					'add_payment_info',
+					getEventHandler,
+					{
+						...data,
+						paymentType: getPaymentTypeLabel(
+							data.paymentMethodSlug
+						),
+					}
+				);
+			} catch ( error ) {
+				addPaymentInfoTracked = false;
+				warnTrackingError(
+					'could not prepare the add_payment_info event.',
+					error
+				);
+			}
 		}
 	);
 
@@ -969,33 +987,40 @@ export const blocksTracking = ( getEventHandler ) => {
 		`${ ACTION_PREFIX }-checkout-submit`,
 		NAMESPACE,
 		( data ) => {
-			const shippingTier = getSelectedShippingRate( data.storeCart );
+			try {
+				const shippingTier = getSelectedShippingRate( data.storeCart );
 
-			if ( ! addShippingInfoTracked && shippingTier ) {
-				addShippingInfoTracked = trackCheckoutEvent(
-					'add_shipping_info',
+				if ( ! addShippingInfoTracked && shippingTier ) {
+					addShippingInfoTracked = trackCheckoutEvent(
+						'add_shipping_info',
+						getEventHandler,
+						{
+							...data,
+							shippingTier,
+						}
+					);
+				}
+
+				if ( addPaymentInfoTracked ) {
+					return;
+				}
+
+				addPaymentInfoTracked = trackCheckoutEvent(
+					'add_payment_info',
 					getEventHandler,
 					{
 						...data,
-						shippingTier,
+						paymentType: getPaymentTypeLabel(
+							getActivePaymentMethod()
+						),
 					}
 				);
+			} catch ( error ) {
+				warnTrackingError(
+					'could not prepare checkout submit tracking.',
+					error
+				);
 			}
-
-			if ( addPaymentInfoTracked ) {
-				return;
-			}
-
-			addPaymentInfoTracked = trackCheckoutEvent(
-				'add_payment_info',
-				getEventHandler,
-				{
-					...data,
-					paymentType: getPaymentTypeLabel(
-						getActivePaymentMethod()
-					),
-				}
-			);
 		}
 	);
 

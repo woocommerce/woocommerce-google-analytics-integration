@@ -97,6 +97,8 @@ export function classicTracking(
 ) {
 	let shippingInfoTracked = false;
 	let paymentInfoTracked = false;
+	let cartSnapshot = cart;
+	const cartQuantityTrackedForms = new WeakSet();
 
 	const trackShippingInfo = ( shippingTier ) => {
 		shippingInfoTracked = true;
@@ -290,11 +292,11 @@ export function classicTracking(
 			return;
 		}
 		getEventHandler( 'remove_from_cart' )( {
-			product: getProductFromID( productID, products, cart ),
+			product: getProductFromID( productID, products, cartSnapshot ),
 		} );
 	}
 
-	function getQuantityChangeProduct( cartProduct, quantity ) {
+	function getCartItemUnitPrice( cartProduct ) {
 		const previousQuantity = parseInt( cartProduct?.quantity, 10 );
 		const linePrice = parseInt( cartProduct?.prices?.price, 10 );
 
@@ -303,6 +305,16 @@ export function classicTracking(
 			previousQuantity < 1 ||
 			! Number.isFinite( linePrice )
 		) {
+			return null;
+		}
+
+		return linePrice / previousQuantity;
+	}
+
+	function getQuantityChangeProduct( cartProduct, quantity ) {
+		const unitPrice = getCartItemUnitPrice( cartProduct );
+
+		if ( null === unitPrice ) {
 			return { ...cartProduct, quantity };
 		}
 
@@ -311,7 +323,24 @@ export function classicTracking(
 			quantity,
 			prices: {
 				...cartProduct.prices,
-				price: Math.round( linePrice / previousQuantity ),
+				price: Math.round( unitPrice ),
+			},
+		};
+	}
+
+	function getCartSnapshotProduct( cartProduct, quantity ) {
+		const unitPrice = getCartItemUnitPrice( cartProduct );
+
+		if ( null === unitPrice ) {
+			return { ...cartProduct, quantity };
+		}
+
+		return {
+			...cartProduct,
+			quantity,
+			prices: {
+				...cartProduct.prices,
+				price: Math.round( unitPrice * quantity ),
 			},
 		};
 	}
@@ -323,9 +352,10 @@ export function classicTracking(
 
 	function getProductFromCartItemRow( item, productID ) {
 		const cartItemKey = getCartItemKeyFromRow( item );
+		const cartItems = cartSnapshot?.items ?? [];
 
 		if ( cartItemKey ) {
-			const matchedCartItem = cart?.items?.find(
+			const matchedCartItem = cartItems.find(
 				( { key } ) => key === cartItemKey
 			);
 
@@ -342,82 +372,130 @@ export function classicTracking(
 		// than one cart line maps to this `productID` we can't tell them apart
 		// by ID alone. Bail out rather than risk attributing the change to the
 		// wrong variation's price and attributes.
-		const matchingItems =
-			cart?.items?.filter(
-				( { id } ) => String( id ) === String( productID )
-			) ?? [];
+		const matchingItems = cartItems.filter(
+			( { id } ) => String( id ) === String( productID )
+		);
 
 		if ( matchingItems.length > 1 ) {
 			return undefined;
 		}
 
-		return getProductFromID( productID, cart?.items, { items: products } );
+		return getProductFromID( productID, cartItems, { items: products } );
 	}
 
-	document
-		.querySelector( '.woocommerce-cart-form' )
-		?.addEventListener( 'submit', () => {
-			if ( ! cart?.items?.length ) {
-				return;
-			}
+	function syncCartSnapshotFromCartRows() {
+		if ( ! cartSnapshot?.items?.length ) {
+			return;
+		}
 
-			document
-				.querySelectorAll( classicCartItemSelector )
-				.forEach( ( item ) => {
-					const newQuantity = parseInt(
-						item.querySelector( 'input.qty' )?.value,
-						10
+		const syncedItems = [];
+
+		document
+			.querySelectorAll( classicCartItemSelector )
+			.forEach( ( item ) => {
+				const newQuantity = parseInt(
+					item.querySelector( 'input.qty' )?.value,
+					10
+				);
+				const productID = parseInt(
+					item.querySelector( '.remove[data-product_id]' )?.dataset
+						.product_id,
+					10
+				);
+				const matchedProduct = getProductFromCartItemRow(
+					item,
+					productID
+				);
+
+				if ( matchedProduct && Number.isFinite( newQuantity ) ) {
+					syncedItems.push(
+						getCartSnapshotProduct( matchedProduct, newQuantity )
 					);
+				}
+			} );
 
-					if ( ! Number.isFinite( newQuantity ) ) {
-						return;
-					}
+		cartSnapshot = {
+			...cartSnapshot,
+			items: syncedItems,
+		};
+	}
 
-					const productID = parseInt(
-						item.querySelector( '.remove[data-product_id]' )
-							?.dataset.product_id,
-						10
-					);
-					const matchedProduct = getProductFromCartItemRow(
-						item,
-						productID
-					);
-					const previousQuantity = parseInt(
-						matchedProduct?.quantity,
-						10
-					);
+	function handleCartQuantitySubmit() {
+		if ( ! cartSnapshot?.items?.length ) {
+			return;
+		}
 
-					if (
-						! matchedProduct ||
-						! Number.isFinite( previousQuantity ) ||
-						newQuantity === previousQuantity
-					) {
-						return;
-					}
+		document
+			.querySelectorAll( classicCartItemSelector )
+			.forEach( ( item ) => {
+				const newQuantity = parseInt(
+					item.querySelector( 'input.qty' )?.value,
+					10
+				);
 
-					const eventName =
-						newQuantity > previousQuantity
-							? 'add_to_cart'
-							: 'remove_from_cart';
-					const quantity = Math.abs( newQuantity - previousQuantity );
+				if ( ! Number.isFinite( newQuantity ) ) {
+					return;
+				}
 
-					getEventHandler( eventName )( {
-						product: getQuantityChangeProduct(
-							matchedProduct,
-							quantity
-						),
-					} );
+				const productID = parseInt(
+					item.querySelector( '.remove[data-product_id]' )?.dataset
+						.product_id,
+					10
+				);
+				const matchedProduct = getProductFromCartItemRow(
+					item,
+					productID
+				);
+				const previousQuantity = parseInt(
+					matchedProduct?.quantity,
+					10
+				);
+
+				if (
+					! matchedProduct ||
+					! Number.isFinite( previousQuantity ) ||
+					newQuantity === previousQuantity
+				) {
+					return;
+				}
+
+				const eventName =
+					newQuantity > previousQuantity
+						? 'add_to_cart'
+						: 'remove_from_cart';
+				const quantity = Math.abs( newQuantity - previousQuantity );
+
+				getEventHandler( eventName )( {
+					product: getQuantityChangeProduct(
+						matchedProduct,
+						quantity
+					),
 				} );
-		} );
+			} );
+	}
+
+	function attachCartQuantityChangeListener() {
+		const form = document.querySelector( '.woocommerce-cart-form' );
+
+		if ( ! form || cartQuantityTrackedForms.has( form ) ) {
+			return;
+		}
+
+		cartQuantityTrackedForms.add( form );
+		form.addEventListener( 'submit', handleCartQuantitySubmit );
+	}
 
 	// Attach event listeners on initial page load and when the cart div is updated
 	removeFromCartListener();
+	attachCartQuantityChangeListener();
 	const oldOnupdatedWcDiv = document.body.onupdated_wc_div;
 	document.body.onupdated_wc_div = function () {
 		if ( typeof oldOnupdatedWcDiv === 'function' ) {
 			oldOnupdatedWcDiv.apply( this, arguments );
 		}
+		syncCartSnapshotFromCartRows();
 		removeFromCartListener();
+		attachCartQuantityChangeListener();
 	};
 
 	// Trigger the handler when an item is removed from the mini-cart and WooCommerce dispatches the `removed_from_cart` event.

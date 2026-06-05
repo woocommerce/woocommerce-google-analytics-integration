@@ -361,6 +361,18 @@ test.describe( 'GTag events on block pages', () => {
 				'experimental__woocommerce_blocks-checkout-render-checkout-form',
 				checkoutData
 			);
+			window.wp.hooks.doAction(
+				'experimental__woocommerce_blocks-checkout-set-selected-shipping-rate',
+				checkoutData
+			);
+			window.wp.hooks.doAction(
+				'experimental__woocommerce_blocks-checkout-set-active-payment-method',
+				checkoutData
+			);
+			window.wp.hooks.doAction(
+				'experimental__woocommerce_blocks-checkout-submit',
+				checkoutData
+			);
 
 			return true;
 		} );

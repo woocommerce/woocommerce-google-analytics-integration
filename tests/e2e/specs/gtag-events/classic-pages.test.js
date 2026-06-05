@@ -407,6 +407,39 @@ test.describe( 'GTag events on classic pages', () => {
 		} );
 	} );
 
+	test( 'Add to cart event keeps tracking after classic cart AJAX replacement', async ( {
+		page,
+	} ) => {
+		await createClassicCartPage();
+		await simpleProductAddToCart( page, simpleProductID );
+		await page.goto( 'classic-cart' );
+
+		await page.locator( '.quantity input.qty' ).first().fill( '2' );
+
+		const firstEvent = trackGtagEvent( page, 'add_to_cart' );
+		await page.locator( 'button[name="update_cart"]' ).click();
+		await firstEvent;
+		await expect(
+			page.locator( '.woocommerce-cart-form .quantity input.qty' ).first()
+		).toHaveValue( '2' );
+
+		await page.locator( '.quantity input.qty' ).first().fill( '4' );
+
+		const secondEvent = trackGtagEvent( page, 'add_to_cart' );
+		await page.locator( 'button[name="update_cart"]' ).click();
+
+		await secondEvent.then( ( request ) => {
+			const data = getEventData( request, 'add_to_cart' );
+			expect( data.product1 ).toEqual( {
+				id: simpleProductID.toString(),
+				nm: 'Simple product',
+				ca: 'Uncategorized',
+				qt: '2',
+				pr: simpleProductPrice.toString(),
+			} );
+		} );
+	} );
+
 	test( 'Add to cart event uses cart data when the classic cart row falls back to product ID', async ( {
 		page,
 	} ) => {

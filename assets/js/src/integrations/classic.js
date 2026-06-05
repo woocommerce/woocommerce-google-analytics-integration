@@ -287,6 +287,87 @@ export function classicTracking(
 		} );
 	}
 
+	function getQuantityChangeProduct( cartProduct, quantity ) {
+		const previousQuantity = parseInt( cartProduct?.quantity, 10 );
+		const linePrice = parseInt( cartProduct?.prices?.price, 10 );
+
+		if (
+			! Number.isFinite( previousQuantity ) ||
+			previousQuantity < 1 ||
+			! Number.isFinite( linePrice )
+		) {
+			return { ...cartProduct, quantity };
+		}
+
+		return {
+			...cartProduct,
+			quantity,
+			prices: {
+				...cartProduct.prices,
+				price: Math.round( linePrice / previousQuantity ),
+			},
+		};
+	}
+
+	document
+		.querySelector( '.woocommerce-cart-form' )
+		?.addEventListener( 'submit', () => {
+			if ( ! cart?.items?.length ) {
+				return;
+			}
+
+			document
+				.querySelectorAll( '.woocommerce-cart-form .cart_item' )
+				.forEach( ( item ) => {
+					const productID = parseInt(
+						item.querySelector( '.remove[data-product_id]' )
+							?.dataset.product_id
+					);
+					const newQuantity = parseInt(
+						item.querySelector( 'input.qty' )?.value,
+						10
+					);
+
+					if (
+						Number.isNaN( productID ) ||
+						! Number.isFinite( newQuantity )
+					) {
+						return;
+					}
+
+					const matchedProduct = getProductFromID(
+						productID,
+						products,
+						cart
+					);
+					const previousQuantity = parseInt(
+						matchedProduct?.quantity,
+						10
+					);
+
+					if (
+						! matchedProduct ||
+						! Number.isFinite( previousQuantity ) ||
+						newQuantity === previousQuantity
+					) {
+						return;
+					}
+
+					const eventName =
+						newQuantity > previousQuantity
+							? 'add_to_cart'
+							: 'remove_from_cart';
+					const quantity = Math.abs( newQuantity - previousQuantity );
+
+					getEventHandler( eventName )( {
+						product: getQuantityChangeProduct(
+							matchedProduct,
+							quantity
+						),
+					} );
+				} );
+		} );
+
 	// Attach event listeners on initial page load and when the cart div is updated
 	removeFromCartListener();
 	const oldOnupdatedWcDiv = document.body.onupdated_wc_div;

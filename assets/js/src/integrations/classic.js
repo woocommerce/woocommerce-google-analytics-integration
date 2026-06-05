@@ -388,6 +388,14 @@ export function classicTracking(
 			return;
 		}
 
+		// The classic cart rows only exist on the cart page. On other pages
+		// (e.g. after a mini-cart AJAX update on the shop) `updated_wc_div`
+		// still fires but there are no rows to read, so leave the existing
+		// snapshot untouched instead of wiping it to an empty array.
+		if ( ! document.querySelector( '.woocommerce-cart-form' ) ) {
+			return;
+		}
+
 		const syncedItems = [];
 
 		document

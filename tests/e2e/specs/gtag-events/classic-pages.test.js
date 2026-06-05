@@ -174,6 +174,34 @@ test.describe( 'GTag events on classic pages', () => {
 		} );
 	} );
 
+	test( 'Add to cart event is sent after redirecting to the cart page', async ( {
+		page,
+	} ) => {
+		await setOptions( { woocommerce_cart_redirect_after_add: 'yes' } );
+
+		try {
+			const event = trackGtagEvent( page, 'add_to_cart' );
+
+			await page.goto( `?p=${ simpleProductID }` );
+			await page.locator( '.single_add_to_cart_button' ).first().click();
+
+			await expect( page ).toHaveURL( /\/cart\/?/ );
+
+			await event.then( ( request ) => {
+				const data = getEventData( request, 'add_to_cart' );
+				expect( data.product1 ).toEqual( {
+					id: simpleProductID.toString(),
+					nm: 'Simple product',
+					ca: 'Uncategorized',
+					qt: '1',
+					pr: simpleProductPrice.toString(),
+				} );
+			} );
+		} finally {
+			await setOptions( { woocommerce_cart_redirect_after_add: 'no' } );
+		}
+	} );
+
 	test( 'Add to cart event is sent on a variable product page', async ( {
 		page,
 	} ) => {

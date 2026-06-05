@@ -199,14 +199,22 @@ const getSelectedShippingRate = ( storeCart ) => {
 };
 
 const trackCheckoutEvent = ( eventName, getEventHandler, data = {} ) => {
-	const storeCart = getCheckoutCartData( data.storeCart );
+	try {
+		const storeCart = getCheckoutCartData( data.storeCart );
 
-	if ( ! storeCart?.items?.length ) {
+		if ( ! storeCart?.items?.length ) {
+			return false;
+		}
+
+		safeTrackEvent( getEventHandler, eventName, { ...data, storeCart } );
+		return true;
+	} catch ( error ) {
+		warnTrackingError(
+			`could not prepare the ${ eventName } event.`,
+			error
+		);
 		return false;
 	}
-
-	safeTrackEvent( getEventHandler, eventName, { ...data, storeCart } );
-	return true;
 };
 
 /**

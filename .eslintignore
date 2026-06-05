@@ -1,6 +1,0 @@
-!.eslintrc.js
-!.github
-build
-node_modules
-vendor
-tests/e2e/test-results

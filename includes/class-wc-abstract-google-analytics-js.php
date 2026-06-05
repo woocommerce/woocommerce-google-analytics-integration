@@ -351,9 +351,28 @@ abstract class WC_Abstract_Google_Analytics_JS {
 	 * @return void
 	 */
 	public function capture_added_to_cart( $cart_item_key, $product_id, $quantity, $variation_id, $variation ): void {
-		$formatted = $this->get_formatted_product( wc_get_product( $product_id ), $variation_id, $variation, $quantity );
-		$this->set_script_data( 'added_to_cart', $formatted );
-		$this->pending_added_to_cart = $formatted;
+		$cart_item = null;
+		if ( WC()->cart && isset( WC()->cart->cart_contents[ $cart_item_key ] ) ) {
+			$cart_item = WC()->cart->cart_contents[ $cart_item_key ];
+		}
+
+		$product   = $cart_item['data'] ?? wc_get_product( $product_id );
+		$formatted = $this->get_formatted_product( $product, $variation_id, $variation, $quantity );
+
+		if ( null === $this->pending_added_to_cart ) {
+			$this->set_script_data( 'added_to_cart', $formatted );
+			$this->pending_added_to_cart = $formatted;
+			return;
+		}
+
+		$is_grouped_capture = isset( $this->pending_added_to_cart[0] ) && is_array( $this->pending_added_to_cart[0] );
+		$products           = $is_grouped_capture
+			? $this->pending_added_to_cart
+			: array( $this->pending_added_to_cart );
+		$products[]         = $formatted;
+
+		$this->set_script_data( 'added_to_cart', $products );
+		$this->pending_added_to_cart = $products;
 	}
 
 	/**

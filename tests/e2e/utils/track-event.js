@@ -35,6 +35,20 @@ function splitProductData( data ) {
 	);
 }
 
+function withProductData( data ) {
+	// Split data for first product.
+	if ( data.pr1 ) {
+		data.product1 = splitProductData( data.pr1 );
+	}
+
+	// Split data for second product.
+	if ( data.pr2 ) {
+		data.product2 = splitProductData( data.pr2 );
+	}
+
+	return data;
+}
+
 /**
  * Tracks when the Gtag Event request matching a specific name is sent.
  *
@@ -97,15 +111,32 @@ export function getEventData( request, eventName ) {
 		};
 	}
 
-	// Split data for first product.
-	if ( data.pr1 ) {
-		data.product1 = splitProductData( data.pr1 );
+	return withProductData( data );
+}
+
+/**
+ * Retrieve all matching events from a Gtag request.
+ *
+ * @param {Request} request
+ * @param {string}  eventName Event name to match.
+ *
+ * @return {Object[]} Event data objects.
+ */
+export function getAllEventData( request, eventName ) {
+	const url = new URL( request.url() );
+	const params = new URLSearchParams( url.search );
+	const baseData = Object.fromEntries( params.entries() );
+
+	if ( baseData.en ) {
+		return baseData.en === eventName ? [ withProductData( baseData ) ] : [];
 	}
 
-	// Split data for second product.
-	if ( data.pr2 ) {
-		data.product2 = splitProductData( data.pr2 );
-	}
-
-	return data;
+	return ( request.postData() || '' )
+		.split( /\r?\n/ )
+		.map( ( eventData ) => ( {
+			...baseData,
+			...Object.fromEntries( new URLSearchParams( eventData ).entries() ),
+		} ) )
+		.filter( ( data ) => data.en === eventName )
+		.map( withProductData );
 }

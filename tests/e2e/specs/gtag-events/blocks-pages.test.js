@@ -548,6 +548,29 @@ test.describe( 'GTag events on block pages', () => {
 		} );
 	} );
 
+	test( 'Begin checkout event for a variable product includes category and variation data', async ( {
+		page,
+	} ) => {
+		await variableProductAddToCart( page, variableProductID );
+
+		const event = trackGtagEvent( page, 'begin_checkout' );
+		await page.goto( 'checkout' );
+
+		await event.then( ( request ) => {
+			const data = getEventData( request, 'begin_checkout' );
+			expect( data.product1 ).toMatchObject( {
+				id: variableProductID.toString(),
+				nm: 'Variable product',
+				ca: 'Uncategorized',
+				qt: '1',
+				pr: '18.99',
+				va: 'colour: Green, size: Medium',
+			} );
+			expect( data.cu ).toEqual( 'USD' );
+			expect( data[ 'epn.value' ] ).toEqual( '18.99' );
+		} );
+	} );
+
 	test( 'Add shipping info event is sent from a checkout page', async ( {
 		page,
 	} ) => {

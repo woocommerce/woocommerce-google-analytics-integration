@@ -517,12 +517,23 @@ abstract class WC_Abstract_Google_Analytics_JS {
 	}
 
 	/**
-	 * Return the current instance for compatibility wrappers.
+	 * Return an instance for the static compatibility wrappers to read settings from.
+	 *
+	 * If a tracking instance has already been bootstrapped, reuse it. Otherwise build a
+	 * lightweight, settings-only instance without invoking the constructor, so reading a
+	 * setting never registers scripts/hooks, enqueues anything, or installs a live
+	 * singleton. This mirrors the pre-refactor static helpers, which read settings with
+	 * no side effects even when the integration skipped get_tracking_instance() (e.g.
+	 * `ga_id` is unset).
 	 *
 	 * @return WC_Abstract_Google_Analytics_JS
 	 */
 	protected static function get_compatibility_instance(): WC_Abstract_Google_Analytics_JS {
-		return static::$instance ?? static::get_instance();
+		if ( static::$instance ) {
+			return static::$instance;
+		}
+
+		return ( new \ReflectionClass( static::class ) )->newInstanceWithoutConstructor();
 	}
 
 	/**

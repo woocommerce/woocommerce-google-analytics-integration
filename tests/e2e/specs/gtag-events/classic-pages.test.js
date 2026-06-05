@@ -286,6 +286,33 @@ test.describe( 'GTag events on classic pages', () => {
 		} );
 	} );
 
+	test( 'Select content event is sent from a classic shop page before navigation', async ( {
+		page,
+	} ) => {
+		await createClassicShopPage();
+
+		const listEvent = trackGtagEvent( page, 'view_item_list' );
+		await page.goto( 'classic-shop?orderby=date' );
+		await listEvent;
+
+		const event = trackGtagEvent( page, 'select_content' );
+		const productLink = page
+			.locator(
+				`li.post-${ simpleProductID } .woocommerce-loop-product__link`
+			)
+			.first();
+
+		await Promise.all( [ event, productLink.click() ] );
+
+		await event.then( ( request ) => {
+			const data = getEventData( request, 'select_content' );
+			expect( data[ 'ep.content_type' ] ).toEqual( 'product' );
+			expect( data[ 'ep.content_id' ] ).toEqual(
+				simpleProductID.toString()
+			);
+		} );
+	} );
+
 	test( 'Remove from cart event is sent from a classic cart page', async ( {
 		page,
 	} ) => {

@@ -419,6 +419,31 @@ test.describe( 'GTag events on block pages', () => {
 		} );
 	} );
 
+	test( 'Remove from cart event for a variable product is sent from the cart page', async ( {
+		page,
+	} ) => {
+		await variableProductAddToCart( page, variableProductID );
+
+		const event = trackGtagEvent( page, 'remove_from_cart' );
+		await page.goto( 'cart' );
+
+		await page
+			.locator( '.wc-block-cart-item__remove-link' )
+			.first()
+			.click();
+
+		await event.then( ( request ) => {
+			const data = getEventData( request, 'remove_from_cart' );
+			expect( data.product1 ).toMatchObject( {
+				id: variableProductID.toString(),
+				nm: 'Variable product',
+				qt: '1',
+				pr: '18.99',
+				va: 'colour: Green, size: Medium',
+			} );
+		} );
+	} );
+
 	test( 'Remove from cart event is sent from the mini cart', async ( {
 		page,
 	} ) => {

@@ -7,10 +7,15 @@ const { test, expect } = require( '@playwright/test' );
  * Internal dependencies
  */
 import {
+	createCaliforniaTaxRate,
+	createGroupedProduct,
+	createPercentageCoupon,
 	createSimpleProduct,
 	createVariableProduct,
+	deleteTaxRate,
 	setSettings,
 	clearSettings,
+	setOptions,
 } from '../../utils/api';
 import {
 	createClassicCartPage,
@@ -24,7 +29,11 @@ import {
 	simpleProductAddToCart,
 	variableProductAddToCart,
 } from '../../utils/customer';
-import { getEventData, trackGtagEvent } from '../../utils/track-event';
+import {
+	getAllEventData,
+	getEventData,
+	trackGtagEvent,
+} from '../../utils/track-event';
 
 const config = require( '../../config/default' );
 const simpleProductPrice = parseFloat( config.products.simple.regular_price );
@@ -472,16 +481,20 @@ test.describe( 'GTag events on classic pages', () => {
 				va: 'colour: Green, size: Medium',
 			} );
 
-			expect( data[ 'epn.transaction_id' ] ).toEqual( orderID );
+			expect( data[ 'ep.transaction_id' ] ).toEqual( orderID );
 			expect( data[ 'ep.affiliation' ] ).toEqual(
 				'WooCommerce E2E Test Suite'
 			);
 
-			const total = simpleProductPrice + simpleProductPrice + 18.99;
+			const shipping = 10;
+			const total =
+				simpleProductPrice + simpleProductPrice + 18.99 + shipping;
 			expect( data.cu ).toEqual( 'USD' );
 			expect( data[ 'epn.value' ] ).toEqual(
 				total.toFixed( 2 ).toString()
 			);
+			expect( data[ 'epn.tax' ] ).toEqual( '0' );
+			expect( data[ 'epn.shipping' ] ).toEqual( shipping.toString() );
 		} );
 	} );
 } );

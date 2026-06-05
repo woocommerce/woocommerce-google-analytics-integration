@@ -115,7 +115,15 @@ export function classicTracking(
 	// Instantly track the events listed in the `events` object.
 	Object.values( events ?? {} ).forEach( ( eventName ) => {
 		if ( eventName === 'add_to_cart' ) {
-			getEventHandler( eventName )( { product: addedToCart } );
+			const addedProducts = Array.isArray( addedToCart )
+				? addedToCart
+				: [ addedToCart ];
+
+			addedProducts.filter( Boolean ).forEach( ( productToHandle ) => {
+				getEventHandler( eventName )( {
+					product: productToHandle,
+				} );
+			} );
 		} else {
 			getEventHandler( eventName )( {
 				storeCart: cart,

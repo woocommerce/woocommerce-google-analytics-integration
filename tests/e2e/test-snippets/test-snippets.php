@@ -122,3 +122,24 @@ add_action(
 		return $slug;
 	}
 );
+
+/*
+ * Test-only dynamic pricing hook. The add-to-cart request can pass a
+ * `ga4w_e2e_cart_item_price` value to verify tracking reads the final cart item
+ * price, not only the catalog product price.
+ */
+add_filter(
+	'woocommerce_add_cart_item',
+	function ( $cart_item ) {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( ! isset( $_REQUEST['ga4w_e2e_cart_item_price'] ) ) {
+			return $cart_item;
+		}
+
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$price = sanitize_text_field( wp_unslash( $_REQUEST['ga4w_e2e_cart_item_price'] ) );
+		$cart_item['data']->set_price( wc_format_decimal( $price ) );
+
+		return $cart_item;
+	}
+);

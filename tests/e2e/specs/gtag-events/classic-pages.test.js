@@ -7,6 +7,7 @@ const { test, expect } = require( '@playwright/test' );
  * Internal dependencies
  */
 import {
+	api,
 	createCaliforniaTaxRate,
 	createGroupedProduct,
 	createPercentageCoupon,
@@ -402,6 +403,147 @@ test.describe( 'GTag events on classic pages', () => {
 				ca: 'Uncategorized',
 				qt: '2',
 				pr: simpleProductPrice.toString(),
+			} );
+		} );
+	} );
+
+	test( 'Add to cart event uses cart data when the classic cart row falls back to product ID', async ( {
+		page,
+	} ) => {
+		await createClassicCartPage();
+		await simpleProductAddToCart( page, simpleProductID );
+		await page.goto( 'classic-cart' );
+
+		await page.evaluate( ( productID ) => {
+			const row = document.querySelector(
+				'.woocommerce-cart-form .woocommerce-cart-form__cart-item'
+			);
+			const quantityInput = row?.querySelector( 'input.qty' );
+
+			if ( ! row || ! quantityInput ) {
+				throw new Error( 'Classic cart row was not found.' );
+			}
+
+			row.classList.remove( 'cart_item' );
+			quantityInput.removeAttribute( 'name' );
+			window.ga4w.data.products = [
+				{
+					id: productID,
+					name: 'Catalog Simple product',
+					categories: [],
+					prices: {
+						price: 999,
+						currency_minor_unit: 2,
+					},
+				},
+				...( window.ga4w.data.products || [] ),
+			];
+		}, simpleProductID );
+
+		await page
+			.locator( '.woocommerce-cart-form__cart-item input.qty' )
+			.first()
+			.fill( '3' );
+
+		const event = trackGtagEvent( page, 'add_to_cart' );
+		await page.evaluate( () => {
+			document.querySelector( '.woocommerce-cart-form' ).dispatchEvent(
+				new Event( 'submit', {
+					bubbles: true,
+					cancelable: true,
+				} )
+			);
+		} );
+
+		await event.then( ( request ) => {
+			const data = getEventData( request, 'add_to_cart' );
+			expect( data.product1 ).toEqual( {
+				id: simpleProductID.toString(),
+				nm: 'Simple product',
+				ca: 'Uncategorized',
+				qt: '2',
+				pr: simpleProductPrice.toString(),
+			} );
+		} );
+	} );
+
+	test( 'Add to cart event uses the changed variation when increasing quantity on a classic cart page', async ( {
+		page,
+	} ) => {
+		await createClassicCartPage();
+
+		const variations = await api()
+			.get( `products/${ variableProductID }/variations` )
+			.then( ( response ) => response.data );
+		const findVariation = ( attributes ) =>
+			variations.find( ( variation ) =>
+				attributes.every( ( { name, option } ) =>
+					variation.attributes.some(
+						( attribute ) =>
+							attribute.name === name &&
+							attribute.option === option
+					)
+				)
+			);
+		const addVariationToCart = async ( variation ) => {
+			const params = new URLSearchParams( {
+				'add-to-cart': variableProductID,
+				variation_id: variation.id,
+			} );
+
+			variation.attributes.forEach( ( { name, option } ) => {
+				params.set( `attribute_${ name.toLowerCase() }`, option );
+			} );
+
+			const event = trackGtagEvent( page, 'add_to_cart' );
+			await page.goto( `?${ params.toString() }` );
+			await event;
+		};
+
+		await addVariationToCart(
+			findVariation( [
+				{ name: 'Colour', option: 'Red' },
+				{ name: 'Size', option: 'Large' },
+			] )
+		);
+		await addVariationToCart(
+			findVariation( [
+				{ name: 'Colour', option: 'Green' },
+				{ name: 'Size', option: 'Medium' },
+			] )
+		);
+		await page.goto( 'classic-cart' );
+
+		await expect(
+			page.locator( '.woocommerce-cart-form .cart_item' )
+		).toHaveCount( 2 );
+
+		const greenVariationRow = page
+			.locator( '.woocommerce-cart-form .cart_item' )
+			.filter( { hasText: 'Green' } );
+		const greenVariationQuantity = greenVariationRow.locator( 'input.qty' );
+		const previousQuantity = parseInt(
+			await greenVariationQuantity.inputValue(),
+			10
+		);
+
+		expect( previousQuantity ).toBeGreaterThan( 0 );
+		await greenVariationQuantity.fill(
+			( previousQuantity + 1 ).toString()
+		);
+
+		const event = trackGtagEvent( page, 'add_to_cart' );
+		await page.locator( 'button[name="update_cart"]' ).click();
+
+		await event.then( ( request ) => {
+			const data = getEventData( request, 'add_to_cart' );
+			expect( data.product1 ).toEqual( {
+				id: variableProductID.toString(),
+				nm: 'Variable product',
+				ca: 'Uncategorized',
+				qt: '1',
+				pr: '18.99',
+				va: 'colour: Green, size: Medium',
 			} );
 		} );
 	} );

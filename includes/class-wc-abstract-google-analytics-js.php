@@ -237,22 +237,23 @@ abstract class WC_Abstract_Google_Analytics_JS {
 			return array();
 		}
 
+		$items = array();
+		foreach ( $cart->get_cart() as $cart_item_key => $item ) {
+			$items[] = array_merge(
+				$this->get_formatted_product( $item['data'] ),
+				array(
+					'key'      => $cart_item_key,
+					'quantity' => $item['quantity'],
+					'prices'   => array(
+						'price'               => $this->get_formatted_price( $item['line_total'] ),
+						'currency_minor_unit' => wc_get_price_decimals(),
+					),
+				)
+			);
+		}
+
 		return array(
-			'items'   => array_map(
-				function ( $item ) {
-					return array_merge(
-						$this->get_formatted_product( $item['data'] ),
-						array(
-							'quantity' => $item['quantity'],
-							'prices'   => array(
-								'price'               => $this->get_formatted_price( $item['line_total'] ),
-								'currency_minor_unit' => wc_get_price_decimals(),
-							),
-						)
-					);
-				},
-				array_values( $cart->get_cart() )
-			),
+			'items'   => $items,
 			'coupons' => $cart->get_coupons(),
 			'totals'  => array(
 				'currency_code'       => get_woocommerce_currency(),

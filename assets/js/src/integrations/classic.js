@@ -3,6 +3,8 @@ import { getProductFromID } from '../utils';
 const checkoutPaymentMethodSelector = 'input[name="payment_method"]';
 const checkoutShippingMethodSelector =
 	'input[name^="shipping_method"], select[name^="shipping_method"]';
+const classicCartItemSelector =
+	'.woocommerce-cart-form .woocommerce-cart-form__cart-item, .woocommerce-cart-form .cart_item';
 
 const getSelectedCheckoutOption = ( selector ) =>
 	Array.from( document.querySelectorAll( selector ) ).find(
@@ -309,6 +311,29 @@ export function classicTracking(
 		};
 	}
 
+	function getCartItemKeyFromRow( item ) {
+		const inputName = item.querySelector( 'input.qty' )?.name;
+		return inputName?.match( /^cart\[([^\]]+)\]\[qty]$/ )?.[ 1 ];
+	}
+
+	function getProductFromCartItemRow( item, productID ) {
+		const cartItemKey = getCartItemKeyFromRow( item );
+
+		if ( cartItemKey ) {
+			const matchedCartItem = cart?.items?.find(
+				( { key } ) => key === cartItemKey
+			);
+
+			if ( matchedCartItem ) {
+				return matchedCartItem;
+			}
+		}
+
+		return Number.isNaN( productID )
+			? undefined
+			: getProductFromID( productID, cart?.items, { items: products } );
+	}
+
 	document
 		.querySelector( '.woocommerce-cart-form' )
 		?.addEventListener( 'submit', () => {
@@ -317,28 +342,25 @@ export function classicTracking(
 			}
 
 			document
-				.querySelectorAll( '.woocommerce-cart-form .cart_item' )
+				.querySelectorAll( classicCartItemSelector )
 				.forEach( ( item ) => {
-					const productID = parseInt(
-						item.querySelector( '.remove[data-product_id]' )
-							?.dataset.product_id
-					);
 					const newQuantity = parseInt(
 						item.querySelector( 'input.qty' )?.value,
 						10
 					);
 
-					if (
-						Number.isNaN( productID ) ||
-						! Number.isFinite( newQuantity )
-					) {
+					if ( ! Number.isFinite( newQuantity ) ) {
 						return;
 					}
 
-					const matchedProduct = getProductFromID(
-						productID,
-						products,
-						cart
+					const productID = parseInt(
+						item.querySelector( '.remove[data-product_id]' )
+							?.dataset.product_id,
+						10
+					);
+					const matchedProduct = getProductFromCartItemRow(
+						item,
+						productID
 					);
 					const previousQuantity = parseInt(
 						matchedProduct?.quantity,

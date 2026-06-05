@@ -141,6 +141,30 @@ test.describe( 'GTag events on classic pages', () => {
 		} );
 	} );
 
+	test( 'Add to cart event falls back to single product data when the event has no button', async ( {
+		page,
+	} ) => {
+		const event = trackGtagEvent( page, 'add_to_cart' );
+
+		await page.goto( `?p=${ simpleProductID }` );
+		await page.evaluate( () => {
+			window
+				.jQuery( document.body )
+				.trigger( 'added_to_cart', [ {}, 'test-cart-hash' ] );
+		} );
+
+		await event.then( ( request ) => {
+			const data = getEventData( request, 'add_to_cart' );
+			expect( data.product1 ).toEqual( {
+				id: simpleProductID.toString(),
+				nm: 'Simple product',
+				ca: 'Uncategorized',
+				qt: '1',
+				pr: simpleProductPrice.toString(),
+			} );
+		} );
+	} );
+
 	test( 'Add to cart event is sent on a variable product page', async ( {
 		page,
 	} ) => {

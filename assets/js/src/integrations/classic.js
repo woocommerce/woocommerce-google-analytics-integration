@@ -196,7 +196,17 @@ export function classicTracking(
 			buttonElement?.dataset.product_id || buttonElement?.value
 		);
 
+		let productToHandle;
 		if ( Number.isNaN( productID ) ) {
+			productToHandle = addedToCart ?? product;
+
+			if ( productToHandle ) {
+				getEventHandler( 'add_to_cart' )( {
+					product: productToHandle,
+				} );
+				return;
+			}
+
 			// eslint-disable-next-line no-console
 			console.error(
 				'Google Analytics for WooCommerce: Could not read product ID from the button given in `added_to_cart` event. Check whether WooCommerce Core events or elements are malformed by other extensions.'
@@ -205,7 +215,7 @@ export function classicTracking(
 		}
 
 		// If the current product doesn't match search by ID.
-		const productToHandle =
+		productToHandle =
 			product?.id === productID
 				? product
 				: getProductFromID( productID, products, cart );

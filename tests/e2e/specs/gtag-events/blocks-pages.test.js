@@ -19,6 +19,7 @@ import {
 	variableProductAddToCart,
 	storeApiAddToCart,
 	storeApiBatchAddToCart,
+	storeApiBatchDecreaseCartQuantity,
 	storeApiBatchIncreaseCartQuantity,
 	waitForStoreApiInterceptor,
 } from '../../utils/customer';
@@ -142,6 +143,148 @@ test.describe( 'GTag events on block pages', () => {
 				qt: '2',
 				// Price reflects the two added units (the scaled line total).
 				pr: ( simpleProductPrice * 2 ).toString(),
+			} );
+		} );
+	} );
+
+	test( 'Remove from cart event is sent when a Store API batch update-item decreases the quantity', async ( {
+		page,
+	} ) => {
+		const updateProductID = await createSimpleProduct();
+		await page.goto( 'shop?orderby=date' );
+
+		const seedEvent = trackGtagEvent( page, 'add_to_cart' );
+		await storeApiAddToCart( page, updateProductID, 3 );
+		await seedEvent;
+
+		const event = trackGtagEvent( page, 'remove_from_cart' );
+		await storeApiBatchDecreaseCartQuantity( page, updateProductID, 2 );
+
+		await event.then( ( request ) => {
+			const data = getEventData( request, 'remove_from_cart' );
+			expect( data.product1 ).toMatchObject( {
+				id: updateProductID.toString(),
+				nm: 'Simple product',
+				qt: '2',
+				pr: ( simpleProductPrice * 2 ).toString(),
+			} );
+		} );
+	} );
+
+	test( 'Remove from cart event is sent when update-item removes a stale cart line', async ( {
+		page,
+	} ) => {
+		const updateProductID = await createSimpleProduct();
+		await page.goto( 'shop?orderby=date' );
+
+		const seedEvent = trackGtagEvent( page, 'add_to_cart' );
+		await storeApiAddToCart( page, updateProductID, 3 );
+		await seedEvent;
+		await waitForStoreApiInterceptor( page );
+
+		const event = trackGtagEvent( page, 'remove_from_cart' );
+		await page.evaluate( async ( productID ) => {
+			const cartResponse = await window.fetch(
+				'/wp-json/wc/store/v1/cart'
+			);
+			const nonce =
+				cartResponse.headers.get( 'Nonce' ) ||
+				cartResponse.headers.get( 'X-WC-Store-API-Nonce' );
+			const cart = await cartResponse.json();
+			const item = cart.items.find(
+				( cartItem ) => parseInt( cartItem.id, 10 ) === productID
+			);
+
+			if ( ! item ) {
+				throw new Error( `Product ${ productID } is not in the cart` );
+			}
+
+			const originalSelect = window.wp?.data?.select;
+			const originalCart = window.ga4w?.data?.cart;
+
+			if ( window.wp?.data && originalSelect ) {
+				window.wp.data.select = ( store ) => {
+					if ( store === 'wc/store/cart' ) {
+						return { getCartData: () => ( { items: [] } ) };
+					}
+
+					return originalSelect( store );
+				};
+			}
+
+			if ( window.ga4w?.data ) {
+				window.ga4w.data.cart = null;
+			}
+
+			try {
+				const response = await window.fetch(
+					'/wp-json/wc/store/v1/batch',
+					{
+						method: 'POST',
+						headers: {
+							'Content-Type': 'application/json',
+							...( nonce ? { Nonce: nonce } : {} ),
+						},
+						body: JSON.stringify( {
+							requests: [
+								{
+									method: 'POST',
+									path: '/wc/store/v1/cart/update-item',
+									headers: nonce ? { Nonce: nonce } : {},
+									body: {
+										key: item.key,
+										quantity: 0,
+									},
+								},
+							],
+						} ),
+					}
+				);
+
+				if ( ! response.ok ) {
+					throw new Error( await response.text() );
+				}
+			} finally {
+				if ( window.wp?.data && originalSelect ) {
+					window.wp.data.select = originalSelect;
+				}
+
+				if ( window.ga4w?.data ) {
+					window.ga4w.data.cart = originalCart;
+				}
+			}
+		}, updateProductID );
+
+		await event.then( ( request ) => {
+			const data = getEventData( request, 'remove_from_cart' );
+			expect( data.product1 ).toMatchObject( {
+				id: updateProductID.toString(),
+				nm: 'Simple product',
+				qt: '3',
+				pr: ( simpleProductPrice * 3 ).toString(),
+			} );
+		} );
+	} );
+
+	test( 'Add to cart event is sent when increasing quantity on the cart page', async ( {
+		page,
+	} ) => {
+		await simpleProductAddToCart( page, simpleProductID );
+		await page.goto( 'cart' );
+
+		const event = trackGtagEvent( page, 'add_to_cart' );
+		await page
+			.locator( '.wc-block-components-quantity-selector__button--plus' )
+			.first()
+			.click();
+
+		await event.then( ( request ) => {
+			const data = getEventData( request, 'add_to_cart' );
+			expect( data.product1 ).toMatchObject( {
+				id: simpleProductID.toString(),
+				nm: 'Simple product',
+				qt: '1',
+				pr: simpleProductPrice.toString(),
 			} );
 		} );
 	} );

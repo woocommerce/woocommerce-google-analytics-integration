@@ -267,6 +267,66 @@ export async function storeApiBatchIncreaseCartQuantity(
 }
 
 /**
+ * Lowers the quantity of a cart item through the Store API batch endpoint.
+ *
+ * @param {Page}   page
+ * @param {number} productID
+ * @param {number} decreaseBy How many units to remove from the current quantity.
+ */
+export async function storeApiBatchDecreaseCartQuantity(
+	page,
+	productID,
+	decreaseBy = 1
+) {
+	await waitForStoreApiInterceptor( page );
+
+	await page.evaluate(
+		async ( { id, delta } ) => {
+			const cartResponse = await window.fetch(
+				'/wp-json/wc/store/v1/cart'
+			);
+			const nonce =
+				cartResponse.headers.get( 'Nonce' ) ||
+				cartResponse.headers.get( 'X-WC-Store-API-Nonce' );
+			const cart = await cartResponse.json();
+			const item = cart.items.find(
+				( cartItem ) => parseInt( cartItem.id, 10 ) === id
+			);
+
+			if ( ! item ) {
+				throw new Error( `Product ${ id } is not in the cart` );
+			}
+
+			const response = await window.fetch( '/wp-json/wc/store/v1/batch', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+					...( nonce ? { Nonce: nonce } : {} ),
+				},
+				body: JSON.stringify( {
+					requests: [
+						{
+							method: 'POST',
+							path: '/wc/store/v1/cart/update-item',
+							headers: nonce ? { Nonce: nonce } : {},
+							body: {
+								key: item.key,
+								quantity: Math.max( item.quantity - delta, 0 ),
+							},
+						},
+					],
+				} ),
+			} );
+
+			if ( ! response.ok ) {
+				throw new Error( await response.text() );
+			}
+		},
+		{ id: productID, delta: decreaseBy }
+	);
+}
+
+/**
  * Perform checkout steps to purchase a product.
  *
  * @param {Page} page

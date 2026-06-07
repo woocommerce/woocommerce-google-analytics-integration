@@ -13,33 +13,33 @@ let addPaymentInfoTracked = false;
 /*
  * Track recently dispatched add_to_cart events so the cart-add-item hook and
  * the fetch interceptor don't both fire for the same Store API add. Entries
- * auto-expire after 50ms, which is long enough for the second code path to
+ * auto-expire after 200ms, which is long enough for the second code path to
  * short-circuit but short enough that a deliberate second add of the same
  * product is not swallowed.
  */
 const recentlyAdded = new Set();
-const DEDUP_WINDOW = 50;
+const DEDUP_WINDOW = 200;
 let addItemStoreApiTrackingStarted = false;
-let addItemEventHandler = null;
+let storeApiEventHandler = null;
 
 /*
- * Last quantity observed for each cart line item (keyed by Store API line item
+ * Last item observed for each cart line item (keyed by Store API line item
  * key), recorded from every Store API cart response the interceptor sees. A
- * follow-up update-item is reported as the added delta against this value, which
- * stays correct across repeated adds of the same product on a single page load —
- * the cart data exposed to the page (wc/store/cart, or the static window.ga4w
- * cart) reflects page-load state and would otherwise go stale.
+ * follow-up update-item is reported as the changed delta against this value,
+ * which stays correct across repeated cart changes on a single page load — the
+ * cart data exposed to the page (wc/store/cart, or the static window.ga4w cart)
+ * reflects page-load state and would otherwise go stale.
  */
-const lastSeenCartQuantities = new Map();
+const lastSeenCartItems = new Map();
 
-const rememberCartQuantities = ( cart ) => {
+const rememberCartItems = ( cart ) => {
 	if ( ! Array.isArray( cart?.items ) ) {
 		return;
 	}
 
 	cart.items.forEach( ( item ) => {
 		if ( item?.key !== undefined && item?.key !== null ) {
-			lastSeenCartQuantities.set( item.key, item.quantity );
+			lastSeenCartItems.set( item.key, item );
 		}
 	} );
 };
@@ -63,9 +63,9 @@ const safeTrackEvent = ( getEventHandler, eventName, data ) => {
  * How long to wait before the batch interceptor dispatches its add_to_cart
  * event. The All Products Block bundles its add into a Store API batch request
  * and fires the cart-add-item hook ~2ms after the batch response resolves, so
- * the interceptor must give the hook time to claim the add (via recentlyAdded)
+ * the interceptor must give the hook time to claim the add
  * before falling back to firing the event itself. Comfortably larger than the
- * hook latency yet well within the 50ms de-dup window above.
+ * hook latency yet well within the 200ms de-dup window above.
  */
 const BATCH_ADD_TRACK_DELAY = 25;
 
@@ -376,6 +376,23 @@ const isStoreApiAddItemRequest = ( input, init = {} ) => {
 };
 
 /**
+ * Check whether a fetch call is updating an item through the Store API.
+ *
+ * @param {Request|string|URL} input Fetch input.
+ * @param {Object}             init  Fetch options.
+ * @return {boolean} Whether the request is a Store API cart update item request.
+ */
+const isStoreApiUpdateItemRequest = ( input, init = {} ) => {
+	const info = getStoreApiRequestInfo( input, init );
+
+	return (
+		!! info &&
+		info.method === 'POST' &&
+		STORE_API_UPDATE_ITEM_PATH.test( info.pathname )
+	);
+};
+
+/**
  * Check whether a fetch call is a Store API batch request, which Interactivity
  * API powered add-to-cart blocks use to bundle their cart mutations.
  *
@@ -514,28 +531,57 @@ const getAddedCartItem = ( cartAfter, cartBefore, requestProductId ) => {
 		: undefined;
 };
 
+const getAddedQuantity = ( item, cartBefore, requestedQuantity ) => {
+	const itemQuantity = parseInt( item?.quantity, 10 );
+
+	if (
+		Array.isArray( cartBefore?.items ) &&
+		Number.isFinite( itemQuantity )
+	) {
+		const previousItem = cartBefore.items.find(
+			( beforeItem ) =>
+				getCartItemKey( beforeItem ) === getCartItemKey( item )
+		);
+		const previousQuantity = parseInt( previousItem?.quantity ?? 0, 10 );
+
+		if ( Number.isFinite( previousQuantity ) ) {
+			const addedQuantity = itemQuantity - previousQuantity;
+
+			if ( addedQuantity > 0 ) {
+				return addedQuantity;
+			}
+		}
+	}
+
+	return Number.isFinite( itemQuantity )
+		? Math.min( requestedQuantity, itemQuantity )
+		: requestedQuantity;
+};
+
 /**
- * Scale a cart line item's line total down to a subset of its quantity.
+ * Scale a cart line item's line total to the quantity being reported.
  *
- * A Store API cart line's `line_total` covers its full quantity. When only part
- * of that quantity is reported as an add — a repeated add of a product already
- * in the cart, or a quantity increase — the line total must be scaled to the
- * added units so the reported price stays in step with the reported quantity.
+ * A Store API cart line's `line_total` covers its current quantity. When the
+ * reported quantity differs from that — a partial add, a quantity increase, or
+ * a decrease valued from the reduced remaining line — the line total is
+ * rescaled to the reported units at the line's per-unit price so the price
+ * stays in step with the reported quantity. The reported quantity may exceed
+ * the line's quantity (e.g. a decrease whose remaining line is smaller than the
+ * removed units), in which case the per-unit price is scaled up accordingly.
  *
- * @param {Object} item          Store API cart item.
- * @param {number} addedQuantity Quantity being reported as added.
- * @return {Object} The item, with `totals.line_total` scaled to the added units.
+ * @param {Object} item     Store API cart item.
+ * @param {number} quantity Quantity being reported.
+ * @return {Object} The item, with `totals.line_total` scaled to the reported units.
  */
-const scaleLineTotalToAddedQuantity = ( item, addedQuantity ) => {
+const scaleLineTotalToQuantity = ( item, quantity ) => {
 	const newQuantity = parseInt( item?.quantity, 10 );
 	const lineTotal = parseInt( item?.totals?.line_total, 10 );
 
 	if (
 		! Number.isFinite( lineTotal ) ||
 		! Number.isFinite( newQuantity ) ||
-		! Number.isFinite( addedQuantity ) ||
-		! newQuantity ||
-		addedQuantity >= newQuantity
+		! Number.isFinite( quantity ) ||
+		! newQuantity
 	) {
 		return item;
 	}
@@ -545,7 +591,7 @@ const scaleLineTotalToAddedQuantity = ( item, addedQuantity ) => {
 		totals: {
 			...item.totals,
 			line_total: String(
-				Math.round( ( lineTotal * addedQuantity ) / newQuantity )
+				Math.round( ( lineTotal * quantity ) / newQuantity )
 			),
 		},
 	};
@@ -562,28 +608,39 @@ const scaleLineTotalToAddedQuantity = ( item, addedQuantity ) => {
 const getAddItemFromResponse = ( requestBody, cartAfter, cartBefore ) => {
 	const { productId, quantity } = parseAddItemRequestBody( requestBody );
 	const product = getAddedCartItem( cartAfter, cartBefore, productId );
+	const addedQuantity = product
+		? getAddedQuantity( product, cartBefore, quantity )
+		: quantity;
 
+	// The requested quantity can exceed what the line actually holds when the
+	// add is capped by available stock; value at most the full line so the
+	// reported price never exceeds the real line total.
 	return product
 		? {
-				product: scaleLineTotalToAddedQuantity( product, quantity ),
-				quantity,
+				eventName: 'add_to_cart',
+				product: scaleLineTotalToQuantity( product, addedQuantity ),
+				quantity: addedQuantity,
+				isAddItem: true,
 		  }
 		: null;
 };
 
 /**
- * Resolve the added product and quantity for a single Store API update-item
- * call. Updating an item that is already in the cart to a higher quantity (e.g.
- * clicking add-to-cart again, or raising the quantity) is treated as an
- * add_to_cart for the increase, so the quantity reported is the delta between
- * the new and previous quantity — not the new total.
+ * Resolve the tracked product delta for a single Store API update-item call.
+ * Increasing quantity is tracked as add_to_cart, and decreasing quantity is
+ * tracked as remove_from_cart. The quantity reported is the delta between the
+ * new and previous quantity, not the new total.
  *
  * @param {*}      requestBody Update-item request body.
  * @param {Object} cartAfter   Cart data returned by the update-item response.
  * @param {Object} cartBefore  Cart data before the update-item call.
- * @return {{ product: Object, quantity: number }|null} Added product, or null when the quantity did not increase.
+ * @return {{ eventName: string, product: Object, quantity: number }|null} Tracked cart change, or null when quantity did not change.
  */
-const getUpdateItemFromResponse = ( requestBody, cartAfter, cartBefore ) => {
+const getUpdateItemChangeFromResponse = (
+	requestBody,
+	cartAfter,
+	cartBefore
+) => {
 	const key = parseUpdateItemRequestKey( requestBody );
 
 	if ( ! key ) {
@@ -593,29 +650,38 @@ const getUpdateItemFromResponse = ( requestBody, cartAfter, cartBefore ) => {
 	const updatedItem = Array.isArray( cartAfter?.items )
 		? cartAfter.items.find( ( item ) => item.key === key )
 		: null;
-
-	if ( ! updatedItem ) {
-		return null;
-	}
+	const previousItem = Array.isArray( cartBefore?.items )
+		? cartBefore.items.find( ( item ) => item.key === key )
+		: null;
+	const lastSeenItem = lastSeenCartItems.get( key );
 
 	let previousQuantity = 0;
-	if ( lastSeenCartQuantities.has( key ) ) {
-		previousQuantity = lastSeenCartQuantities.get( key );
-	} else if ( Array.isArray( cartBefore?.items ) ) {
-		previousQuantity =
-			cartBefore.items.find( ( item ) => item.key === key )?.quantity ??
-			0;
+	if ( lastSeenItem ) {
+		previousQuantity = lastSeenItem.quantity ?? 0;
+	} else if ( previousItem ) {
+		previousQuantity = previousItem.quantity ?? 0;
 	}
-	const addedQuantity =
-		parseInt( updatedItem.quantity, 10 ) - parseInt( previousQuantity, 10 );
 
-	if ( ! Number.isFinite( addedQuantity ) || addedQuantity <= 0 ) {
+	const newQuantity = parseInt( updatedItem?.quantity ?? 0, 10 );
+	const quantityDelta = newQuantity - parseInt( previousQuantity, 10 );
+
+	if ( ! Number.isFinite( quantityDelta ) || quantityDelta === 0 ) {
 		return null;
 	}
 
+	const product =
+		quantityDelta > 0 ? updatedItem : previousItem ?? lastSeenItem;
+
+	if ( ! product ) {
+		return null;
+	}
+
+	const quantity = Math.abs( quantityDelta );
+
 	return {
-		product: scaleLineTotalToAddedQuantity( updatedItem, addedQuantity ),
-		quantity: addedQuantity,
+		eventName: quantityDelta > 0 ? 'add_to_cart' : 'remove_from_cart',
+		product: scaleLineTotalToQuantity( product, quantity ),
+		quantity,
 	};
 };
 
@@ -638,20 +704,19 @@ const parseBatchRequestBody = ( body ) => {
 };
 
 /**
- * Resolve every add_to_cart from a Store API batch request/response pair.
+ * Resolve every tracked cart change from a Store API batch request/response pair.
  *
  * A batch bundles sub-requests under `requests` and returns their results, in
  * the same order, under `responses`. Each cart sub-response body is the full
  * cart at that point, matched against the previous cart state to pick out the
- * change. Both add-item (new line) and update-item (quantity increase of an
- * existing line) sub-requests are reported as add_to_cart.
+ * change.
  *
  * @param {*}      requestBody  Batch request body.
  * @param {Object} responseJson Batch response JSON.
  * @param {Object} cartBefore   Cart data before the batch request.
- * @return {Array<{ product: Object, quantity: number }>} Added products.
+ * @return {Array<{ eventName: string, product: Object, quantity: number }>} Tracked cart changes.
  */
-const getBatchAddToCartItems = ( requestBody, responseJson, cartBefore ) => {
+const getBatchCartChanges = ( requestBody, responseJson, cartBefore ) => {
 	const requests = parseBatchRequestBody( requestBody )?.requests;
 	const responses = responseJson?.responses;
 
@@ -659,7 +724,7 @@ const getBatchAddToCartItems = ( requestBody, responseJson, cartBefore ) => {
 		return [];
 	}
 
-	const adds = [];
+	const changes = [];
 	let previousCart = cartBefore;
 
 	requests.forEach( ( request, index ) => {
@@ -679,25 +744,25 @@ const getBatchAddToCartItems = ( requestBody, responseJson, cartBefore ) => {
 		}
 
 		const cartAfter = subResponse.body;
-		const add = isAddItem
+		const change = isAddItem
 			? getAddItemFromResponse( request.body, cartAfter, previousCart )
-			: getUpdateItemFromResponse(
+			: getUpdateItemChangeFromResponse(
 					request.body,
 					cartAfter,
 					previousCart
 			  );
 
-		if ( add ) {
-			adds.push( add );
+		if ( change ) {
+			changes.push( change );
 		}
 
-		// Record quantities after reading the delta so a later update-item (in
-		// this batch or a subsequent request) compares against the new state.
-		rememberCartQuantities( cartAfter );
+		// Record items after reading the delta so a later update-item (in this
+		// batch or a subsequent request) compares against the new state.
+		rememberCartItems( cartAfter );
 		previousCart = cartAfter;
 	} );
 
-	return adds;
+	return changes;
 };
 
 /**
@@ -709,8 +774,8 @@ const getBatchAddToCartItems = ( requestBody, responseJson, cartBefore ) => {
  * @param {Function} getEventHandler - Function to get the event handler for a given event name.
  */
 const trackStoreApiAddToCart = ( getEventHandler ) => {
-	addItemEventHandler = ( data ) =>
-		safeTrackEvent( getEventHandler, 'add_to_cart', data );
+	storeApiEventHandler = ( eventName, data ) =>
+		safeTrackEvent( getEventHandler, eventName, data );
 
 	if (
 		addItemStoreApiTrackingStarted ||
@@ -725,9 +790,14 @@ const trackStoreApiAddToCart = ( getEventHandler ) => {
 	window.fetch = async function trackAddItemFetch( ...args ) {
 		const [ input, init ] = args;
 		const isAddItemRequest = isStoreApiAddItemRequest( input, init );
+		const isUpdateItemRequest =
+			! isAddItemRequest && isStoreApiUpdateItemRequest( input, init );
 		const isBatchRequest =
-			! isAddItemRequest && isStoreApiBatchRequest( input, init );
-		const shouldTrack = isAddItemRequest || isBatchRequest;
+			! isAddItemRequest &&
+			! isUpdateItemRequest &&
+			isStoreApiBatchRequest( input, init );
+		const shouldTrack =
+			isAddItemRequest || isUpdateItemRequest || isBatchRequest;
 		const cartBefore = shouldTrack ? getCartData() : null;
 		const bodyPromise = shouldTrack ? getRequestBody( input, init ) : null;
 		const response = await originalFetch.apply( this, args );
@@ -739,15 +809,24 @@ const trackStoreApiAddToCart = ( getEventHandler ) => {
 		try {
 			const requestBody = await bodyPromise;
 			const responseJson = await response.clone().json();
-			let adds;
+			let changes;
 			if ( isBatchRequest ) {
-				adds = getBatchAddToCartItems(
+				changes = getBatchCartChanges(
 					requestBody,
 					responseJson,
 					cartBefore
 				);
+			} else if ( isUpdateItemRequest ) {
+				changes = [
+					getUpdateItemChangeFromResponse(
+						requestBody,
+						responseJson,
+						cartBefore
+					),
+				].filter( Boolean );
+				rememberCartItems( responseJson );
 			} else {
-				adds = [
+				changes = [
 					getAddItemFromResponse(
 						requestBody,
 						responseJson,
@@ -756,7 +835,7 @@ const trackStoreApiAddToCart = ( getEventHandler ) => {
 				].filter( Boolean );
 				// responseJson is the cart for a direct add-item; record it so a
 				// later update-item compares against the new state.
-				rememberCartQuantities( responseJson );
+				rememberCartItems( responseJson );
 			}
 
 			// Give the cart-add-item hook a chance to mark these products as
@@ -767,23 +846,44 @@ const trackStoreApiAddToCart = ( getEventHandler ) => {
 			// direct add-item (where deferring a single task is enough).
 			const trackDelay = isBatchRequest ? BATCH_ADD_TRACK_DELAY : 0;
 
-			adds.forEach( ( { product, quantity } ) => {
-				setTimeout( () => {
-					if ( wasRecentlyAdded( product ) ) {
+			changes.forEach(
+				( { eventName, product, quantity, isAddItem } ) => {
+					if ( eventName === 'remove_from_cart' ) {
+						storeApiEventHandler( eventName, {
+							product: { ...product, quantity },
+						} );
 						return;
 					}
 
-					markRecentlyAdded( product );
-					addItemEventHandler( {
-						product: { ...product, quantity },
-					} );
-				}, trackDelay );
-			} );
+					// An add_to_cart from a quantity increase (update-item) has no
+					// competing hook event to dedupe against — the cart-add-item
+					// hook only fires for adds — so track it directly. The add-dedup
+					// gate below is only for add-item, where a block can fire both
+					// the hook and a Store API request for the same add.
+					if ( ! isAddItem ) {
+						storeApiEventHandler( eventName, {
+							product: { ...product, quantity },
+						} );
+						return;
+					}
+
+					setTimeout( () => {
+						if ( wasRecentlyAdded( product ) ) {
+							return;
+						}
+
+						markRecentlyAdded( product );
+						storeApiEventHandler( eventName, {
+							product: { ...product, quantity },
+						} );
+					}, trackDelay );
+				}
+			);
 		} catch ( error ) {
 			// Tracking must never break the cart. Swallow the error but warn so
 			// an unexpected Store API response shape can be diagnosed.
 			warnTrackingError(
-				'could not parse the Store API add-item response for add_to_cart tracking.',
+				'could not parse the Store API cart response for cart change tracking.',
 				error
 			);
 			return response;

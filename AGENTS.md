@@ -113,7 +113,7 @@ wp-env automatically installs Basic Auth plugin for API testing and runs `tests/
 - `WC_Google_Analytics` (the integration class) handles settings, admin UI, and script enqueuing.
 - `WC_Google_Gtag_JS` generates server-side JavaScript snippets for GA4 events. It extends `WC_Abstract_Google_Analytics_JS`.
 - Client-side tracking in `assets/js/src/` handles cart interactions and checkout events that can't be tracked server-side.
-- The plugin declares HPOS (High-Performance Order Storage), cart/checkout blocks, and product block editor compatibility.
+- The plugin declares HPOS (High-Performance Order Storage) and cart/checkout blocks compatibility.
 - GA4 measurement ID (format: `G-XXXXXXXXXX`) is configured in plugin settings, not hardcoded.
 
 ## Common Pitfalls

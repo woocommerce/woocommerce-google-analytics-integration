@@ -390,7 +390,9 @@ abstract class WC_Abstract_Google_Analytics_JS {
 
 				$path[] = $term;
 
-				return $path;
+				// GA4 supports at most 5 category levels. When the path is deeper, keep the
+				// most specific terms (including the assigned leaf) instead of the topmost ancestors.
+				return array_slice( $path, -5 );
 			},
 			$assigned_terms
 		);

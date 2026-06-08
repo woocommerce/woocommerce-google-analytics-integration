@@ -318,10 +318,7 @@ abstract class WC_Abstract_Google_Analytics_JS {
 		$formatted = array(
 			'id'         => $product_id,
 			'name'       => $product->get_title(),
-			'categories' => array_map(
-				fn( $category ) => array( 'name' => $category->name ),
-				wc_get_product_terms( $product_id, 'product_cat', array( 'number' => 5 ) )
-			),
+			'categories' => $this->get_formatted_product_categories( $product_id ),
 			'prices'     => array(
 				'price'               => $this->get_formatted_price( $price ),
 				'currency_minor_unit' => wc_get_price_decimals(),
@@ -359,6 +356,80 @@ abstract class WC_Abstract_Google_Analytics_JS {
 		}
 
 		return $formatted;
+	}
+
+	/**
+	 * Return product categories with assigned terms expanded into parent-first hierarchy order.
+	 *
+	 * @param int $product_id Product ID.
+	 *
+	 * @return array
+	 */
+	private function get_formatted_product_categories( int $product_id ): array {
+		$assigned_terms = wc_get_product_terms(
+			$product_id,
+			'product_cat',
+			array(
+				'orderby' => 'name',
+				'order'   => 'ASC',
+			)
+		);
+
+		if ( ! is_array( $assigned_terms ) ) {
+			return array();
+		}
+
+		$category_paths = array_map(
+			function ( $term ) {
+				$ancestors = array_reverse( get_ancestors( $term->term_id, 'product_cat', 'taxonomy' ) );
+				$path      = array();
+
+				foreach ( $ancestors as $ancestor_id ) {
+					$ancestor = get_term( $ancestor_id, 'product_cat' );
+
+					if ( $ancestor && ! is_wp_error( $ancestor ) ) {
+						$path[] = $ancestor;
+					}
+				}
+
+				$path[] = $term;
+
+				// GA4 supports at most 5 category levels. When the path is deeper, keep the
+				// most specific terms (including the assigned leaf) instead of the topmost ancestors.
+				return array_slice( $path, -5 );
+			},
+			$assigned_terms
+		);
+
+		usort(
+			$category_paths,
+			function ( $left, $right ) {
+				return strnatcasecmp(
+					implode( '/', wp_list_pluck( $left, 'name' ) ),
+					implode( '/', wp_list_pluck( $right, 'name' ) )
+				);
+			}
+		);
+
+		$categories = array();
+		$seen_terms = array();
+
+		foreach ( $category_paths as $path ) {
+			foreach ( $path as $category ) {
+				if ( isset( $seen_terms[ $category->term_id ] ) ) {
+					continue;
+				}
+
+				$categories[]                     = array( 'name' => $category->name );
+				$seen_terms[ $category->term_id ] = true;
+
+				if ( 5 === count( $categories ) ) {
+					break 2;
+				}
+			}
+		}
+
+		return $categories;
 	}
 
 	/**

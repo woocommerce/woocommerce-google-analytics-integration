@@ -261,6 +261,121 @@ class DataFormatting extends EventsDataTest {
 	}
 
 	/**
+	 * Test that a child category includes its parent before the child term.
+	 *
+	 * @return void
+	 */
+	public function test_get_formatted_product_categories_include_parent_names() {
+		$product = WC_Helper_Product::create_simple_product();
+		$parent  = wp_insert_term( 'Parent_' . uniqid(), 'product_cat' );
+		$child   = wp_insert_term(
+			'Child_' . uniqid(),
+			'product_cat',
+			[
+				'parent' => $parent['term_id'],
+			]
+		);
+
+		wp_set_object_terms( $product->get_id(), [ $child['term_id'] ], 'product_cat' );
+		clean_object_term_cache( $product->get_id(), 'product' );
+
+		$formatted = $this->gtag->get_formatted_product( $product );
+
+		$this->assertEquals(
+			[ $parent['term_id'], $child['term_id'] ],
+			array_map(
+				function ( $category ) {
+					return get_term_by( 'name', $category['name'], 'product_cat' )->term_id;
+				},
+				$formatted['categories']
+			)
+		);
+	}
+
+	/**
+	 * Test that multiple category trees are flattened deterministically without duplicate parents.
+	 *
+	 * @return void
+	 */
+	public function test_get_formatted_product_categories_flatten_multiple_trees() {
+		$product      = WC_Helper_Product::create_simple_product();
+		$clothing     = wp_insert_term( 'Clothing_' . uniqid(), 'product_cat' );
+		$hoodies      = wp_insert_term(
+			'Hoodies_' . uniqid(),
+			'product_cat',
+			[
+				'parent' => $clothing['term_id'],
+			]
+		);
+		$fan_gear     = wp_insert_term( 'Fan Gear_' . uniqid(), 'product_cat' );
+		$real_madrid  = wp_insert_term(
+			'Real Madrid_' . uniqid(),
+			'product_cat',
+			[
+				'parent' => $fan_gear['term_id'],
+			]
+		);
+		$category_ids = [ $real_madrid['term_id'], $hoodies['term_id'] ];
+		$expected_ids = [ $clothing['term_id'], $hoodies['term_id'], $fan_gear['term_id'], $real_madrid['term_id'] ];
+
+		wp_set_object_terms( $product->get_id(), $category_ids, 'product_cat' );
+		clean_object_term_cache( $product->get_id(), 'product' );
+
+		$formatted = $this->gtag->get_formatted_product( $product );
+
+		$this->assertEquals(
+			$expected_ids,
+			array_map(
+				function ( $category ) {
+					return get_term_by( 'name', $category['name'], 'product_cat' )->term_id;
+				},
+				$formatted['categories']
+			)
+		);
+	}
+
+	/**
+	 * Test that the assigned leaf term is kept when its category path is deeper than five levels.
+	 *
+	 * @return void
+	 */
+	public function test_get_formatted_product_categories_deep_path_keeps_leaf() {
+		$product   = WC_Helper_Product::create_simple_product();
+		$parent_id = 0;
+		$level_ids = [];
+
+		// Build a single chain six levels deep (root -> ... -> leaf).
+		for ( $i = 0; $i < 6; $i++ ) {
+			$term        = wp_insert_term(
+				"Level{$i}_" . uniqid(),
+				'product_cat',
+				$parent_id ? [ 'parent' => $parent_id ] : []
+			);
+			$parent_id   = $term['term_id'];
+			$level_ids[] = $term['term_id'];
+		}
+
+		$leaf_id = end( $level_ids );
+
+		wp_set_object_terms( $product->get_id(), [ $leaf_id ], 'product_cat' );
+		clean_object_term_cache( $product->get_id(), 'product' );
+
+		$formatted = $this->gtag->get_formatted_product( $product );
+
+		$category_ids = array_map(
+			function ( $category ) {
+				return get_term_by( 'name', $category['name'], 'product_cat' )->term_id;
+			},
+			$formatted['categories']
+		);
+
+		// GA4 supports five levels: the five most specific terms, ending with the assigned leaf.
+		$this->assertEquals( array_slice( $level_ids, -5 ), $category_ids );
+		$this->assertContains( $leaf_id, $category_ids );
+		$this->assertSame( $leaf_id, end( $category_ids ) );
+	}
+
+	/**
 	 * Create a fresh order with its own product and customer for test isolation.
 	 *
 	 * @return \WC_Order

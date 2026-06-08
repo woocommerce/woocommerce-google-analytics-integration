@@ -375,6 +375,10 @@ abstract class WC_Abstract_Google_Analytics_JS {
 			)
 		);
 
+		if ( ! is_array( $assigned_terms ) ) {
+			return array();
+		}
+
 		$category_paths = array_map(
 			function ( $term ) {
 				$ancestors = array_reverse( get_ancestors( $term->term_id, 'product_cat', 'taxonomy' ) );

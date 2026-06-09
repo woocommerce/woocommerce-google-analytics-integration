@@ -586,7 +586,7 @@ abstract class WC_Abstract_Google_Analytics_JS {
 	public function get_formatted_price( $value ): int {
 		return intval(
 			round(
-				( (float) wc_format_decimal( $value ) ) * ( 10 ** absint( wc_get_price_decimals() ) ),
+				wc_add_number_precision( (float) wc_format_decimal( $value ), false ),
 				0
 			)
 		);

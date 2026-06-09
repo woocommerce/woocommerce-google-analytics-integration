@@ -171,9 +171,14 @@ test.describe( 'GTag events on block pages', () => {
 		} );
 	} );
 
-	test( 'Remove from cart event is sent when update-item removes a stale cart line', async ( {
+	test( 'Remove from cart event is sent for an update-item decrease when the live cart data is stale', async ( {
 		page,
 	} ) => {
+		// Resilience check: when the Blocks cart store and the static cart are
+		// both unavailable (stubbed empty below), the decrease delta must still
+		// be resolved from the remembered cart items so remove_from_cart reports
+		// the units removed. A quantity of 0 would be rejected by the Store API
+		// (its minimum is 1), so the line is decreased rather than emptied.
 		const updateProductID = await createSimpleProduct();
 		await page.goto( 'shop?orderby=date' );
 
@@ -233,7 +238,7 @@ test.describe( 'GTag events on block pages', () => {
 									headers: nonce ? { Nonce: nonce } : {},
 									body: {
 										key: item.key,
-										quantity: 0,
+										quantity: 1,
 									},
 								},
 							],
@@ -260,8 +265,8 @@ test.describe( 'GTag events on block pages', () => {
 			expect( data.product1 ).toMatchObject( {
 				id: updateProductID.toString(),
 				nm: 'Simple product',
-				qt: '3',
-				pr: ( simpleProductPrice * 3 ).toString(),
+				qt: '2',
+				pr: ( simpleProductPrice * 2 ).toString(),
 			} );
 		} );
 	} );

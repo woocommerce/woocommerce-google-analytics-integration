@@ -82,7 +82,6 @@ Duplicate Google Analytics code causes a conflict in tracking. Remove any other 
 = 2.1.23 - 2026-04-15 =
 * Dev - Enable min-release-age supply-chain protection.
 * Dev - Override serialize-javascript to ^7.0.5 and ajv to ^8.18.0 to resolve npm security vulnerabilities.
-* Dev - Update npm dependencies and transitive overrides to resolve non-breaking security advisories.
 * Update - Require WooCommerce 10.6+.
 
 = 2.1.22 - 2026-03-26 =

@@ -285,11 +285,17 @@ if ( ! class_exists( 'WC_Google_Analytics_Integration' ) ) {
 		 * @return array The asset file. Or an empty array if the file doesn't exist.
 		 */
 		public function get_js_asset_file( $asset_name ) {
+			$asset_path = $this->get_js_asset_path( $asset_name . '.asset.php' );
+
+			if ( ! file_exists( $asset_path ) ) {
+				return [];
+			}
+
 			try {
 				// Exclusion reason: No reaching any user input
 				// nosemgrep audit.php.lang.security.file.inclusion-arg
-				return require $this->get_js_asset_path( $asset_name . '.asset.php' );
-			} catch ( Exception $e ) {
+				return require $asset_path;
+			} catch ( Throwable $e ) {
 				return [];
 			}
 		}

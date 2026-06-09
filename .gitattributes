@@ -30,3 +30,11 @@ node_modules export-ignore
 languages export-ignore
 assets/js/src export-ignore
 webpack.config.js export-ignore
+eslint.config.mjs export-ignore
+.npmrc export-ignore
+.wp-env.json export-ignore
+.coderabbit.yaml export-ignore
+.ai export-ignore
+.claude export-ignore
+AGENTS.md export-ignore
+CLAUDE.md export-ignore

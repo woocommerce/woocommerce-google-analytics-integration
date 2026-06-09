@@ -742,12 +742,31 @@ test.describe( 'GTag events on block pages', () => {
 		await simpleProductAddToCart( page, simpleProductID );
 		await page.goto( 'checkout' );
 
+		// Wait for the live cart to expose its shipping rates so we can dispatch
+		// the actual rate id rather than a hard-coded one. The rate's machine id
+		// (e.g. flat_rate:N) is not deterministic — WooCommerce's instance_id is
+		// monotonic, so it climbs whenever the test env's shipping method is
+		// re-provisioned against a persisted database.
+		await page.waitForFunction( () => {
+			const cart = window.wp?.data
+				?.select?.( 'wc/store/cart' )
+				?.getCartData?.();
+			return ( cart?.shippingRates ?? [] ).some(
+				( pkg ) => ( pkg.shipping_rates ?? [] ).length
+			);
+		} );
+
 		const event = trackGtagEvent( page, 'add_shipping_info' );
 		await page.evaluate( () => {
+			const cart = window.wp.data.select( 'wc/store/cart' ).getCartData();
+			const rates = ( cart.shippingRates ?? [] ).flatMap(
+				( pkg ) => pkg.shipping_rates ?? []
+			);
+			const rate = rates.find( ( r ) => r.selected ) ?? rates[ 0 ];
 			window.wp.hooks.doAction(
 				'experimental__woocommerce_blocks-checkout-set-selected-shipping-rate',
 				{
-					shippingRateId: 'flat_rate:1',
+					shippingRateId: rate.rate_id,
 					storeCart: window.ga4w.data.cart,
 				}
 			);

@@ -737,7 +737,7 @@ test.describe( 'GTag events on block pages', () => {
 			window.wp.hooks.doAction(
 				'experimental__woocommerce_blocks-checkout-set-selected-shipping-rate',
 				{
-					shippingRateId: 'free_shipping:1',
+					shippingRateId: 'flat_rate:1',
 					storeCart: window.ga4w.data.cart,
 				}
 			);

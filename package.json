@@ -19,7 +19,7 @@
     "@wordpress/scripts": "^31.8.0",
     "@wordpress/url": "^4.26.0",
     "ajv": "^8.20.0",
-    "axios": "^1.15.2",
+    "axios": "^1.16.0",
     "eslint": "^9.39.4",
     "node-wp-i18n": "~1.2.8",
     "prettier": "npm:wp-prettier@^3.0.3"
@@ -27,6 +27,7 @@
   "overrides": {
     "@babel/runtime": "^7.27.6",
     "webpack-dev-server": "^5.2.4",
+    "launch-editor": "2.9.0",
     "lodash": "^4.17.24",
     "qs": "^6.15.2",
     "socks": {

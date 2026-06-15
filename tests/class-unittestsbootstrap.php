@@ -120,7 +120,16 @@ class UnitTestsBootstrap {
 		include $this->plugins_dir . '/woocommerce/uninstall.php';
 
 		\WC_Install::install();
-		new \WP_Roles();
+
+		// WC_Install::install() persists role capabilities to the wp_user_roles
+		// option, but does not refresh the runtime global $wp_roles. On a fresh
+		// database whose option was not already seeded, the administrator role
+		// is then left without manage_woocommerce. Unset the global so
+		// wp_roles() rebuilds it from the option. Instantiating `new WP_Roles()`
+		// does not help: it builds a discarded object and never reassigns the
+		// global.
+		unset( $GLOBALS['wp_roles'] );
+
 		WC()->init();
 
 		echo 'WooCommerce Finished Installing...' . PHP_EOL;

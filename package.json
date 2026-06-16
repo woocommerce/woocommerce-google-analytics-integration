@@ -79,7 +79,7 @@
     "wp-env:down": "npm run wp-env stop"
   },
   "engines": {
-    "node": ">=20",
+    "node": ">=24",
     "npm": ">=11.10.0"
   },
   "config": {

@@ -27,7 +27,6 @@
   "overrides": {
     "@babel/runtime": "^7.27.6",
     "webpack-dev-server": "^5.2.4",
-    "launch-editor": "2.9.0",
     "lodash": "^4.17.24",
     "qs": "^6.15.2",
     "socks": {

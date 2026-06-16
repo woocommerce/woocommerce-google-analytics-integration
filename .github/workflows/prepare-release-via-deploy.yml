@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        uses: actions/checkout@v6
 
       - name: Validate version format
         env:
@@ -46,7 +46,7 @@ jobs:
 
       - name: Create a pull request for the release
         id: prepare-release-pr
-        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
+        uses: actions/github-script@v9
         with:
           script: |
             const { default: script } = await import( `${ process.env.GITHUB_WORKSPACE }/.github/workflows/scripts/create-release-pr.mjs` );

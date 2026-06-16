@@ -46,13 +46,13 @@ jobs:
     steps:
       - name: Get Release versions from Wordpress
         id: wp
-        uses: woocommerce/grow/get-plugin-releases@actions-v2
+        uses: woocommerce/grow/get-plugin-releases@actions-v3
         with:
           slug: wordpress
           releases: 2
       - name: Get Release versions from WooCommerce
         id: wc
-        uses: woocommerce/grow/get-plugin-releases@actions-v2
+        uses: woocommerce/grow/get-plugin-releases@actions-v3
         with:
           source: github
           slug: woocommerce/woocommerce
@@ -81,15 +81,15 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Prepare PHP
-        uses: woocommerce/grow/prepare-php@actions-v2
+        uses: woocommerce/grow/prepare-php@actions-v3
         with:
           php-version: "${{ matrix.php }}"
 
       - name: Set up MySQL
-        uses: woocommerce/grow/prepare-mysql@actions-v2
+        uses: woocommerce/grow/prepare-mysql@actions-v3
 
       - name: Install svn (used for installing WP versions)
         run: sudo apt-get -y install subversion
@@ -122,15 +122,15 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Prepare PHP
-        uses: woocommerce/grow/prepare-php@actions-v2
+        uses: woocommerce/grow/prepare-php@actions-v3
         with:
           php-version: "${{ inputs.php-version }}"
 
       - name: Prepare MySQL
-        uses: woocommerce/grow/prepare-mysql@actions-v2
+        uses: woocommerce/grow/prepare-mysql@actions-v3
 
       - name: Install svn (used for installing WP versions)
         run: sudo apt-get -y install subversion

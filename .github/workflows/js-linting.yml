@@ -25,22 +25,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Prepare node
-        uses: woocommerce/grow/prepare-node@actions-v2
+        uses: woocommerce/grow/prepare-node@actions-v3
         with:
           node-version-file: ".nvmrc"
-          install-deps: "no"
-
-      - name: Upgrade npm
-        run: npm install -g npm@11
-
-      - name: Install dependencies
-        run: npm ci --ignore-scripts
 
       - name: Prepare annotation formatter
-        uses: woocommerce/grow/eslint-annotation@actions-v2
+        uses: woocommerce/grow/eslint-annotation@actions-v3
 
       - name: Lint JavaScript and annotate linting errors
         run: npm run lint:js -- --quiet --format ./eslintFormatter.cjs

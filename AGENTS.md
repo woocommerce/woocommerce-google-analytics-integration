@@ -25,7 +25,7 @@ tests/e2e/                                    — Playwright E2E tests
 ### Setup
 
 ```sh
-nvm use               # Switch to Node 20
+nvm use               # Switch to Node 24
 npm install           # Install JS dependencies
 composer install      # Install PHP dev dependencies (PHPCS, PHPUnit)
 ```

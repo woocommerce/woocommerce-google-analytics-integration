@@ -18,24 +18,18 @@ jobs:
       FORCE_COLOR: 2
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Prepare PHP
-        uses: woocommerce/grow/prepare-php@actions-v2
+        uses: woocommerce/grow/prepare-php@actions-v3
         with:
           install-deps: "no"
 
       - name: Prepare node
-        uses: woocommerce/grow/prepare-node@actions-v2
+        uses: woocommerce/grow/prepare-node@actions-v3
         with:
           node-version-file: ".nvmrc"
-          install-deps: "no"
-
-      - name: Upgrade npm
-        run: npm install -g npm@11
-
-      - name: Install dependencies
-        run: npm ci
+          ignore-scripts: "no"
 
       - name: Build production bundle
         run: |
@@ -45,13 +39,13 @@ jobs:
 
       - name: Publish dev build to GitHub
         if: ${{ github.event_name == 'push' && github.ref_name == 'trunk' }}
-        uses: woocommerce/grow/publish-extension-dev-build@actions-v2
+        uses: woocommerce/grow/publish-extension-dev-build@actions-v3
         with:
           extension-asset-path: woocommerce-google-analytics-integration.zip
 
       - name: Publish build artifact
         if: ${{ ! ( github.event_name == 'push' && github.ref_name == 'trunk' ) }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: woocommerce-google-analytics-integration.zip
           path: ${{ github.workspace }}/woocommerce-google-analytics-integration.zip

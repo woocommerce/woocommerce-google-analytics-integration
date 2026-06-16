@@ -61,7 +61,7 @@ jobs:
     steps:
       # Checkout the private action repository
       - name: Checkout woo-product-deploy action
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        uses: actions/checkout@v6
         with:
           repository: woocommerce/woo-product-deploy
           ref: trunk
@@ -75,7 +75,7 @@ jobs:
           repo_url: https://github.com/woocommerce/woocommerce-google-analytics-integration
           branch: ${{ github.ref_name }}
           version: ${{ inputs.version }}
-          node_version: '20'
+          node_version: '24'
           npm_version: '11'
           simulate: ${{ inputs.simulate }}
           wporg_release: ${{ inputs.deploy_wporg }}

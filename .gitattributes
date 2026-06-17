@@ -24,6 +24,7 @@ webpack.config.js export-ignore
 eslint.config.mjs export-ignore
 .npmrc export-ignore
 .wp-env.json export-ignore
+.wp-env.test.json export-ignore
 .coderabbit.yaml export-ignore
 .ai export-ignore
 .claude export-ignore

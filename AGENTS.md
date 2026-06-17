@@ -58,16 +58,27 @@ vendor/bin/phpunit                # Run PHP unit tests locally (see README.md fo
 
 ### Local Environment (wp-env)
 
-The project uses `@wordpress/env` for local development. Configuration is in `.wp-env.json`.
+The project uses `@wordpress/env` for local development. There are two separate, isolated configurations:
+
+- `.wp-env.json` — the default development environment (WooCommerce + plugin). Runs at `http://localhost:8888`. Start it with `wp-env:dev:up`.
+- `.wp-env.test.json` — the test environment used by PHPUnit and E2E. Runs at `http://localhost:8889`. The test npm scripts and CI pass `--config=.wp-env.test.json`, so it is what `wp-env:up` starts and what `wp-env run cli` must target.
+
+Both set `testsEnvironment: false`, so each runs a single environment. The legacy behavior of auto-creating a second tests environment is deprecated in `@wordpress/env` 11.
 
 ```sh
-npm run wp-env:up     # Start Docker environment (WordPress + WooCommerce + plugin)
-npm run wp-env:down   # Stop Docker environment
+npm run wp-env:up           # Start the test Docker environment (PHPUnit + E2E), port 8889
+npm run wp-env:down         # Stop the test Docker environment
+npm run wp-env:destroy      # Destroy the test Docker environment (containers, volumes, images)
+npm run wp-env:dev:up       # Start the development Docker environment, port 8888
+npm run wp-env:dev:down     # Stop the development Docker environment
+npm run wp-env:dev:destroy  # Destroy the development Docker environment
 ```
 
-The local environment runs at `http://localhost:8888` (admin: `admin`/`password`).
+The test environment runs at `http://localhost:8889` (admin: `admin`/`password`).
 
-wp-env automatically installs Basic Auth plugin for API testing and runs `tests/e2e/bin/test-env-setup.sh` on startup to configure the test environment.
+The test config installs Basic Auth for API testing and runs `tests/e2e/bin/test-env-setup.sh` on startup to configure the test environment. That script and the PHPUnit setup target the test environment via the `WP_ENV_CONFIG_FILE` environment variable, which the lifecycle and npm scripts set to `.wp-env.test.json`.
+
+`test:php` (PHPUnit) runs against a dedicated `wordpress_test` database in the same MySQL container, set in `phpunit.xml.dist`. The site served at 8889 and the E2E suite use the separate `wordpress` database, so the two suites no longer interfere and can be run in any order.
 
 ## Conventions
 

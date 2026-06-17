@@ -62,9 +62,19 @@ Run E2E testing:
 
 To remove the Docker container and images (this will **delete everything** in the WordPress Docker container):
 
-`npm run wp-env destroy`
+`npm run wp-env:destroy`
 
 :warning: Currently, the E2E testing on GitHub Actions is only run automatically after opening a PR with `release/*` branches or pushing changes to `release/*` branches. To run it manually, please visit [here](../../actions/workflows/e2e-tests.yml) and follow [this instruction](https://docs.github.com/en/actions/managing-workflow-runs/manually-running-a-workflow?tool=webui) to do so.
+
+## Local development environment
+
+The scripts above run against the test environment (`.wp-env.test.json`, port 8889). PHPUnit uses a dedicated `wordpress_test` database (configured in `phpunit.xml.dist`), while the browser-served site and the E2E suite use the separate `wordpress` database in the same MySQL container. PHPUnit and E2E therefore no longer overwrite each other and can be run in any order. A separate development environment is defined in `.wp-env.json` (port 8888) with WooCommerce and the plugin installed, intended for manual work:
+
+-   `npm run wp-env:dev:up` to start it at http://localhost:8888
+-   `npm run wp-env:dev:down` to stop it
+-   `npm run wp-env:dev:destroy` to remove its containers, volumes, and images
+
+Both environments are isolated and can run at the same time.
 
 ## Coding standards checks
 

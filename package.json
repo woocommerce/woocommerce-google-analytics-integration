@@ -14,7 +14,7 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.56.1",
-    "@wordpress/env": "^10.26.0",
+    "@wordpress/env": "^11.8.1",
     "@wordpress/eslint-plugin": "^25.4.0",
     "@wordpress/scripts": "^31.8.0",
     "@wordpress/url": "^4.26.0",

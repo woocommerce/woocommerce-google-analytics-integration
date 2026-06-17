@@ -10,6 +10,11 @@
 
 set -e
 
+# Target the wp-env environment named by WP_ENV_CONFIG_FILE (set by the
+# test:php:setup npm script) so the PHPUnit setup runs in the test environment
+# rather than the default one.
+CONFIG_ARG="${WP_ENV_CONFIG_FILE:+--config=$WP_ENV_CONFIG_FILE}"
+
 WC_VERSION=""
 
 # Parse arguments
@@ -24,16 +29,16 @@ done
 # Install WooCommerce if not already present, or if a specific version was requested
 if [ -n "$WC_VERSION" ]; then
 	echo "==> Installing WooCommerce ${WC_VERSION}..."
-	wp-env run tests-cli -- wp plugin install woocommerce --version="${WC_VERSION}" --activate --force
+	wp-env run cli $CONFIG_ARG -- wp plugin install woocommerce --version="${WC_VERSION}" --activate --force
 else
 	# Check if WooCommerce is already installed
-	INSTALLED=$(wp-env run tests-cli wp plugin list --field=name 2>/dev/null | grep '^woocommerce$' || true)
+	INSTALLED=$(wp-env run cli $CONFIG_ARG wp plugin list --field=name 2>/dev/null | grep '^woocommerce$' || true)
 	if [ -z "$INSTALLED" ]; then
 		echo "==> Installing WooCommerce (latest)..."
-		wp-env run tests-cli -- wp plugin install woocommerce --activate
+		wp-env run cli $CONFIG_ARG -- wp plugin install woocommerce --activate
 	fi
 
-	WC_VERSION=$(wp-env run tests-cli wp plugin get woocommerce --field=version 2>/dev/null | tail -1)
+	WC_VERSION=$(wp-env run cli $CONFIG_ARG wp plugin get woocommerce --field=version 2>/dev/null | tail -1)
 fi
 
 if [ -z "$WC_VERSION" ]; then
@@ -62,7 +67,7 @@ TEST_FILES=(
 # Also need the legacy bootstrap marker so the bootstrap detects the legacy path
 TEST_FILES+=("tests/legacy/bootstrap.php")
 
-wp-env run tests-cli bash -c "
+wp-env run cli $CONFIG_ARG bash -c "
 	set -e
 	WC_DIR=/var/www/html/wp-content/plugins/woocommerce
 	RAW_BASE='${RAW_BASE}'
@@ -78,7 +83,7 @@ wp-env run tests-cli bash -c "
 "
 
 echo "==> Installing plugin composer dependencies..."
-wp-env run tests-cli --env-cwd=wp-content/plugins/woocommerce-google-analytics-integration composer install --no-interaction 2>&1 | tail -3
+wp-env run cli $CONFIG_ARG --env-cwd=wp-content/plugins/woocommerce-google-analytics-integration composer install --no-interaction 2>&1 | tail -3
 
 echo ""
 echo "==> PHPUnit environment ready. Run tests with: npm run test:php"

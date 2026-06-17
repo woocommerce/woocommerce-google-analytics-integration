@@ -59,11 +59,15 @@
     "prebuild": "rm -rf ./vendor",
     "test:e2e": "npx playwright test --config=tests/e2e/config/playwright.config.js",
     "test:e2e-dev": "npx playwright test --config=tests/e2e/config/playwright.config.js --debug",
-    "test:php:setup": "./tests/bin/setup-phpunit-env.sh",
-    "test:php": "wp-env run tests-cli --env-cwd=wp-content/plugins/woocommerce-google-analytics-integration vendor/bin/phpunit",
+    "test:php:setup": "WP_ENV_CONFIG_FILE=.wp-env.test.json ./tests/bin/setup-phpunit-env.sh",
+    "test:php": "wp-env run cli --config=.wp-env.test.json --env-cwd=wp-content/plugins/woocommerce-google-analytics-integration vendor/bin/phpunit",
     "wp-env": "wp-env",
-    "wp-env:up": "npm run -- wp-env start --update",
-    "wp-env:down": "npm run wp-env stop"
+    "wp-env:up": "npm run -- wp-env start --update --config=.wp-env.test.json",
+    "wp-env:down": "npm run -- wp-env stop --config=.wp-env.test.json",
+    "wp-env:destroy": "npm run -- wp-env destroy --config=.wp-env.test.json",
+    "wp-env:dev:up": "npm run -- wp-env start --update",
+    "wp-env:dev:down": "npm run -- wp-env stop",
+    "wp-env:dev:destroy": "npm run -- wp-env destroy"
   },
   "engines": {
     "node": ">=24",

@@ -26,6 +26,11 @@ for arg in "$@"; do
 	esac
 done
 
+# PHPUnit runs against a dedicated database (see phpunit.xml.dist) so it never
+# wipes the site database that the E2E suite relies on. Ensure it exists.
+echo "==> Ensuring the dedicated PHPUnit database (wordpress_test) exists..."
+wp-env run cli $CONFIG_ARG wp db query "CREATE DATABASE IF NOT EXISTS wordpress_test"
+
 # Install WooCommerce if not already present, or if a specific version was requested
 if [ -n "$WC_VERSION" ]; then
 	echo "==> Installing WooCommerce ${WC_VERSION}..."

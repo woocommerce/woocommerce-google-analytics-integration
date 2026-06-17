@@ -11,6 +11,15 @@
 			<directory suffix=".php">./tests/unit-tests</directory>
 		</testsuite>
 	</testsuites>
+	<!--
+		Run PHPUnit against a dedicated database so it never wipes the wp-env
+		site database that the E2E suite relies on. Only the wp-env
+		wp-tests-config reads WORDPRESS_DB_NAME (via getenv_docker); the
+		local/CI config hardcodes DB_NAME, so this has no effect there.
+	-->
+	<php>
+		<env name="WORDPRESS_DB_NAME" value="wordpress_test" force="true"/>
+	</php>
 	<coverage>
 		<include>
 			<directory suffix=".php">./includes</directory>

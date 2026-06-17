@@ -68,7 +68,7 @@ To remove the Docker container and images (this will **delete everything** in th
 
 ## Local development environment
 
-The scripts above run against the test environment (`.wp-env.test.json`, port 8889), which is configured for automated testing and is reset by the PHPUnit suite. A separate development environment is defined in `.wp-env.json` (port 8888) with WooCommerce and the plugin installed, intended for manual work:
+The scripts above run against the test environment (`.wp-env.test.json`, port 8889). PHPUnit uses a dedicated `wordpress_test` database (configured in `phpunit.xml.dist`), while the browser-served site and the E2E suite use the separate `wordpress` database in the same MySQL container. PHPUnit and E2E therefore no longer overwrite each other and can be run in any order. A separate development environment is defined in `.wp-env.json` (port 8888) with WooCommerce and the plugin installed, intended for manual work:
 
 -   `npm run wp-env:dev:up` to start it at http://localhost:8888
 -   `npm run wp-env:dev:down` to stop it

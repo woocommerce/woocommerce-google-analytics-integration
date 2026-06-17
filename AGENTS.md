@@ -78,6 +78,8 @@ The test environment runs at `http://localhost:8889` (admin: `admin`/`password`)
 
 The test config installs Basic Auth for API testing and runs `tests/e2e/bin/test-env-setup.sh` on startup to configure the test environment. That script and the PHPUnit setup target the test environment via the `WP_ENV_CONFIG_FILE` environment variable, which the lifecycle and npm scripts set to `.wp-env.test.json`.
 
+`test:php` (PHPUnit) runs against a dedicated `wordpress_test` database in the same MySQL container, set in `phpunit.xml.dist`. The site served at 8889 and the E2E suite use the separate `wordpress` database, so the two suites no longer interfere and can be run in any order.
+
 ## Conventions
 
 ### PHP

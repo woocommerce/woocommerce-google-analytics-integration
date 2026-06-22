@@ -1,5 +1,10 @@
 *** Changelog ***
 
+= 2.2.1 - 2026-06-22 =
+* Dev - Fix E2E tests against current WooCommerce shipping and checkout behavior.
+* Dev - Update vulnerable npm development dependencies.
+* Fix - Prevent a fatal TypeError on PHP 8 when a cart item, order line, or product loop references a product that no longer resolves to a WC_Product.
+
 = 2.2.0 - 2026-06-09 =
 * Add - Add a read-only Google Analytics tracking settings ability.
 * Add - Expose JavaScript tracking formatters and utilities for custom integrations.

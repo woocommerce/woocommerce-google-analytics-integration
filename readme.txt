@@ -1,9 +1,9 @@
 === Google Analytics for WooCommerce ===
-Contributors: woocommerce, automattic, claudiosanches, bor0, royho, laurendavissmith001, cshultz88, mmjones, tomalec
+Contributors: woocommerce, automattic, claudiosanches, bor0, royho, laurendavissmith001, cshultz88, mmjones, tomalec, neosinner
 Tags: woocommerce, google analytics
 Requires at least: 6.9
 Tested up to: 7.0
-Stable tag: 2.2.0
+Stable tag: 2.2.1
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -48,6 +48,11 @@ Duplicate Google Analytics code causes a conflict in tracking. Remove any other 
 
 == Changelog ==
 
+= 2.2.1 - 2026-06-22 =
+* Dev - Fix E2E tests against current WooCommerce shipping and checkout behavior.
+* Dev - Update vulnerable npm development dependencies.
+* Fix - Prevent a fatal TypeError on PHP 8 when a cart item, order line, or product loop references a product that no longer resolves to a WC_Product.
+
 = 2.2.0 - 2026-06-09 =
 * Add - Add a read-only Google Analytics tracking settings ability.
 * Add - Expose JavaScript tracking formatters and utilities for custom integrations.
@@ -83,18 +88,5 @@ Duplicate Google Analytics code causes a conflict in tracking. Remove any other 
 * Dev - Enable min-release-age supply-chain protection.
 * Dev - Override serialize-javascript to ^7.0.5 and ajv to ^8.18.0 to resolve npm security vulnerabilities.
 * Update - Require WooCommerce 10.6+.
-
-= 2.1.22 - 2026-03-26 =
-* Dev - Add AGENTS.md and CLAUDE.md for coding agent guidelines.
-* Dev - Add Woo Deploy workflow for streamlined releases.
-* Dev - Add WooCommerce beta compatibility testing skill.
-* Dev - Add deploy workflow and release preparation via Woo Deploy.
-* Dev - Add npm scripts to run PHPUnit tests via wp-env for simpler local development.
-* Dev - Expand PHP unit test coverage for data formatting and configuration methods.
-* Update - Require WooCommerce 10.5+.
-
-= 2.1.21 - 2026-02-10 =
-* Tweak - WC 10.5 compatibility.
-* Update - Require WooCommerce 10.4+.
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce-google-analytics-integration/trunk/changelog.txt).

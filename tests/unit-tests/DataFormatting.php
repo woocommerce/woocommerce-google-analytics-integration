@@ -96,6 +96,19 @@ class DataFormatting extends EventsDataTest {
 	}
 
 	/**
+	 * Test that the method returns an empty array for a non-product value.
+	 *
+	 * This is the central safety net: even if a caller (including third-party
+	 * or future code) passes a non-WC_Product, the method must not fatal.
+	 *
+	 * @return void
+	 */
+	public function test_get_formatted_product_returns_empty_for_non_product() {
+		$this->assertSame( array(), $this->gtag->get_formatted_product( false ) );
+		$this->assertSame( array(), $this->gtag->get_formatted_product( null ) );
+	}
+
+	/**
 	 * Test that a simple product returns correct structure and values.
 	 *
 	 * @return void
@@ -546,5 +559,127 @@ class DataFormatting extends EventsDataTest {
 		$this->assertEquals( get_woocommerce_currency(), $totals['currency_code'] );
 		$this->assertEquals( wc_get_price_decimals(), $totals['currency_minor_unit'] );
 		$this->assertIsInt( $totals['total_price'] );
+	}
+
+	/**
+	 * Test that a cart item whose 'data' is not a WC_Product is skipped
+	 * instead of fataling the whole render.
+	 *
+	 * Core drops unresolvable items while rebuilding the cart from session, so
+	 * a non-product 'data' in practice comes from third-party code mutating the
+	 * cart contents. Simulated here via the woocommerce_get_cart_contents
+	 * filter.
+	 *
+	 * @return void
+	 */
+	public function test_get_formatted_cart_skips_unresolvable_product() {
+		$product = WC_Helper_Product::create_simple_product();
+		WC()->cart->add_to_cart( $product->get_id(), 2 );
+
+		// Simulate third-party code leaving a cart item without a valid product.
+		$callback = function ( $contents ) {
+			foreach ( $contents as $key => $item ) {
+				$contents[ $key ]['data'] = false;
+			}
+			return $contents;
+		};
+		add_filter( 'woocommerce_get_cart_contents', $callback );
+
+		try {
+			$formatted = $this->gtag->get_formatted_cart();
+
+			$this->assertIsArray( $formatted );
+			$this->assertArrayHasKey( 'items', $formatted );
+			$this->assertEmpty( $formatted['items'], 'Unresolvable cart items should be skipped.' );
+		} finally {
+			remove_filter( 'woocommerce_get_cart_contents', $callback );
+		}
+	}
+
+	/**
+	 * Test that an order line whose product was deleted is skipped instead
+	 * of fataling the whole render.
+	 *
+	 * WC_Order_Item_Product::get_product() returns false for a deleted
+	 * order-line product.
+	 *
+	 * @return void
+	 */
+	public function test_get_formatted_order_skips_deleted_line_product() {
+		$order = $this->create_order_with_product();
+
+		// Delete the underlying product so get_product() returns false.
+		foreach ( $order->get_items() as $item ) {
+			wp_delete_post( $item->get_product_id(), true );
+		}
+
+		// Reload the order so the line items resolve their products fresh.
+		$order = wc_get_order( $order->get_id() );
+
+		$formatted = $this->gtag->get_formatted_order( $order );
+
+		$this->assertIsArray( $formatted['items'] );
+		$this->assertEmpty( $formatted['items'], 'Order items with a deleted product should be skipped.' );
+	}
+
+	/**
+	 * Test that the woocommerce_loop_add_to_cart_link callback ignores a
+	 * non-WC_Product value instead of fataling the page render.
+	 *
+	 * Third-party themes/extensions can apply this filter with a value that is
+	 * not a product.
+	 *
+	 * @return void
+	 */
+	public function test_loop_add_to_cart_link_filter_ignores_non_product() {
+		$button = '<a href="#">Add to cart</a>';
+
+		$result = apply_filters( 'woocommerce_loop_add_to_cart_link', $button, false );
+
+		$this->assertEquals( $button, $result, 'The filter should return the button unchanged for a non-product value.' );
+
+		$data = (array) json_decode( $this->gtag->get_script_data(), true );
+		$this->assertArrayNotHasKey( 'products', $data, 'No product data should be appended for a non-product value.' );
+	}
+
+	/**
+	 * Test that capturing an add-to-cart for an unresolvable product neither
+	 * fatals nor emits empty added_to_cart data.
+	 *
+	 * Covers the woocommerce_add_to_cart capture path: with no matching cart
+	 * item, wc_get_product() returns false for a product id that no longer
+	 * resolves.
+	 *
+	 * @return void
+	 */
+	public function test_capture_added_to_cart_ignores_unresolvable_product() {
+		$this->gtag->capture_added_to_cart( 'missing_key', 999999999, 1, 0, array() );
+
+		$data = (array) json_decode( $this->gtag->get_script_data(), true );
+
+		$this->assertArrayNotHasKey( 'added_to_cart', $data, 'No added_to_cart data should be set for an unresolvable product.' );
+	}
+
+	/**
+	 * Test that the woocommerce_before_single_product hook neither fatals nor
+	 * emits product data when the global $product is not a WC_Product.
+	 *
+	 * Covers the single-product render path.
+	 *
+	 * @return void
+	 */
+	public function test_before_single_product_action_ignores_non_product() {
+		global $product;
+		$original = $product;
+		$product  = false;
+
+		try {
+			do_action( 'woocommerce_before_single_product' );
+
+			$data = (array) json_decode( $this->gtag->get_script_data(), true );
+			$this->assertArrayNotHasKey( 'product', $data, 'No product data should be set when the global product is not a WC_Product.' );
+		} finally {
+			$product = $original;
+		}
 	}
 }

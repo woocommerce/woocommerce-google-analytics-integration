@@ -25,6 +25,7 @@
     "prettier": "npm:wp-prettier@^3.0.3"
   },
   "overrides": {
+    "@babel/core": "^7.29.6",
     "@babel/runtime": "^7.27.6",
     "webpack-dev-server": "^5.2.4",
     "qs": "^6.15.2",

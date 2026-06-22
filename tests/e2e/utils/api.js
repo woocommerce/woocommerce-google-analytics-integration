@@ -34,11 +34,14 @@ export function apiWP() {
 /**
  * Creates a simple product.
  *
+ * @param {Object} overrides Product fields to merge over the default config
+ *                           (e.g. a `sku` for product identifier tests).
+ *
  * @return {number} Product ID of the created product.
  */
-export async function createSimpleProduct() {
+export async function createSimpleProduct( overrides = {} ) {
 	return await api()
-		.post( 'products', config.products.simple )
+		.post( 'products', { ...config.products.simple, ...overrides } )
 		.then( ( response ) => response.data.id );
 }
 
@@ -139,9 +142,12 @@ export async function deleteTaxRate( taxRateID ) {
 
 /**
  * Set test settings.
+ *
+ * @param {Object} settings Settings overrides to apply on top of the test
+ *                          defaults (e.g. `{ ga_product_identifier: 'product_sku' }`).
  */
-export async function setSettings() {
-	await api().post( 'ga4w-test/settings' );
+export async function setSettings( settings = {} ) {
+	await api().post( 'ga4w-test/settings', settings );
 }
 
 /**

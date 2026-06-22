@@ -47,27 +47,36 @@ function register_routes() {
 
 /**
  * Set the settings to enable tracking.
+ *
+ * The product identifier can be overridden through the request body so tests
+ * can exercise both the default product id and the SKU based identifier.
+ *
+ * @param \WP_REST_Request $request Request object.
  */
-function set_settings() {
-	update_option(
-		'woocommerce_google_analytics_settings',
-		[
-			'ga_product_identifier'                   => 'product_id',
-			'ga_id'                                   => 'G-ABCD123',
-			'ga_support_display_advertising'          => 'no',
-			'ga_404_tracking_enabled'                 => 'yes',
-			'ga_linker_allow_incoming_enabled'        => 'no',
-			'ga_ecommerce_tracking_enabled'           => 'yes',
-			'ga_event_tracking_enabled'               => 'yes',
-			'ga_enhanced_ecommerce_tracking_enabled'  => 'yes',
-			'ga_enhanced_remove_from_cart_enabled'    => 'yes',
-			'ga_enhanced_product_impression_enabled'  => 'yes',
-			'ga_enhanced_product_click_enabled'       => 'yes',
-			'ga_enhanced_product_detail_view_enabled' => 'yes',
-			'ga_enhanced_checkout_process_enabled'    => 'yes',
-			'ga_linker_cross_domains'                 => '',
-		]
-	);
+function set_settings( $request ) {
+	$settings = [
+		'ga_product_identifier'                   => 'product_id',
+		'ga_id'                                   => 'G-ABCD123',
+		'ga_support_display_advertising'          => 'no',
+		'ga_404_tracking_enabled'                 => 'yes',
+		'ga_linker_allow_incoming_enabled'        => 'no',
+		'ga_ecommerce_tracking_enabled'           => 'yes',
+		'ga_event_tracking_enabled'               => 'yes',
+		'ga_enhanced_ecommerce_tracking_enabled'  => 'yes',
+		'ga_enhanced_remove_from_cart_enabled'    => 'yes',
+		'ga_enhanced_product_impression_enabled'  => 'yes',
+		'ga_enhanced_product_click_enabled'       => 'yes',
+		'ga_enhanced_product_detail_view_enabled' => 'yes',
+		'ga_enhanced_checkout_process_enabled'    => 'yes',
+		'ga_linker_cross_domains'                 => '',
+	];
+
+	$identifier = $request->get_json_params()['ga_product_identifier'] ?? null;
+	if ( in_array( $identifier, [ 'product_id', 'product_sku' ], true ) ) {
+		$settings['ga_product_identifier'] = $identifier;
+	}
+
+	update_option( 'woocommerce_google_analytics_settings', $settings );
 }
 
 /**

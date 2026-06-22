@@ -14,6 +14,7 @@ import {
 } from '../../utils/api';
 import {
 	blockProductAddToCart,
+	checkout,
 	relatedProductAddToCart,
 	simpleProductAddToCart,
 	variableProductAddToCart,
@@ -820,6 +821,60 @@ test.describe( 'GTag events on block pages', () => {
 			expect( data[ 'epn.value' ] ).toEqual(
 				simpleProductPrice.toString()
 			);
+		} );
+	} );
+
+	// The purchase event itself is built server-side from the order, so its data
+	// does not depend on which checkout a shopper used. What this test guards is
+	// the block-specific surface around it: placing an order through the
+	// `woocommerce/checkout` block and the block order-confirmation page still
+	// firing `woocommerce_thankyou`, which is where the purchase event is
+	// enqueued. Those pieces can break independently of the classic checkout when
+	// WooCommerce updates, so the block path is verified on its own here.
+	test( 'Purchase event is sent after completing the block checkout', async ( {
+		page,
+	} ) => {
+		// Add the simple product twice and one variable product so quantity and
+		// variation handling are both exercised in the order.
+		await simpleProductAddToCart( page, simpleProductID );
+		await simpleProductAddToCart( page, simpleProductID );
+		await variableProductAddToCart( page, variableProductID );
+
+		const event = trackGtagEvent( page, 'purchase', 'checkout' );
+		const orderID = await checkout( page );
+
+		await event.then( ( request ) => {
+			const data = getEventData( request, 'purchase' );
+			expect( data.product1 ).toEqual( {
+				id: simpleProductID.toString(),
+				nm: 'Simple product',
+				ca: 'Uncategorized',
+				qt: '2',
+				pr: simpleProductPrice.toString(),
+			} );
+			expect( data.product2 ).toEqual( {
+				id: variableProductID.toString(),
+				nm: 'Variable product',
+				ca: 'Uncategorized',
+				qt: '1',
+				pr: '18.99',
+				va: 'colour: Green, size: Medium',
+			} );
+
+			expect( data[ 'ep.transaction_id' ] ).toEqual( orderID );
+			expect( data[ 'ep.affiliation' ] ).toEqual(
+				'WooCommerce E2E Test Suite'
+			);
+
+			const shipping = 10;
+			const total =
+				simpleProductPrice + simpleProductPrice + 18.99 + shipping;
+			expect( data.cu ).toEqual( 'USD' );
+			expect( data[ 'epn.value' ] ).toEqual(
+				total.toFixed( 2 ).toString()
+			);
+			expect( data[ 'epn.tax' ] ).toEqual( '0' );
+			expect( data[ 'epn.shipping' ] ).toEqual( shipping.toString() );
 		} );
 	} );
 

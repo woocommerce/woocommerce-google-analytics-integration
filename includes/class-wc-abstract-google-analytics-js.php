@@ -79,7 +79,9 @@ abstract class WC_Abstract_Google_Analytics_JS {
 			'woocommerce_before_single_product',
 			function () {
 				global $product;
-				$this->set_script_data( 'product', $this->get_formatted_product( $product ) );
+				if ( $product instanceof WC_Product ) {
+					$this->set_script_data( 'product', $this->get_formatted_product( $product ) );
+				}
 			}
 		);
 
@@ -106,7 +108,7 @@ abstract class WC_Abstract_Google_Analytics_JS {
 		add_filter(
 			'woocommerce_loop_add_to_cart_link',
 			function ( $button, $product ) use ( &$product_list_items, $max_product_list_items ) {
-				if ( $product_list_items < $max_product_list_items ) {
+				if ( $product instanceof WC_Product && $product_list_items < $max_product_list_items ) {
 					$this->append_script_data( 'products', $this->get_formatted_product( $product ) );
 					++$product_list_items;
 				}
@@ -261,8 +263,13 @@ abstract class WC_Abstract_Google_Analytics_JS {
 
 		$items = array();
 		foreach ( $cart->get_cart() as $cart_item_key => $item ) {
+			$product = $item['data'] ?? null;
+			if ( ! $product instanceof WC_Product ) {
+				continue;
+			}
+
 			$items[] = array_merge(
-				$this->get_formatted_product( $item['data'] ),
+				$this->get_formatted_product( $product ),
 				array(
 					'key'      => $cart_item_key,
 					'quantity' => $item['quantity'],
@@ -288,15 +295,25 @@ abstract class WC_Abstract_Google_Analytics_JS {
 	/**
 	 * Returns an array of product data in the required format
 	 *
-	 * @param WC_Product $product   The product to format.
-	 * @param int        $variation_id Variation product ID.
-	 * @param array|bool $variation An array containing product variation attributes to include in the product data.
+	 * Returns an empty array when the product cannot be resolved. Several
+	 * callers pass a value that is not guaranteed to be a WC_Product (e.g. a
+	 * deleted product, or a product whose type class is not registered). The
+	 * argument is intentionally untyped so that such values degrade gracefully
+	 * instead of fataling the front-end render with a TypeError on PHP 8.
+	 *
+	 * @param WC_Product|false|null $product   The product to format.
+	 * @param int                   $variation_id Variation product ID.
+	 * @param array|bool            $variation An array containing product variation attributes to include in the product data.
 	 *                              For the "variation" type products, we'll use product->get_attributes.
-	 * @param bool|int   $quantity  Quantity to include in the formatted product object
+	 * @param bool|int              $quantity  Quantity to include in the formatted product object
 	 *
 	 * @return array
 	 */
-	public function get_formatted_product( WC_Product $product, $variation_id = 0, $variation = false, $quantity = false ): array {
+	public function get_formatted_product( $product, $variation_id = 0, $variation = false, $quantity = false ): array {
+		if ( ! $product instanceof WC_Product ) {
+			return array();
+		}
+
 		$product_id = $product->is_type( 'variation' ) ? $product->get_parent_id() : $product->get_id();
 		$price      = $product->get_price();
 
@@ -450,7 +467,11 @@ abstract class WC_Abstract_Google_Analytics_JS {
 			$cart_item = WC()->cart->cart_contents[ $cart_item_key ];
 		}
 
-		$product   = $cart_item['data'] ?? wc_get_product( $product_id );
+		$product = $cart_item['data'] ?? wc_get_product( $product_id );
+		if ( ! $product instanceof WC_Product ) {
+			return;
+		}
+
 		$formatted = $this->get_formatted_product( $product, $variation_id, $variation, $quantity );
 
 		if ( null === $this->pending_added_to_cart ) {
@@ -549,6 +570,24 @@ abstract class WC_Abstract_Google_Analytics_JS {
 		 */
 		$order_id = apply_filters( 'woocommerce_ga_order_id', $order->get_order_number(), $order );
 
+		$items = array();
+		foreach ( $order->get_items() as $item ) {
+			$product = $item->get_product();
+			if ( ! $product instanceof WC_Product ) {
+				continue;
+			}
+
+			$items[] = array_merge(
+				$this->get_formatted_product( $product ),
+				array(
+					'quantity'                    => $item->get_quantity(),
+					// The method get_total() will return the price after coupon discounts.
+					// https://github.com/woocommerce/woocommerce/blob/54eba223b8dec015c91a13423f9eced09e96f399/plugins/woocommerce/includes/class-wc-order-item-product.php#L308-L310
+					'price_after_coupon_discount' => $this->get_formatted_price( $item->get_total() ),
+				)
+			);
+		}
+
 		return array(
 			'id'          => $order_id,
 			'affiliation' => get_bloginfo( 'name' ),
@@ -559,20 +598,7 @@ abstract class WC_Abstract_Google_Analytics_JS {
 				'shipping_total'      => $this->get_formatted_price( $order->get_total_shipping() ),
 				'total_price'         => $this->get_formatted_price( $order->get_total() ),
 			),
-			'items'       => array_map(
-				function ( WC_Order_Item_Product $item ) {
-					return array_merge(
-						$this->get_formatted_product( $item->get_product() ),
-						array(
-							'quantity'                    => $item->get_quantity(),
-							// The method get_total() will return the price after coupon discounts.
-							// https://github.com/woocommerce/woocommerce/blob/54eba223b8dec015c91a13423f9eced09e96f399/plugins/woocommerce/includes/class-wc-order-item-product.php#L308-L310
-							'price_after_coupon_discount' => $this->get_formatted_price( $item->get_total() ),
-						)
-					);
-				},
-				array_values( $order->get_items() ),
-			),
+			'items'       => $items,
 		);
 	}
 

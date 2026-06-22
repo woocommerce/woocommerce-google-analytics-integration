@@ -27,6 +27,7 @@
   "overrides": {
     "@babel/core": "^7.29.6",
     "@babel/runtime": "^7.27.6",
+    "http-proxy-middleware": "^3.0.6",
     "js-yaml": "^4.2.0",
     "markdown-it": "^14.2.0",
     "webpack-dev-server": "^5.2.5",

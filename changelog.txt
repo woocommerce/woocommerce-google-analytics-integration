@@ -1,5 +1,8 @@
 *** Changelog ***
 
+= 2.3.0 - 2026-06-25 =
+* Update - Require WooCommerce 10.8+.
+
 = 2.2.1 - 2026-06-22 =
 * Dev - Fix E2E tests against current WooCommerce shipping and checkout behavior.
 * Dev - Update vulnerable npm development dependencies.

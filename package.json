@@ -27,7 +27,6 @@
   "overrides": {
     "@babel/core": "^7.29.6",
     "@babel/runtime": "^7.27.6",
-    "http-proxy-middleware": "^3.0.6",
     "markdown-it": "^14.2.0",
     "webpack-dev-server": "^5.2.6",
     "adm-zip": "^0.6.0",
@@ -40,9 +39,6 @@
     },
     "serialize-javascript": "^7.0.5",
     "schema-utils": {
-      "ajv": "^8.18.0"
-    },
-    "ajv-formats": {
       "ajv": "^8.18.0"
     }
   },

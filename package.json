@@ -28,9 +28,16 @@
     "@babel/core": "^7.29.6",
     "@babel/runtime": "^7.27.6",
     "markdown-it": "^14.2.0",
-    "webpack-dev-server": "^5.2.6",
-    "adm-zip": "^0.6.0",
-    "lighthouse": "^13.4.1",
+    "@wordpress/env": {
+      "adm-zip": "^0.6.0"
+    },
+    "@wordpress/scripts": {
+      "adm-zip": "^0.6.0",
+      "webpack-dev-server": "^5.2.6"
+    },
+    "@wordpress/e2e-test-utils-playwright": {
+      "lighthouse": "^13.4.1"
+    },
     "qs": "^6.15.2",
     "uuid": "11.1.1",
     "minimatch": "^3.1.4",

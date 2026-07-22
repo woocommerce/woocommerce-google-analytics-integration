@@ -19,7 +19,7 @@
     "@wordpress/scripts": "^31.8.0",
     "@wordpress/url": "^4.26.0",
     "ajv": "^8.20.0",
-    "axios": "^1.16.0",
+    "axios": "^1.18.1",
     "eslint": "^9.39.4",
     "node-wp-i18n": "~1.2.8",
     "prettier": "npm:wp-prettier@^3.0.3"
@@ -27,10 +27,17 @@
   "overrides": {
     "@babel/core": "^7.29.6",
     "@babel/runtime": "^7.27.6",
-    "http-proxy-middleware": "^3.0.6",
-    "js-yaml": "^4.2.0",
     "markdown-it": "^14.2.0",
-    "webpack-dev-server": "^5.2.5",
+    "@wordpress/env": {
+      "adm-zip": "^0.6.0"
+    },
+    "@wordpress/scripts": {
+      "adm-zip": "^0.6.0",
+      "webpack-dev-server": "^5.2.6"
+    },
+    "@wordpress/e2e-test-utils-playwright": {
+      "lighthouse": "^13.4.1"
+    },
     "qs": "^6.15.2",
     "uuid": "11.1.1",
     "minimatch": "^3.1.4",
@@ -39,9 +46,6 @@
     },
     "serialize-javascript": "^7.0.5",
     "schema-utils": {
-      "ajv": "^8.18.0"
-    },
-    "ajv-formats": {
       "ajv": "^8.18.0"
     }
   },

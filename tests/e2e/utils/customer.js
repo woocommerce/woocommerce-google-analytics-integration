@@ -327,51 +327,37 @@ export async function storeApiBatchDecreaseCartQuantity(
 }
 
 /**
- * Perform checkout steps to purchase a product.
+ * Perform checkout steps to purchase a product through the block checkout on
+ * the default checkout page. For the classic shortcode form, use
+ * classicCheckout() instead.
  *
  * @param {Page} page
  *
- * @return {number} Order number.
+ * @return {string} Order number.
  */
 export async function checkout( page ) {
 	const user = config.addresses.customer.billing;
 
 	await page.goto( 'checkout' );
 
-	if ( await page.locator( '#billing_first_name' ).isVisible() ) {
-		await page.locator( '#billing_first_name' ).fill( user.firstname );
-		await page.locator( '#billing_last_name' ).fill( user.lastname );
-		await page
-			.locator( '#billing_address_1' )
-			.fill( user.addressfirstline );
-		await page.locator( '#billing_city' ).fill( user.city );
-		await page.locator( '#billing_state' ).selectOption( user.state );
-		await page.locator( '#billing_postcode' ).fill( user.postcode );
-		await page.locator( '#billing_phone' ).fill( user.phone );
-		await page.locator( '#billing_email' ).fill( user.email );
+	await page.getByLabel( 'Email address' ).fill( user.email );
+	await page.getByLabel( 'First name' ).fill( user.firstname );
+	await page.getByLabel( 'Last name' ).fill( user.lastname );
+	await page
+		.getByLabel( 'Address', { exact: true } )
+		.fill( user.addressfirstline );
+	await page.getByLabel( 'City' ).fill( user.city );
+	await page.getByLabel( 'ZIP Code' ).fill( user.postcode );
 
-		await page.locator( 'text=Cash on delivery' ).click();
-		await expect( page.locator( 'div.payment_method_cod' ) ).toBeVisible();
+	const stateField = page.getByRole( 'combobox', { name: /State$/ } );
+	const stateFieldTagName = await stateField.evaluate(
+		( element ) => element.tagName
+	);
+	if ( stateFieldTagName === 'SELECT' ) {
+		await stateField.selectOption( user.statename );
 	} else {
-		await page.getByLabel( 'Email address' ).fill( user.email );
-		await page.getByLabel( 'First name' ).fill( user.firstname );
-		await page.getByLabel( 'Last name' ).fill( user.lastname );
-		await page
-			.getByLabel( 'Address', { exact: true } )
-			.fill( user.addressfirstline );
-		await page.getByLabel( 'City' ).fill( user.city );
-		await page.getByLabel( 'ZIP Code' ).fill( user.postcode );
-
-		const stateField = page.getByRole( 'combobox', { name: /State$/ } );
-		const stateFieldTagName = await stateField.evaluate(
-			( element ) => element.tagName
-		);
-		if ( stateFieldTagName === 'SELECT' ) {
-			stateField.selectOption( user.statename );
-		} else {
-			// compatibility-code "WC < 9.2"
-			stateField.fill( user.statename );
-		}
+		// compatibility-code "WC < 9.2"
+		await stateField.fill( user.statename );
 	}
 
 	//TODO: See if there's an alternative method to click the button without relying on waitForTimeout.

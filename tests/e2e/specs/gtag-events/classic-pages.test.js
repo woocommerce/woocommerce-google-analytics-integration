@@ -27,6 +27,7 @@ import {
 import {
 	blockProductAddToCart,
 	checkout,
+	classicCheckout,
 	simpleProductAddToCart,
 	variableProductAddToCart,
 } from '../../utils/customer';
@@ -813,16 +814,22 @@ test.describe( 'GTag events on classic pages', () => {
 		}
 	} );
 
-	test( 'Purchase event is sent on order complete page', async ( {
+	// The default checkout page is the block checkout, so the block purchase
+	// test in the blocks spec covers that form. This test drives the purchase
+	// through the classic `[woocommerce_checkout]` shortcode form instead
+	// (a wc-ajax=checkout submission rather than the Store API).
+	test( 'Purchase event is sent after completing the classic shortcode checkout', async ( {
 		page,
 	} ) => {
+		await createClassicCheckoutPage();
+
 		// Add simple product twice, and one variable product.
 		await simpleProductAddToCart( page, simpleProductID );
 		await simpleProductAddToCart( page, simpleProductID );
 		await variableProductAddToCart( page, variableProductID );
 
 		const event = trackGtagEvent( page, 'purchase', 'checkout' );
-		const orderID = await checkout( page );
+		const orderID = await classicCheckout( page );
 
 		await event.then( ( request ) => {
 			const data = getEventData( request, 'purchase' );

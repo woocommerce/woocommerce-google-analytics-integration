@@ -389,3 +389,51 @@ export async function checkout( page ) {
 		( el ) => el.textContent
 	);
 }
+
+/**
+ * Perform checkout steps on the classic shortcode checkout page (created by
+ * createClassicCheckoutPage()).
+ *
+ * Only the form differs from checkout(): the classic `[woocommerce_checkout]`
+ * form posts through wc-ajax=checkout instead of the Store API. The
+ * order-received confirmation is rendered by the block theme's Order
+ * Confirmation template either way, so the same confirmation markup is
+ * asserted here.
+ *
+ * @param {Page} page
+ *
+ * @return {string} Order number.
+ */
+export async function classicCheckout( page ) {
+	const user = config.addresses.customer.billing;
+
+	await page.goto( 'classic-checkout' );
+
+	await page.locator( '#billing_first_name' ).fill( user.firstname );
+	await page.locator( '#billing_last_name' ).fill( user.lastname );
+	await page.locator( '#billing_address_1' ).fill( user.addressfirstline );
+	await page.locator( '#billing_city' ).fill( user.city );
+	await page.locator( '#billing_state' ).selectOption( user.state );
+	await page.locator( '#billing_postcode' ).fill( user.postcode );
+	await page.locator( '#billing_phone' ).fill( user.phone );
+	await page.locator( '#billing_email' ).fill( user.email );
+
+	await page.locator( 'text=Cash on delivery' ).click();
+	await expect( page.locator( 'div.payment_method_cod' ) ).toBeVisible();
+
+	// Address changes trigger update_order_review refreshes that overlay the
+	// form. Waiting on a specific request would race (a pre-selected gateway
+	// fires none on click), so wait for the overlay to be gone instead; the
+	// place-order click's own actionability wait covers any late refresh.
+	await expect( page.locator( '.blockUI.blockOverlay' ) ).toHaveCount( 0 );
+	await page.locator( '#place_order' ).click();
+
+	await expect(
+		page.locator( '.wc-block-order-confirmation-status' )
+	).toContainText( 'order has been received' );
+
+	return await page.$eval(
+		'.wc-block-order-confirmation-summary-list-item__value',
+		( el ) => el.textContent
+	);
+}

@@ -47,11 +47,11 @@ add_filter(
 		if ( isset( $_GET['ga4w_e2e_extra_consent_region'] ) ) {
 			// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			$region  = sanitize_text_field( wp_unslash( $_GET['ga4w_e2e_extra_consent_region'] ) );
-			$modes[] = array(
+			$modes[] = [
 				'analytics_storage' => 'granted',
 				'ad_storage'        => 'granted',
-				'region'            => array( $region ),
-			);
+				'region'            => [ $region ],
+			];
 		}
 
 		return $modes;
@@ -91,10 +91,10 @@ add_action(
 					wp_enqueue_script(
 						WC_Google_Gtag_JS::get_instance()->script_handle . '-head',
 						WC_Google_Analytics_Integration::get_instance()->get_js_asset_url( 'main.js' ),
-						array(
+						[
 							...WC_Google_Analytics_Integration::get_instance()->get_js_asset_dependencies( 'main' ),
 							'google-tag-manager',
-						),
+						],
 						WC_Google_Analytics_Integration::get_instance()->get_js_asset_version( 'main' ),
 						false
 					);

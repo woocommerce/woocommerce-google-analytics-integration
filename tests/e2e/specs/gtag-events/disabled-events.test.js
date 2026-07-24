@@ -13,6 +13,7 @@ import {
 } from '../../utils/api';
 import {
 	blockProductAddToCart,
+	checkout,
 	storeApiAddToCart,
 	storeApiBatchDecreaseCartQuantity,
 } from '../../utils/customer';
@@ -54,6 +55,31 @@ function collectGtagEventNames( page ) {
 	return names;
 }
 
+// Every event the plugin can send. Absence is asserted against this list
+// rather than a whitelist of the collected names, because gtag emits automatic
+// events of its own (page_view, session_start, user_engagement).
+const PLUGIN_EVENTS = [
+	'purchase',
+	'add_to_cart',
+	'remove_from_cart',
+	'view_item_list',
+	'select_content',
+	'view_item',
+	'begin_checkout',
+	'add_shipping_info',
+	'add_payment_info',
+];
+
+const ALL_DISABLED_SETTINGS = {
+	ga_ecommerce_tracking_enabled: 'no',
+	ga_event_tracking_enabled: 'no',
+	ga_enhanced_remove_from_cart_enabled: 'no',
+	ga_enhanced_product_impression_enabled: 'no',
+	ga_enhanced_product_click_enabled: 'no',
+	ga_enhanced_product_detail_view_enabled: 'no',
+	ga_enhanced_checkout_process_enabled: 'no',
+};
+
 test.describe( 'Disabled event tracking', () => {
 	let productID;
 
@@ -68,15 +94,7 @@ test.describe( 'Disabled event tracking', () => {
 	test( 'No ecommerce events fire when all event tracking is disabled', async ( {
 		page,
 	} ) => {
-		await setSettings( {
-			ga_ecommerce_tracking_enabled: 'no',
-			ga_event_tracking_enabled: 'no',
-			ga_enhanced_remove_from_cart_enabled: 'no',
-			ga_enhanced_product_impression_enabled: 'no',
-			ga_enhanced_product_click_enabled: 'no',
-			ga_enhanced_product_detail_view_enabled: 'no',
-			ga_enhanced_checkout_process_enabled: 'no',
-		} );
+		await setSettings( ALL_DISABLED_SETTINGS );
 
 		const eventNames = collectGtagEventNames( page );
 
@@ -100,22 +118,47 @@ test.describe( 'Disabled event tracking', () => {
 		await page.goto( 'shop' );
 		await pageView;
 
-		// Assert against every event the plugin can send rather than a
-		// whitelist of the collected names, because gtag emits automatic
-		// events of its own (page_view, session_start, user_engagement).
-		const pluginEvents = [
-			'purchase',
-			'add_to_cart',
-			'remove_from_cart',
-			'view_item_list',
-			'select_content',
-			'view_item',
-			'begin_checkout',
-			'add_shipping_info',
-			'add_payment_info',
-		];
 		expect(
-			eventNames.filter( ( name ) => pluginEvents.includes( name ) )
+			eventNames.filter( ( name ) => PLUGIN_EVENTS.includes( name ) )
+		).toEqual( [] );
+	} );
+
+	// Walks the whole shopper journey with every toggle off so each surface
+	// (product click-through, product page, cart mutations, checkout, and the
+	// order confirmation where the server-side purchase capture runs) proves
+	// silent, not just the shop page interactions of the test above.
+	test( 'No events fire across a full purchase journey when all tracking is disabled', async ( {
+		page,
+	} ) => {
+		await setSettings( ALL_DISABLED_SETTINGS );
+
+		const eventNames = collectGtagEventNames( page );
+
+		// Clicking through from the shop exercises the select_content surface;
+		// the landing product page covers the view_item surface.
+		await page.goto( 'shop?orderby=date' );
+		await page
+			.getByRole( 'link', { name: 'Simple product' } )
+			.first()
+			.click();
+		// Wait for the product page before the Store API calls, both to avoid
+		// evaluating on the dying shop document and to guarantee the
+		// view_item surface was actually reached (a later goto would silently
+		// cancel an uncommitted navigation).
+		await expect(
+			page.locator( '.single_add_to_cart_button' ).first()
+		).toBeVisible();
+
+		await storeApiAddToCart( page, productID, 2 );
+		await storeApiBatchDecreaseCartQuantity( page, productID, 1 );
+		await checkout( page );
+
+		const pageView = trackGtagEvent( page, 'page_view' );
+		await page.goto( 'shop' );
+		await pageView;
+
+		expect(
+			eventNames.filter( ( name ) => PLUGIN_EVENTS.includes( name ) )
 		).toEqual( [] );
 	} );
 

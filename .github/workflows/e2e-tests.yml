@@ -3,10 +3,17 @@ name: E2E Tests
 on:
   push:
     branches:
+      - trunk
       - "release/**"
   pull_request:
-    branches:
-      - "release/**"
+    paths-ignore:
+      - "**.md"
+      - "docs/**"
+      - "wordpress_org_assets/**"
+      - ".github/ISSUE_TEMPLATE/**"
+      - "changelog.txt"
+      - "readme.txt"
+      - "languages/**"
   workflow_dispatch:
     inputs:
       wp-rc-version:

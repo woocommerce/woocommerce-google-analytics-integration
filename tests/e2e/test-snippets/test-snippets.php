@@ -34,6 +34,31 @@ add_filter(
 	}
 );
 
+/*
+ * Test-only consent mode appender. Pass `ga4w_e2e_extra_consent_region` to
+ * append an extra consent mode for that region, mirroring how merchants
+ * customize consent defaults through the documented filter. Runs after the
+ * grant-all snippet above so the appended mode is not rewritten by it.
+ */
+add_filter(
+	'woocommerce_ga_gtag_consent_modes',
+	function ( $modes ) {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( isset( $_GET['ga4w_e2e_extra_consent_region'] ) ) {
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$region  = sanitize_text_field( wp_unslash( $_GET['ga4w_e2e_extra_consent_region'] ) );
+			$modes[] = array(
+				'analytics_storage' => 'granted',
+				'ad_storage'        => 'granted',
+				'region'            => array( $region ),
+			);
+		}
+
+		return $modes;
+	},
+	20
+);
+
 /**
  * Snippet to allow the main.js file to be moved either to the page head or to
  * late in the footer after the extension inline data has been added to the page.

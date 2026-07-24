@@ -1058,4 +1058,67 @@ test.describe( 'GTag events on block pages', () => {
 			} );
 		} );
 	} );
+
+	test( 'Select content event is sent from the shop page', async ( {
+		page,
+	} ) => {
+		const listEvent = trackGtagEvent( page, 'view_item_list' );
+		await page.goto( 'shop?orderby=date' );
+		await listEvent;
+
+		const event = trackGtagEvent( page, 'select_content' );
+		// Target the known product so the content id can be asserted exactly.
+		const productLink = page
+			.locator(
+				`li.post-${ simpleProductID } .wc-block-components-product-image a`
+			)
+			.first();
+		// A readable failure when tests added above push the product off the
+		// catalog's first page, instead of a click timeout.
+		await expect( productLink ).toBeVisible();
+
+		await Promise.all( [ event, productLink.click() ] );
+
+		await event.then( ( request ) => {
+			const data = getEventData( request, 'select_content' );
+			expect( data[ 'ep.content_type' ] ).toEqual( 'product' );
+			expect( data[ 'ep.content_id' ] ).toEqual(
+				simpleProductID.toString()
+			);
+		} );
+	} );
+
+	test( 'Select content event is sent when opening a related product by name', async ( {
+		page,
+	} ) => {
+		await createSimpleProduct(); // Create an additional product for related to show up.
+		await page.goto( `?p=${ simpleProductID }` );
+
+		// The title link inside the related Product Collection carries the
+		// viewProduct interactivity action, so clicking the product name
+		// fires the event before the browser navigates away.
+		const relatedTitleLink = page
+			.locator(
+				'[data-collection="woocommerce/product-collection/related"] .wp-block-post-title a'
+			)
+			.first();
+
+		// Skip on the click target itself, so a WC setup rendering the
+		// related section with an older markup variant skips instead of
+		// timing out on the click.
+		test.skip(
+			! ( await relatedTitleLink.count() ),
+			'This WC setup does not render a related Product Collection product link on the single product page.'
+		);
+
+		const event = trackGtagEvent( page, 'select_content' );
+
+		await Promise.all( [ event, relatedTitleLink.click() ] );
+
+		await event.then( ( request ) => {
+			const data = getEventData( request, 'select_content' );
+			expect( data[ 'ep.content_type' ] ).toEqual( 'product' );
+			expect( data[ 'ep.content_id' ] ).toBeTruthy();
+		} );
+	} );
 } );

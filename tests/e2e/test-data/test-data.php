@@ -47,27 +47,54 @@ function register_routes() {
 
 /**
  * Set the settings to enable tracking.
+ *
+ * The product identifier and the per-event tracking toggles can be overridden
+ * through the request body so tests can exercise the SKU based identifier and
+ * the disabled-event behavior.
+ *
+ * @param \WP_REST_Request $request Request object.
  */
-function set_settings() {
-	update_option(
-		'woocommerce_google_analytics_settings',
-		[
-			'ga_product_identifier'                   => 'product_id',
-			'ga_id'                                   => 'G-ABCD123',
-			'ga_support_display_advertising'          => 'no',
-			'ga_404_tracking_enabled'                 => 'yes',
-			'ga_linker_allow_incoming_enabled'        => 'no',
-			'ga_ecommerce_tracking_enabled'           => 'yes',
-			'ga_event_tracking_enabled'               => 'yes',
-			'ga_enhanced_ecommerce_tracking_enabled'  => 'yes',
-			'ga_enhanced_remove_from_cart_enabled'    => 'yes',
-			'ga_enhanced_product_impression_enabled'  => 'yes',
-			'ga_enhanced_product_click_enabled'       => 'yes',
-			'ga_enhanced_product_detail_view_enabled' => 'yes',
-			'ga_enhanced_checkout_process_enabled'    => 'yes',
-			'ga_linker_cross_domains'                 => '',
-		]
-	);
+function set_settings( $request ) {
+	$settings = [
+		'ga_product_identifier'                   => 'product_id',
+		'ga_id'                                   => 'G-ABCD123',
+		'ga_support_display_advertising'          => 'no',
+		'ga_404_tracking_enabled'                 => 'yes',
+		'ga_linker_allow_incoming_enabled'        => 'no',
+		'ga_ecommerce_tracking_enabled'           => 'yes',
+		'ga_event_tracking_enabled'               => 'yes',
+		'ga_enhanced_ecommerce_tracking_enabled'  => 'yes',
+		'ga_enhanced_remove_from_cart_enabled'    => 'yes',
+		'ga_enhanced_product_impression_enabled'  => 'yes',
+		'ga_enhanced_product_click_enabled'       => 'yes',
+		'ga_enhanced_product_detail_view_enabled' => 'yes',
+		'ga_enhanced_checkout_process_enabled'    => 'yes',
+		'ga_linker_cross_domains'                 => '',
+	];
+
+	$params = $request->get_json_params();
+	if ( is_array( $params ) ) {
+		if ( in_array( $params['ga_product_identifier'] ?? null, [ 'product_id', 'product_sku' ], true ) ) {
+			$settings['ga_product_identifier'] = $params['ga_product_identifier'];
+		}
+
+		$event_toggles = [
+			'ga_ecommerce_tracking_enabled',
+			'ga_event_tracking_enabled',
+			'ga_enhanced_remove_from_cart_enabled',
+			'ga_enhanced_product_impression_enabled',
+			'ga_enhanced_product_click_enabled',
+			'ga_enhanced_product_detail_view_enabled',
+			'ga_enhanced_checkout_process_enabled',
+		];
+		foreach ( $event_toggles as $toggle ) {
+			if ( isset( $params[ $toggle ] ) && in_array( $params[ $toggle ], [ 'yes', 'no' ], true ) ) {
+				$settings[ $toggle ] = $params[ $toggle ];
+			}
+		}
+	}
+
+	update_option( 'woocommerce_google_analytics_settings', $settings );
 }
 
 /**

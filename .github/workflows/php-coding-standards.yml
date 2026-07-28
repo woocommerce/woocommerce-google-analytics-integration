@@ -6,6 +6,8 @@ on:
       - trunk
     paths:
       - "**.php"
+      - composer.json
+      - composer.lock
       - .github/workflows/php-coding-standards.yml
   pull_request:
 
@@ -30,6 +32,8 @@ jobs:
           filters: |
             php:
               - '**.php'
+              - 'composer.json'
+              - 'composer.lock'
               - '.github/workflows/php-coding-standards.yml'
 
   phpcs:

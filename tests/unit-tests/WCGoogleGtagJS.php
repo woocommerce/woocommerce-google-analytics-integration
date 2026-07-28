@@ -217,7 +217,7 @@ class WCGoogleGtagJS extends EventsDataTest {
 
 		add_filter(
 			'woocommerce_gtag_tracker_variable',
-			function ( $variable ) {
+			function () {
 				return 'filtered';
 			}
 		);

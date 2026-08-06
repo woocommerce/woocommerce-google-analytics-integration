@@ -3,7 +3,7 @@ Contributors: woocommerce, automattic, claudiosanches, bor0, royho, laurendaviss
 Tags: woocommerce, google analytics
 Requires at least: 6.9
 Tested up to: 7.0
-Stable tag: 2.3.0
+Stable tag: 2.4.0
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -47,6 +47,11 @@ Duplicate Google Analytics code causes a conflict in tracking. Remove any other 
 1. Google Analytics Integration Settings.
 
 == Changelog ==
+
+= 2.4.0 - 2026-08-06 =
+* Dev - Run the PHP coding standards job when dependencies change.
+* Dev - Update WPCS to 3.4.1 to pick up the fix for GHSA-3pwp-g2mj-5p3v.
+* Update - Bump the minimum required WooCommerce version to 10.9 and the compatibility version to 11.0.
 
 = 2.3.0 - 2026-06-25 =
 * Update - Require WooCommerce 10.8+.

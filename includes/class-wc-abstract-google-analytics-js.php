@@ -577,13 +577,22 @@ abstract class WC_Abstract_Google_Analytics_JS {
 				continue;
 			}
 
+			// Both amounts are per-unit and tax-exclusive so the client-side
+			// discount calculation compares values on the same basis. The
+			// catalog price from get_formatted_product() is not suitable here:
+			// it includes tax when the store enters prices inclusive of tax.
+			// A zero-quantity line has a zero total, so dividing by 1 keeps it at 0.
+			$unit_divisor = max( 1, (int) $item->get_quantity() );
+
 			$items[] = array_merge(
 				$this->get_formatted_product( $product ),
 				array(
 					'quantity'                    => $item->get_quantity(),
-					// The method get_total() will return the price after coupon discounts.
-					// https://github.com/woocommerce/woocommerce/blob/54eba223b8dec015c91a13423f9eced09e96f399/plugins/woocommerce/includes/class-wc-order-item-product.php#L308-L310
-					'price_after_coupon_discount' => $this->get_formatted_price( $item->get_total() ),
+					'prices'                      => array(
+						'price'               => $this->get_formatted_price( (float) $item->get_subtotal() / $unit_divisor ),
+						'currency_minor_unit' => wc_get_price_decimals(),
+					),
+					'price_after_coupon_discount' => $this->get_formatted_price( (float) $item->get_total() / $unit_divisor ),
 				)
 			);
 		}

@@ -497,9 +497,87 @@ class DataFormatting extends EventsDataTest {
 
 		$this->assertEquals( $order_item->get_quantity(), $item['quantity'] );
 		$this->assertEquals(
-			$this->gtag->get_formatted_price( $order_item->get_total() ),
+			$this->gtag->get_formatted_price( $order_item->get_subtotal() / $order_item->get_quantity() ),
+			$item['prices']['price']
+		);
+		$this->assertEquals(
+			$this->gtag->get_formatted_price( $order_item->get_total() / $order_item->get_quantity() ),
 			$item['price_after_coupon_discount']
 		);
+	}
+
+	/**
+	 * Create an order containing one line item with explicit subtotal/total values.
+	 *
+	 * @param float $catalog_price Product catalog price (may be tax-inclusive in the simulated store).
+	 * @param int   $quantity      Line item quantity.
+	 * @param float $subtotal      Tax-exclusive line subtotal (before coupon discounts).
+	 * @param float $total         Tax-exclusive line total (after coupon discounts).
+	 *
+	 * @return \WC_Order
+	 */
+	private function create_order_with_line_values( $catalog_price, $quantity, $subtotal, $total ) {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( $catalog_price );
+		$product->set_price( $catalog_price );
+		$product->save();
+
+		$order = wc_create_order();
+		$order->add_product(
+			$product,
+			$quantity,
+			[
+				'subtotal' => $subtotal,
+				'total'    => $total,
+			]
+		);
+		$order->save();
+
+		return $order;
+	}
+
+	/**
+	 * Test that item prices come from the tax-exclusive order line, not the
+	 * catalog price. With prices entered inclusive of tax, using the catalog
+	 * price produced a false discount equal to the tax (ticket case 1:
+	 * 95 incl. 6% tax, line subtotal 89.62).
+	 *
+	 * @return void
+	 */
+	public function test_get_formatted_order_item_price_is_per_unit_tax_exclusive() {
+		$order = $this->create_order_with_line_values( 95, 1, 89.62, 89.62 );
+		$item  = $this->gtag->get_formatted_order( $order )['items'][0];
+
+		$this->assertEquals( 8962, $item['prices']['price'] );
+		$this->assertEquals( 8962, $item['price_after_coupon_discount'] );
+	}
+
+	/**
+	 * Test that with a coupon both amounts stay per-unit and tax-exclusive
+	 * (ticket case 3: 10% coupon on a 89.62 line).
+	 *
+	 * @return void
+	 */
+	public function test_get_formatted_order_item_price_after_coupon_is_per_unit() {
+		$order = $this->create_order_with_line_values( 95, 1, 89.62, 80.66 );
+		$item  = $this->gtag->get_formatted_order( $order )['items'][0];
+
+		$this->assertEquals( 8962, $item['prices']['price'] );
+		$this->assertEquals( 8066, $item['price_after_coupon_discount'] );
+	}
+
+	/**
+	 * Test that a line total not evenly divisible by quantity rounds to the
+	 * nearest minor unit (179.25 / 2 = 89.625 -> 89.63).
+	 *
+	 * @return void
+	 */
+	public function test_get_formatted_order_item_price_rounds_per_unit_amounts() {
+		$order = $this->create_order_with_line_values( 95, 2, 179.25, 179.25 );
+		$item  = $this->gtag->get_formatted_order( $order )['items'][0];
+
+		$this->assertEquals( 8963, $item['prices']['price'] );
+		$this->assertEquals( 8963, $item['price_after_coupon_discount'] );
 	}
 
 	/**

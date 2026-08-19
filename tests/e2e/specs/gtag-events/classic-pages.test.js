@@ -903,6 +903,47 @@ test.describe( 'GTag events on classic pages', () => {
 		}
 	} );
 
+	test( 'Purchase event reports no discount when prices are entered inclusive of tax', async ( {
+		page,
+	} ) => {
+		await setOptions( {
+			woocommerce_calc_taxes: 'yes',
+			woocommerce_prices_include_tax: 'yes',
+			woocommerce_tax_based_on: 'billing',
+		} );
+		const taxRateID = await createCaliforniaTaxRate();
+
+		try {
+			await simpleProductAddToCart( page, simpleProductID );
+
+			const event = trackGtagEvent( page, 'purchase', 'checkout' );
+			await checkout( page );
+
+			await event.then( ( request ) => {
+				const data = getEventData( request, 'purchase' );
+				// The item price is the tax-exclusive unit price (9.99 incl. 10%
+				// tax), and there is no coupon, so no `ds` (discount) field may be
+				// present — toEqual asserts the exact key set.
+				expect( data.product1 ).toEqual( {
+					id: simpleProductID.toString(),
+					nm: 'Simple product',
+					ca: 'Uncategorized',
+					qt: '1',
+					pr: '9.08',
+				} );
+				expect( data[ 'epn.tax' ] ).toEqual( '0.91' );
+				expect( data[ 'epn.shipping' ] ).toEqual( '10' );
+				expect( data[ 'epn.value' ] ).toEqual( '9.08' );
+			} );
+		} finally {
+			await deleteTaxRate( taxRateID );
+			await setOptions( {
+				woocommerce_calc_taxes: 'no',
+				woocommerce_prices_include_tax: 'no',
+			} );
+		}
+	} );
+
 	test( 'Begin checkout and purchase events use discounted item price', async ( {
 		page,
 	} ) => {

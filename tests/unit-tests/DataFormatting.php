@@ -510,7 +510,7 @@ class DataFormatting extends EventsDataTest {
 	 * Create an order containing one line item with explicit subtotal/total values.
 	 *
 	 * @param float $catalog_price Product catalog price (may be tax-inclusive in the simulated store).
-	 * @param int   $quantity      Line item quantity.
+	 * @param float $quantity      Line item quantity (decimal if woocommerce_stock_amount allows it).
 	 * @param float $subtotal      Tax-exclusive line subtotal (before coupon discounts).
 	 * @param float $total         Tax-exclusive line total (after coupon discounts).
 	 *
@@ -578,6 +578,32 @@ class DataFormatting extends EventsDataTest {
 
 		$this->assertEquals( 8963, $item['prices']['price'] );
 		$this->assertEquals( 8963, $item['price_after_coupon_discount'] );
+	}
+
+	/**
+	 * Test that decimal quantities (enabled by extensions via the
+	 * woocommerce_stock_amount filter) produce the correct per-unit price
+	 * instead of being truncated to an integer.
+	 *
+	 * @return void
+	 */
+	public function test_get_formatted_order_item_price_supports_decimal_quantity() {
+		// Core registers intval on this filter; decimal-quantity extensions swap it for floatval.
+		remove_filter( 'woocommerce_stock_amount', 'intval' );
+		add_filter( 'woocommerce_stock_amount', 'floatval' );
+
+		try {
+			// 0.5 units of a 10.00 product: line subtotal and total are 5.00.
+			$order = $this->create_order_with_line_values( 10, 0.5, 5, 5 );
+			$item  = $this->gtag->get_formatted_order( $order )['items'][0];
+
+			$this->assertEquals( 0.5, $item['quantity'] );
+			$this->assertEquals( 1000, $item['prices']['price'] );
+			$this->assertEquals( 1000, $item['price_after_coupon_discount'] );
+		} finally {
+			remove_filter( 'woocommerce_stock_amount', 'floatval' );
+			add_filter( 'woocommerce_stock_amount', 'intval' );
+		}
 	}
 
 	/**

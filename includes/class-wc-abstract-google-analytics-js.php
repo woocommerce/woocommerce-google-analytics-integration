@@ -581,8 +581,10 @@ abstract class WC_Abstract_Google_Analytics_JS {
 			// discount calculation compares values on the same basis. The
 			// catalog price from get_formatted_product() is not suitable here:
 			// it includes tax when the store enters prices inclusive of tax.
-			// A zero-quantity line has a zero total, so dividing by 1 keeps it at 0.
-			$unit_divisor = max( 1, (int) $item->get_quantity() );
+			// Quantities may be decimal (woocommerce_stock_amount filter), so do not
+			// cast to int. A zero-quantity line has a zero total, so dividing by 1 keeps it at 0.
+			$quantity     = (float) $item->get_quantity();
+			$unit_divisor = $quantity > 0 ? $quantity : 1;
 
 			$items[] = array_merge(
 				$this->get_formatted_product( $product ),

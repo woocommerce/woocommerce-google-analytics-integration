@@ -219,8 +219,12 @@ export const purchase = ( { order } ) => {
 		// https://developers.google.com/analytics/devguides/collection/ga4/reference/events#purchase
 		value: formatPrice(
 			items.reduce(
+				// Round each line to whole minor units: quantity may be decimal.
 				( sum, { price = 0, quantity = 1 } ) =>
-					sum + Math.round( price * 10 ** minorUnit ) * quantity,
+					sum +
+					Math.round(
+						Math.round( price * 10 ** minorUnit ) * quantity
+					),
 				0
 			),
 			minorUnit

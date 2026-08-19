@@ -207,7 +207,7 @@ export const purchase = ( { order } ) => {
 		return false;
 	}
 
-	const items = order.items.map( getProductFieldObject );
+	const items = order.items.map( ( item ) => getProductFieldObject( item ) );
 	const minorUnit = order.totals.currency_minor_unit;
 
 	return {

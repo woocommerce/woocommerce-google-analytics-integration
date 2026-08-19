@@ -859,9 +859,7 @@ test.describe( 'GTag events on classic pages', () => {
 			// excluding tax and shipping.
 			const itemsTotal = simpleProductPrice + simpleProductPrice + 18.99;
 			expect( data.cu ).toEqual( 'USD' );
-			expect( data[ 'epn.value' ] ).toEqual(
-				itemsTotal.toFixed( 2 ).toString()
-			);
+			expect( data[ 'epn.value' ] ).toEqual( itemsTotal.toFixed( 2 ) );
 			expect( data[ 'epn.tax' ] ).toEqual( '0' );
 			expect( data[ 'epn.shipping' ] ).toEqual( shipping.toString() );
 		} );

@@ -497,9 +497,113 @@ class DataFormatting extends EventsDataTest {
 
 		$this->assertEquals( $order_item->get_quantity(), $item['quantity'] );
 		$this->assertEquals(
-			$this->gtag->get_formatted_price( $order_item->get_total() ),
+			$this->gtag->get_formatted_price( $order_item->get_subtotal() / $order_item->get_quantity() ),
+			$item['prices']['price']
+		);
+		$this->assertEquals(
+			$this->gtag->get_formatted_price( $order_item->get_total() / $order_item->get_quantity() ),
 			$item['price_after_coupon_discount']
 		);
+	}
+
+	/**
+	 * Create an order containing one line item with explicit subtotal/total values.
+	 *
+	 * @param float $catalog_price Product catalog price (may be tax-inclusive in the simulated store).
+	 * @param float $quantity      Line item quantity (decimal if woocommerce_stock_amount allows it).
+	 * @param float $subtotal      Tax-exclusive line subtotal (before coupon discounts).
+	 * @param float $total         Tax-exclusive line total (after coupon discounts).
+	 *
+	 * @return \WC_Order
+	 */
+	private function create_order_with_line_values( $catalog_price, $quantity, $subtotal, $total ) {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( $catalog_price );
+		$product->set_price( $catalog_price );
+		$product->save();
+
+		$order = wc_create_order();
+		$order->add_product(
+			$product,
+			$quantity,
+			[
+				'subtotal' => $subtotal,
+				'total'    => $total,
+			]
+		);
+		$order->save();
+
+		return $order;
+	}
+
+	/**
+	 * Test that item prices come from the tax-exclusive order line, not the
+	 * catalog price. With prices entered inclusive of tax, using the catalog
+	 * price produced a false discount equal to the tax (ticket case 1:
+	 * 95 incl. 6% tax, line subtotal 89.62).
+	 *
+	 * @return void
+	 */
+	public function test_get_formatted_order_item_price_is_per_unit_tax_exclusive() {
+		$order = $this->create_order_with_line_values( 95, 1, 89.62, 89.62 );
+		$item  = $this->gtag->get_formatted_order( $order )['items'][0];
+
+		$this->assertEquals( 8962, $item['prices']['price'] );
+		$this->assertEquals( 8962, $item['price_after_coupon_discount'] );
+	}
+
+	/**
+	 * Test that with a coupon both amounts stay per-unit and tax-exclusive
+	 * (ticket case 3: 10% coupon on a 89.62 line).
+	 *
+	 * @return void
+	 */
+	public function test_get_formatted_order_item_price_after_coupon_is_per_unit() {
+		$order = $this->create_order_with_line_values( 95, 1, 89.62, 80.66 );
+		$item  = $this->gtag->get_formatted_order( $order )['items'][0];
+
+		$this->assertEquals( 8962, $item['prices']['price'] );
+		$this->assertEquals( 8066, $item['price_after_coupon_discount'] );
+	}
+
+	/**
+	 * Test that a line total not evenly divisible by quantity rounds to the
+	 * nearest minor unit (179.25 / 2 = 89.625 -> 89.63).
+	 *
+	 * @return void
+	 */
+	public function test_get_formatted_order_item_price_rounds_per_unit_amounts() {
+		$order = $this->create_order_with_line_values( 95, 2, 179.25, 179.25 );
+		$item  = $this->gtag->get_formatted_order( $order )['items'][0];
+
+		$this->assertEquals( 8963, $item['prices']['price'] );
+		$this->assertEquals( 8963, $item['price_after_coupon_discount'] );
+	}
+
+	/**
+	 * Test that decimal quantities (enabled by extensions via the
+	 * woocommerce_stock_amount filter) produce the correct per-unit price
+	 * instead of being truncated to an integer.
+	 *
+	 * @return void
+	 */
+	public function test_get_formatted_order_item_price_supports_decimal_quantity() {
+		// Core registers intval on this filter; decimal-quantity extensions swap it for floatval.
+		remove_filter( 'woocommerce_stock_amount', 'intval' );
+		add_filter( 'woocommerce_stock_amount', 'floatval' );
+
+		try {
+			// 0.5 units of a 10.00 product: line subtotal and total are 5.00.
+			$order = $this->create_order_with_line_values( 10, 0.5, 5, 5 );
+			$item  = $this->gtag->get_formatted_order( $order )['items'][0];
+
+			$this->assertEquals( 0.5, $item['quantity'] );
+			$this->assertEquals( 1000, $item['prices']['price'] );
+			$this->assertEquals( 1000, $item['price_after_coupon_discount'] );
+		} finally {
+			remove_filter( 'woocommerce_stock_amount', 'floatval' );
+			add_filter( 'woocommerce_stock_amount', 'intval' );
+		}
 	}
 
 	/**

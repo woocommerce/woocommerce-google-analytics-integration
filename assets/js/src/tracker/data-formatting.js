@@ -207,23 +207,31 @@ export const purchase = ( { order } ) => {
 		return false;
 	}
 
+	const items = order.items.map( ( item ) => getProductFieldObject( item ) );
+	const minorUnit = order.totals.currency_minor_unit;
+
 	return {
 		transaction_id: order.id,
 		affiliation: order.affiliation,
 		currency: order.totals.currency_code,
+		// GA4 defines purchase value as the sum of price × quantity for the
+		// items, excluding tax and shipping.
+		// https://developers.google.com/analytics/devguides/collection/ga4/reference/events#purchase
 		value: formatPrice(
-			order.totals.total_price,
-			order.totals.currency_minor_unit
+			items.reduce(
+				// Round each line to whole minor units: quantity may be decimal.
+				( sum, { price = 0, quantity = 1 } ) =>
+					sum +
+					Math.round(
+						Math.round( price * 10 ** minorUnit ) * quantity
+					),
+				0
+			),
+			minorUnit
 		),
-		tax: formatPrice(
-			order.totals.tax_total,
-			order.totals.currency_minor_unit
-		),
-		shipping: formatPrice(
-			order.totals.shipping_total,
-			order.totals.currency_minor_unit
-		),
-		items: order.items.map( getProductFieldObject ),
+		tax: formatPrice( order.totals.tax_total, minorUnit ),
+		shipping: formatPrice( order.totals.shipping_total, minorUnit ),
+		items,
 	};
 };
 

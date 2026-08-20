@@ -855,12 +855,11 @@ test.describe( 'GTag events on classic pages', () => {
 			);
 
 			const shipping = 10;
-			const total =
-				simpleProductPrice + simpleProductPrice + 18.99 + shipping;
+			// GA4 purchase value is the sum of item price × quantity,
+			// excluding tax and shipping.
+			const itemsTotal = simpleProductPrice + simpleProductPrice + 18.99;
 			expect( data.cu ).toEqual( 'USD' );
-			expect( data[ 'epn.value' ] ).toEqual(
-				total.toFixed( 2 ).toString()
-			);
+			expect( data[ 'epn.value' ] ).toEqual( itemsTotal.toFixed( 2 ) );
 			expect( data[ 'epn.tax' ] ).toEqual( '0' );
 			expect( data[ 'epn.shipping' ] ).toEqual( shipping.toString() );
 		} );
@@ -893,10 +892,55 @@ test.describe( 'GTag events on classic pages', () => {
 				} );
 				expect( data[ 'epn.tax' ] ).toEqual( '1' );
 				expect( data[ 'epn.shipping' ] ).toEqual( '10' );
+				// Value excludes both the tax and the shipping totals.
+				expect( data[ 'epn.value' ] ).toEqual(
+					simpleProductPrice.toString()
+				);
 			} );
 		} finally {
 			await deleteTaxRate( taxRateID );
 			await setOptions( { woocommerce_calc_taxes: 'no' } );
+		}
+	} );
+
+	test( 'Purchase event reports no discount when prices are entered inclusive of tax', async ( {
+		page,
+	} ) => {
+		await setOptions( {
+			woocommerce_calc_taxes: 'yes',
+			woocommerce_prices_include_tax: 'yes',
+			woocommerce_tax_based_on: 'billing',
+		} );
+		const taxRateID = await createCaliforniaTaxRate();
+
+		try {
+			await simpleProductAddToCart( page, simpleProductID );
+
+			const event = trackGtagEvent( page, 'purchase', 'checkout' );
+			await checkout( page );
+
+			await event.then( ( request ) => {
+				const data = getEventData( request, 'purchase' );
+				// The item price is the tax-exclusive unit price (9.99 incl. 10%
+				// tax), and there is no coupon, so no `ds` (discount) field may be
+				// present — toEqual asserts the exact key set.
+				expect( data.product1 ).toEqual( {
+					id: simpleProductID.toString(),
+					nm: 'Simple product',
+					ca: 'Uncategorized',
+					qt: '1',
+					pr: '9.08',
+				} );
+				expect( data[ 'epn.tax' ] ).toEqual( '0.91' );
+				expect( data[ 'epn.shipping' ] ).toEqual( '10' );
+				expect( data[ 'epn.value' ] ).toEqual( '9.08' );
+			} );
+		} finally {
+			await deleteTaxRate( taxRateID );
+			await setOptions( {
+				woocommerce_calc_taxes: 'no',
+				woocommerce_prices_include_tax: 'no',
+			} );
 		}
 	} );
 
@@ -960,6 +1004,8 @@ test.describe( 'GTag events on classic pages', () => {
 				pr: discountedPrice,
 				ds: '2',
 			} );
+			// Value uses the discounted item price.
+			expect( data[ 'epn.value' ] ).toEqual( discountedPrice );
 		} );
 	} );
 } );

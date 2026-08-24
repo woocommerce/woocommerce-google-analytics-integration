@@ -44,20 +44,20 @@
 	<rule ref="PSR12.Functions.ReturnTypeDeclaration"/>
 	<rule ref="PSR12.Properties.ConstantVisibility"/>
 	<rule ref="PSR12.Traits.UseDeclaration"/>
-	<rule ref="Squiz.Classes">
+	<rule ref="Squiz.Classes.ClassDeclaration">
 		<exclude name="Squiz.Classes.ClassDeclaration.OpenBraceNewLine"/>
 		<exclude name="Squiz.Classes.ClassDeclaration.CloseBraceSameLine"/>
 		<exclude name="Squiz.Classes.ClassDeclaration.SpaceBeforeKeyword"/>
 		<exclude name="Squiz.Classes.ClassDeclaration.SpaceBeforeCloseBrace"/>
-		<exclude name="Squiz.Classes.ClassFileName.NoMatch"/>
-		<exclude name="Squiz.Classes.ValidClassName.NotCamelCaps"/>
 	</rule>
 	<rule ref="Squiz.WhiteSpace.FunctionOpeningBraceSpace"/>
 
 	<!-- Set the appropriate text domain. -->
 	<rule ref="WordPress.WP.I18n">
 		<properties>
-			<property name="text_domain" type="array" value="woocommerce-google-analytics-integration"/>
+			<property name="text_domain" type="array">
+				<element value="woocommerce-google-analytics-integration"/>
+			</property>
 		</properties>
 	</rule>
 

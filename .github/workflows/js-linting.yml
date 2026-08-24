@@ -25,15 +25,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
 
       - name: Prepare node
-        uses: woocommerce/grow/prepare-node@actions-v3
+        uses: woocommerce/grow/prepare-node@3a4249a1fc7e39a987d213e578cbcf32abd55980 # actions-v3
         with:
           node-version-file: ".nvmrc"
 
       - name: Prepare annotation formatter
-        uses: woocommerce/grow/eslint-annotation@actions-v3
+        uses: woocommerce/grow/eslint-annotation@3a4249a1fc7e39a987d213e578cbcf32abd55980 # actions-v3
 
       - name: Lint JavaScript and annotate linting errors
         run: npm run lint:js -- --quiet --format ./eslintFormatter.cjs

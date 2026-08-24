@@ -12,4 +12,4 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Set Labels
-        uses: woocommerce/grow/branch-label@actions-v3
+        uses: woocommerce/grow/branch-label@3a4249a1fc7e39a987d213e578cbcf32abd55980 # actions-v3

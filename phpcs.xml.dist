@@ -3,7 +3,7 @@
 	<description>Generally-applicable sniffs for WordPress plugins</description>
 
 	<!-- Set the minimum WP version -->
-	<config name="minimum_supported_wp_version" value="7.0"/>
+	<config name="minimum_wp_version" value="7.0"/>
 
 	<rule ref="WordPress">
 		<!-- We don't require conforming to WP file naming -->
@@ -15,7 +15,6 @@
 		<exclude name="Squiz.Commenting.FunctionComment.MissingParamComment"/>
 		<exclude name="Squiz.Commenting.FunctionComment.ParamCommentFullStop"/>
 		<exclude name="Squiz.Commenting.InlineComment.InvalidEndChar"/>
-		<exclude name="Squiz.Commenting.LongConditionClosingComment"/>
 
 		<!-- No thanks -->
 		<exclude name="Universal.Operators.DisallowShortTernary"/>
@@ -35,29 +34,23 @@
 	</rule>
 
 	<!-- Include some other sniffs we want to enforce. -->
-	<rule ref="Generic.VersionControl.GitMergeConflict"/>
-	<rule ref="Generic.WhiteSpace.SpreadOperatorSpacingAfter"/>
 	<rule ref="PSR12.Classes.AnonClassDeclaration"/>
-	<rule ref="PSR12.Classes.ClassInstantiation"/>
 	<rule ref="PSR12.Files.ImportStatement"/>
-	<rule ref="PSR12.Functions.NullableTypeDeclaration"/>
-	<rule ref="PSR12.Functions.ReturnTypeDeclaration"/>
 	<rule ref="PSR12.Properties.ConstantVisibility"/>
-	<rule ref="PSR12.Traits.UseDeclaration"/>
-	<rule ref="Squiz.Classes">
+	<rule ref="Squiz.Classes.ClassDeclaration">
 		<exclude name="Squiz.Classes.ClassDeclaration.OpenBraceNewLine"/>
 		<exclude name="Squiz.Classes.ClassDeclaration.CloseBraceSameLine"/>
 		<exclude name="Squiz.Classes.ClassDeclaration.SpaceBeforeKeyword"/>
 		<exclude name="Squiz.Classes.ClassDeclaration.SpaceBeforeCloseBrace"/>
-		<exclude name="Squiz.Classes.ClassFileName.NoMatch"/>
-		<exclude name="Squiz.Classes.ValidClassName.NotCamelCaps"/>
 	</rule>
 	<rule ref="Squiz.WhiteSpace.FunctionOpeningBraceSpace"/>
 
 	<!-- Set the appropriate text domain. -->
 	<rule ref="WordPress.WP.I18n">
 		<properties>
-			<property name="text_domain" type="array" value="woocommerce-google-analytics-integration"/>
+			<property name="text_domain" type="array">
+				<element value="woocommerce-google-analytics-integration"/>
+			</property>
 		</properties>
 	</rule>
 

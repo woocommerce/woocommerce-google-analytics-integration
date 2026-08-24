@@ -3,7 +3,7 @@
 	<description>Generally-applicable sniffs for WordPress plugins</description>
 
 	<!-- Set the minimum WP version -->
-	<config name="minimum_supported_wp_version" value="6.8"/>
+	<config name="minimum_supported_wp_version" value="7.0"/>
 
 	<rule ref="WordPress">
 		<!-- We don't require conforming to WP file naming -->

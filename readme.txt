@@ -1,8 +1,8 @@
 === Google Analytics for WooCommerce ===
 Contributors: woocommerce, automattic, claudiosanches, bor0, royho, laurendavissmith001, cshultz88, mmjones, tomalec, neosinner
 Tags: woocommerce, google analytics
-Requires at least: 6.9
-Tested up to: 7.0
+Requires at least: 7.0
+Tested up to: 7.1
 Stable tag: 2.4.0
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html

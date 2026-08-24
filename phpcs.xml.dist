@@ -34,15 +34,9 @@
 	</rule>
 
 	<!-- Include some other sniffs we want to enforce. -->
-	<rule ref="Generic.VersionControl.GitMergeConflict"/>
-	<rule ref="Generic.WhiteSpace.SpreadOperatorSpacingAfter"/>
 	<rule ref="PSR12.Classes.AnonClassDeclaration"/>
-	<rule ref="PSR12.Classes.ClassInstantiation"/>
 	<rule ref="PSR12.Files.ImportStatement"/>
-	<rule ref="PSR12.Functions.NullableTypeDeclaration"/>
-	<rule ref="PSR12.Functions.ReturnTypeDeclaration"/>
 	<rule ref="PSR12.Properties.ConstantVisibility"/>
-	<rule ref="PSR12.Traits.UseDeclaration"/>
 	<rule ref="Squiz.Classes.ClassDeclaration">
 		<exclude name="Squiz.Classes.ClassDeclaration.OpenBraceNewLine"/>
 		<exclude name="Squiz.Classes.ClassDeclaration.CloseBraceSameLine"/>

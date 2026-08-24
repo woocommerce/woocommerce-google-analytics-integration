@@ -3,7 +3,7 @@
 	<description>Generally-applicable sniffs for WordPress plugins</description>
 
 	<!-- Set the minimum WP version -->
-	<config name="minimum_supported_wp_version" value="7.0"/>
+	<config name="minimum_wp_version" value="7.0"/>
 
 	<rule ref="WordPress">
 		<!-- We don't require conforming to WP file naming -->
@@ -15,7 +15,6 @@
 		<exclude name="Squiz.Commenting.FunctionComment.MissingParamComment"/>
 		<exclude name="Squiz.Commenting.FunctionComment.ParamCommentFullStop"/>
 		<exclude name="Squiz.Commenting.InlineComment.InvalidEndChar"/>
-		<exclude name="Squiz.Commenting.LongConditionClosingComment"/>
 
 		<!-- No thanks -->
 		<exclude name="Universal.Operators.DisallowShortTernary"/>

@@ -19,6 +19,7 @@ jobs:
   check-paths:
     name: Check changed files
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     outputs:
       should-run: ${{ steps.changes.outputs.php }}
     steps:
@@ -39,6 +40,7 @@ jobs:
   phpcs:
     name: PHP coding standards
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     needs: check-paths
     if: needs.check-paths.outputs.should-run == 'true'
     steps:

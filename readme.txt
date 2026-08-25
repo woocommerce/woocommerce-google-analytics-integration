@@ -48,6 +48,12 @@ Duplicate Google Analytics code causes a conflict in tracking. Remove any other 
 
 == Changelog ==
 
+= 2.4.1 - 2026-08-25 =
+* Fix - Purchase event no longer reports a false item discount in stores that enter prices inclusive of tax, and no longer drops coupon discounts for quantities above one; item price and discount are now per unit and tax-exclusive.
+* Fix - Purchase event value now sums the item prices × quantity, excluding tax and shipping as GA4 expects, instead of the gross order total.
+* Tweak - WordPress 7.1 compatibility.
+* Update - Require WordPress 7.0+.
+
 = 2.4.0 - 2026-08-06 =
 * Dev - Run the PHP coding standards job when dependencies change.
 * Dev - Update WPCS to 3.4.1 to pick up the fix for GHSA-3pwp-g2mj-5p3v.

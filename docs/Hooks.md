@@ -8,7 +8,7 @@ A list of hooks, e.g. `actions` and `filters`, that are defined or used in this 
 
 **Used in**:
 
-- [class-wc-google-analytics.php#L284](https://github.com/woocommerce/woocommerce-google-analytics-integration/blob/dc8af56694f911b4af055c59fd89f7895caab78a/includes/class-wc-google-analytics.php#L284)
+- [class-wc-google-analytics.php#L284](https://github.com/woocommerce/woocommerce-google-analytics-integration/blob/27770fd7803ed785da172e4b0d53dfd259ee9908/includes/class-wc-google-analytics.php#L284)
 
 ## woocommerce_ga_gtag_config
 
@@ -16,7 +16,7 @@ A list of hooks, e.g. `actions` and `filters`, that are defined or used in this 
 
 **Used in**:
 
-- [class-wc-google-gtag-js.php#L292](https://github.com/woocommerce/woocommerce-google-analytics-integration/blob/dc8af56694f911b4af055c59fd89f7895caab78a/includes/class-wc-google-gtag-js.php#L292)
+- [class-wc-google-gtag-js.php#L292](https://github.com/woocommerce/woocommerce-google-analytics-integration/blob/27770fd7803ed785da172e4b0d53dfd259ee9908/includes/class-wc-google-gtag-js.php#L292)
 
 ## woocommerce_ga_gtag_consent_modes
 
@@ -24,7 +24,7 @@ A list of hooks, e.g. `actions` and `filters`, that are defined or used in this 
 
 **Used in**:
 
-- [class-wc-google-gtag-js.php#L428](https://github.com/woocommerce/woocommerce-google-analytics-integration/blob/dc8af56694f911b4af055c59fd89f7895caab78a/includes/class-wc-google-gtag-js.php#L428)
+- [class-wc-google-gtag-js.php#L428](https://github.com/woocommerce/woocommerce-google-analytics-integration/blob/27770fd7803ed785da172e4b0d53dfd259ee9908/includes/class-wc-google-gtag-js.php#L428)
 
 ## woocommerce_ga_max_product_list_items
 
@@ -32,7 +32,7 @@ A list of hooks, e.g. `actions` and `filters`, that are defined or used in this 
 
 **Used in**:
 
-- [class-wc-abstract-google-analytics-js.php#L106](https://github.com/woocommerce/woocommerce-google-analytics-integration/blob/dc8af56694f911b4af055c59fd89f7895caab78a/includes/class-wc-abstract-google-analytics-js.php#L106)
+- [class-wc-abstract-google-analytics-js.php#L106](https://github.com/woocommerce/woocommerce-google-analytics-integration/blob/27770fd7803ed785da172e4b0d53dfd259ee9908/includes/class-wc-abstract-google-analytics-js.php#L106)
 
 ## woocommerce_ga_order_id
 
@@ -40,7 +40,7 @@ A list of hooks, e.g. `actions` and `filters`, that are defined or used in this 
 
 **Used in**:
 
-- [class-wc-abstract-google-analytics-js.php#L571](https://github.com/woocommerce/woocommerce-google-analytics-integration/blob/dc8af56694f911b4af055c59fd89f7895caab78a/includes/class-wc-abstract-google-analytics-js.php#L571)
+- [class-wc-abstract-google-analytics-js.php#L571](https://github.com/woocommerce/woocommerce-google-analytics-integration/blob/27770fd7803ed785da172e4b0d53dfd259ee9908/includes/class-wc-abstract-google-analytics-js.php#L571)
 
 ## woocommerce_ga_product_identifier
 
@@ -48,7 +48,7 @@ A list of hooks, e.g. `actions` and `filters`, that are defined or used in this 
 
 **Used in**:
 
-- [class-wc-abstract-google-analytics-js.php#L238](https://github.com/woocommerce/woocommerce-google-analytics-integration/blob/dc8af56694f911b4af055c59fd89f7895caab78a/includes/class-wc-abstract-google-analytics-js.php#L238)
+- [class-wc-abstract-google-analytics-js.php#L238](https://github.com/woocommerce/woocommerce-google-analytics-integration/blob/27770fd7803ed785da172e4b0d53dfd259ee9908/includes/class-wc-abstract-google-analytics-js.php#L238)
 
 ## woocommerce_gtag_snippet
 
@@ -56,7 +56,7 @@ A list of hooks, e.g. `actions` and `filters`, that are defined or used in this 
 
 **Used in**:
 
-- [class-wc-google-gtag-js.php#L100](https://github.com/woocommerce/woocommerce-google-analytics-integration/blob/dc8af56694f911b4af055c59fd89f7895caab78a/includes/class-wc-google-gtag-js.php#L100)
+- [class-wc-google-gtag-js.php#L100](https://github.com/woocommerce/woocommerce-google-analytics-integration/blob/27770fd7803ed785da172e4b0d53dfd259ee9908/includes/class-wc-google-gtag-js.php#L100)
 
 ## woocommerce_gtag_tracker_variable
 
@@ -64,7 +64,7 @@ A list of hooks, e.g. `actions` and `filters`, that are defined or used in this 
 
 **Used in**:
 
-- [class-wc-google-gtag-js.php#L282](https://github.com/woocommerce/woocommerce-google-analytics-integration/blob/dc8af56694f911b4af055c59fd89f7895caab78a/includes/class-wc-google-gtag-js.php#L282)
+- [class-wc-google-gtag-js.php#L282](https://github.com/woocommerce/woocommerce-google-analytics-integration/blob/27770fd7803ed785da172e4b0d53dfd259ee9908/includes/class-wc-google-gtag-js.php#L282)
 
 ## plugin_locale
 
@@ -72,5 +72,5 @@ A list of hooks, e.g. `actions` and `filters`, that are defined or used in this 
 
 **Used in**:
 
-- [woocommerce-google-analytics-integration.php#L146](https://github.com/woocommerce/woocommerce-google-analytics-integration/blob/dc8af56694f911b4af055c59fd89f7895caab78a/woocommerce-google-analytics-integration.php#L146)
+- [woocommerce-google-analytics-integration.php#L146](https://github.com/woocommerce/woocommerce-google-analytics-integration/blob/27770fd7803ed785da172e4b0d53dfd259ee9908/woocommerce-google-analytics-integration.php#L146)
 

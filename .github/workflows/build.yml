@@ -22,12 +22,12 @@ jobs:
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
 
       - name: Prepare PHP
-        uses: woocommerce/grow/prepare-php@3a4249a1fc7e39a987d213e578cbcf32abd55980 # actions-v3
+        uses: woocommerce/grow/prepare-php@a81d3fca0166a02a4c25953d250d80d3612db4b8 # actions-v3
         with:
           install-deps: "no"
 
       - name: Prepare node
-        uses: woocommerce/grow/prepare-node@3a4249a1fc7e39a987d213e578cbcf32abd55980 # actions-v3
+        uses: woocommerce/grow/prepare-node@a81d3fca0166a02a4c25953d250d80d3612db4b8 # actions-v3
         with:
           node-version-file: ".nvmrc"
           ignore-scripts: "no"
@@ -40,7 +40,7 @@ jobs:
 
       - name: Publish dev build to GitHub
         if: ${{ github.event_name == 'push' && github.ref_name == 'trunk' }}
-        uses: woocommerce/grow/publish-extension-dev-build@3a4249a1fc7e39a987d213e578cbcf32abd55980 # actions-v3
+        uses: woocommerce/grow/publish-extension-dev-build@a81d3fca0166a02a4c25953d250d80d3612db4b8 # actions-v3
         with:
           extension-asset-path: woocommerce-google-analytics-integration.zip
 

@@ -48,7 +48,7 @@ jobs:
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
 
       - name: Prepare PHP
-        uses: woocommerce/grow/prepare-php@3a4249a1fc7e39a987d213e578cbcf32abd55980 # actions-v3
+        uses: woocommerce/grow/prepare-php@b9c1e59aae9fdbe668b068ebd59c1545a88ea9fa # actions-v3.0.5
         with:
           php-version: 7.4
           tools: cs2pr

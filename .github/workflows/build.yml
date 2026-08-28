@@ -19,7 +19,7 @@ jobs:
       FORCE_COLOR: 2
     steps:
       - name: Checkout repository
-        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
 
       - name: Prepare PHP
         uses: woocommerce/grow/prepare-php@e981c25267d29c39ff6ab1ae4ea09b267efae86c # actions-v3.0.6
@@ -46,7 +46,7 @@ jobs:
 
       - name: Publish build artifact
         if: ${{ ! ( github.event_name == 'push' && github.ref_name == 'trunk' ) }}
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: woocommerce-google-analytics-integration.zip
           path: ${{ github.workspace }}/woocommerce-google-analytics-integration.zip

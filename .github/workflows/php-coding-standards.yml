@@ -24,7 +24,7 @@ jobs:
       should-run: ${{ steps.changes.outputs.php }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
 
       - name: Check for relevant changes
         uses: dorny/paths-filter@fbd0ab8f3e69293af611ebaee6363fc25e6d187d # v4.0.1
@@ -45,7 +45,7 @@ jobs:
     if: needs.check-paths.outputs.should-run == 'true'
     steps:
       - name: Checkout repository
-        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
 
       - name: Prepare PHP
         uses: woocommerce/grow/prepare-php@e981c25267d29c39ff6ab1ae4ea09b267efae86c # actions-v3.0.6

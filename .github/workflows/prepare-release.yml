@@ -28,7 +28,7 @@ jobs:
     timeout-minutes: 5
     steps:
       - name: Checkout repository
-        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
 
       - name: Create branch & PR
         uses: woocommerce/grow/prepare-extension-release@e981c25267d29c39ff6ab1ae4ea09b267efae86c # actions-v3.0.6

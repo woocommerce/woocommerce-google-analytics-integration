@@ -47,13 +47,13 @@ jobs:
     steps:
       - name: Get Release versions from Wordpress
         id: wp
-        uses: woocommerce/grow/get-plugin-releases@3a4249a1fc7e39a987d213e578cbcf32abd55980 # actions-v3
+        uses: woocommerce/grow/get-plugin-releases@e981c25267d29c39ff6ab1ae4ea09b267efae86c # actions-v3.0.6
         with:
           slug: wordpress
           releases: 2
       - name: Get Release versions from WooCommerce
         id: wc
-        uses: woocommerce/grow/get-plugin-releases@3a4249a1fc7e39a987d213e578cbcf32abd55980 # actions-v3
+        uses: woocommerce/grow/get-plugin-releases@e981c25267d29c39ff6ab1ae4ea09b267efae86c # actions-v3.0.6
         with:
           source: github
           slug: woocommerce/woocommerce
@@ -86,12 +86,12 @@ jobs:
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
 
       - name: Prepare PHP
-        uses: woocommerce/grow/prepare-php@b9c1e59aae9fdbe668b068ebd59c1545a88ea9fa # actions-v3.0.5
+        uses: woocommerce/grow/prepare-php@e981c25267d29c39ff6ab1ae4ea09b267efae86c # actions-v3.0.6
         with:
           php-version: "${{ matrix.php }}"
 
       - name: Set up MySQL
-        uses: woocommerce/grow/prepare-mysql@3a4249a1fc7e39a987d213e578cbcf32abd55980 # actions-v3
+        uses: woocommerce/grow/prepare-mysql@e981c25267d29c39ff6ab1ae4ea09b267efae86c # actions-v3.0.6
 
       - name: Install svn (used for installing WP versions)
         run: sudo apt-get -y install subversion
@@ -128,12 +128,12 @@ jobs:
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
 
       - name: Prepare PHP
-        uses: woocommerce/grow/prepare-php@b9c1e59aae9fdbe668b068ebd59c1545a88ea9fa # actions-v3.0.5
+        uses: woocommerce/grow/prepare-php@e981c25267d29c39ff6ab1ae4ea09b267efae86c # actions-v3.0.6
         with:
           php-version: "${{ inputs.php-version }}"
 
       - name: Prepare MySQL
-        uses: woocommerce/grow/prepare-mysql@3a4249a1fc7e39a987d213e578cbcf32abd55980 # actions-v3
+        uses: woocommerce/grow/prepare-mysql@e981c25267d29c39ff6ab1ae4ea09b267efae86c # actions-v3.0.6
 
       - name: Install svn (used for installing WP versions)
         run: sudo apt-get -y install subversion

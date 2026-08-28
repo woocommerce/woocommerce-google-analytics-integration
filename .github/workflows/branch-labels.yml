@@ -13,4 +13,4 @@ jobs:
     timeout-minutes: 5
     steps:
       - name: Set Labels
-        uses: woocommerce/grow/branch-label@b9c1e59aae9fdbe668b068ebd59c1545a88ea9fa # actions-v3.0.5
+        uses: woocommerce/grow/branch-label@e981c25267d29c39ff6ab1ae4ea09b267efae86c # actions-v3.0.6

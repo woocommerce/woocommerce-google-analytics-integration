@@ -50,11 +50,36 @@ function withProductData( data ) {
 }
 
 /**
+ * Whether the `dl` (page_location) of a hit points at the given path on the
+ * current site. Only hostname and path are compared: the plugin sets
+ * page_location from document.location.href, which keeps the port, while
+ * gtag's own default omits it.
+ *
+ * @param {string|null} pageLocation The `dl` parameter of the hit.
+ * @param {string}      pageUrl      The current page URL.
+ * @param {string}      urlPath      Path prefix without the leading slash, e.g. `checkout`.
+ *
+ * @return {boolean} Whether the hit was sent from that path.
+ */
+function pageLocationMatches( pageLocation, pageUrl, urlPath ) {
+	try {
+		const sent = new URL( pageLocation );
+		return (
+			sent.hostname === new URL( pageUrl ).hostname &&
+			( sent.pathname === `/${ urlPath }` ||
+				sent.pathname.startsWith( `/${ urlPath }/` ) )
+		);
+	} catch {
+		return false;
+	}
+}
+
+/**
  * Tracks when the Gtag Event request matching a specific name is sent.
  *
  * @param {Page}        page
  * @param {string}      eventName Event name to match.
- * @param {string|null} urlPath   The starting path to match where the event should be triggered.
+ * @param {string|null} urlPath   Path prefix (without leading slash) the hit's page location must start with.
  *
  * @return {Promise<Request>} Matching request.
  */
@@ -70,13 +95,8 @@ export function trackGtagEvent( page, eventName, urlPath = null ) {
 		}
 
 		const params = new URL( url ).searchParams;
-		const pageUrl = new URL( page.url() );
 		const urlPathMatches = urlPath
-			? params
-					.get( 'dl' )
-					?.includes(
-						`${ pageUrl.protocol }//${ pageUrl.hostname }/${ urlPath }`
-					)
+			? pageLocationMatches( params.get( 'dl' ), page.url(), urlPath )
 			: true;
 
 		// Match a single event sent in query parameters.

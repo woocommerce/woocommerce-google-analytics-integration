@@ -94,6 +94,91 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 			)
 		);
 
+		// The redaction helper is registered outside the `woocommerce_gtag_snippet` filter, so a
+		// snippet that replaces the default one can still call it. The lists come from PHP; the
+		// URL and referrer can only be read in the browser.
+		wp_add_inline_script(
+			$this->gtag_script_handle,
+			sprintf(
+				'window.wcGoogleAnalyticsIntegration = window.wcGoogleAnalyticsIntegration || {};
+				/* Returns the gtag config with page_location and page_referrer stripped of sensitive query parameters. */
+				window.wcGoogleAnalyticsIntegration.redactGtagConfig = (function ( redaction ) {
+					function lower( value ) {
+						try {
+							return decodeURIComponent( String( value ).replace( /\+/g, " " ) ).toLowerCase();
+						} catch ( e ) {
+							return String( value ).toLowerCase();
+						}
+					}
+					function redact( href ) {
+						try {
+							const url = new URL( href );
+							if ( ! url.search ) {
+								return href;
+							}
+							const pairs = url.search.slice( 1 ).split( "&" );
+							const names = pairs.map( function ( pair ) {
+								const eq = pair.indexOf( "=" );
+								return lower( eq === -1 ? pair : pair.slice( 0, eq ) );
+							} );
+							const segments = url.pathname.split( "/" ).map( lower );
+							const isOrderPage = ( redaction.order_endpoints || [] ).some( function ( endpoint ) {
+								return segments.includes( endpoint ) || names.includes( endpoint );
+							} );
+							const kept = [];
+							let changed = false;
+							pairs.forEach( function ( pair, index ) {
+								const eq = pair.indexOf( "=" );
+								const value = eq === -1 ? "" : pair.slice( eq + 1 );
+								// An order key starts with wc_ (the rest of the prefix is filterable in
+								// WooCommerce) and may sit inside a return URL carried by another parameter.
+								const isOrderKey = /^wc_|wc_order_/i.test( value ) || /^wc_|wc_order_/i.test( lower( value ) );
+								const drop = pair !== "" && ( isOrderKey || ( isOrderPage
+									? ! ( redaction.order_params || [] ).includes( names[ index ] )
+									: redaction.params.includes( names[ index ] ) ) );
+								if ( drop ) {
+									changed = true;
+								} else {
+									kept.push( pair );
+								}
+							} );
+							if ( ! changed ) {
+								return href;
+							}
+							// Reassembled from the original pairs so kept values keep their exact encoding.
+							url.search = kept.join( "&" );
+							return url.href;
+						} catch ( e ) {
+							// Unparsable or unfilterable: drop the query and fragment rather than risk leaking a key.
+							return String( href ).split( /[?#]/ )[ 0 ];
+						}
+					}
+					return function ( config ) {
+						try {
+							if ( ! redaction || ! Array.isArray( redaction.params ) ) {
+								return config;
+							}
+							if ( ! ( "page_location" in config ) ) {
+								const pageLocation = redact( document.location.href );
+								if ( pageLocation !== document.location.href ) {
+									config.page_location = pageLocation;
+								}
+							}
+							if ( ! ( "page_referrer" in config ) && document.referrer ) {
+								const pageReferrer = redact( document.referrer );
+								if ( pageReferrer !== document.referrer ) {
+									config.page_referrer = pageReferrer;
+								}
+							}
+						} catch ( e ) {}
+						return config;
+					};
+				})( %1$s );',
+				wp_json_encode( $this->get_url_redaction_config(), JSON_HEX_TAG | JSON_UNESCAPED_SLASHES )
+			),
+			'before'
+		);
+
 		wp_add_inline_script(
 			$this->gtag_script_handle,
 			apply_filters(
@@ -108,7 +193,8 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 					}
 					%2$s("js", new Date());
 					%2$s("set", "developer_id.%3$s", true);
-					%2$s("config", "%1$s", %5$s);',
+					// Report the page URL and referrer without order keys and other sensitive query parameters.
+					%2$s("config", "%1$s", ( window.wcGoogleAnalyticsIntegration && window.wcGoogleAnalyticsIntegration.redactGtagConfig || function ( config ) { return config; } )( %5$s ));',
 					esc_js( $this->get_setting( 'ga_id' ) ),
 					esc_js( $this->tracker_function_name() ),
 					esc_js( static::DEVELOPER_ID ),
@@ -334,6 +420,163 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 				)
 			)
 		);
+	}
+
+	/**
+	 * Query parameters stripped from the page URL and referrer reported to Google Analytics on every page.
+	 *
+	 * Names are matched case-insensitively. Independently of this list, any parameter whose value
+	 * looks like a WooCommerce order key, or carries one inside a nested URL, is stripped as well.
+	 *
+	 * @return string[]
+	 */
+	public function get_redacted_url_params(): array {
+		$params = [
+			'key',
+			'login',
+			'session',
+			'email',
+			'uid',
+			'_wpnonce',
+			'_wp_http_referer',
+			'woo-share',
+			'moderation-hash',
+			'unapproved',
+			'email_link_action_key',
+			'consumer_key',
+			'consumer_secret',
+			// Nested return URLs: WooCommerce and WordPress put checkout/order URLs in them,
+			// where a `key=wc_order_...` would escape the value check above.
+			'redirect',
+			'redirect_to',
+		];
+
+		/**
+		 * Filters the query parameters stripped from the page URL and referrer reported to Google Analytics.
+		 *
+		 * @param string[] $params Parameter names, matched case-insensitively.
+		 */
+		return self::normalize_url_param_names( apply_filters( 'woocommerce_ga_redacted_url_params', $params ) );
+	}
+
+	/**
+	 * Slugs of the WooCommerce endpoints whose URLs carry an order key: order-received and order-pay.
+	 *
+	 * Read from WooCommerce's configured query vars (which honour the endpoint settings and the
+	 * `woocommerce_get_query_vars` filter), falling back to the stock slugs.
+	 *
+	 * @return string[]
+	 */
+	public function get_order_page_endpoints(): array {
+		$query_vars = [];
+		if ( function_exists( 'WC' ) && WC()->query instanceof WC_Query ) {
+			$query_vars = WC()->query->get_query_vars();
+		}
+
+		$endpoints = [];
+		foreach ( [ 'order-received', 'order-pay' ] as $endpoint ) {
+			$endpoints[] = ! empty( $query_vars[ $endpoint ] ) && is_string( $query_vars[ $endpoint ] ) ? $query_vars[ $endpoint ] : $endpoint;
+		}
+
+		return self::normalize_url_param_names( $endpoints );
+	}
+
+	/**
+	 * Query parameters kept in the page URL reported to Google Analytics on order-received and
+	 * order-pay pages. Every other parameter is stripped there.
+	 *
+	 * @return string[]
+	 */
+	public function get_order_page_allowed_url_params(): array {
+		$endpoints = $this->get_order_page_endpoints();
+		$params    = array_merge(
+			// The endpoint query vars identify the page on plain permalinks (`?order-received=123`).
+			$endpoints,
+			[
+				'pay_for_order',
+				// Page identity on plain permalinks, and the language/currency of the page.
+				'page_id',
+				'p',
+				'pagename',
+				'lang',
+				'currency',
+				// Campaign attribution.
+				'utm_source',
+				'utm_medium',
+				'utm_campaign',
+				'utm_term',
+				'utm_content',
+				'utm_id',
+				'utm_source_platform',
+				'utm_creative_format',
+				'utm_marketing_tactic',
+				'utm_nooverride',
+				'srsltid',
+				'gclid',
+				'gbraid',
+				'wbraid',
+				'dclid',
+				'fbclid',
+				'msclkid',
+				'_gl',
+			]
+		);
+
+		/**
+		 * Filters the query parameters kept in the page URL reported to Google Analytics on the
+		 * order-received and order-pay pages.
+		 *
+		 * @param string[] $params    Parameter names, matched case-insensitively.
+		 * @param string[] $endpoints The order-received and order-pay endpoint slugs.
+		 */
+		return self::normalize_url_param_names( apply_filters( 'woocommerce_ga_order_page_allowed_url_params', $params, $endpoints ) );
+	}
+
+	/**
+	 * Configuration for the client-side URL redaction, passed to the `redactGtagConfig` helper.
+	 *
+	 * Returns an empty array when redaction is disabled, which the helper treats as "do nothing".
+	 *
+	 * @return array
+	 */
+	public function get_url_redaction_config(): array {
+		/**
+		 * Filters whether the gtag snippet strips sensitive query parameters, such as order keys,
+		 * from the page URL and referrer it reports to Google Analytics.
+		 *
+		 * @param bool $enabled Whether redaction is enabled. Default true.
+		 */
+		if ( ! apply_filters( 'woocommerce_ga_url_redaction_enabled', true ) ) {
+			return [];
+		}
+
+		return [
+			'params'          => $this->get_redacted_url_params(),
+			'order_endpoints' => $this->get_order_page_endpoints(),
+			'order_params'    => $this->get_order_page_allowed_url_params(),
+		];
+	}
+
+	/**
+	 * Lower-case, de-duplicate and reindex a list of query parameter names, dropping anything
+	 * that is not a non-empty string.
+	 *
+	 * @param mixed $names Parameter names, typically the output of a filter.
+	 * @return string[]
+	 */
+	private static function normalize_url_param_names( $names ): array {
+		$names = array_filter( (array) $names, 'is_string' );
+		$names = array_map(
+			function ( string $name ): string {
+				// Translated endpoint slugs may be non-ASCII, which strtolower() leaves untouched
+				// while the JS side lowercases by Unicode rules.
+				return function_exists( 'mb_strtolower' ) ? mb_strtolower( $name, 'UTF-8' ) : strtolower( $name );
+			},
+			$names
+		);
+		$names = array_filter( $names, 'strlen' );
+
+		return array_values( array_unique( $names ) );
 	}
 
 	/**

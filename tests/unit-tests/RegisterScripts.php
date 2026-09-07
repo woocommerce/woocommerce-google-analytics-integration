@@ -132,6 +132,104 @@ class RegisterScripts extends WP_UnitTestCase {
 
 		$this->assertStringContainsString( '/* replaced snippet */', $snippet );
 		$this->assertStringNotContainsString( 'gtag("config"', $snippet, 'The default snippet should be replaced, not appended' );
+		$this->assertStringContainsString(
+			'window.wcGoogleAnalyticsIntegration.redactGtagConfig',
+			$this->get_inline_snippet( $gtag->gtag_script_handle, 'before' ),
+			'The redaction helper stays available to a replacement snippet'
+		);
+	}
+
+	/**
+	 * The config call must go through the redaction helper, and the helper must be
+	 * installed with the lists PHP resolved.
+	 *
+	 * @return void
+	 */
+	public function test_inline_snippet_redacts_the_page_url_before_configuring_the_property() {
+		$gtag    = new WC_Google_Gtag_JS( [ 'ga_id' => 'G-TEST123' ] );
+		$snippet = $this->get_inline_snippet( $gtag->gtag_script_handle );
+		$helper  = $this->get_inline_snippet( $gtag->gtag_script_handle, 'before' );
+
+		$this->assertStringContainsString(
+			'window.wcGoogleAnalyticsIntegration.redactGtagConfig',
+			$helper,
+			'The redaction helper should be installed before the snippet runs'
+		);
+		$this->assertStringContainsString(
+			'redactGtagConfig || function ( config ) { return config; } )( {',
+			$snippet,
+			'The config call should pass its config through the helper'
+		);
+		$this->assertStringContainsString(
+			wp_json_encode( $gtag->get_url_redaction_config(), JSON_HEX_TAG | JSON_UNESCAPED_SLASHES ),
+			$helper,
+			'The helper should receive the redaction lists as JSON'
+		);
+	}
+
+	/**
+	 * The lists are filterable and the filtered values must reach the helper.
+	 *
+	 * @return void
+	 */
+	public function test_inline_snippet_embeds_filtered_redaction_lists() {
+		$deny  = function () {
+			return [ 'key', 'token' ];
+		};
+		$allow = function ( $params ) {
+			$params[] = 'ref';
+			return $params;
+		};
+		add_filter( 'woocommerce_ga_redacted_url_params', $deny );
+		add_filter( 'woocommerce_ga_order_page_allowed_url_params', $allow );
+
+		$gtag   = new WC_Google_Gtag_JS( [ 'ga_id' => 'G-TEST123' ] );
+		$helper = $this->get_inline_snippet( $gtag->gtag_script_handle, 'before' );
+
+		remove_filter( 'woocommerce_ga_redacted_url_params', $deny );
+		remove_filter( 'woocommerce_ga_order_page_allowed_url_params', $allow );
+
+		$this->assertStringContainsString( '"params":["key","token"]', $helper );
+		$this->assertStringNotContainsString( '"login"', $helper, 'Replaced denylist entries should be gone' );
+		$this->assertStringContainsString( ',"ref"]', $helper, 'Appended allowlist entries should be embedded' );
+	}
+
+	/**
+	 * Disabling redaction must leave the helper without lists, which makes it
+	 * return the config untouched.
+	 *
+	 * @return void
+	 */
+	public function test_inline_snippet_carries_no_redaction_lists_when_disabled() {
+		add_filter( 'woocommerce_ga_url_redaction_enabled', '__return_false' );
+
+		$gtag   = new WC_Google_Gtag_JS( [ 'ga_id' => 'G-TEST123' ] );
+		$helper = $this->get_inline_snippet( $gtag->gtag_script_handle, 'before' );
+
+		remove_filter( 'woocommerce_ga_url_redaction_enabled', '__return_false' );
+
+		$this->assertStringNotContainsString( '"order_endpoints"', $helper );
+		$this->assertStringContainsString( '})( [] );', $helper, 'An empty configuration should be passed to the helper' );
+	}
+
+	/**
+	 * Filter-supplied names are printed inside a script tag, so markup must be escaped.
+	 *
+	 * @return void
+	 */
+	public function test_inline_snippet_escapes_markup_in_redaction_lists() {
+		$callback = function () {
+			return [ 'key', '</script><script>alert(1)</script>' ];
+		};
+		add_filter( 'woocommerce_ga_redacted_url_params', $callback );
+
+		$gtag   = new WC_Google_Gtag_JS( [ 'ga_id' => 'G-TEST123' ] );
+		$helper = $this->get_inline_snippet( $gtag->gtag_script_handle, 'before' );
+
+		remove_filter( 'woocommerce_ga_redacted_url_params', $callback );
+
+		$this->assertStringNotContainsString( '</script>', $helper );
+		$this->assertStringContainsString( '\u003C/script\u003E', $helper, 'JSON_HEX_TAG should encode the angle brackets' );
 	}
 
 	/**
@@ -151,18 +249,19 @@ class RegisterScripts extends WP_UnitTestCase {
 	/**
 	 * Read the concatenated inline "after" data attached to a script handle.
 	 *
-	 * @param string $handle The registered script handle.
+	 * @param string $handle   The registered script handle.
+	 * @param string $position  Which inline scripts to read, `before` or `after`.
 	 *
 	 * @return string
 	 */
-	private function get_inline_snippet( $handle ) {
+	private function get_inline_snippet( $handle, $position = 'after' ) {
 		// query() returns false for an unregistered handle instead of raising an
 		// undefined-array-key warning like a direct registered[] access would.
 		$registered = wp_scripts()->query( $handle );
 		$this->assertNotFalse( $registered, "Script handle '{$handle}' should be registered" );
 
-		$after = $registered->extra['after'] ?? [];
-		return implode( "\n", array_filter( (array) $after, 'is_string' ) );
+		$scripts = $registered->extra[ $position ] ?? [];
+		return implode( "\n", array_filter( (array) $scripts, 'is_string' ) );
 	}
 
 	/**

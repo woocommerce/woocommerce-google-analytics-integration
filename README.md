@@ -115,6 +115,10 @@ The extension does not provide any UI, like a cookie banner, to let your visitor
 
 Each of those extensions may require additional setup or registration. Usually, the basic default setup works out of the box, but there may be some integration caveats. Here are a couple of the most frequent ones:
 
+##### Visitors who have not answered the banner yet
+
+When the WP Consent API reports that the site is opt-in, a visitor who has not answered the banner is reported to Google as `denied` for every consent type, rather than being left on the regional defaults. Sites the WP Consent API reports as opt-out, and sites where no extension declares a consent type at all, are unaffected: their visitors keep the defaults until they make a choice.
+
 ##### GA4W overwrites the consent mode defaults set by the other extension
 
 If the additional extension you chose sets its own default state of consent modes, different than the one we set, and you would like to make sure we'll not overwrite that, you can use the `woocommerce_ga_gtag_consent_modes` snippet to change or disable our setup:
@@ -135,3 +139,42 @@ add_filter( 'woocommerce_ga_gtag_config', function ( $config ) {
    return $config;
 } );
 ```
+
+### Sensitive query parameters in the page URL
+
+gtag reports the page URL (`page_location`, the `dl` parameter) and the referrer (`page_referrer`, `dr`) with every hit. Before gtag reads them, the extension strips query parameters that must not end up in Google Analytics, such as the WooCommerce order key on the order-received page:
+
+- On every page it removes `key`, `login`, `session`, `email`, `uid`, `_wpnonce`, `_wp_http_referer`, `woo-share`, `moderation-hash`, `unapproved`, `email_link_action_key`, `consumer_key`, `consumer_secret`, `redirect` and `redirect_to`, plus any parameter that carries a WooCommerce order key as its value or inside a URL nested in it.
+- On the order-received and order-pay pages it keeps only the endpoint parameters, `pay_for_order`, the parameters that identify the page on plain permalinks (`page_id`, `p`, `pagename`, `lang`, `currency`), the standard `utm_` parameters, the click identifiers (`gclid`, `gbraid`, `wbraid`, `dclid`, `fbclid`, `msclkid`, `srsltid`) and the cross-domain linker `_gl`.
+
+URLs with nothing to strip are reported exactly as gtag would report them. The lists are filterable; hook the filters before WooCommerce loads its integrations (from your plugin’s main file or `plugins_loaded`):
+
+```php
+add_filter( 'woocommerce_ga_redacted_url_params', function ( $params ) {
+    $params[] = 'token';
+    return $params;
+} );
+
+add_filter( 'woocommerce_ga_order_page_allowed_url_params', function ( $params ) {
+    $params[] = 'ref';
+    return $params;
+} );
+```
+
+To switch the redaction off entirely:
+
+```php
+add_filter( 'woocommerce_ga_url_redaction_enabled', '__return_false' );
+```
+
+If your `woocommerce_ga_gtag_config` filter sets `page_location` or `page_referrer`, those values are used as they are.
+
+The redaction is performed by `window.wcGoogleAnalyticsIntegration.redactGtagConfig( config )`, which is installed before the tag snippet runs. It is registered separately from the snippet, so if you replace the snippet through `woocommerce_gtag_snippet` you can keep the redaction by passing your config through it:
+
+```js
+gtag( 'config', 'G-XXXXXXXXXX', wcGoogleAnalyticsIntegration.redactGtagConfig( { /* … */ } ) );
+```
+
+A replacement snippet that does not call it reports the unredacted URL.
+
+This only changes what the extension reports to Google. Browsers send the page URL in the `Referer` header of the requests the page makes, which for third-party resources means the origin alone under the usual `strict-origin-when-cross-origin` policy, and the full URL if the site relaxes that policy. Other tags on the page report their own `page_location`.

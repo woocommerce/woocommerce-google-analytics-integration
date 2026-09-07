@@ -186,3 +186,21 @@ add_filter(
 		return sanitize_text_field( wp_unslash( $_GET['ga4w_e2e_consent_type'] ) );
 	}
 );
+
+/*
+ * Test-only page location override, mimicking a merchant that sets
+ * `page_location` themselves. Pass `ga4w_e2e_page_location` to check that the
+ * redaction leaves their value alone.
+ */
+add_filter(
+	'woocommerce_ga_gtag_config',
+	function ( $config ) {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( isset( $_GET['ga4w_e2e_page_location'] ) ) {
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$config['page_location'] = sanitize_text_field( wp_unslash( $_GET['ga4w_e2e_page_location'] ) );
+		}
+
+		return $config;
+	}
+);

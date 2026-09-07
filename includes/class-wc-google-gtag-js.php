@@ -103,6 +103,10 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 				'window.wcGoogleAnalyticsIntegration = window.wcGoogleAnalyticsIntegration || {};
 				/* Returns the gtag config with page_location and page_referrer stripped of sensitive query parameters. */
 				window.wcGoogleAnalyticsIntegration.redactGtagConfig = (function ( redaction ) {
+					// An order key is wc_ followed by a body WooCommerce lets sites filter, so match
+					// the guaranteed prefix, the stock format anywhere in the value, and a key sitting
+					// in the query string of a URL nested inside the value.
+					const ORDER_KEY = /^wc_|wc_order_|[?&][^=&]*=wc_/i;
 					function lower( value ) {
 						try {
 							return decodeURIComponent( String( value ).replace( /\+/g, " " ) ).toLowerCase();
@@ -130,9 +134,7 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 							pairs.forEach( function ( pair, index ) {
 								const eq = pair.indexOf( "=" );
 								const value = eq === -1 ? "" : pair.slice( eq + 1 );
-								// An order key starts with wc_ (the rest of the prefix is filterable in
-								// WooCommerce) and may sit inside a return URL carried by another parameter.
-								const isOrderKey = /^wc_|wc_order_/i.test( value ) || /^wc_|wc_order_/i.test( lower( value ) );
+								const isOrderKey = ORDER_KEY.test( value ) || ORDER_KEY.test( lower( value ) );
 								const drop = pair !== "" && ( isOrderKey || ( isOrderPage
 									? ! ( redaction.order_params || [] ).includes( names[ index ] )
 									: redaction.params.includes( names[ index ] ) ) );

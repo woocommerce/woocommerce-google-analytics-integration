@@ -132,6 +132,27 @@ test( 'strips an order key nested in another URL', () => {
 	);
 } );
 
+test( 'strips a nested order key whose format was filtered away from wc_order_', () => {
+	const nested = encodeURIComponent(
+		'http://example.test/checkout/order-received/5/?key=wc_abc123'
+	);
+
+	assert.strictEqual(
+		locationFor( `http://example.test/shop/?return_url=${ nested }&foo=1` ),
+		'http://example.test/shop/?foo=1'
+	);
+} );
+
+test( 'keeps a value that merely contains wc_ in ordinary text', () => {
+	// Nothing is stripped, so the helper leaves the config alone.
+	assert.strictEqual(
+		locationFor(
+			'http://example.test/shop/?utm_campaign=summer_wc_sale&foo=1'
+		),
+		undefined
+	);
+} );
+
 test( 'matches parameter names case-insensitively and keeps the original case of the rest', () => {
 	assert.strictEqual(
 		locationFor( 'http://example.test/shop/?KEY=1&Login=2&Foo=Bar' ),

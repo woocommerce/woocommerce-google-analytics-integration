@@ -162,6 +162,140 @@ class Configuration extends EventsDataTest {
 	}
 
 	/**
+	 * Default denylist for the page URL / referrer redaction.
+	 *
+	 * @return void
+	 */
+	public function test_get_redacted_url_params_defaults() {
+		$gtag = new WC_Google_Gtag_JS();
+
+		$this->assertEquals(
+			[ 'key', 'login', 'session', 'email', 'uid', '_wpnonce', '_wp_http_referer', 'woo-share', 'moderation-hash', 'unapproved', 'email_link_action_key', 'consumer_key', 'consumer_secret', 'redirect', 'redirect_to' ],
+			$gtag->get_redacted_url_params()
+		);
+	}
+
+	/**
+	 * The denylist filter output is lower-cased, de-duplicated and cleaned of non-strings.
+	 *
+	 * @return void
+	 */
+	public function test_get_redacted_url_params_filter_output_is_normalized() {
+		$callback = function () {
+			return [ 'KEY', 'Token', 'token', '', 123, null, [ 'nested' ] ];
+		};
+		add_filter( 'woocommerce_ga_redacted_url_params', $callback );
+
+		try {
+			$gtag = new WC_Google_Gtag_JS();
+			$this->assertEquals( [ 'key', 'token' ], $gtag->get_redacted_url_params() );
+		} finally {
+			remove_filter( 'woocommerce_ga_redacted_url_params', $callback );
+		}
+	}
+
+	/**
+	 * Endpoint slugs come from WooCommerce's query vars, so renamed endpoints are honoured.
+	 *
+	 * @return void
+	 */
+	public function test_get_order_page_endpoints_follow_woocommerce_query_vars() {
+		$gtag = new WC_Google_Gtag_JS();
+		$this->assertEquals( [ 'order-received', 'order-pay' ], $gtag->get_order_page_endpoints() );
+
+		$callback = function ( $vars ) {
+			$vars['order-received'] = 'Thank-You';
+			return $vars;
+		};
+		add_filter( 'woocommerce_get_query_vars', $callback );
+
+		try {
+			$this->assertEquals( [ 'thank-you', 'order-pay' ], $gtag->get_order_page_endpoints(), 'Custom slugs are read and lower-cased' );
+			$this->assertContains( 'thank-you', $gtag->get_order_page_allowed_url_params(), 'The custom slug is kept on order pages' );
+		} finally {
+			remove_filter( 'woocommerce_get_query_vars', $callback );
+		}
+	}
+
+	/**
+	 * Without WC()->query the stock slugs are used.
+	 *
+	 * @return void
+	 */
+	public function test_get_order_page_endpoints_fall_back_to_stock_slugs_without_wc_query() {
+		$gtag       = new WC_Google_Gtag_JS();
+		$query      = WC()->query;
+		WC()->query = null;
+
+		try {
+			$this->assertEquals( [ 'order-received', 'order-pay' ], $gtag->get_order_page_endpoints() );
+		} finally {
+			WC()->query = $query;
+		}
+	}
+
+	/**
+	 * Default allowlist for order pages: the endpoint vars, pay_for_order, campaign and click ids, the linker param.
+	 *
+	 * @return void
+	 */
+	public function test_get_order_page_allowed_url_params_defaults() {
+		$gtag = new WC_Google_Gtag_JS();
+
+		$this->assertEquals(
+			[ 'order-received', 'order-pay', 'pay_for_order', 'page_id', 'p', 'pagename', 'lang', 'currency', 'utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content', 'utm_id', 'utm_source_platform', 'utm_creative_format', 'utm_marketing_tactic', 'utm_nooverride', 'srsltid', 'gclid', 'gbraid', 'wbraid', 'dclid', 'fbclid', 'msclkid', '_gl' ],
+			$gtag->get_order_page_allowed_url_params()
+		);
+	}
+
+	/**
+	 * The allowlist filter receives the endpoint slugs and its output is normalized.
+	 *
+	 * @return void
+	 */
+	public function test_get_order_page_allowed_url_params_filter_receives_endpoints() {
+		$received = null;
+		$callback = function ( $params, $endpoints ) use ( &$received ) {
+			$received = $endpoints;
+			$params[] = 'REF';
+			return $params;
+		};
+		add_filter( 'woocommerce_ga_order_page_allowed_url_params', $callback, 10, 2 );
+
+		try {
+			$gtag   = new WC_Google_Gtag_JS();
+			$params = $gtag->get_order_page_allowed_url_params();
+
+			$this->assertEquals( [ 'order-received', 'order-pay' ], $received );
+			$this->assertContains( 'ref', $params );
+		} finally {
+			remove_filter( 'woocommerce_ga_order_page_allowed_url_params', $callback );
+		}
+	}
+
+	/**
+	 * The snippet config carries the three lists, or nothing when disabled.
+	 *
+	 * @return void
+	 */
+	public function test_get_url_redaction_config_shape_and_off_switch() {
+		$gtag   = new WC_Google_Gtag_JS();
+		$config = $gtag->get_url_redaction_config();
+
+		$this->assertEquals( [ 'params', 'order_endpoints', 'order_params' ], array_keys( $config ) );
+		$this->assertEquals( $gtag->get_redacted_url_params(), $config['params'] );
+		$this->assertEquals( $gtag->get_order_page_endpoints(), $config['order_endpoints'] );
+		$this->assertEquals( $gtag->get_order_page_allowed_url_params(), $config['order_params'] );
+
+		add_filter( 'woocommerce_ga_url_redaction_enabled', '__return_false' );
+		try {
+			$this->assertEquals( [], $gtag->get_url_redaction_config() );
+		} finally {
+			remove_filter( 'woocommerce_ga_url_redaction_enabled', '__return_false' );
+		}
+	}
+
+	/**
 	 * Test that get_consent_modes returns an array with one mode.
 	 *
 	 * @return void

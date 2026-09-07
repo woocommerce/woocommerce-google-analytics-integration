@@ -279,4 +279,90 @@ test.describe( 'WP Consent API Integration', () => {
 			getEventData( await revokedStatsAddEvent, 'add_to_cart' ).gcs
 		).toEqual( 'G100' );
 	} );
+
+	test( 'Consent update denying every type is sent while an opt-in site has no decision yet', async ( {
+		page,
+	} ) => {
+		await page.goto( 'shop?ga4w_e2e_consent_type=optin' );
+
+		const dataLayer = await page.evaluate( () => window.dataLayer );
+		const consentState = dataLayer.filter( ( i ) => i[ 0 ] === 'consent' );
+
+		await expect( consentState.length ).toEqual( 2 );
+		await expect( consentState[ 0 ][ 1 ] ).toEqual( 'default' );
+		await expect( consentState[ 1 ] ).toEqual( {
+			0: 'consent',
+			1: 'update',
+			2: {
+				analytics_storage: 'denied',
+				ad_storage: 'denied',
+				ad_user_data: 'denied',
+				ad_personalization: 'denied',
+			},
+		} );
+	} );
+
+	test( 'Event hits from an undecided opt-in visitor carry the denied state', async ( {
+		page,
+	} ) => {
+		const productID = await createSimpleProduct();
+
+		// The test defaults grant everything, so without the denied baseline this
+		// hit would read `G111`.
+		await page.goto( 'shop?ga4w_e2e_consent_type=optin' );
+
+		const addEvent = trackGtagEvent( page, 'add_to_cart' );
+		await storeApiAddToCart( page, productID );
+
+		expect( getEventData( await addEvent, 'add_to_cart' ).gcs ).toEqual(
+			'G100'
+		);
+	} );
+
+	test( 'No consent update is sent for undecided categories on an opt-out site', async ( {
+		page,
+	} ) => {
+		await page.goto( 'shop?ga4w_e2e_consent_type=optout' );
+
+		const dataLayer = await page.evaluate( () => window.dataLayer );
+		const consentState = dataLayer.filter( ( i ) => i[ 0 ] === 'consent' );
+
+		await expect( consentState.length ).toEqual( 1 );
+		await expect( consentState[ 0 ][ 1 ] ).toEqual( 'default' );
+	} );
+
+	test( 'Decided categories are still reported on an opt-out site', async ( {
+		page,
+	} ) => {
+		await page.goto( 'shop?ga4w_e2e_consent_type=optout' );
+		await page.evaluate( () =>
+			window.wp_set_consent( 'statistics', 'deny' )
+		);
+		await page.goto( 'shop?ga4w_e2e_consent_type=optout' );
+
+		const dataLayer = await page.evaluate( () => window.dataLayer );
+		const consentState = dataLayer.filter( ( i ) => i[ 0 ] === 'consent' );
+
+		// The undecided marketing category stays absent; only the decision is sent.
+		await expect( consentState.length ).toEqual( 2 );
+		await expect( consentState[ 1 ] ).toEqual( {
+			0: 'consent',
+			1: 'update',
+			2: { analytics_storage: 'denied' },
+		} );
+	} );
+
+	test( 'Consent state is unchanged when no consent type is declared', async ( {
+		page,
+	} ) => {
+		// The WP Consent API without a banner declares no type, so an undecided
+		// visitor keeps the region-scoped defaults instead of a denied baseline.
+		await page.goto( 'shop' );
+
+		const dataLayer = await page.evaluate( () => window.dataLayer );
+		const consentState = dataLayer.filter( ( i ) => i[ 0 ] === 'consent' );
+
+		await expect( consentState.length ).toEqual( 1 );
+		await expect( consentState[ 0 ][ 1 ] ).toEqual( 'default' );
+	} );
 } );

@@ -168,3 +168,21 @@ add_filter(
 		return $cart_item;
 	}
 );
+
+/*
+ * Test-only consent type declaration. A consent management plugin declares
+ * whether the site is opt-in or opt-out through this filter; pass
+ * `ga4w_e2e_consent_type` to mimic one without installing a banner.
+ */
+add_filter(
+	'wp_get_consent_type',
+	function ( $type ) {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( ! isset( $_GET['ga4w_e2e_consent_type'] ) ) {
+			return $type;
+		}
+
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		return sanitize_text_field( wp_unslash( $_GET['ga4w_e2e_consent_type'] ) );
+	}
+);

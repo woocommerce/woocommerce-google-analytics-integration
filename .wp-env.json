@@ -1,5 +1,5 @@
 {
-	"phpVersion": "8.0",
+	"phpVersion": "8.2",
 	"port": 8888,
 	"testsEnvironment": false,
 	"plugins": [

@@ -11,6 +11,7 @@ on:
       - package.json
       - package-lock.json
       - .github/workflows/php-unit-tests.yml
+      - "bin/*.sh"
   pull_request:
     paths:
       - "**.php"
@@ -19,6 +20,7 @@ on:
       - package.json
       - package-lock.json
       - .github/workflows/php-unit-tests.yml
+      - "bin/*.sh"
   workflow_dispatch:
     inputs:
       php-version:

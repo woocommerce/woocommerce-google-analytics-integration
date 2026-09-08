@@ -10,16 +10,16 @@ PLUGINS_DIR="${WP_CORE_DIR}/wp-content/plugins"
 
 download() {
   if [ $(which curl) ]; then
-    curl -s "$1" >"$2"
+    curl -fsSL "$1" -o "$2"
   elif [ $(which wget) ]; then
     wget -nv -O "$2" "$1"
   fi
 }
 
 get_latest_wp_version() {
-  # http serves a single offer, whereas https serves multiple. we only want one
-  download http://api.wordpress.org/core/version-check/1.7/ "${TMPDIR}/wp-latest.json"
-  local LATEST_VERSION=$(grep -o '"version":"[^"]*' "${TMPDIR}/wp-latest.json" | sed 's/"version":"//')
+  # https serves multiple offers; the first one is the latest release.
+  download https://api.wordpress.org/core/version-check/1.7/ "${TMPDIR}/wp-latest.json"
+  local LATEST_VERSION=$(grep -o '"version":"[^"]*' "${TMPDIR}/wp-latest.json" | sed 's/"version":"//' | head -1)
   if [[ -z "$LATEST_VERSION" ]]; then
     echo "Latest WordPress version could not be found"
     exit 1

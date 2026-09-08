@@ -99,20 +99,22 @@ jobs:
         run: sudo apt-get -y install subversion
 
       - name: Run PHP unit tests
+        env:
+          WP_VERSION: ${{ matrix.wp-version }}
+          MATRIX_WC_VERSIONS: ${{ matrix.wc-versions }}
         run: |
-          WC_VERSIONS=$(echo "${{ matrix.wc-versions }}" | sed -r "s/ *, */ /g")
-          WC_VERSIONS=($WC_VERSIONS)
+          read -ra WC_VERSIONS <<< "$(echo "$MATRIX_WC_VERSIONS" | sed -r "s/ *, */ /g")"
 
           INIT_INSTALL=true
 
           for WC_VERSION in "${WC_VERSIONS[@]}"; do
             if [ "$INIT_INSTALL" = true ]; then
-              echo "::group::Install WP ${{ matrix.wp-version }} and WC ${WC_VERSION}"
-              ./bin/install-unit-tests.sh wordpress_test root root localhost ${{ matrix.wp-version }} $WC_VERSION
+              echo "::group::Install WP ${WP_VERSION} and WC ${WC_VERSION}"
+              ./bin/install-unit-tests.sh wordpress_test root root localhost "${WP_VERSION}" "${WC_VERSION}"
               INIT_INSTALL=false
             else
-              echo "::group::Switch to WP ${{ matrix.wp-version }} and WC ${WC_VERSION}"
-              ./bin/switch-wp-wc-in-unit-tests.sh wordpress_test root root localhost ${{ matrix.wp-version }} $WC_VERSION
+              echo "::group::Switch to WP ${WP_VERSION} and WC ${WC_VERSION}"
+              ./bin/switch-wp-wc-in-unit-tests.sh wordpress_test root root localhost "${WP_VERSION}" "${WC_VERSION}"
             fi
             echo "::endgroup::"
 

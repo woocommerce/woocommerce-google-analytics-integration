@@ -3,7 +3,7 @@
 	"port": 8889,
 	"testsEnvironment": false,
 	"plugins": [
-		"https://github.com/WP-API/Basic-Auth/archive/master.zip",
+		"https://github.com/WP-API/Basic-Auth/archive/9e9d5267c7805c024f141d115b224cdee5a10008.zip",
 		"./tests/e2e/test-data",
 		"./tests/e2e/test-snippets",
 		"."

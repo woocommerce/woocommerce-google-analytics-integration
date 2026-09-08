@@ -34,18 +34,19 @@ jobs:
       - name: Commit hook documentation
         env:
           HEAD_REF: ${{ github.head_ref }}
+          HOOK_DOCS: ${{ steps.generate-hook-docs.outputs.hook-docs }}
         shell: bash
         # Use the github-actions bot account to commit.
         # https://api.github.com/users/github-actions%5Bbot%5D
         run: |
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
-          echo "${{ steps.generate-hook-docs.outputs.hook-docs }}" > docs/Hooks.md
+          printf '%s\n' "$HOOK_DOCS" > docs/Hooks.md
           git add docs/Hooks.md
           if git diff --cached --quiet; then
-            echo "*No documentation changes to commit.*" >> $GITHUB_STEP_SUMMARY
+            echo "*No documentation changes to commit.*" >> "$GITHUB_STEP_SUMMARY"
           else
-            echo "*Committing documentation changes.*" >> $GITHUB_STEP_SUMMARY
+            echo "*Committing documentation changes.*" >> "$GITHUB_STEP_SUMMARY"
             git commit -q -m "Update hooks documentation from ${HEAD_REF} branch."
             git push
           fi

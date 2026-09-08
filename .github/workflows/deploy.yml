@@ -1,5 +1,15 @@
 name: Deploy Product
 
+# **What it does**: Builds and publishes a release to WordPress.org, Woo.com and GitHub.
+# **How to use it**: Run it from the `release/x.y.z` branch (or the `x.y.z` tag) that
+# matches the `version` input. Dry runs need no approval and never see the WP.org
+# publishing password. Production runs wait for approval on the `production` environment
+# and ship the exact commit that was approved.
+#
+# The `woocommerce/woo-product-deploy` action is pinned to a commit SHA. Dependabot does
+# not track `repository:` refs in `actions/checkout`, so bump `WOO_PRODUCT_DEPLOY_SHA`
+# through a reviewed PR after checking the upstream diff.
+
 on:
   workflow_dispatch:
     inputs:
@@ -27,58 +37,132 @@ on:
         required: false
         default: true
         type: boolean
-  workflow_call:
-    inputs:
-      version:
-        description: 'Version to deploy (e.g., 2.1.21)'
-        required: true
-        type: string
-      deploy_wporg:
-        description: 'Deploy to WordPress.org'
-        required: false
-        default: true
-        type: boolean
-      deploy_woo:
-        description: 'Deploy to Woo.com'
-        required: false
-        default: true
-        type: boolean
-      deploy_github:
-        description: 'Deploy to GitHub'
-        required: false
-        default: true
-        type: boolean
-      simulate:
-        description: 'Dry run mode'
-        required: false
-        default: true
-        type: boolean
+
+permissions:
+  contents: read
+
+env:
+  # woocommerce/woo-product-deploy trunk @ 2026-08-31
+  WOO_PRODUCT_DEPLOY_SHA: 5f5b49d49b8a3681a7a99efec089187666885759
 
 jobs:
-  deploy:
+  validate:
+    name: Validate release ref
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      ref_name: ${{ steps.check.outputs.ref_name }}
+      sha: ${{ steps.check.outputs.sha }}
+    steps:
+      - name: Check that the ref matches the version
+        id: check
+        env:
+          VERSION: ${{ inputs.version }}
+          REF: ${{ github.ref }}
+          REF_NAME: ${{ github.ref_name }}
+          SHA: ${{ github.sha }}
+          SIMULATE: ${{ inputs.simulate }}
+        run: |
+          if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9.]+)?$ ]]; then
+            echo "::error::Invalid version format '$VERSION'. Expected X.Y.Z or X.Y.Z-suffix."
+            exit 1
+          fi
+          if [[ "$REF" != "refs/heads/release/${VERSION}" && "$REF" != "refs/tags/${VERSION}" ]]; then
+            echo "::error::Refusing to deploy '${REF}'. Run this workflow from 'release/${VERSION}' or the '${VERSION}' tag."
+            exit 1
+          fi
+          echo "ref_name=${REF_NAME}" >> "$GITHUB_OUTPUT"
+          echo "sha=${SHA}" >> "$GITHUB_OUTPUT"
+          {
+            echo "### Release ${VERSION}"
+            echo "- Ref: \`${REF}\`"
+            echo "- Commit: \`${SHA}\`"
+            echo "- Dry run: \`${SIMULATE}\`"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  dry-run:
+    name: Dry run
+    if: inputs.simulate
+    needs: validate
     runs-on: ubuntu-latest
     timeout-minutes: 15
-
     steps:
-      # Checkout the private action repository
+      # The action lives in a private repository, so a PAT is needed to check it out.
       - name: Checkout woo-product-deploy action
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
         with:
           repository: woocommerce/woo-product-deploy
-          ref: trunk
+          ref: ${{ env.WOO_PRODUCT_DEPLOY_SHA }}
           path: ./.github/actions/woo-product-deploy
-          token: ${{ secrets.ORG_DEPLOY_SECRET }}  # Need PAT with access to the action repository
+          token: ${{ secrets.ORG_DEPLOY_SECRET }}
+          persist-credentials: false
 
-      # Use the action we checked out
+      # Dry runs do not publish, so they never receive the WP.org SVN password.
+      # Partner credentials are kept so QIT tests still run against the built zip.
+      - name: Simulate deploy
+        uses: ./.github/actions/woo-product-deploy
+        with:
+          repo_url: https://github.com/woocommerce/woocommerce-google-analytics-integration
+          branch: ${{ needs.validate.outputs.ref_name }}
+          version: ${{ inputs.version }}
+          node_version: '24'
+          npm_version: '11'
+          simulate: true
+          wporg_release: ${{ inputs.deploy_wporg }}
+          wccom_release: ${{ inputs.deploy_woo }}
+          github_release: ${{ inputs.deploy_github }}
+          deploy_pat: ${{ secrets.ORG_DEPLOY_SECRET }}
+          wporg_username: ''
+          wporg_password: ''
+          partner_user: ${{ secrets.ORG_PARTNER_USER }}
+          partner_secret: ${{ secrets.ORG_PARTNER_DEPLOY_SECRET }}
+          wccom_product_id: 1442927
+
+  deploy:
+    name: Deploy
+    if: ${{ ! inputs.simulate }}
+    needs: validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: production
+    steps:
+      # The approval can happen long after the run was queued. Make sure the ref still
+      # points at the commit the reviewer saw in the summary.
+      - name: Check that the approved commit is still the head of the ref
+        env:
+          REF: ${{ github.ref }}
+          EXPECTED_SHA: ${{ needs.validate.outputs.sha }}
+          REPO_URL: https://github.com/${{ github.repository }}
+        run: |
+          CURRENT_SHA=$(git ls-remote "$REPO_URL" "$REF" | cut -f1)
+          if [[ -z "$CURRENT_SHA" ]]; then
+            echo "::error::Could not resolve '${REF}' on ${REPO_URL}."
+            exit 1
+          fi
+          if [[ "$CURRENT_SHA" != "$EXPECTED_SHA" ]]; then
+            echo "::error::'${REF}' moved from ${EXPECTED_SHA} to ${CURRENT_SHA} since this run was approved. Start a new run."
+            exit 1
+          fi
+          echo "Deploying ${REF} at ${CURRENT_SHA}."
+
+      - name: Checkout woo-product-deploy action
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          repository: woocommerce/woo-product-deploy
+          ref: ${{ env.WOO_PRODUCT_DEPLOY_SHA }}
+          path: ./.github/actions/woo-product-deploy
+          token: ${{ secrets.ORG_DEPLOY_SECRET }}
+          persist-credentials: false
+
       - name: Deploy Product
         uses: ./.github/actions/woo-product-deploy
         with:
           repo_url: https://github.com/woocommerce/woocommerce-google-analytics-integration
-          branch: ${{ github.ref_name }}
+          branch: ${{ needs.validate.outputs.ref_name }}
           version: ${{ inputs.version }}
           node_version: '24'
           npm_version: '11'
-          simulate: ${{ inputs.simulate }}
+          simulate: false
           wporg_release: ${{ inputs.deploy_wporg }}
           wccom_release: ${{ inputs.deploy_woo }}
           github_release: ${{ inputs.deploy_github }}

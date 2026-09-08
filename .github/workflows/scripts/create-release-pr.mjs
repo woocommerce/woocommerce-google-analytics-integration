@@ -30,7 +30,7 @@ export default async ( { context, github, version } ) => {
 
 ## Next steps
 1. [ ] Do the final release
-   1. [ ] Run [Woo Deploy Action](${ context.payload.repository.html_url }/actions/workflows/deploy.yml) — select branch \`release/${ version }\`, version \`${ version }\`, and **production** mode (disable **Dry run**).
+   1. [ ] Run [Woo Deploy Action](${ context.payload.repository.html_url }/actions/workflows/deploy.yml) — select branch \`release/${ version }\`, version \`${ version }\`, and **production** mode (disable **Dry run**). The run waits for approval on the \`production\` environment; the summary of the \`Validate release ref\` job shows the commit that will ship.
 1. [ ] Confirm the release using the activation link from your email.
    When releasing to WordPress.org, _"release notifications"_ have been enabled, so each committer will be sent an email with an action link to confirm the release. This must be done after committing in SVN before the release becomes available. See the following page for releases pending notifications: https://wordpress.org/plugins/developers/releases/
 1. [ ] Go to ${ context.payload.repository.html_url }/releases/${ version }, generate GitHub release notes, and paste them as a comment here.

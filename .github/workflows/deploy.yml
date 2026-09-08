@@ -1,14 +1,17 @@
 name: Deploy Product
 
 # **What it does**: Builds and publishes a release to WordPress.org, Woo.com and GitHub.
-# **How to use it**: Run it from the `release/x.y.z` branch (or the `x.y.z` tag) that
-# matches the `version` input. Dry runs need no approval and never see the WP.org
-# publishing password. Production runs wait for approval on the `production` environment
-# and ship the exact commit that was approved.
+# **How to use it**: Run it from the `release/x.y.z` or `hotfix/x.y.z` branch that matches
+# the `version` input. Dry runs need no approval and never see the WP.org publishing
+# password. Production runs wait for approval on the `production` environment and refuse
+# to start if the branch moved since the approved commit. The action itself resolves the
+# branch by name, so the branch must also be protected against force pushes.
 #
 # The `woocommerce/woo-product-deploy` action is pinned to a commit SHA. Dependabot does
 # not track `repository:` refs in `actions/checkout`, so bump `WOO_PRODUCT_DEPLOY_SHA`
 # through a reviewed PR after checking the upstream diff.
+
+run-name: Deploy ${{ inputs.version }} from ${{ github.ref_name }}${{ inputs.simulate && ' (dry run)' || '' }}
 
 on:
   workflow_dispatch:
@@ -41,6 +44,10 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
 env:
   # woocommerce/woo-product-deploy trunk @ 2026-08-31
   WOO_PRODUCT_DEPLOY_SHA: 5f5b49d49b8a3681a7a99efec089187666885759
@@ -63,12 +70,14 @@ jobs:
           SHA: ${{ github.sha }}
           SIMULATE: ${{ inputs.simulate }}
         run: |
-          if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9.]+)?$ ]]; then
-            echo "::error::Invalid version format '$VERSION'. Expected X.Y.Z or X.Y.Z-suffix."
+          # Same pattern as validate-inputs.sh in woo-product-deploy, so a version that
+          # passes here also passes inside the action.
+          if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9]+)?$ ]]; then
+            echo "::error::Invalid version format '$VERSION'. Expected X.Y.Z or X.Y.Z-suffix (no dots in the suffix)."
             exit 1
           fi
-          if [[ "$REF" != "refs/heads/release/${VERSION}" && "$REF" != "refs/tags/${VERSION}" ]]; then
-            echo "::error::Refusing to deploy '${REF}'. Run this workflow from 'release/${VERSION}' or the '${VERSION}' tag."
+          if [[ "$REF" != "refs/heads/release/${VERSION}" && "$REF" != "refs/heads/hotfix/${VERSION}" ]]; then
+            echo "::error::Refusing to deploy '${REF}'. Run this workflow from 'release/${VERSION}' or 'hotfix/${VERSION}'."
             exit 1
           fi
           echo "ref_name=${REF_NAME}" >> "$GITHUB_OUTPUT"
@@ -99,6 +108,8 @@ jobs:
 
       # Dry runs do not publish, so they never receive the WP.org SVN password.
       # Partner credentials are kept so QIT tests still run against the built zip.
+      # wporg_release is forced on because the action needs at least one release
+      # target enabled to set up woorelease, and simulate mode never commits.
       - name: Simulate deploy
         uses: ./.github/actions/woo-product-deploy
         with:
@@ -108,7 +119,7 @@ jobs:
           node_version: '24'
           npm_version: '11'
           simulate: true
-          wporg_release: ${{ inputs.deploy_wporg }}
+          wporg_release: true
           wccom_release: ${{ inputs.deploy_woo }}
           github_release: ${{ inputs.deploy_github }}
           deploy_pat: ${{ secrets.ORG_DEPLOY_SECRET }}
@@ -126,8 +137,8 @@ jobs:
     timeout-minutes: 15
     environment: production
     steps:
-      # The approval can happen long after the run was queued. Make sure the ref still
-      # points at the commit the reviewer saw in the summary.
+      # The approval can happen long after the run was queued. Refuse to start if the
+      # ref no longer points at the commit the reviewer saw in the summary.
       - name: Check that the approved commit is still the head of the ref
         env:
           REF: ${{ github.ref }}
@@ -167,8 +178,8 @@ jobs:
           wccom_release: ${{ inputs.deploy_woo }}
           github_release: ${{ inputs.deploy_github }}
           deploy_pat: ${{ secrets.ORG_DEPLOY_SECRET }}
-          wporg_username: ${{ secrets.WPORG_SVN_USERNAME }}
-          wporg_password: ${{ secrets.WPORG_SVN_PASSWORD }}
+          wporg_username: ${{ inputs.deploy_wporg && secrets.WPORG_SVN_USERNAME || '' }}
+          wporg_password: ${{ inputs.deploy_wporg && secrets.WPORG_SVN_PASSWORD || '' }}
           partner_user: ${{ secrets.ORG_PARTNER_USER }}
           partner_secret: ${{ secrets.ORG_PARTNER_DEPLOY_SECRET }}
           wccom_product_id: 1442927

@@ -22,7 +22,7 @@ export default async ( { context, github, version } ) => {
    woorelease cl:generate --release --product_version=${ version } ${ repoURL }
    \`\`\`
 1. [ ] Automated tests are passing.
-1. [ ] Wait for the automated hooks documentation commit on this branch (it runs after the changelog changes). A production run fails if the branch moves after approval.
+1. [ ] Wait for the automated hooks documentation commit on this branch (it is triggered by the \`changelog.txt\` commit that \`cl:generate\` makes above). A production run fails if the branch moves after approval.
 1. [ ] Run [Woo Deploy Action](${ context.payload.repository.html_url }/actions/workflows/deploy.yml) — select branch \`release/${ version }\`, version \`${ version }\`, and **Dry run** mode.
 1. [ ] Test the package
    1. [ ] Install the .zip package from the artifact from the dry run on a test site

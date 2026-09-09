@@ -19,7 +19,9 @@ export function api( version ) {
 	).toString( 'base64' );
 
 	return axios.create( {
-		baseURL: `${ config.url }wp-json/${ version ?? 'wc/v3' }/`,
+		baseURL: `${ process.env.WP_BASE_URL || config.url }wp-json/${
+			version ?? 'wc/v3'
+		}/`,
 		headers: {
 			'Content-Type': 'application/json',
 			Authorization: `Basic ${ token }`,

@@ -1,6 +1,8 @@
 name: Deploy Product
 
-# **What it does**: Builds and publishes a release to WordPress.org, Woo.com and GitHub.
+# **What it does**: Builds and publishes a release to WordPress.org and GitHub.
+# This plugin is hosted on WordPress.org, so the action skips its WooCommerce.com
+# step; that channel is served from the WordPress.org release, not from this run.
 # **How to use it**: Run it from the `release/x.y.z` or `hotfix/x.y.z` branch that matches
 # the `version` input. Dry runs need no approval and never see the WP.org publishing
 # password. Production runs wait for approval on the `production` environment and refuse
@@ -22,11 +24,6 @@ on:
         type: string
       deploy_wporg:
         description: 'Deploy to WordPress.org'
-        required: false
-        default: true
-        type: boolean
-      deploy_woo:
-        description: 'Deploy to Woo.com'
         required: false
         default: true
         type: boolean
@@ -120,14 +117,14 @@ jobs:
           npm_version: '11'
           simulate: true
           wporg_release: true
-          wccom_release: ${{ inputs.deploy_woo }}
+          # Hosted on WordPress.org, so the action's WooCommerce.com step never runs.
+          wccom_release: false
           github_release: ${{ inputs.deploy_github }}
           deploy_pat: ${{ secrets.ORG_DEPLOY_SECRET }}
           wporg_username: ''
           wporg_password: ''
           partner_user: ${{ secrets.ORG_PARTNER_USER }}
           partner_secret: ${{ secrets.ORG_PARTNER_DEPLOY_SECRET }}
-          wccom_product_id: 1442927
 
   deploy:
     name: Deploy
@@ -175,11 +172,11 @@ jobs:
           npm_version: '11'
           simulate: false
           wporg_release: ${{ inputs.deploy_wporg }}
-          wccom_release: ${{ inputs.deploy_woo }}
+          # Hosted on WordPress.org, so the action's WooCommerce.com step never runs.
+          wccom_release: false
           github_release: ${{ inputs.deploy_github }}
           deploy_pat: ${{ secrets.ORG_DEPLOY_SECRET }}
           wporg_username: ${{ inputs.deploy_wporg && secrets.WPORG_SVN_USERNAME || '' }}
           wporg_password: ${{ inputs.deploy_wporg && secrets.WPORG_SVN_PASSWORD || '' }}
           partner_user: ${{ secrets.ORG_PARTNER_USER }}
           partner_secret: ${{ secrets.ORG_PARTNER_DEPLOY_SECRET }}
-          wccom_product_id: 1442927

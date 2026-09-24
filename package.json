@@ -14,9 +14,9 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.61.0",
-    "@wordpress/env": "^11.8.1",
+    "@wordpress/env": "^11.15.0",
     "@wordpress/eslint-plugin": "^25.4.0",
-    "@wordpress/scripts": "^31.8.0",
+    "@wordpress/scripts": "^35.0.0",
     "@wordpress/url": "^4.26.0",
     "ajv": "^8.20.0",
     "axios": "^1.18.1",
@@ -29,10 +29,10 @@
     "@babel/runtime": "^7.27.6",
     "markdown-it": "^14.2.0",
     "@wordpress/env": {
-      "adm-zip": "^0.6.0"
+      "adm-zip": "^0.6.1"
     },
     "@wordpress/scripts": {
-      "adm-zip": "^0.6.0",
+      "adm-zip": "^0.6.1",
       "webpack-dev-server": "^5.2.6"
     },
     "@wordpress/e2e-test-utils-playwright": {

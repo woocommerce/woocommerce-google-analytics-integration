@@ -29,10 +29,10 @@
     "@babel/runtime": "^7.27.6",
     "markdown-it": "^14.2.0",
     "@wordpress/env": {
-      "adm-zip": "^0.6.0"
+      "adm-zip": "^0.6.1"
     },
     "@wordpress/scripts": {
-      "adm-zip": "^0.6.0",
+      "adm-zip": "^0.6.1",
       "webpack-dev-server": "^5.2.6"
     },
     "@wordpress/e2e-test-utils-playwright": {

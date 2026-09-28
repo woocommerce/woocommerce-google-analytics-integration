@@ -4,8 +4,9 @@ on:
   pull_request:
   workflow_dispatch:
 
+# build.yml uses ${{ github.workflow }}-${{ github.ref }}, which would deadlock with this workflow.
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: plugin-check-${{ github.ref }}
   cancel-in-progress: true
 
 permissions: {}

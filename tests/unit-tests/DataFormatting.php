@@ -190,6 +190,63 @@ class DataFormatting extends EventsDataTest {
 	}
 
 	/**
+	 * Test that composite products use their minimum composite price when Composite Products exposes it.
+	 *
+	 * @return void
+	 */
+	public function test_get_formatted_product_composite_uses_minimum_composite_price() {
+		$product   = WC_Helper_Product::create_simple_product();
+		$composite = $this->getMockBuilder( WC_Product_Simple::class )
+			->setConstructorArgs( [ $product->get_id() ] )
+			->onlyMethods( [ 'get_type' ] )
+			->addMethods( [ 'get_composite_price' ] )
+			->getMock();
+		$composite->method( 'get_type' )->willReturn( 'composite' );
+		$composite->method( 'get_composite_price' )->with( 'min' )->willReturn( 51.0 );
+
+		$formatted = $this->gtag->get_formatted_product( $composite );
+
+		$this->assertEquals( 5100, $formatted['prices']['price'] );
+	}
+
+	/**
+	 * Test that a container product keeps the `get_price()` value when its extension returns no price.
+	 *
+	 * @dataProvider data_container_price_methods
+	 *
+	 * @param string $type         Product type of the container.
+	 * @param string $price_method Method that returns the container's minimum price.
+	 *
+	 * @return void
+	 */
+	public function test_get_formatted_product_container_without_price_uses_get_price( string $type, string $price_method ) {
+		$product   = WC_Helper_Product::create_simple_product();
+		$container = $this->getMockBuilder( WC_Product_Simple::class )
+			->setConstructorArgs( [ $product->get_id() ] )
+			->onlyMethods( [ 'get_type' ] )
+			->addMethods( [ $price_method ] )
+			->getMock();
+		$container->method( 'get_type' )->willReturn( $type );
+		$container->method( $price_method )->with( 'min' )->willReturn( '' );
+
+		$formatted = $this->gtag->get_formatted_product( $container );
+
+		$this->assertEquals( $this->gtag->get_formatted_price( $product->get_price() ), $formatted['prices']['price'] );
+	}
+
+	/**
+	 * Container product types and the method each one uses for its minimum price.
+	 *
+	 * @return array
+	 */
+	public function data_container_price_methods(): array {
+		return [
+			'Product Bundles'    => [ 'bundle', 'get_bundle_price' ],
+			'Composite Products' => [ 'composite', 'get_composite_price' ],
+		];
+	}
+
+	/**
 	 * Test that a variation array is formatted as "attr: value, attr2: value2".
 	 *
 	 * @return void

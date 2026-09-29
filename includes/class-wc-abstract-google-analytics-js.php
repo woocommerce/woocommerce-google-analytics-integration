@@ -325,12 +325,7 @@ abstract class WC_Abstract_Google_Analytics_JS {
 			}
 		}
 
-		// Integration with Product Bundles.
-		// Get the minimum price, as `get_price` may return 0 if the product is a bundle and the price is potentially a range.
-		// Even a range containing a single value.
-		if ( $product->is_type( 'bundle' ) && is_callable( [ $product, 'get_bundle_price' ] ) ) {
-			$price = $product->get_bundle_price( 'min' );
-		}
+		$price = $this->get_catalog_price( $product, $price );
 
 		$formatted = array(
 			'id'         => $product_id,
@@ -373,6 +368,34 @@ abstract class WC_Abstract_Google_Analytics_JS {
 		}
 
 		return $formatted;
+	}
+
+	/**
+	 * Returns the catalog price of a product.
+	 *
+	 * For simple, variable and grouped products, `get_price()` is already the lowest price
+	 * the product sells for. Product Bundles and Composite Products keep only the container's
+	 * base price in `get_price()`, which is often 0 when the items inside are priced individually.
+	 *
+	 * @param WC_Product $product The product.
+	 * @param mixed      $price   The price from `get_price()`, or from the chosen variation.
+	 *
+	 * @return mixed
+	 */
+	private function get_catalog_price( WC_Product $product, $price ) {
+		$extension_price = '';
+
+		if ( $product->is_type( 'bundle' ) && is_callable( [ $product, 'get_bundle_price' ] ) ) {
+			$extension_price = $product->get_bundle_price( 'min' );
+		} elseif ( $product->is_type( 'composite' ) && is_callable( [ $product, 'get_composite_price' ] ) ) {
+			// This follows the composite's "Catalog Price" setting. With the default setting,
+			// 'min' is the price of the default configuration, not the lowest possible price.
+			$extension_price = $product->get_composite_price( 'min' );
+		}
+
+		// Both extensions return '' when they have no price. For composites, this also
+		// happens when the catalog price is hidden or not calculated yet.
+		return '' !== $extension_price ? $extension_price : $price;
 	}
 
 	/**

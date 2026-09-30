@@ -1,0 +1,45 @@
+name: CI
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+# build.yml uses ${{ github.workflow }}-${{ github.ref }}, which would deadlock with this workflow.
+concurrency:
+  group: plugin-check-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions: {}
+
+jobs:
+  build:
+    name: Build extension bundle
+    uses: ./.github/workflows/build.yml
+    permissions:
+      contents: read
+
+  plugin-check:
+    name: WP.org Plugin Check
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - name: Download extension bundle
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: woocommerce-google-analytics-integration.zip
+
+      - name: Unzip extension bundle
+        run: unzip -q woocommerce-google-analytics-integration.zip
+
+      - name: WP.org Plugin Check
+        uses: wordpress/plugin-check-action@10857da14b6c2246d15402b3e69f777edcf8c12e # v1.1.9
+        with:
+          build-dir: ./woocommerce-google-analytics-integration
+          # Keep results in annotations and the uploaded artifact, not a PR comment.
+          repo-token: ''
+          # The plugin name and slug are already published and cannot change.
+          ignore-codes: |
+            trademarked_term

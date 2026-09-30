@@ -1,4 +1,4 @@
-name: Plugin Check
+name: CI
 
 on:
   pull_request:
@@ -19,7 +19,7 @@ jobs:
       contents: read
 
   plugin-check:
-    name: Run Plugin Check
+    name: WP.org Plugin Check
     needs: build
     runs-on: ubuntu-latest
     timeout-minutes: 15
@@ -34,7 +34,7 @@ jobs:
       - name: Unzip extension bundle
         run: unzip -q woocommerce-google-analytics-integration.zip
 
-      - name: Run Plugin Check
+      - name: WP.org Plugin Check
         uses: wordpress/plugin-check-action@10857da14b6c2246d15402b3e69f777edcf8c12e # v1.1.9
         with:
           build-dir: ./woocommerce-google-analytics-integration

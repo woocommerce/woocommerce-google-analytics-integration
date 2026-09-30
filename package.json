@@ -27,7 +27,7 @@
   "overrides": {
     "@babel/core": "^7.29.6",
     "@babel/runtime": "^7.27.6",
-    "markdown-it": "^14.2.0",
+    "markdown-it": "^14.3.2",
     "@wordpress/env": {
       "adm-zip": "^0.6.1"
     },

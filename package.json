@@ -38,7 +38,7 @@
     "@wordpress/e2e-test-utils-playwright": {
       "lighthouse": "^13.4.1"
     },
-    "qs": "^6.15.2",
+    "qs": "^6.16.0",
     "uuid": "11.1.1",
     "minimatch": "^3.1.4",
     "@typescript-eslint/typescript-estree": {

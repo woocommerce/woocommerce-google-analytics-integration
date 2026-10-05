@@ -247,6 +247,73 @@ class DataFormatting extends EventsDataTest {
 	}
 
 	/**
+	 * Test that cart items do not calculate the catalog price, which they replace with the line price.
+	 *
+	 * @return void
+	 */
+	public function test_get_formatted_cart_skips_catalog_price() {
+		$product = WC_Helper_Product::create_simple_product();
+		WC()->cart->add_to_cart( $product->get_id() );
+
+		$composite = $this->create_composite_that_must_not_be_priced( $product );
+		$callback  = function ( $contents ) use ( $composite ) {
+			foreach ( $contents as $key => $item ) {
+				$contents[ $key ]['data'] = $composite;
+			}
+			return $contents;
+		};
+		add_filter( 'woocommerce_get_cart_contents', $callback );
+
+		try {
+			$formatted = $this->gtag->get_formatted_cart();
+			$this->assertEquals( $product->get_id(), $formatted['items'][0]['id'] );
+		} finally {
+			remove_filter( 'woocommerce_get_cart_contents', $callback );
+		}
+	}
+
+	/**
+	 * Test that order items do not calculate the catalog price, which they replace with the line price.
+	 *
+	 * @return void
+	 */
+	public function test_get_formatted_order_skips_catalog_price() {
+		$order     = $this->create_order_with_product();
+		$product   = array_values( $order->get_items() )[0]->get_product();
+		$composite = $this->create_composite_that_must_not_be_priced( $product );
+		$callback  = function () use ( $composite ) {
+			return $composite;
+		};
+		add_filter( 'woocommerce_order_item_product', $callback );
+
+		try {
+			$formatted = $this->gtag->get_formatted_order( $order );
+			$this->assertEquals( $product->get_id(), $formatted['items'][0]['id'] );
+		} finally {
+			remove_filter( 'woocommerce_order_item_product', $callback );
+		}
+	}
+
+	/**
+	 * Create a composite product mock that fails the test if its catalog price is calculated.
+	 *
+	 * @param WC_Product $product Product whose data the mock loads.
+	 *
+	 * @return WC_Product_Simple
+	 */
+	private function create_composite_that_must_not_be_priced( $product ) {
+		$composite = $this->getMockBuilder( WC_Product_Simple::class )
+			->setConstructorArgs( [ $product->get_id() ] )
+			->onlyMethods( [ 'get_type' ] )
+			->addMethods( [ 'get_composite_price' ] )
+			->getMock();
+		$composite->method( 'get_type' )->willReturn( 'composite' );
+		$composite->expects( $this->never() )->method( 'get_composite_price' );
+
+		return $composite;
+	}
+
+	/**
 	 * Test that a variation array is formatted as "attr: value, attr2: value2".
 	 *
 	 * @return void

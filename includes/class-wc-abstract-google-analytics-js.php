@@ -269,7 +269,7 @@ abstract class WC_Abstract_Google_Analytics_JS {
 			}
 
 			$items[] = array_merge(
-				$this->get_formatted_product( $product ),
+				$this->get_formatted_product_data( $product ),
 				array(
 					'key'      => $cart_item_key,
 					'quantity' => $item['quantity'],
@@ -314,8 +314,7 @@ abstract class WC_Abstract_Google_Analytics_JS {
 			return array();
 		}
 
-		$product_id = $product->is_type( 'variation' ) ? $product->get_parent_id() : $product->get_id();
-		$price      = $product->get_price();
+		$price = $product->get_price();
 
 		// Get product price from chosen variation if set.
 		if ( $variation_id ) {
@@ -325,26 +324,45 @@ abstract class WC_Abstract_Google_Analytics_JS {
 			}
 		}
 
-		$price = $this->get_catalog_price( $product, $price );
+		$formatted           = $this->get_formatted_product_data( $product, $variation );
+		$formatted['prices'] = array(
+			'price'               => $this->get_formatted_price( $this->get_catalog_price( $product, $price ) ),
+			'currency_minor_unit' => wc_get_price_decimals(),
+		);
+
+		if ( $quantity ) {
+			$formatted['quantity'] = (int) $quantity;
+		}
+
+		return $formatted;
+	}
+
+	/**
+	 * Returns the product fields that do not depend on a price.
+	 *
+	 * Cart and order items use this instead of get_formatted_product() because they report
+	 * their own line prices. Skipping the catalog price matters for Composite Products: when
+	 * its stored price data is out of date, calculating the price can take seconds.
+	 *
+	 * @param WC_Product $product   The product to format.
+	 * @param array|bool $variation Variation attributes to include. For "variation" type products,
+	 *                              the product's own attributes are used instead.
+	 *
+	 * @return array
+	 */
+	private function get_formatted_product_data( WC_Product $product, $variation = false ): array {
+		$product_id = $product->is_type( 'variation' ) ? $product->get_parent_id() : $product->get_id();
 
 		$formatted = array(
 			'id'         => $product_id,
 			'name'       => $product->get_title(),
 			'categories' => $this->get_formatted_product_categories( $product_id ),
-			'prices'     => array(
-				'price'               => $this->get_formatted_price( $price ),
-				'currency_minor_unit' => wc_get_price_decimals(),
-			),
 			'extensions' => array(
 				'woocommerce_google_analytics_integration' => array(
 					'identifier' => $this->get_product_identifier_for_product( $product ),
 				),
 			),
 		);
-
-		if ( $quantity ) {
-			$formatted['quantity'] = (int) $quantity;
-		}
 
 		if ( $product->is_type( 'variation' ) ) {
 			$variation = $product->get_attributes();
@@ -610,7 +628,7 @@ abstract class WC_Abstract_Google_Analytics_JS {
 			$unit_divisor = $quantity > 0 ? $quantity : 1;
 
 			$items[] = array_merge(
-				$this->get_formatted_product( $product ),
+				$this->get_formatted_product_data( $product ),
 				array(
 					'quantity'                    => $item->get_quantity(),
 					'prices'                      => array(

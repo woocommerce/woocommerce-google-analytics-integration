@@ -269,7 +269,7 @@ abstract class WC_Abstract_Google_Analytics_JS {
 			}
 
 			$items[] = array_merge(
-				$this->get_formatted_product( $product ),
+				$this->get_formatted_product_data( $product ),
 				array(
 					'key'      => $cart_item_key,
 					'quantity' => $item['quantity'],
@@ -314,8 +314,7 @@ abstract class WC_Abstract_Google_Analytics_JS {
 			return array();
 		}
 
-		$product_id = $product->is_type( 'variation' ) ? $product->get_parent_id() : $product->get_id();
-		$price      = $product->get_price();
+		$price = $product->get_price();
 
 		// Get product price from chosen variation if set.
 		if ( $variation_id ) {
@@ -325,31 +324,45 @@ abstract class WC_Abstract_Google_Analytics_JS {
 			}
 		}
 
-		// Integration with Product Bundles.
-		// Get the minimum price, as `get_price` may return 0 if the product is a bundle and the price is potentially a range.
-		// Even a range containing a single value.
-		if ( $product->is_type( 'bundle' ) && is_callable( [ $product, 'get_bundle_price' ] ) ) {
-			$price = $product->get_bundle_price( 'min' );
+		$formatted           = $this->get_formatted_product_data( $product, $variation );
+		$formatted['prices'] = array(
+			'price'               => $this->get_formatted_price( $this->get_catalog_price( $product, $price ) ),
+			'currency_minor_unit' => wc_get_price_decimals(),
+		);
+
+		if ( $quantity ) {
+			$formatted['quantity'] = (int) $quantity;
 		}
+
+		return $formatted;
+	}
+
+	/**
+	 * Returns the product fields that do not depend on a price.
+	 *
+	 * Cart and order items use this instead of get_formatted_product() because they report
+	 * their own line prices. Skipping the catalog price matters for Composite Products: when
+	 * its stored price data is out of date, calculating the price can take seconds.
+	 *
+	 * @param WC_Product $product   The product to format.
+	 * @param array|bool $variation Variation attributes to include. For "variation" type products,
+	 *                              the product's own attributes are used instead.
+	 *
+	 * @return array
+	 */
+	private function get_formatted_product_data( WC_Product $product, $variation = false ): array {
+		$product_id = $product->is_type( 'variation' ) ? $product->get_parent_id() : $product->get_id();
 
 		$formatted = array(
 			'id'         => $product_id,
 			'name'       => $product->get_title(),
 			'categories' => $this->get_formatted_product_categories( $product_id ),
-			'prices'     => array(
-				'price'               => $this->get_formatted_price( $price ),
-				'currency_minor_unit' => wc_get_price_decimals(),
-			),
 			'extensions' => array(
 				'woocommerce_google_analytics_integration' => array(
 					'identifier' => $this->get_product_identifier_for_product( $product ),
 				),
 			),
 		);
-
-		if ( $quantity ) {
-			$formatted['quantity'] = (int) $quantity;
-		}
 
 		if ( $product->is_type( 'variation' ) ) {
 			$variation = $product->get_attributes();
@@ -373,6 +386,34 @@ abstract class WC_Abstract_Google_Analytics_JS {
 		}
 
 		return $formatted;
+	}
+
+	/**
+	 * Returns the catalog price of a product.
+	 *
+	 * For simple, variable and grouped products, `get_price()` is already the lowest price
+	 * the product sells for. Product Bundles and Composite Products keep only the container's
+	 * base price in `get_price()`, which is often 0 when the items inside are priced individually.
+	 *
+	 * @param WC_Product $product The product.
+	 * @param mixed      $price   The price from `get_price()`, or from the chosen variation.
+	 *
+	 * @return mixed
+	 */
+	private function get_catalog_price( WC_Product $product, $price ) {
+		$extension_price = '';
+
+		if ( $product->is_type( 'bundle' ) && is_callable( [ $product, 'get_bundle_price' ] ) ) {
+			$extension_price = $product->get_bundle_price( 'min' );
+		} elseif ( $product->is_type( 'composite' ) && is_callable( [ $product, 'get_composite_price' ] ) ) {
+			// This follows the composite's "Catalog Price" setting. With the default setting,
+			// 'min' is the price of the default configuration, not the lowest possible price.
+			$extension_price = $product->get_composite_price( 'min' );
+		}
+
+		// Both extensions return '' when they have no price. For composites, this also
+		// happens when the catalog price is hidden or not calculated yet.
+		return '' !== $extension_price ? $extension_price : $price;
 	}
 
 	/**
@@ -587,7 +628,7 @@ abstract class WC_Abstract_Google_Analytics_JS {
 			$unit_divisor = $quantity > 0 ? $quantity : 1;
 
 			$items[] = array_merge(
-				$this->get_formatted_product( $product ),
+				$this->get_formatted_product_data( $product ),
 				array(
 					'quantity'                    => $item->get_quantity(),
 					'prices'                      => array(

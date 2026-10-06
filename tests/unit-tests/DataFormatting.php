@@ -190,6 +190,130 @@ class DataFormatting extends EventsDataTest {
 	}
 
 	/**
+	 * Test that composite products use their minimum composite price when Composite Products exposes it.
+	 *
+	 * @return void
+	 */
+	public function test_get_formatted_product_composite_uses_minimum_composite_price() {
+		$product   = WC_Helper_Product::create_simple_product();
+		$composite = $this->getMockBuilder( WC_Product_Simple::class )
+			->setConstructorArgs( [ $product->get_id() ] )
+			->onlyMethods( [ 'get_type' ] )
+			->addMethods( [ 'get_composite_price' ] )
+			->getMock();
+		$composite->method( 'get_type' )->willReturn( 'composite' );
+		$composite->method( 'get_composite_price' )->with( 'min' )->willReturn( 51.0 );
+
+		$formatted = $this->gtag->get_formatted_product( $composite );
+
+		$this->assertEquals( 5100, $formatted['prices']['price'] );
+	}
+
+	/**
+	 * Test that a container product keeps the `get_price()` value when its extension returns no price.
+	 *
+	 * @dataProvider data_container_price_methods
+	 *
+	 * @param string $type         Product type of the container.
+	 * @param string $price_method Method that returns the container's minimum price.
+	 *
+	 * @return void
+	 */
+	public function test_get_formatted_product_container_without_price_uses_get_price( string $type, string $price_method ) {
+		$product   = WC_Helper_Product::create_simple_product();
+		$container = $this->getMockBuilder( WC_Product_Simple::class )
+			->setConstructorArgs( [ $product->get_id() ] )
+			->onlyMethods( [ 'get_type' ] )
+			->addMethods( [ $price_method ] )
+			->getMock();
+		$container->method( 'get_type' )->willReturn( $type );
+		$container->method( $price_method )->with( 'min' )->willReturn( '' );
+
+		$formatted = $this->gtag->get_formatted_product( $container );
+
+		$this->assertEquals( $this->gtag->get_formatted_price( $product->get_price() ), $formatted['prices']['price'] );
+	}
+
+	/**
+	 * Container product types and the method each one uses for its minimum price.
+	 *
+	 * @return array
+	 */
+	public function data_container_price_methods(): array {
+		return [
+			'Product Bundles'    => [ 'bundle', 'get_bundle_price' ],
+			'Composite Products' => [ 'composite', 'get_composite_price' ],
+		];
+	}
+
+	/**
+	 * Test that cart items do not calculate the catalog price, which they replace with the line price.
+	 *
+	 * @return void
+	 */
+	public function test_get_formatted_cart_skips_catalog_price() {
+		$product = WC_Helper_Product::create_simple_product();
+		WC()->cart->add_to_cart( $product->get_id() );
+
+		$composite = $this->create_composite_that_must_not_be_priced( $product );
+		$callback  = function ( $contents ) use ( $composite ) {
+			foreach ( $contents as $key => $item ) {
+				$contents[ $key ]['data'] = $composite;
+			}
+			return $contents;
+		};
+		add_filter( 'woocommerce_get_cart_contents', $callback );
+
+		try {
+			$formatted = $this->gtag->get_formatted_cart();
+			$this->assertEquals( $product->get_id(), $formatted['items'][0]['id'] );
+		} finally {
+			remove_filter( 'woocommerce_get_cart_contents', $callback );
+		}
+	}
+
+	/**
+	 * Test that order items do not calculate the catalog price, which they replace with the line price.
+	 *
+	 * @return void
+	 */
+	public function test_get_formatted_order_skips_catalog_price() {
+		$order     = $this->create_order_with_product();
+		$product   = array_values( $order->get_items() )[0]->get_product();
+		$composite = $this->create_composite_that_must_not_be_priced( $product );
+		$callback  = function () use ( $composite ) {
+			return $composite;
+		};
+		add_filter( 'woocommerce_order_item_product', $callback );
+
+		try {
+			$formatted = $this->gtag->get_formatted_order( $order );
+			$this->assertEquals( $product->get_id(), $formatted['items'][0]['id'] );
+		} finally {
+			remove_filter( 'woocommerce_order_item_product', $callback );
+		}
+	}
+
+	/**
+	 * Create a composite product mock that fails the test if its catalog price is calculated.
+	 *
+	 * @param WC_Product $product Product whose data the mock loads.
+	 *
+	 * @return WC_Product_Simple
+	 */
+	private function create_composite_that_must_not_be_priced( $product ) {
+		$composite = $this->getMockBuilder( WC_Product_Simple::class )
+			->setConstructorArgs( [ $product->get_id() ] )
+			->onlyMethods( [ 'get_type' ] )
+			->addMethods( [ 'get_composite_price' ] )
+			->getMock();
+		$composite->method( 'get_type' )->willReturn( 'composite' );
+		$composite->expects( $this->never() )->method( 'get_composite_price' );
+
+		return $composite;
+	}
+
+	/**
 	 * Test that a variation array is formatted as "attr: value, attr2: value2".
 	 *
 	 * @return void

@@ -527,7 +527,7 @@ const getAddedCartItem = ( cartAfter, cartBefore, requestProductId ) => {
 	return requestProductId
 		? cartAfter.items.find(
 				( item ) => parseInt( item.id, 10 ) === requestProductId
-		  )
+			)
 		: undefined;
 };
 
@@ -621,7 +621,7 @@ const getAddItemFromResponse = ( requestBody, cartAfter, cartBefore ) => {
 				product: scaleLineTotalToQuantity( product, addedQuantity ),
 				quantity: addedQuantity,
 				isAddItem: true,
-		  }
+			}
 		: null;
 };
 
@@ -670,7 +670,7 @@ const getUpdateItemChangeFromResponse = (
 	}
 
 	const product =
-		quantityDelta > 0 ? updatedItem : previousItem ?? lastSeenItem;
+		quantityDelta > 0 ? updatedItem : ( previousItem ?? lastSeenItem );
 
 	if ( ! product ) {
 		return null;
@@ -750,7 +750,7 @@ const getBatchCartChanges = ( requestBody, responseJson, cartBefore ) => {
 					request.body,
 					cartAfter,
 					previousCart
-			  );
+				);
 
 		if ( change ) {
 			changes.push( change );

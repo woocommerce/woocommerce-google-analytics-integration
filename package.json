@@ -9,20 +9,20 @@
     "url": "git://github.com/woocommerce/woocommerce-google-analytics-integration.git"
   },
   "dependencies": {
-    "@wordpress/hooks": "^4.26.0",
+    "@wordpress/hooks": "^4.56.0",
     "@wordpress/i18n": "^5.26.0"
   },
   "devDependencies": {
-    "@playwright/test": "^1.61.0",
-    "@wordpress/env": "^11.15.0",
-    "@wordpress/eslint-plugin": "^25.4.0",
+    "@playwright/test": "^1.63.0",
+    "@wordpress/env": "^11.16.0",
+    "@wordpress/eslint-plugin": "^25.10.0",
     "@wordpress/scripts": "^35.0.0",
-    "@wordpress/url": "^4.26.0",
+    "@wordpress/url": "^4.56.0",
     "ajv": "^8.20.0",
     "axios": "^1.20.0",
-    "eslint": "^9.39.4",
+    "eslint": "^9.39.5",
     "node-wp-i18n": "~1.2.8",
-    "prettier": "npm:wp-prettier@^3.0.3"
+    "prettier": "npm:wp-prettier@^3.9.6"
   },
   "overrides": {
     "@babel/core": "^7.29.6",

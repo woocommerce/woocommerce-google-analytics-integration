@@ -125,7 +125,7 @@ export const add_shipping_info = ( { storeCart, shippingTier } ) => {
 		? {
 				...checkoutData,
 				...( shippingTier ? { shipping_tier: shippingTier } : {} ),
-		  }
+			}
 		: false;
 };
 
@@ -143,7 +143,7 @@ export const add_payment_info = ( { storeCart, paymentType } ) => {
 		? {
 				...checkoutData,
 				...( paymentType ? { payment_type: paymentType } : {} ),
-		  }
+			}
 		: false;
 };
 

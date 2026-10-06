@@ -257,7 +257,7 @@ export function classicTracking(
 					event.detail?.fragments,
 					event.detail?.cartHash,
 					event.detail?.button,
-			  ];
+				];
 
 		handleAddedToCart( event, ...detail );
 	} );

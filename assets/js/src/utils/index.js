@@ -170,7 +170,7 @@ export const getCartCoupon = ( storeCart ) => {
 	return storeCart.coupons[ 0 ]?.code
 		? {
 				coupon: storeCart.coupons[ 0 ]?.code,
-		  }
+			}
 		: {};
 };
 

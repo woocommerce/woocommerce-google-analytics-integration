@@ -68,9 +68,4 @@ Duplicate Google Analytics code causes a conflict in tracking. Remove any other 
 * Tweak - WordPress 7.1 compatibility.
 * Update - Require WordPress 7.0+.
 
-= 2.4.0 - 2026-08-06 =
-* Dev - Run the PHP coding standards job when dependencies change.
-* Dev - Update WPCS to 3.4.1 to pick up the fix for GHSA-3pwp-g2mj-5p3v.
-* Update - Bump the minimum required WooCommerce version to 10.9 and the compatibility version to 11.0.
-
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce-google-analytics-integration/trunk/changelog.txt).

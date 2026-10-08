@@ -1,15 +1,12 @@
 *** Changelog ***
 
 = 2.4.3 - 2026-10-08 =
-* Declare compatibility with WooCommerce 11.1.0.
+* Declare compatibility with WooCommerce 11.2.0.
 * Dev - Allow the E2E suite to run against a site other than localhost:8889 via the WP_BASE_URL environment variable.
 * Dev - Deploy the reviewed commit instead of the release branch head.
 * Dev - Harden the release and test pipelines: pin the deploy action and test dependencies, gate production deploys behind a protected environment.
-* Dev - Pin GitHub Actions and their nested dependencies to immutable commit SHAs.
 * Dev - Update npm and Composer development dependencies.
 * Fix - Report the catalog price of Composite Products instead of 0 in `view_item`, `view_item_list`, `select_content` and `add_to_cart` events.
-* Fix - Strip the order key and other sensitive query parameters from the page URL and referrer sent to Google Analytics, and send an explicit denied consent state for undecided visitors on opt-in sites.
-* Update GitHub Action references.
 
 = 2.4.2 - 2026-09-08 =
 * Declare compatibility with WooCommerce 11.1.0.

@@ -531,7 +531,9 @@ class Configuration extends EventsDataTest {
 		$ga = new WC_Google_Analytics();
 
 		$reflection = new \ReflectionProperty( WC_Google_Analytics::class, 'settings' );
-		$reflection->setAccessible( true );
+		if ( PHP_VERSION_ID < 80100 ) {
+			$reflection->setAccessible( true );
+		}
 		$settings = $reflection->getValue( $ga );
 
 		$expected_keys = [
@@ -571,7 +573,9 @@ class Configuration extends EventsDataTest {
 	 */
 	private function call_protected_method( $instance, $method_name, $args = [] ) {
 		$reflection = new \ReflectionMethod( get_class( $instance ), $method_name );
-		$reflection->setAccessible( true );
+		if ( PHP_VERSION_ID < 80100 ) {
+			$reflection->setAccessible( true );
+		}
 		return $reflection->invokeArgs( $instance, $args );
 	}
 
@@ -590,7 +594,9 @@ class Configuration extends EventsDataTest {
 					->getMock();
 
 		$reflection = new \ReflectionProperty( WC_Google_Analytics::class, 'settings' );
-		$reflection->setAccessible( true );
+		if ( PHP_VERSION_ID < 80100 ) {
+			$reflection->setAccessible( true );
+		}
 		$reflection->setValue( $ga, $settings );
 
 		return $ga;

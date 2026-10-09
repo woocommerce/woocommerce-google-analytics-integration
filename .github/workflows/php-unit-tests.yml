@@ -27,7 +27,7 @@ on:
     inputs:
       php-version:
         description: 'PHP Version'
-        default: '8.4'
+        default: '8.5'
       wp-rc-version:
         description: 'WordPress version for Release Candidate (ex. 6.5-RC3)'
         default: 'latest'
@@ -72,7 +72,7 @@ jobs:
     needs: GetMatrix
     strategy:
       matrix:
-        php: [8.4]
+        php: [8.5]
         wp-version: [latest]
         # Please note that wc-versions is a string containing versions separated by commas.
         # It will be split and loop within the run unit test step below to reduce the time spent.
@@ -85,6 +85,9 @@ jobs:
             wp-version: latest
             wc-versions: latest
           - php: 8.3
+            wp-version: latest
+            wc-versions: latest
+          - php: 8.4
             wp-version: latest
             wc-versions: latest
 

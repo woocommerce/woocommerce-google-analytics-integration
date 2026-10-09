@@ -4,7 +4,7 @@
 
 cd "$(dirname "$0")/.." || exit 1
 
-echo "Linting plugin PHP files with PHP $(php -r 'echo PHP_VERSION;')"
+echo "Linting plugin and test PHP files with PHP $(php -r 'echo PHP_VERSION;')"
 
 FAILED=0
 
@@ -16,6 +16,6 @@ while IFS= read -r FILE; do
     echo "$OUTPUT" | grep -v '^No syntax errors detected'
     FAILED=1
   fi
-done < <(find includes -name '*.php'; echo woocommerce-google-analytics-integration.php)
+done < <(find includes tests -name '*.php'; echo woocommerce-google-analytics-integration.php)
 
 exit $FAILED

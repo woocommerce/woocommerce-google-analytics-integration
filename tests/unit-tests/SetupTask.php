@@ -18,23 +18,29 @@ class SetupTask extends WP_UnitTestCase {
 	/** @var array Stored integration settings, restored after each test. */
 	private $settings;
 
+	/** @var array Registered task lists, restored after each test. */
+	private $task_lists;
+
 	/**
-	 * Remember the stored settings.
+	 * Remember the stored settings and task lists.
 	 *
 	 * @return void
 	 */
 	public function set_up() {
 		parent::set_up();
-		$this->settings = get_option( 'woocommerce_google_analytics_settings' );
+		$this->settings   = get_option( 'woocommerce_google_analytics_settings' );
+		$this->task_lists = $this->task_lists_property()->getValue();
 		require_once dirname( __DIR__, 2 ) . '/includes/class-wc-google-analytics-task.php';
 	}
 
 	/**
-	 * Restore the stored settings.
+	 * Restore the stored settings and task lists.
 	 *
 	 * @return void
 	 */
 	public function tear_down() {
+		$this->task_lists_property()->setValue( null, $this->task_lists );
+
 		if ( false === $this->settings ) {
 			delete_option( 'woocommerce_google_analytics_settings' );
 		} else {
@@ -115,8 +121,6 @@ class SetupTask extends WP_UnitTestCase {
 			WC_Google_Analytics_Task::class,
 			TaskLists::get_task( 'setup-google-analytics-integration', 'extended' )
 		);
-		TaskLists::clear_lists();
-		TaskLists::init_default_lists();
 	}
 
 	/**
@@ -142,5 +146,18 @@ class SetupTask extends WP_UnitTestCase {
 	private function save_ga_id( $ga_id ) {
 		update_option( 'woocommerce_google_analytics_settings', [ 'ga_id' => $ga_id ] );
 		WC()->integrations->get_integration( 'google_analytics' )->init_settings();
+	}
+
+	/**
+	 * The registry of task lists, which TaskLists keeps in a static property.
+	 *
+	 * @return \ReflectionProperty
+	 */
+	private function task_lists_property() {
+		$property = new \ReflectionProperty( TaskLists::class, 'lists' );
+		if ( PHP_VERSION_ID < 80100 ) {
+			$property->setAccessible( true );
+		}
+		return $property;
 	}
 }

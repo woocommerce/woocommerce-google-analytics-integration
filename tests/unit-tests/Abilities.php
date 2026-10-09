@@ -95,6 +95,8 @@ class Abilities extends WP_UnitTestCase {
 
 		if ( $this->original_integration ) {
 			WC()->integrations->integrations['google_analytics'] = $this->original_integration;
+		} else {
+			unset( WC()->integrations->integrations['google_analytics'] );
 		}
 
 		wp_set_current_user( 0 );

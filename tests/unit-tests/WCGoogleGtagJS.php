@@ -327,7 +327,9 @@ class WCGoogleGtagJS extends EventsDataTest {
 	 */
 	private function reset_gtag_instance(): void {
 		$property = new \ReflectionProperty( \WC_Abstract_Google_Analytics_JS::class, 'instance' );
-		$property->setAccessible( true );
+		if ( PHP_VERSION_ID < 80100 ) {
+			$property->setAccessible( true );
+		}
 		$property->setValue( null, null );
 	}
 
@@ -338,7 +340,9 @@ class WCGoogleGtagJS extends EventsDataTest {
 	 */
 	private function get_gtag_instance() {
 		$property = new \ReflectionProperty( \WC_Abstract_Google_Analytics_JS::class, 'instance' );
-		$property->setAccessible( true );
+		if ( PHP_VERSION_ID < 80100 ) {
+			$property->setAccessible( true );
+		}
 		return $property->getValue();
 	}
 }

@@ -130,7 +130,9 @@ class DisableTracking extends WP_UnitTestCase {
 	 */
 	private function disable_tracking( $instance, $type ) {
 		$reflection = new \ReflectionMethod( WC_Google_Analytics::class, 'disable_tracking' );
-		$reflection->setAccessible( true );
+		if ( PHP_VERSION_ID < 80100 ) {
+			$reflection->setAccessible( true );
+		}
 		return $reflection->invokeArgs( $instance, [ $type ] );
 	}
 
@@ -149,7 +151,9 @@ class DisableTracking extends WP_UnitTestCase {
 					->getMock();
 
 		$reflection = new \ReflectionProperty( WC_Google_Analytics::class, 'settings' );
-		$reflection->setAccessible( true );
+		if ( PHP_VERSION_ID < 80100 ) {
+			$reflection->setAccessible( true );
+		}
 		$reflection->setValue( $ga, $settings );
 
 		return $ga;

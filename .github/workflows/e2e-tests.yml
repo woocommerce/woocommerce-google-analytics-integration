@@ -54,6 +54,7 @@ jobs:
           echo "::endgroup::"
 
       - name: Start wp-env container
+        id: wp-env-start
         run: npm run wp-env:up
 
       - name: Install WP release candidate (optional)
@@ -79,7 +80,7 @@ jobs:
         run: npm run test:e2e
 
       - name: Check PHP debug log
-        if: ${{ always() }}
+        if: ${{ !cancelled() && steps.wp-env-start.outcome == 'success' }}
         run: npm run test:e2e:debug-log
 
       - name: Archive e2e failure screenshots

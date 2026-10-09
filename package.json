@@ -68,6 +68,7 @@
     "build": "NODE_ENV=production wp-scripts build && npm run makepot &&  npm run archive",
     "prebuild": "rm -rf ./vendor",
     "test:e2e": "npx playwright test --config=tests/e2e/config/playwright.config.js",
+    "test:e2e:debug-log": "WP_ENV_CONFIG_FILE=.wp-env.test.json ./tests/e2e/bin/check-debug-log.sh",
     "test:e2e-dev": "npx playwright test --config=tests/e2e/config/playwright.config.js --debug",
     "test:php:setup": "WP_ENV_CONFIG_FILE=.wp-env.test.json ./tests/bin/setup-phpunit-env.sh",
     "test:php": "wp-env run cli --config=.wp-env.test.json --env-cwd=wp-content/plugins/woocommerce-google-analytics-integration vendor/bin/phpunit",

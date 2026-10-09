@@ -45,3 +45,6 @@ wp-env run cli $CONFIG_ARG wp option update "woocommerce_flat_rate_${instance_id
 
 echo -e 'Set the store as live \n'
 wp-env run cli $CONFIG_ARG wp option update woocommerce_coming_soon 'no'
+
+echo -e 'Clear the PHP debug log \n'
+wp-env run cli $CONFIG_ARG -- bash -c ': > /var/www/html/wp-content/debug.log'

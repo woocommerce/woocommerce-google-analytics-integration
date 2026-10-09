@@ -78,6 +78,10 @@ jobs:
       - name: Run tests
         run: npm run test:e2e
 
+      - name: Check PHP debug log
+        if: ${{ always() }}
+        run: npm run test:e2e:debug-log
+
       - name: Archive e2e failure screenshots
         if: ${{ always() }}
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1

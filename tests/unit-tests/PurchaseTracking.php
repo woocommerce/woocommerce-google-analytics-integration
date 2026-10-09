@@ -2,16 +2,18 @@
 
 namespace GoogleAnalyticsIntegration\Tests;
 
+use WC_Abstract_Google_Analytics_JS;
 use WC_Google_Gtag_JS;
 use WC_Helper_Order;
 use WC_Helper_Product;
+use WP_UnitTestCase;
 
 /**
  * Unit tests for sending the purchase event once per order.
  *
  * @package GoogleAnalyticsIntegration\Tests
  */
-class PurchaseTracking extends EventsDataTest {
+class PurchaseTracking extends WP_UnitTestCase {
 
 	/** @var WC_Google_Gtag_JS */
 	private $gtag;
@@ -44,6 +46,7 @@ class PurchaseTracking extends EventsDataTest {
 	 */
 	public function tear_down() {
 		unset( $_GET['key'] );
+		$this->reset_gtag_instance();
 		parent::tear_down();
 	}
 
@@ -114,5 +117,18 @@ class PurchaseTracking extends EventsDataTest {
 		$data = json_decode( $gtag->get_script_data(), true );
 		$this->assertArrayNotHasKey( 'order', $data );
 		$this->assertSame( '', wc_get_order( $this->order->get_id() )->get_meta( '_ga_tracked' ) );
+	}
+
+	/**
+	 * Clear the singleton set by the constructor so it does not leak into later tests.
+	 *
+	 * @return void
+	 */
+	private function reset_gtag_instance(): void {
+		$property = new \ReflectionProperty( WC_Abstract_Google_Analytics_JS::class, 'instance' );
+		if ( PHP_VERSION_ID < 80100 ) {
+			$property->setAccessible( true );
+		}
+		$property->setValue( null, null );
 	}
 }

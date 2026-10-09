@@ -4,6 +4,7 @@
 	colors="true"
 	convertErrorsToExceptions="true"
 	convertNoticesToExceptions="true"
+	convertDeprecationsToExceptions="true"
 	convertWarningsToExceptions="true"
 	>
 	<testsuites>

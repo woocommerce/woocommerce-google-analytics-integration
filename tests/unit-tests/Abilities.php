@@ -22,6 +22,13 @@ class Abilities extends WP_UnitTestCase {
 	private $original_action_counts = array();
 
 	/**
+	 * Integration object registered before the test, restored in tearDown.
+	 *
+	 * @var \WC_Integration|null
+	 */
+	private $original_integration;
+
+	/**
 	 * Set up the ability registration boundary.
 	 *
 	 * @return void
@@ -30,6 +37,8 @@ class Abilities extends WP_UnitTestCase {
 		global $wp_actions;
 
 		parent::set_up();
+
+		$this->original_integration = WC()->integrations->integrations['google_analytics'] ?? null;
 
 		foreach ( array( 'init', 'wp_abilities_api_init', 'wp_abilities_api_categories_init' ) as $action ) {
 			$this->original_action_counts[ $action ] = $wp_actions[ $action ] ?? null;
@@ -82,6 +91,10 @@ class Abilities extends WP_UnitTestCase {
 			} elseif ( isset( $wp_actions[ $action ] ) ) {
 				unset( $wp_actions[ $action ] ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 			}
+		}
+
+		if ( $this->original_integration ) {
+			WC()->integrations->integrations['google_analytics'] = $this->original_integration;
 		}
 
 		wp_set_current_user( 0 );

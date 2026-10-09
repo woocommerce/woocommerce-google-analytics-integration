@@ -40,6 +40,8 @@ class SetupTask extends WP_UnitTestCase {
 		} else {
 			update_option( 'woocommerce_google_analytics_settings', $this->settings );
 		}
+		// Reload while the stored value is correct, so the shared integration does not keep test settings.
+		WC()->integrations->get_integration( 'google_analytics' )->init_settings();
 		parent::tear_down();
 	}
 
@@ -87,18 +89,34 @@ class SetupTask extends WP_UnitTestCase {
 	}
 
 	/**
+	 * The integration hooks task registration to init.
+	 *
+	 * @return void
+	 */
+	public function test_integration_hooks_task_registration_to_init() {
+		$integration = WC()->integrations->get_integration( 'google_analytics' );
+
+		$this->assertSame( 20, has_action( 'init', [ $integration, 'add_wc_setup_task' ] ) );
+	}
+
+	/**
 	 * The integration registers the task in the extended task list.
 	 *
 	 * @return void
 	 */
 	public function test_integration_registers_task_in_extended_list() {
-		if ( null === TaskLists::get_list( 'extended' ) ) {
-			TaskLists::init_default_lists();
-		}
+		TaskLists::clear_lists();
+		TaskLists::init_default_lists();
+		$this->assertNull( TaskLists::get_task( 'setup-google-analytics-integration', 'extended' ) );
 
 		WC()->integrations->get_integration( 'google_analytics' )->add_wc_setup_task();
 
-		$this->assertNotNull( TaskLists::get_task( 'setup-google-analytics-integration', 'extended' ) );
+		$this->assertInstanceOf(
+			WC_Google_Analytics_Task::class,
+			TaskLists::get_task( 'setup-google-analytics-integration', 'extended' )
+		);
+		TaskLists::clear_lists();
+		TaskLists::init_default_lists();
 	}
 
 	/**

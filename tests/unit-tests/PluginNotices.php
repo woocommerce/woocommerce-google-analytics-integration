@@ -158,11 +158,7 @@ class PluginNotices extends WP_UnitTestCase {
 					->onlyMethods( [] )
 					->getMock();
 
-		$reflection = new \ReflectionProperty( WC_Google_Analytics::class, 'settings' );
-		if ( PHP_VERSION_ID < 80100 ) {
-			$reflection->setAccessible( true );
-		}
-		$reflection->setValue( $ga, [ 'ga_id' => $ga_id ] );
+		$ga->settings = [ 'ga_id' => $ga_id ];
 
 		ob_start();
 		$ga->universal_analytics_upgrade_notice();

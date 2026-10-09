@@ -10,6 +10,7 @@ on:
       - composer.lock
       - package.json
       - package-lock.json
+      - phpunit.xml.dist
       - .github/workflows/php-unit-tests.yml
       - "bin/*.sh"
   pull_request:
@@ -19,6 +20,7 @@ on:
       - composer.lock
       - package.json
       - package-lock.json
+      - phpunit.xml.dist
       - .github/workflows/php-unit-tests.yml
       - "bin/*.sh"
   workflow_dispatch:

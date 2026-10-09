@@ -28,28 +28,29 @@ abstract class EventsDataTest extends WP_UnitTestCase {
 	public $filter;
 
 	/**
-	 * Setup mock filter and dummy product, order, and customer data
+	 * Create the dummy product, customer, and order shared by all tests in the class
+	 *
+	 * @param \WP_UnitTest_Factory $factory Test factory.
+	 *
+	 * @return void
+	 */
+	public static function wpSetUpBeforeClass( $factory ) {
+		self::$product  = WC_Helper_Product::create_simple_product();
+		self::$customer = WC_Helper_Customer::create_customer( 'JD', 'pw', 'customer@unit.test' );
+		self::$order    = WC_Helper_Order::create_order( self::$customer->get_id(), self::$product );
+	}
+
+	/**
+	 * Setup mock filter
 	 *
 	 * @return void
 	 */
 	public function set_up() {
-		if ( is_null( $this->filter ) ) {
-			// Mock woocommerce_gtag_event_data filter to ensure it is called and the correct data is processed.
-			$this->filter = new MockAction();
-			add_filter( 'woocommerce_gtag_event_data', array( &$this->filter, 'filter' ) );
-		}
+		parent::set_up();
 
-		if ( is_null( self::$product ) ) {
-			self::$product = WC_Helper_Product::create_simple_product();
-		}
-
-		if ( is_null( self::$customer ) ) {
-			self::$customer = WC_Helper_Customer::create_customer( 'JD', 'pw', 'customer@unit.test' );
-		}
-
-		if ( is_null( self::$order ) ) {
-			self::$order = WC_Helper_Order::create_order( self::get_customer()->get_id(), self::get_product() );
-		}
+		// Mock woocommerce_gtag_event_data filter to ensure it is called and the correct data is processed.
+		$this->filter = new MockAction();
+		add_filter( 'woocommerce_gtag_event_data', array( &$this->filter, 'filter' ) );
 	}
 
 	/**

@@ -92,6 +92,9 @@ jobs:
         with:
           php-version: "${{ matrix.php }}"
 
+      - name: Lint PHP files for deprecations
+        run: ./bin/lint-php-deprecations.sh
+
       - name: Set up MySQL
         uses: woocommerce/grow/prepare-mysql@e981c25267d29c39ff6ab1ae4ea09b267efae86c # actions-v3.0.6
 
@@ -135,6 +138,9 @@ jobs:
         uses: woocommerce/grow/prepare-php@e981c25267d29c39ff6ab1ae4ea09b267efae86c # actions-v3.0.6
         with:
           php-version: "${{ inputs.php-version }}"
+
+      - name: Lint PHP files for deprecations
+        run: ./bin/lint-php-deprecations.sh
 
       - name: Prepare MySQL
         uses: woocommerce/grow/prepare-mysql@e981c25267d29c39ff6ab1ae4ea09b267efae86c # actions-v3.0.6

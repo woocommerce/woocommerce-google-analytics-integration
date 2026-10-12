@@ -1,5 +1,9 @@
 *** Changelog ***
 
+= 2.4.3 - 2026-10-12 =
+* Fix - Report the catalog price of Composite Products instead of 0 in `view_item`, `view_item_list`, `select_content` and `add_to_cart` events.
+* Update - Bump the minimum required WooCommerce version to 11.1 and the compatibility version to 11.2.
+
 = 2.4.2 - 2026-09-08 =
 * Declare compatibility with WooCommerce 11.1.0.
 * Dev - Pin GitHub Actions and their nested dependencies to immutable commit SHAs.

@@ -17,6 +17,8 @@ jobs:
     name: Hook Documentation Generator
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    permissions:
+      contents: write
     steps:
       - name: Checkout the repository
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
@@ -38,7 +40,8 @@ jobs:
         run: |
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
-          printf '%s\n' "$HOOK_DOCS" > docs/Hooks.md
+          # The generator writes backticks as \` for a shell echo, so drop those backslashes.
+          printf '%s\n' "${HOOK_DOCS//\\\`/\`}" > docs/Hooks.md
           git add docs/Hooks.md
           if git diff --cached --quiet; then
             echo "*No documentation changes to commit.*" >> "$GITHUB_STEP_SUMMARY"

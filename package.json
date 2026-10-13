@@ -2,7 +2,7 @@
   "name": "woocommerce-google-analytics-integration",
   "title": "Google Analytics for WooCommerce",
   "version": "2.4.3",
-  "license": "GPL-2.0",
+  "license": "GPL-3.0-or-later",
   "homepage": "https://wordpress.org/plugins/woocommerce-google-analytics-integration/",
   "repository": {
     "type": "git",

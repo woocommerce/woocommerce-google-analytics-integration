@@ -3,6 +3,7 @@
 [![PHP Coding Standards](https://github.com/woocommerce/woocommerce-google-analytics-integration/actions/workflows/php-coding-standards.yml/badge.svg)](https://github.com/woocommerce/woocommerce-google-analytics-integration/actions/workflows/php-coding-standards.yml)
 [![PHP Unit Tests](https://github.com/woocommerce/woocommerce-google-analytics-integration/actions/workflows/php-unit-tests.yml/badge.svg)](https://github.com/woocommerce/woocommerce-google-analytics-integration/actions/workflows/php-unit-tests.yml)
 [![JavaScript Linting](https://github.com/woocommerce/woocommerce-google-analytics-integration/actions/workflows/js-linting.yml/badge.svg)](https://github.com/woocommerce/woocommerce-google-analytics-integration/actions/workflows/js-linting.yml)
+[![JavaScript Unit Tests](https://github.com/woocommerce/woocommerce-google-analytics-integration/actions/workflows/js-unit-tests.yml/badge.svg)](https://github.com/woocommerce/woocommerce-google-analytics-integration/actions/workflows/js-unit-tests.yml)
 [![Build](https://github.com/woocommerce/woocommerce-google-analytics-integration/actions/workflows/build.yml/badge.svg)](https://github.com/woocommerce/woocommerce-google-analytics-integration/actions/workflows/build.yml)
 
 WordPress plugin: Provides the integration between WooCommerce and Google Analytics.
@@ -17,9 +18,13 @@ Will be required for WooCommerce shops using the integration from WooCommerce 2.
 
 Google Analytics for WooCommerce utilizes npm scripts for task management utilities.
 
-`npm run build` - Runs the tasks necessary for a release. These may include building JavaScript, SASS, CSS minification, and language files.
+`npm run build` - Runs the tasks necessary for a release: builds the production JavaScript bundle, generates the language file, and packages the plugin zip.
 
 ## Unit tests
+
+### Running JavaScript unit tests
+
+`npm run test:js` runs the tests in `tests/js` with the Node.js test runner. They need no Docker environment.
 
 ### Running PHP unit tests via wp-env (recommended)
 
@@ -64,7 +69,7 @@ To remove the Docker container and images (this will **delete everything** in th
 
 `npm run wp-env:destroy`
 
-:warning: Currently, the E2E testing on GitHub Actions is only run automatically after opening a PR with `release/*` branches or pushing changes to `release/*` branches. To run it manually, please visit [here](../../actions/workflows/e2e-tests.yml) and follow [this instruction](https://docs.github.com/en/actions/managing-workflow-runs/manually-running-a-workflow?tool=webui) to do so.
+On GitHub Actions, E2E tests run on every pull request (except documentation-only changes) and on pushes to `trunk` and `release/*` branches. To run them manually, for example against a WordPress or WooCommerce release candidate, open [the workflow](../../actions/workflows/e2e-tests.yml) and follow [these instructions](https://docs.github.com/en/actions/managing-workflow-runs/manually-running-a-workflow?tool=webui).
 
 ## Local development environment
 

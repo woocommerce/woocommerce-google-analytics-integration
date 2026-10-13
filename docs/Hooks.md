@@ -1,6 +1,6 @@
 # Hooks Reference
 
-A list of hooks, e.g. \`actions\` and \`filters\`, that are defined or used in this project.
+A list of hooks, e.g. `actions` and `filters`, that are defined or used in this project.
 
 ## woocommerce_ga_disable_tracking
 

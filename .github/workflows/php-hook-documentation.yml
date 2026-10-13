@@ -20,9 +20,6 @@ jobs:
     steps:
       - name: Checkout the repository
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
-        with:
-          # Checks out a branch instead of a commit in detached HEAD state
-          ref: ${{ github.head_ref }}
 
         # This generates the documentation string. The `id` property is used to reference the output in the next step.
       - name: Generate hook documentation
@@ -33,7 +30,7 @@ jobs:
 
       - name: Commit hook documentation
         env:
-          HEAD_REF: ${{ github.head_ref }}
+          BRANCH: ${{ github.ref_name }}
           HOOK_DOCS: ${{ steps.generate-hook-docs.outputs.hook-docs }}
         shell: bash
         # Use the github-actions bot account to commit.
@@ -47,6 +44,6 @@ jobs:
             echo "*No documentation changes to commit.*" >> "$GITHUB_STEP_SUMMARY"
           else
             echo "*Committing documentation changes.*" >> "$GITHUB_STEP_SUMMARY"
-            git commit -q -m "Update hooks documentation from ${HEAD_REF} branch."
+            git commit -q -m "Update hooks documentation from ${BRANCH} branch."
             git push
           fi

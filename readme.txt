@@ -3,7 +3,7 @@ Contributors: woocommerce, automattic, claudiosanches, bor0, royho, laurendaviss
 Tags: woocommerce, google analytics
 Requires at least: 7.0
 Tested up to: 7.1
-Stable tag: 2.4.2
+Stable tag: 2.4.3
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -48,6 +48,10 @@ Duplicate Google Analytics code causes a conflict in tracking. Remove any other 
 
 == Changelog ==
 
+= 2.4.3 - 2026-10-12 =
+* Fix - Report the catalog price of Composite Products instead of 0 in `view_item`, `view_item_list`, `select_content` and `add_to_cart` events.
+* Update - Bump the minimum required WooCommerce version to 11.1 and the compatibility version to 11.2.
+
 = 2.4.2 - 2026-09-08 =
 * Declare compatibility with WooCommerce 11.1.0.
 * Dev - Pin GitHub Actions and their nested dependencies to immutable commit SHAs.
@@ -59,10 +63,5 @@ Duplicate Google Analytics code causes a conflict in tracking. Remove any other 
 * Fix - Purchase event value now sums the item prices × quantity, excluding tax and shipping as GA4 expects, instead of the gross order total.
 * Tweak - WordPress 7.1 compatibility.
 * Update - Require WordPress 7.0+.
-
-= 2.4.0 - 2026-08-06 =
-* Dev - Run the PHP coding standards job when dependencies change.
-* Dev - Update WPCS to 3.4.1 to pick up the fix for GHSA-3pwp-g2mj-5p3v.
-* Update - Bump the minimum required WooCommerce version to 10.9 and the compatibility version to 11.0.
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce-google-analytics-integration/trunk/changelog.txt).

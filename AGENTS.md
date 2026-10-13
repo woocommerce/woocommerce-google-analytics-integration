@@ -18,6 +18,7 @@ assets/js/src/                                — JS source (entry: index.js)
 assets/js/build/                              — Webpack output (committed for distribution)
 tests/unit-tests/                             — PHPUnit tests
 tests/e2e/                                    — Playwright E2E tests
+tests/js/                                     — JS unit tests (Node.js test runner)
 ```
 
 ## Commands
@@ -48,6 +49,7 @@ npm run lint:php      # PHPCS (WordPress Coding Standards)
 ### Test
 
 ```sh
+npm run test:js                   # Run JS unit tests (Node.js test runner, no Docker)
 npm run wp-env:up                 # Start local WordPress Docker environment
 npm run test:php:setup            # Install WooCommerce + deps for PHPUnit (once after wp-env:up)
 npm run test:php                  # Run PHP unit tests via wp-env

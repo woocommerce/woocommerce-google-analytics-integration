@@ -1,0 +1,46 @@
+name: JavaScript Unit Tests
+
+on:
+  push:
+    branches:
+      - trunk
+    paths:
+      - "**.js"
+      - includes/class-wc-google-gtag-js.php
+      - package.json
+      - package-lock.json
+      - .nvmrc
+      - .github/workflows/js-unit-tests.yml
+  pull_request:
+    paths:
+      - "**.js"
+      - includes/class-wc-google-gtag-js.php
+      - package.json
+      - package-lock.json
+      - .nvmrc
+      - .github/workflows/js-unit-tests.yml
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  FORCE_COLOR: 2
+
+jobs:
+  JSUnitTests:
+    name: JavaScript Unit Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+
+      - name: Prepare node
+        uses: woocommerce/grow/prepare-node@e981c25267d29c39ff6ab1ae4ea09b267efae86c # actions-v3.0.6
+        with:
+          node-version-file: ".nvmrc"
+
+      # tests/js reads the redaction helper out of class-wc-google-gtag-js.php.
+      - name: Run JavaScript unit tests
+        run: npm run test:js

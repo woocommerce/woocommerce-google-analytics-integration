@@ -94,7 +94,7 @@
     "*.php": "bin/lint-staged-php.sh"
   },
   "engines": {
-    "node": ">=24",
+    "node": "^24.15.0",
     "npm": ">=11.10.0"
   },
   "config": {

@@ -1,161 +1,109 @@
-# Google Analytics for WooCommerce - Agent Guidelines
+# Google Analytics for WooCommerce – Agent Guidelines
 
-A WordPress/WooCommerce plugin that integrates Google Analytics (GA4) tracking via gtag.js into WooCommerce stores. Tracks e-commerce events (add to cart, purchases, etc.), supports both classic and block-based storefronts, and integrates with the WP Consent API for GDPR compliance.
-
-## Project Structure
-
-```
-woocommerce-google-analytics-integration.php  — Main plugin entry point, singleton bootstrap
-includes/
-  class-wc-google-analytics.php               — WC_Integration subclass, settings, script loading
-  class-wc-abstract-google-analytics-js.php   — Base class for JS event generation
-  class-wc-google-gtag-js.php                 — GA4 gtag.js event implementation
-  class-wc-google-analytics-task.php          — Setup task for WooCommerce admin
-assets/js/src/                                — JS source (entry: index.js)
-  tracker/                                    — Client-side event tracking
-  integrations/                               — Block-based checkout/cart integration
-  utils/                                      — Shared utilities
-assets/js/build/                              — Webpack output (committed for distribution)
-tests/unit-tests/                             — PHPUnit tests
-tests/e2e/                                    — Playwright E2E tests
-tests/js/                                     — JS unit tests (Node.js test runner)
-```
+A WordPress/WooCommerce plugin that adds Google Analytics (GA4) tracking through gtag.js. It tracks e‑commerce events (add to cart, purchase and more) on classic and block‑based storefronts, and integrates with the WP Consent API for GDPR compliance.
+Stack: PHP with no production Composer dependencies, JavaScript built with `@wordpress/scripts`, PHPUnit, Playwright and the Node.js test runner.
 
 ## Commands
 
-### Setup
+| Task | Command |
+|---|---|
+| Start / stop dev site | `npm run env:start` / `npm run env:stop` |
+| All lint checks | `npm run lint` (`lint:php`, `lint:php:deprecations`, `lint:js`) |
+| Format | `npm run format` |
+| Everything CI checks without a database | `npm run qa` |
+| Tests | `npm run test:php`, `npm run test:js`, `npm run test:e2e` |
 
-```sh
-nvm use               # Switch to Node 24
-npm install           # Install JS dependencies
-composer install      # Install PHP dev dependencies (PHPCS, PHPUnit)
+- Setup: `nvm use`, `npm install`, `composer install` (dev tools only: PHPCS, PHPUnit). Use the Node version in `.nvmrc` (`nvm use`).
+- Build: `npm run dev` (unminified), `npm run start` (watch), `npm run build` (production bundle, `.pot` file and plugin zip).
+- The dev site runs at `http://localhost:8888`. `env:start`/`env:stop` are aliases for `wp-env:dev:up`/`wp-env:dev:down`.
+- `test:php` and `test:e2e` run in a separate test site: `npm run wp-env:up`, `http://localhost:8889`, `admin`/`password`. See the `running-tests` skill.
+- `qa` = `lint` + `test:js` and needs no Docker. CI also runs PHPUnit, E2E, Plugin Check and a build.
+- `lint:js` fails on warnings too (`--max-warnings 0`). There is no `lint:css` or `lint:phpstan`.
+
+## Git hooks
+
+On commit, Husky runs lint‑staged on staged files. To turn checks off, set these in `.env` in the repository root (gitignored): `MP_GIT_HOOKS_ENABLE=false` turns off all hooks; `MP_GIT_HOOKS_ESLINT=false` and `MP_GIT_HOOKS_CODE_SNIFFER=false` turn off one check each. Hooks only see staged files, so still run `npm run qa` before pushing. Do not use `--no-verify`.
+
+The lint‑staged scripts are in `tasks/`.
+
+## Architecture
+
 ```
-
-### Build
-
-```sh
-npm run dev           # Development build (unminified)
-npm run start         # Watch mode with hot reload
-npm run build         # Production build + pot file + zip archive
+woocommerce-google-analytics-integration.php  – main plugin file, singleton bootstrap
+includes/
+  class-wc-google-analytics.php               – WC_Integration subclass: settings, admin UI, script loading
+  class-wc-abstract-google-analytics-js.php   – base class for JS event generation
+  class-wc-google-gtag-js.php                 – GA4 gtag.js events
+  class-wc-google-analytics-task.php          – setup task for WooCommerce admin
+assets/js/src/                                – JS source (entry: index.js)
+  tracker/                                    – client-side event tracking
+  integrations/                               – classic and block storefronts, WP Consent API
+  utils/                                      – shared utilities
+assets/js/build/                              – Webpack output (gitignored, added to the release zip)
+tests/unit-tests/                             – PHPUnit tests
+tests/e2e/                                    – Playwright E2E tests
+tests/js/                                     – JS unit tests (Node.js test runner)
 ```
-
-### Lint
-
-```sh
-npm run lint:js       # ESLint (WordPress rules)
-npm run lint:php      # PHPCS (WordPress Coding Standards)
-```
-
-### Test
-
-```sh
-npm run test:js                   # Run JS unit tests (Node.js test runner, no Docker)
-npm run wp-env:up                 # Start local WordPress Docker environment
-npm run test:php:setup            # Install WooCommerce + deps for PHPUnit (once after wp-env:up)
-npm run test:php                  # Run PHP unit tests via wp-env
-npm run test:e2e                  # Run Playwright E2E tests (headless, requires wp-env)
-npm run test:e2e-dev              # Run E2E tests in debug mode with browser visible
-vendor/bin/phpunit                # Run PHP unit tests locally (see README.md for setup)
-```
-
-### Local Environment (wp-env)
-
-The project uses `@wordpress/env` for local development. There are two separate, isolated configurations:
-
-- `.wp-env.json` — the default development environment (WooCommerce + plugin). Runs at `http://localhost:8888`. Start it with `wp-env:dev:up`.
-- `.wp-env.test.json` — the test environment used by PHPUnit and E2E. Runs at `http://localhost:8889`. The test npm scripts and CI pass `--config=.wp-env.test.json`, so it is what `wp-env:up` starts and what `wp-env run cli` must target.
-
-Both set `testsEnvironment: false`, so each runs a single environment. The legacy behavior of auto-creating a second tests environment is deprecated in `@wordpress/env` 11.
-
-```sh
-npm run wp-env:up           # Start the test Docker environment (PHPUnit + E2E), port 8889
-npm run wp-env:down         # Stop the test Docker environment
-npm run wp-env:destroy      # Destroy the test Docker environment (containers, volumes, images)
-npm run wp-env:dev:up       # Start the development Docker environment, port 8888
-npm run wp-env:dev:down     # Stop the development Docker environment
-npm run wp-env:dev:destroy  # Destroy the development Docker environment
-```
-
-The test environment runs at `http://localhost:8889` (admin: `admin`/`password`).
-
-The test config installs Basic Auth for API testing and runs `tests/e2e/bin/test-env-setup.sh` on startup to configure the test environment. That script and the PHPUnit setup target the test environment via the `WP_ENV_CONFIG_FILE` environment variable, which the lifecycle and npm scripts set to `.wp-env.test.json`.
-
-`test:php` (PHPUnit) runs against a dedicated `wordpress_test` database in the same MySQL container, set in `phpunit.xml.dist`. The site served at 8889 and the E2E suite use the separate `wordpress` database, so the two suites no longer interfere and can be run in any order.
-
-### PHP versions
-
-The dev and test PHP version is set in:
-
-- `.wp-env.json` and `.wp-env.test.json` (`phpVersion`). The test file drives E2E in CI and `npm run test:php`.
-- `.github/workflows/php-unit-tests.yml`: the matrix `php` default, the `include` rows, and the `workflow_dispatch` `php-version` default.
-
-These stay at the minimum on purpose: `Requires PHP: 7.4` in the plugin header, `config.platform.php` (7.4.33) in `composer.json`, and PHPCS in `php-coding-standards.yml`.
-
-To try another version without editing files: `WP_ENV_PHP_VERSION=8.5 npm run wp-env:up`.
-
-To move to a new PHP version:
-
-1. Set `phpVersion` in both wp-env files.
-2. Make it the matrix default and the `workflow_dispatch` default. Move the previous default into an `include` row.
-3. Start the env: `npm run wp-env:up`.
-4. Run `npm run test:php`.
-5. Run `npx wp-env run cli --config=.wp-env.test.json --env-cwd=wp-content/plugins/woocommerce-google-analytics-integration -- ./bin/lint-php-deprecations.sh`.
-6. Run `npm run test:e2e`, then `npm run test:e2e:debug-log`.
-
-Guards: PHPUnit fails on deprecations raised in tests. `lint:php:deprecations` catches compile-time ones. `test:e2e:debug-log` fails on plugin lines in `debug.log`.
-
-## Conventions
-
-### PHP
-
-- MUST follow WordPress Coding Standards. Run `npm run lint:php` to verify.
-- Use tabs for indentation (not spaces) in PHP.
-- Short array syntax `[]` is preferred over `array()`.
-- Yoda conditions are NOT required (disabled in phpcs config).
-- Text domain is `woocommerce-google-analytics-integration` — MUST be used in all translatable strings.
-- The `manage_woocommerce` capability is a recognized custom capability.
-- Hook names may use `/` as a delimiter.
-
-### JavaScript
-
-- MUST follow `@wordpress/eslint-plugin/recommended` rules.
-- Use `@wordpress/i18n` for translations, `@wordpress/hooks` for extensibility.
-- Source lives in `assets/js/src/`, builds to `assets/js/build/`.
-
-### Indentation and Formatting
-
-- PHP, JS: tabs, width 4.
-- JSON: spaces, width 2.
-- YAML: spaces, width 2.
-- All files: UTF-8, LF line endings, final newline.
-
-### Pull Requests
-
-- Branch from `trunk`. The main branch is `trunk`, not `main` or `master`.
-- Release branches follow the pattern `release/x.y.z`.
-- PR template is at `.github/PULL_REQUEST_TEMPLATE.md`. Include: description, checks, test instructions, and a changelog entry.
-- Changelog entries use prefixes: `Fix`, `Add`, `Update`, `Break`, `Tweak`, `Dev`, `Doc`.
-
-### Commits
-
-- Write concise commit messages focused on the "why".
-- No "Co-Authored-By" lines.
-- No "Generated with Claude Code" or similar agent bylines.
-
-## Architecture Notes
 
 - The plugin registers as a WooCommerce Integration (`WC_Integration` subclass). Settings live under WooCommerce > Settings > Integrations > Google Analytics.
-- `WC_Google_Analytics` (the integration class) handles settings, admin UI, and script enqueuing.
-- `WC_Google_Gtag_JS` generates server-side JavaScript snippets for GA4 events. It extends `WC_Abstract_Google_Analytics_JS`.
-- Client-side tracking in `assets/js/src/` handles cart interactions and checkout events that can't be tracked server-side.
-- The plugin declares HPOS (High-Performance Order Storage) and cart/checkout blocks compatibility.
-- GA4 measurement ID (format: `G-XXXXXXXXXX`) is configured in plugin settings, not hardcoded.
+- `WC_Google_Gtag_JS` extends `WC_Abstract_Google_Analytics_JS` and builds the server‑side GA4 event snippets.
+- Client‑side code in `assets/js/src/` tracks cart and checkout events that the server cannot see.
+- The plugin declares HPOS and cart/checkout blocks compatibility.
+- The GA4 measurement ID (`G-XXXXXXXXXX`) comes from the plugin settings via `WC_Google_Analytics::get_integration()`.
 
-## Common Pitfalls
+## Code rules
 
-- **Do NOT edit files in `assets/js/build/`** — these are generated by Webpack. Edit source in `assets/js/src/` and run `npm run dev` or `npm run start`.
-- **Do NOT add production PHP dependencies** via Composer. The plugin ships without a `vendor/` directory. Composer is dev-only (PHPCS, PHPUnit).
-- **Do NOT use `main` or `master`** — the primary branch is `trunk`.
-- **Do NOT hardcode tracking IDs** — the measurement ID comes from plugin settings via `WC_Google_Analytics::get_integration()`.
-- **The `WC_GOOGLE_ANALYTICS_INTEGRATION_MIN_WC_VER` constant** gates minimum WooCommerce version. Don't use WC APIs newer than this version without a compatibility check.
-- **External scripts (gtag.js) are loaded from Google** — the `WordPress.WP.EnqueuedResourceParameters.MissingVersion` PHPCS warning is intentionally suppressed for this reason.
+- PHP: WordPress Coding Standards (`npm run lint:php`). Tabs. Short array syntax `[]`. Yoda conditions are not required (turned off in `phpcs.xml.dist`).
+- Text domain: `woocommerce-google-analytics-integration` in every translatable string.
+- `manage_woocommerce` is a known custom capability. Hook names may use `/` as a delimiter.
+- JS: `@wordpress/eslint-plugin/recommended`. Use `@wordpress/i18n` for translations and `@wordpress/hooks` for extensibility.
+- Edit JS in `assets/js/src/`, then run `npm run dev` or `npm run start`.
+- Formatting: PHP and JS use tabs (width 4); JSON and YAML use 2 spaces. All files: UTF‑8, LF, final newline.
+- `WC_GOOGLE_ANALYTICS_INTEGRATION_MIN_WC_VER` is the minimum WooCommerce version. Do not use newer WooCommerce APIs without a compatibility check.
+- Tag new hooks, functions and methods `@since x.x.x`. Woorelease replaces it with the version in the paths listed in `package.json` `config.version_replace_paths`.
+
+## Backward compatibility
+
+A change to an externally exposed surface must state its BC impact in the PR description. If you cannot establish the impact, stop and flag it.
+
+- Hooks listed in `docs/Hooks.md` (`woocommerce_ga_*`, `woocommerce_gtag_*`). A release workflow regenerates that file.
+- `window.wcGoogleAnalyticsIntegration` (for example `redactGtagConfig()`), which custom snippets call.
+- Settings stored in `woocommerce_google_analytics_settings`, and the legacy `woocommerce_ga_*` options that still feed the defaults.
+- Public PHP classes and constants (`WC_Google_Analytics`, `WC_GOOGLE_ANALYTICS_INTEGRATION_*`).
+- The minimum PHP version stays at 7.4: `Requires PHP` in the plugin header, `config.platform.php` (7.4.33) in `composer.json`, and PHPCS in `php-coding-standards.yml`.
+
+## Gotchas
+
+- Do not add production PHP dependencies with Composer. The plugin ships without `vendor/`.
+- gtag.js loads from Google, so the PHPCS warning `WordPress.WP.EnqueuedResourceParameters.MissingVersion` is suppressed on purpose.
+- There are two wp‑env configs: `.wp-env.json` is the dev site (port 8888) and `.wp-env.test.json` is the test site (port 8889) that PHPUnit, E2E and CI use. `wp-env run cli` commands for tests need `--config=.wp-env.test.json`.
+- The main branch is `trunk`, not `main` or `master`.
+
+## Git and pull requests
+
+Branch from `trunk`; never commit to it. Start branches with the `starting-branch` skill. Open PRs with the `creating-pull-requests` skill; never run `gh pr create` directly. PRs follow `.github/pull_request_template.md`; write `_N/A_` in sections that don’t apply.
+
+Fill `### Changelog entry`, the last template section, with lines like `Fix - …` (`Add`, `Update`, `Fix`, `Tweak`, `Dev`, `Doc`, `Break`). Woorelease parses it, so keep the heading exact. With no entry, add the `changelog: none` label.
+
+- Commit messages are short and explain why.
+- No `Co-Authored-By` lines and no “Generated with Claude Code” or other agent bylines.
+- The branch prefix sets the changelog label: `add/`, `update/`, `fix/`, `tweak/`, `dev/`, `doc/`, `breaking/`.
+- Release branches are `release/x.y.z`.
+
+## Skills
+
+Skills live in `.ai/skills/` (`.claude/skills` links there). Claude Code loads them as skills. Other agents read `.ai/skills/<name>/SKILL.md` when the task matches. After reading one, also apply `~/.ai/skills/<name>-personal/SKILL.md` if it exists; it wins on conflict.
+
+- `starting-branch` – name and create a branch from `trunk`.
+- `creating-pull-requests` – run the checks, fill the template and changelog entry, push and open the PR.
+- `code-quality` – lint, format, `qa`, hook switches and what CI runs.
+- `running-tests` – PHPUnit, JS and E2E tests, the wp‑env setup and PHP version bumps.
+- `reviewing-code` – review a PR or local changes against these rules.
+- `writing-changelog` – the `### Changelog entry` section and the `changelog: none` label.
+- `beta-compat-test` – test the released plugin against a WooCommerce beta or RC.
+
+## Boundaries
+
+- **Always:** run `npm run qa` and the tests for the code you touched before pushing; sanitize input and escape output; follow the PR template; use the plugin text domain.
+- **Ask first:** new Composer or npm dependencies; CI workflow changes; changes to a surface listed under Backward compatibility; raising the minimum PHP or WooCommerce version.
+- **Never:** commit to `trunk`; commit `.env`, secrets or API keys; edit generated or vendored files (`assets/js/build/`, `vendor/`, `node_modules/`, `docs/Hooks.md`); skip hooks with `--no-verify`; hard‑code a tracking ID.

@@ -22,7 +22,7 @@ Google Analytics for WooCommerce utilizes npm scripts for task management utilit
 
 Shared commands (the same names are used across our plugin repositories):
 
--   `npm run lint` - Runs `lint:php` (PHPCS), `lint:php:deprecations` (PHP syntax and deprecation check with your local PHP) and `lint:js` (ESLint, which also checks Prettier formatting of JavaScript).
+-   `npm run lint` - Runs `lint:php` (PHPCS), `lint:php:deprecations` (PHP syntax and deprecation check with your local PHP) and `lint:js` (ESLint, which also checks Prettier formatting of JavaScript and fails on warnings).
 -   `npm run format` - Formats the JavaScript files with Prettier.
 -   `npm run qa` - Runs every check that needs no Docker environment: `lint` and `test:js`.
 -   `npm run test:js`, `npm run test:php`, `npm run test:e2e` - Run the tests. See below for the setup that `test:php` and `test:e2e` need.

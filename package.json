@@ -90,8 +90,8 @@
     "prepare": "husky"
   },
   "lint-staged": {
-    "*.{js,jsx,mjs,cjs,ts,tsx}": "bin/lint-staged-js.sh",
-    "*.php": "bin/lint-staged-php.sh"
+    "*.{js,jsx,mjs,cjs,ts,tsx}": "tasks/lint-staged-js.sh",
+    "*.php": "tasks/lint-staged-php.sh"
   },
   "engines": {
     "node": "^24.15.0",

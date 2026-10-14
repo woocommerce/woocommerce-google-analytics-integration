@@ -5,6 +5,7 @@
 .husky export-ignore
 .env export-ignore
 bin export-ignore
+tasks export-ignore
 tests export-ignore
 README.md export-ignore
 .nvmrc export-ignore

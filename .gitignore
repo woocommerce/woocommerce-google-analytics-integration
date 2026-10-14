@@ -31,3 +31,6 @@ dist
 
 woocommerce-google-analytics-integration.zip
 .claude/settings.local.json
+
+# Local git hook settings
+.env

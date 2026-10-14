@@ -2,6 +2,8 @@
 .gitmodules export-ignore
 .gitignore export-ignore
 .github export-ignore
+.husky export-ignore
+.env export-ignore
 bin export-ignore
 tests export-ignore
 README.md export-ignore

@@ -1,0 +1,6 @@
+#!/bin/sh
+. "$(dirname "$0")/common.sh"
+
+[ "$MP_GIT_HOOKS_ENABLE" != "true" ] && exit 0
+
+npx lint-staged

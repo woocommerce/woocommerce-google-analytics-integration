@@ -96,6 +96,20 @@ Both environments are isolated and can run at the same time.
 
 An explanation of output can be [found here](https://github.com/squizlabs/PHP_CodeSniffer/wiki/Usage#printing-progress-information) e.g. what are the S's?
 
+### Pre-commit hook
+
+`npm install` sets up a Git pre-commit hook ([husky](https://typicode.github.io/husky/) and [lint-staged](https://github.com/lint-staged/lint-staged)). It runs PHPCS on staged PHP files and ESLint on staged JavaScript files, and blocks the commit if they report problems. PHPCS needs `composer install`.
+
+To turn checks off, add any of these lines to a `.env` file in the repository root (it is git-ignored):
+
+```sh
+MP_GIT_HOOKS_ENABLE=false        # skip the whole hook
+MP_GIT_HOOKS_CODE_SNIFFER=false  # skip PHPCS
+MP_GIT_HOOKS_ESLINT=false        # skip ESLint
+```
+
+The `MP_` prefix comes from MailPoet, which uses the same switches, so one `.env` works in both. To skip the hook once, use `git commit --no-verify`.
+
 ## Docs
 
 - [Hooks defined or used in Google Analytics for WooCommerce](./docs/Hooks.md)

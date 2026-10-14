@@ -8,6 +8,8 @@ export default [
 			'vendor/**',
 			'assets/js/build/**',
 			'tests/e2e/test-results/**',
+			// Written by the CI annotation step before linting.
+			'eslintFormatter.cjs',
 		],
 	},
 	...wordpress.configs.recommended,

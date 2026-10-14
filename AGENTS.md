@@ -19,6 +19,7 @@ Stack: PHP with no production Composer dependencies, JavaScript built with `@wor
 - `test:php` and `test:e2e` run in a separate test site: `npm run wp-env:up`, `http://localhost:8889`, `admin`/`password`. See the `running-tests` skill.
 - `qa` = `lint` + `test:js` and needs no Docker. CI also runs PHPUnit, E2E, Plugin Check and a build.
 - `lint:js` fails on warnings too (`--max-warnings 0`). There is no `lint:css` or `lint:phpstan`.
+- `.claude/settings.json` lets Claude Code run `npm ci`, `npm install` (no arguments), `qa`, `lint`, `lint:php`, `lint:php:deprecations`, `lint:js`, `format`, `test:js`, `test:php`, `test:php:setup`, `test:e2e`, `test:e2e:debug-log`, `env:start`, `env:stop`, `wp-env:up`, `wp-env:down`, `wp-env:dev:up`, `wp-env:dev:down` and `dev` without asking.
 
 ## Git hooks
 

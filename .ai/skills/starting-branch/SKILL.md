@@ -21,7 +21,7 @@ Format: `<prefix>/<team-key>-<id>-<slug>`, all lowercase, e.g. `fix/stomail-7713
   | `doc/` | `changelog: doc` |
   | `breaking/` | `changelog: breaking` |
 
-  `release/` is only for release branches (`release/x.y.z`).
+  `release/` is only for release branches (`release/x.y.z`); they get `changelog: none`.
 - **Team key and ID** – from the Linear issue. Fetch it with the Linear MCP tool (`get_issue`) for the title and type. Take the team key from the issue or from recent branch names (`gh pr list -R github.com/woocommerce/woocommerce-google-analytics-integration --state all --limit 20 --json headRefName`); do not guess it.
 - **Slug** – short kebab-case summary of the issue title.
 

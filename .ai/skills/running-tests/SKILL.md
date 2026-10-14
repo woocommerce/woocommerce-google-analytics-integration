@@ -28,7 +28,7 @@ The repo has two isolated `@wordpress/env` configs. Both set `testsEnvironment: 
 ## PHPUnit (wp-env, recommended)
 
 1. Start Docker, then `npm run wp-env:up`.
-2. `npm run test:php:setup` – installs WooCommerce from source and the WooCommerce test framework. Run it once after each start. For a specific WooCommerce version: `npm run test:php:setup -- --wc-version=9.6.0`.
+2. `npm run test:php:setup` – creates the `wordpress_test` database, installs WooCommerce if it is missing, and downloads the WooCommerce test helpers from GitHub. Run it once after each start. For a specific WooCommerce version: `npm run test:php:setup -- --wc-version=9.6.0`.
 3. `npm run test:php` – runs every test in `tests/unit-tests/`.
 
 One file or test: `npm run test:php -- --filter <TestClass or method>`.

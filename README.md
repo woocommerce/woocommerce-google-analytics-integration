@@ -20,6 +20,14 @@ Google Analytics for WooCommerce utilizes npm scripts for task management utilit
 
 `npm run build` - Runs the tasks necessary for a release: builds the production JavaScript bundle, generates the language file, and packages the plugin zip.
 
+Shared commands (the same names are used across our plugin repositories):
+
+-   `npm run lint` - Runs `lint:php` (PHPCS), `lint:php:deprecations` (PHP syntax and deprecation check with your local PHP) and `lint:js` (ESLint, which also checks Prettier formatting of JavaScript).
+-   `npm run format` - Formats the JavaScript files with Prettier.
+-   `npm run qa` - Runs every check that needs no Docker environment: `lint` and `test:js`.
+-   `npm run test:js`, `npm run test:php`, `npm run test:e2e` - Run the tests. See below for the setup that `test:php` and `test:e2e` need.
+-   `npm run env:start` / `npm run env:stop` - Start or stop the development environment. These are aliases for `wp-env:dev:up` and `wp-env:dev:down`.
+
 ## Unit tests
 
 ### Running JavaScript unit tests

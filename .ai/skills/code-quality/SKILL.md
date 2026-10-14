@@ -27,7 +27,7 @@ PHPCS output help: <https://github.com/squizlabs/PHP_CodeSniffer/wiki/Usage#prin
 
 ## Pre-commit hook
 
-`npm install` sets up Husky and lint‑staged. On commit, `tasks/lint-staged-php.sh` runs PHPCS on staged PHP files and `tasks/lint-staged-js.sh` runs ESLint (`--max-warnings 0 --no-warn-ignored`) on staged JS files. A problem blocks the commit.
+`npm install` sets up Husky and lint-staged. On commit, `tasks/lint-staged-php.sh` runs PHPCS on staged PHP files and `tasks/lint-staged-js.sh` runs ESLint (`--max-warnings 0 --no-warn-ignored`) on staged JS files. A problem blocks the commit.
 
 Switches go in `.env` in the repository root (gitignored); `.husky/common.sh` reads it:
 

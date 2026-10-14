@@ -13,7 +13,7 @@ Stack: PHP with no production Composer dependencies, JavaScript built with `@wor
 | Everything CI checks without a database | `npm run qa` |
 | Tests | `npm run test:php`, `npm run test:js`, `npm run test:e2e` |
 
-- Setup: `nvm use`, `npm install`, `composer install` (dev tools only: PHPCS, PHPUnit). Use the Node version in `.nvmrc` (`nvm use`).
+- Setup: `npm install`, `composer install` (dev tools only: PHPCS, PHPUnit). Use the Node version in `.nvmrc` (`nvm use`).
 - Build: `npm run dev` (unminified), `npm run start` (watch), `npm run build` (production bundle, `.pot` file and plugin zip).
 - The dev site runs at `http://localhost:8888`. `env:start`/`env:stop` are aliases for `wp-env:dev:up`/`wp-env:dev:down`.
 - `test:php` and `test:e2e` run in a separate test site: `npm run wp-env:up`, `http://localhost:8889`, `admin`/`password`. See the `running-tests` skill.
@@ -22,9 +22,9 @@ Stack: PHP with no production Composer dependencies, JavaScript built with `@wor
 
 ## Git hooks
 
-On commit, Husky runs lint‑staged on staged files. To turn checks off, set these in `.env` in the repository root (gitignored): `MP_GIT_HOOKS_ENABLE=false` turns off all hooks; `MP_GIT_HOOKS_ESLINT=false` and `MP_GIT_HOOKS_CODE_SNIFFER=false` turn off one check each. Hooks only see staged files, so still run `npm run qa` before pushing. Do not use `--no-verify`.
+On commit, Husky runs lint-staged on staged files. To turn checks off, set these in `.env` in the repository root (gitignored): `MP_GIT_HOOKS_ENABLE=false` turns off all hooks; `MP_GIT_HOOKS_ESLINT=false` and `MP_GIT_HOOKS_CODE_SNIFFER=false` turn off one check each. Hooks only see staged files, so still run `npm run qa` before pushing. Do not use `--no-verify`.
 
-The lint‑staged scripts are in `tasks/`.
+The lint-staged scripts are in `tasks/`.
 
 ## Architecture
 
@@ -49,7 +49,7 @@ tests/js/                                     – JS unit tests (Node.js test ru
 - `WC_Google_Gtag_JS` extends `WC_Abstract_Google_Analytics_JS` and builds the server‑side GA4 event snippets.
 - Client‑side code in `assets/js/src/` tracks cart and checkout events that the server cannot see.
 - The plugin declares HPOS and cart/checkout blocks compatibility.
-- The GA4 measurement ID (`G-XXXXXXXXXX`) comes from the plugin settings via `WC_Google_Analytics::get_integration()`.
+- The GA4 measurement ID (`G-XXXXXXXXXX`) comes from the plugin settings via `WC_Google_Analytics_Integration::get_integration()`.
 
 ## Code rules
 
@@ -76,7 +76,7 @@ A change to an externally exposed surface must state its BC impact in the PR des
 
 - Do not add production PHP dependencies with Composer. The plugin ships without `vendor/`.
 - gtag.js loads from Google, so the PHPCS warning `WordPress.WP.EnqueuedResourceParameters.MissingVersion` is suppressed on purpose.
-- There are two wp‑env configs: `.wp-env.json` is the dev site (port 8888) and `.wp-env.test.json` is the test site (port 8889) that PHPUnit, E2E and CI use. `wp-env run cli` commands for tests need `--config=.wp-env.test.json`.
+- There are two wp-env configs: `.wp-env.json` is the dev site (port 8888) and `.wp-env.test.json` is the test site (port 8889) that PHPUnit, E2E and CI use. `wp-env run cli` commands for tests need `--config=.wp-env.test.json`.
 - The main branch is `trunk`, not `main` or `master`.
 
 ## Git and pull requests
@@ -97,7 +97,7 @@ Skills live in `.ai/skills/` (`.claude/skills` links there). Claude Code loads t
 - `starting-branch` – name and create a branch from `trunk`.
 - `creating-pull-requests` – run the checks, fill the template and changelog entry, push and open the PR.
 - `code-quality` – lint, format, `qa`, hook switches and what CI runs.
-- `running-tests` – PHPUnit, JS and E2E tests, the wp‑env setup and PHP version bumps.
+- `running-tests` – PHPUnit, JS and E2E tests, the wp-env setup and PHP version bumps.
 - `reviewing-code` – review a PR or local changes against these rules.
 - `writing-changelog` – the `### Changelog entry` section and the `changelog: none` label.
 - `beta-compat-test` – test the released plugin against a WooCommerce beta or RC.

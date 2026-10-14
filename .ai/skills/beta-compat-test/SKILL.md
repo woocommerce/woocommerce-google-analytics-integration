@@ -1,5 +1,5 @@
 ---
-name: woo-beta-compat-test
+name: beta-compat-test
 description: Use when a new WooCommerce beta or release candidate is available and you need to test the plugin's compatibility. Triggers on phrases like "test against WC beta", "compatibility test", "new WooCommerce version".
 ---
 
@@ -13,7 +13,7 @@ Run a full compatibility test of the released plugin against a new WooCommerce b
 
 Invoke with the WooCommerce beta version as argument:
 ```
-/woo-beta-compat-test 10.6.0-beta.1
+/beta-compat-test 10.6.0-beta.1
 ```
 
 ## Process
@@ -67,10 +67,10 @@ After each command completes, analyze the report output. Summarize pass/fail sta
 Trigger both CI workflows with the beta version and wait for completion:
 
 ```bash
-gh workflow run e2e-tests.yml \
+gh workflow run e2e-tests.yml -R github.com/woocommerce/woocommerce-google-analytics-integration \
   -f wc-rc-version="<VERSION>"
 
-gh workflow run php-unit-tests.yml \
+gh workflow run php-unit-tests.yml -R github.com/woocommerce/woocommerce-google-analytics-integration \
   -f wc-rc-version="<VERSION>"
 ```
 
@@ -86,7 +86,7 @@ After triggering:
 Start the local WordPress environment with the WooCommerce beta installed:
 
 ```bash
-npm run wp-env:up
+npm run wp-env:up   # test site, port 8889
 npm run build
 npm run -- wp-env run cli --config=.wp-env.test.json -- wp plugin update woocommerce --version="<VERSION>"
 npm run -- wp-env run cli --config=.wp-env.test.json -- wp wc update
@@ -133,7 +133,7 @@ The error is in code from this repository (e.g., a PHP fatal in `includes/`, a J
 
 The error is related to the QIT tool itself or the testing environment (e.g., QIT command crashes, Docker/environment setup failures, test infrastructure timeouts, flaky QIT test runner behavior unrelated to plugin code).
 
-**Action:** Draft a Slack message for the `#qit` channel describing the error, the QIT command that was run, and the full error output. Ask the user to send the message to the coresponding channel.
+**Action:** Draft a Slack message for the `#qit` channel describing the error, the QIT command that was run, and the full error output. Ask the user to send the message to the corresponding channel.
 
 ### 3. WooCommerce / other plugin error — report to #woo-core-releases
 

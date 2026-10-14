@@ -6,10 +6,16 @@ on:
       - trunk
     paths:
       - "**.js"
+      - "**.mjs"
+      - "**.cjs"
+      - package.json
       - .github/workflows/js-linting.yml
   pull_request:
     paths:
       - "**.js"
+      - "**.mjs"
+      - "**.cjs"
+      - package.json
       - .github/workflows/js-linting.yml
 
 concurrency:
@@ -36,5 +42,5 @@ jobs:
       - name: Prepare annotation formatter
         uses: woocommerce/grow/eslint-annotation@e981c25267d29c39ff6ab1ae4ea09b267efae86c # actions-v3.0.6
 
-      - name: Lint JavaScript and annotate linting errors
-        run: npm run lint:js -- --quiet --format ./eslintFormatter.cjs
+      - name: Lint JavaScript and annotate linting problems
+        run: npm run lint:js -- --format ./eslintFormatter.cjs

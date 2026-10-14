@@ -23,7 +23,7 @@ One line per change, after the `>` line, starting with a type prefix:
 | `Update` | A big change to something that was not broken |
 | `Fix` | Something that was not working |
 | `Tweak` | A small change of little importance |
-| `Dev` | A developer‑facing change only |
+| `Dev` | A developer-facing change only |
 | `Doc` | Customer or developer documentation |
 | `Break` | A change that breaks earlier API or functionality |
 

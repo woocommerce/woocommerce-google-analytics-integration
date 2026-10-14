@@ -1,6 +1,6 @@
 # Google Analytics for WooCommerce – Agent Guidelines
 
-A WordPress/WooCommerce plugin that adds Google Analytics (GA4) tracking through gtag.js. It tracks e‑commerce events (add to cart, purchase and more) on classic and block‑based storefronts, and integrates with the WP Consent API for GDPR compliance.
+A WordPress/WooCommerce plugin that adds Google Analytics (GA4) tracking through gtag.js. It tracks e-commerce events (add to cart, purchase and more) on classic and block-based storefronts, and integrates with the WP Consent API for GDPR compliance.
 Stack: PHP with no production Composer dependencies, JavaScript built with `@wordpress/scripts`, PHPUnit, Playwright and the Node.js test runner.
 
 ## Commands
@@ -46,8 +46,8 @@ tests/js/                                     – JS unit tests (Node.js test ru
 ```
 
 - The plugin registers as a WooCommerce Integration (`WC_Integration` subclass). Settings live under WooCommerce > Settings > Integrations > Google Analytics.
-- `WC_Google_Gtag_JS` extends `WC_Abstract_Google_Analytics_JS` and builds the server‑side GA4 event snippets.
-- Client‑side code in `assets/js/src/` tracks cart and checkout events that the server cannot see.
+- `WC_Google_Gtag_JS` extends `WC_Abstract_Google_Analytics_JS` and builds the server-side GA4 event snippets.
+- Client-side code in `assets/js/src/` tracks cart and checkout events that the server cannot see.
 - The plugin declares HPOS and cart/checkout blocks compatibility.
 - The GA4 measurement ID (`G-XXXXXXXXXX`) comes from the plugin settings via `WC_Google_Analytics_Integration::get_integration()`.
 
@@ -58,7 +58,7 @@ tests/js/                                     – JS unit tests (Node.js test ru
 - `manage_woocommerce` is a known custom capability. Hook names may use `/` as a delimiter.
 - JS: `@wordpress/eslint-plugin/recommended`. Use `@wordpress/i18n` for translations and `@wordpress/hooks` for extensibility.
 - Edit JS in `assets/js/src/`, then run `npm run dev` or `npm run start`.
-- Formatting: PHP and JS use tabs (width 4); JSON and YAML use 2 spaces. All files: UTF‑8, LF, final newline.
+- Formatting: PHP and JS use tabs (width 4); JSON and YAML use 2 spaces. All files: UTF-8, LF, final newline.
 - `WC_GOOGLE_ANALYTICS_INTEGRATION_MIN_WC_VER` is the minimum WooCommerce version. Do not use newer WooCommerce APIs without a compatibility check.
 - Tag new hooks, functions and methods `@since x.x.x`. Woorelease replaces it with the version in the paths listed in `package.json` `config.version_replace_paths`.
 
@@ -106,4 +106,4 @@ Skills live in `.ai/skills/` (`.claude/skills` links there). Claude Code loads t
 
 - **Always:** run `npm run qa` and the tests for the code you touched before pushing; sanitize input and escape output; follow the PR template; use the plugin text domain.
 - **Ask first:** new Composer or npm dependencies; CI workflow changes; changes to a surface listed under Backward compatibility; raising the minimum PHP or WooCommerce version.
-- **Never:** commit to `trunk`; commit `.env`, secrets or API keys; edit generated or vendored files (`assets/js/build/`, `vendor/`, `node_modules/`, `docs/Hooks.md`); skip hooks with `--no-verify`; hard‑code a tracking ID.
+- **Never:** commit to `trunk`; commit `.env`, secrets or API keys; edit generated or vendored files (`assets/js/build/`, `vendor/`, `node_modules/`, `docs/Hooks.md`); skip hooks with `--no-verify`; hard-code a tracking ID.

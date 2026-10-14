@@ -29,4 +29,4 @@ Only report issues you are sure of after reading the code. Mark anything uncerta
 
 ## 3. Report
 
-Group findings as **Must fix**, **Should fix** and **Questions**, each with `file:line` and a short reason. End with a one‑line verdict.
+Group findings as **Must fix**, **Should fix** and **Questions**, each with `file:line` and a short reason. End with a one-line verdict.

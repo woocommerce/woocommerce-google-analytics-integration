@@ -55,7 +55,7 @@ CI runs PHPUnit this way, on a matrix of PHP and WooCommerce versions (`.github/
 
 `npm run test:e2e-dev` runs the tests in a visible browser with the Playwright debugger. One spec: `npm run test:e2e -- tests/e2e/specs/<file>.test.js`. Failure screenshots land in `tests/e2e/test-results/`.
 
-On GitHub Actions, E2E runs on every PR (except docs‑only changes) and on pushes to `trunk` and `release/*`. To test a WordPress or WooCommerce RC, run the `e2e-tests.yml` or `php-unit-tests.yml` workflow by hand with its RC inputs (see the `beta-compat-test` skill).
+On GitHub Actions, E2E runs on every PR (except docs-only changes) and on pushes to `trunk` and `release/*`. To test a WordPress or WooCommerce RC, run the `e2e-tests.yml` or `php-unit-tests.yml` workflow by hand with its RC inputs (see the `beta-compat-test` skill).
 
 ## PHP versions
 

@@ -27,7 +27,7 @@ Never run `gh pr create` without this workflow.
 - **Description** – what changed and why. Link the Linear issue or `Closes #…`, and related PRs. State the BC impact if the PR touches a surface listed in `AGENTS.md` under Backward compatibility.
 - **Testing instructions** – numbered steps a reviewer can follow, with the expected result of each.
 - **Screenshots** – before and after for visible changes, otherwise `_N/A_`.
-- **Code review notes** – only what the diff does not show: trade‑offs, risks, context, open questions. If every point could be read from the code, write `_N/A_`.
+- **Code review notes** – only what the diff does not show: trade-offs, risks, context, open questions. If every point could be read from the code, write `_N/A_`.
 - **After-merge notes** – anything to do after merging, otherwise `_N/A_`.
 - **Tasks** – tick only the boxes that apply.
 - **Changelog entry** – keep the heading exact; Woorelease parses it.

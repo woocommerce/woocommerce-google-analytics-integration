@@ -89,7 +89,7 @@ abstract class WC_Abstract_Google_Analytics_JS {
 
 		// When WC redirects after a successful add-to-cart, in-memory script data is lost before render.
 		// Stash the formatted product in the WC session so the next request can re-emit it. Issue #427 / STORMA-42.
-		add_filter( 'woocommerce_add_to_cart_redirect', array( $this, 'persist_added_to_cart_for_redirect' ) );
+		add_filter( 'woocommerce_add_to_cart_redirect', array( $this, 'persist_added_to_cart_for_redirect' ), 10, 2 );
 		add_action( 'woocommerce_ajax_added_to_cart', array( $this, 'persist_added_to_cart_for_ajax_redirect' ) );
 
 		// On the redirected page, restore the captured event data and mark add_to_cart for firing.
@@ -537,11 +537,16 @@ abstract class WC_Abstract_Google_Analytics_JS {
 	 * will pick it up via `restore_added_to_cart_from_session()` and fire the
 	 * event.
 	 *
-	 * @param string|false $url Redirect URL (returned unchanged).
+	 * @param string|false    $url     Redirect URL (returned unchanged).
+	 * @param WC_Product|null $product Product being added. `null` when WooCommerce only builds the cart link.
 	 *
 	 * @return string|false
 	 */
-	public function persist_added_to_cart_for_redirect( $url ) {
+	public function persist_added_to_cart_for_redirect( $url, $product = null ) {
+		if ( ! $product instanceof WC_Product ) {
+			return $url;
+		}
+
 		if ( $url || 'yes' === get_option( 'woocommerce_cart_redirect_after_add' ) ) {
 			$this->persist_pending_added_to_cart();
 		}

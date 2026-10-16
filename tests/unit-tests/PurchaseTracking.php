@@ -103,6 +103,38 @@ class PurchaseTracking extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Failed orders must not be tracked.
+	 *
+	 * @return void
+	 */
+	public function test_failed_order_does_not_track() {
+		$this->order->update_status( 'failed' );
+		$_GET['key'] = $this->order->get_order_key();
+
+		do_action( 'woocommerce_thankyou', $this->order->get_id() );
+
+		$data = json_decode( $this->gtag->get_script_data(), true );
+		$this->assertArrayNotHasKey( 'order', $data );
+		$this->assertSame( '', wc_get_order( $this->order->get_id() )->get_meta( '_ga_tracked' ) );
+	}
+
+	/**
+	 * Cancelled orders must not be tracked.
+	 *
+	 * @return void
+	 */
+	public function test_cancelled_order_does_not_track() {
+		$this->order->update_status( 'cancelled' );
+		$_GET['key'] = $this->order->get_order_key();
+
+		do_action( 'woocommerce_thankyou', $this->order->get_id() );
+
+		$data = json_decode( $this->gtag->get_script_data(), true );
+		$this->assertArrayNotHasKey( 'order', $data );
+		$this->assertSame( '', wc_get_order( $this->order->get_id() )->get_meta( '_ga_tracked' ) );
+	}
+
+	/**
 	 * With purchase tracking turned off nothing is tracked.
 	 *
 	 * @return void

@@ -75,7 +75,7 @@ class AddToCartRedirectSurvival extends EventsDataTest {
 	public function test_redirect_filter_persists_added_to_cart_to_session() {
 		$product = WC_Helper_Product::create_simple_product();
 		$this->gtag->capture_added_to_cart( 'mock-key', $product->get_id(), 1, 0, [] );
-		$this->gtag->persist_added_to_cart_for_redirect( 'http://example.test/cart' );
+		$this->gtag->persist_added_to_cart_for_redirect( 'http://example.test/cart', $product );
 
 		$pending = WC()->session->get( '_ga_pending_added_to_cart' );
 		$this->assertIsArray( $pending );
@@ -96,7 +96,7 @@ class AddToCartRedirectSurvival extends EventsDataTest {
 		$product = WC_Helper_Product::create_simple_product();
 		$this->gtag->capture_added_to_cart( 'mock-key', $product->get_id(), 1, 0, [] );
 		$this->gtag->append_script_data( 'events', 'add_to_cart' );
-		$this->gtag->persist_added_to_cart_for_redirect( false );
+		$this->gtag->persist_added_to_cart_for_redirect( false, $product );
 		$this->gtag->restore_added_to_cart_from_session();
 
 		$data = $this->script_data();
@@ -117,11 +117,26 @@ class AddToCartRedirectSurvival extends EventsDataTest {
 
 		$product = WC_Helper_Product::create_simple_product();
 		$this->gtag->capture_added_to_cart( 'mock-key', $product->get_id(), 1, 0, [] );
-		$this->gtag->persist_added_to_cart_for_redirect( false );
+		$this->gtag->persist_added_to_cart_for_redirect( false, $product );
 
 		$pending = WC()->session->get( '_ga_pending_added_to_cart' );
 		$this->assertIsArray( $pending );
 		$this->assertSame( $product->get_id(), $pending['id'] );
+	}
+
+	/**
+	 * WooCommerce applies the redirect filter with no product to build `wc_add_to_cart_params.cart_url`.
+	 *
+	 * @return void
+	 */
+	public function test_redirect_filter_without_product_does_not_persist() {
+		update_option( 'woocommerce_cart_redirect_after_add', 'yes' );
+
+		$product = WC_Helper_Product::create_simple_product();
+		$this->gtag->capture_added_to_cart( 'mock-key', $product->get_id(), 1, 0, [] );
+		$this->gtag->persist_added_to_cart_for_redirect( wc_get_cart_url(), null );
+
+		$this->assertEmpty( WC()->session->get( '_ga_pending_added_to_cart' ) );
 	}
 
 	/**

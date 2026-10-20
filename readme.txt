@@ -58,10 +58,4 @@ Duplicate Google Analytics code causes a conflict in tracking. Remove any other 
 * Fix - Strip the order key and other sensitive query parameters from the page URL and referrer sent to Google Analytics, and send an explicit denied consent state for undecided visitors on opt-in sites.
 * Update GitHub Action references.
 
-= 2.4.1 - 2026-08-25 =
-* Fix - Purchase event no longer reports a false item discount in stores that enter prices inclusive of tax, and no longer drops coupon discounts for quantities above one; item price and discount are now per unit and tax-exclusive.
-* Fix - Purchase event value now sums the item prices × quantity, excluding tax and shipping as GA4 expects, instead of the gross order total.
-* Tweak - WordPress 7.1 compatibility.
-* Update - Require WordPress 7.0+.
-
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce-google-analytics-integration/trunk/changelog.txt).

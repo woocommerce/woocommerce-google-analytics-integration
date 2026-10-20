@@ -1,5 +1,13 @@
 *** Changelog ***
 
+= 2.4.4 - 2026-10-20 =
+* Dev - Add shared npm scripts, a pre-commit hook, Dependabot for GitHub Actions and a Node 24 pin.
+* Dev - Declare GPL-3.0-or-later in package metadata to match the plugin header.
+* Dev - Require yoast/phpunit-polyfills 1.1.5 or newer for PHP 8.5.
+* Dev - Run the JavaScript unit tests in CI and update the README.
+* Fix - Send `add_to_cart` once, not twice, when "Redirect to the cart page after successful addition" is off.
+* Fix - Stop sending the purchase event for failed and cancelled orders, so a later successful payment for the same order is still tracked.
+
 = 2.4.3 - 2026-10-12 =
 * Fix - Report the catalog price of Composite Products instead of 0 in `view_item`, `view_item_list`, `select_content` and `add_to_cart` events.
 * Update - Bump the minimum required WooCommerce version to 11.1 and the compatibility version to 11.2.

@@ -22,7 +22,8 @@ Google Analytics for WooCommerce utilizes npm scripts for task management utilit
 
 Shared commands (the same names are used across our plugin repositories):
 
--   `npm run lint` - Runs `lint:php` (PHPCS), `lint:php:deprecations` (PHP syntax and deprecation check with your local PHP) and `lint:js` (ESLint, which also checks Prettier formatting of JavaScript and fails on warnings).
+-   `npm run lint` - Runs `lint:php` (PHPCS), `lint:php:deprecations` (PHP syntax and deprecation check with your local PHP), `lint:phpstan` (PHPStan) and `lint:js` (ESLint, which also checks Prettier formatting of JavaScript and fails on warnings).
+-   `npm run lint:phpstan` - Runs PHPStan (level 9). Errors already in the code are listed in `phpstan-baseline.neon`; new ones fail. `npm run lint:phpstan:baseline` rewrites that list after you fix one.
 -   `npm run format` - Formats the JavaScript files with Prettier.
 -   `npm run qa` - Runs every check that needs no Docker environment: `lint` and `test:js`.
 -   `npm run test:js`, `npm run test:php`, `npm run test:e2e` - Run the tests. See below for the setup that `test:php` and `test:e2e` need.
@@ -98,13 +99,14 @@ An explanation of output can be [found here](https://github.com/squizlabs/PHP_Co
 
 ### Pre-commit hook
 
-`npm install` sets up a Git pre-commit hook ([husky](https://typicode.github.io/husky/) and [lint-staged](https://github.com/lint-staged/lint-staged)). It runs PHPCS on staged PHP files and ESLint on staged JavaScript files, and blocks the commit if they report problems. PHPCS needs `composer install`.
+`npm install` sets up a Git pre-commit hook ([husky](https://typicode.github.io/husky/) and [lint-staged](https://github.com/lint-staged/lint-staged)). It runs PHPCS on staged PHP files, PHPStan on the whole plugin, and ESLint on staged JavaScript files, and blocks the commit if they report problems. PHPCS and PHPStan need `composer install`.
 
 To turn checks off, add any of these lines to a `.env` file in the repository root (it is git-ignored):
 
 ```sh
 MP_GIT_HOOKS_ENABLE=false        # skip the whole hook
 MP_GIT_HOOKS_CODE_SNIFFER=false  # skip PHPCS
+MP_GIT_HOOKS_PHPSTAN=false       # skip PHPStan
 MP_GIT_HOOKS_ESLINT=false        # skip ESLint
 ```
 

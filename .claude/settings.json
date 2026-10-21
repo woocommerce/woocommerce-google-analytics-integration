@@ -9,6 +9,7 @@
       "Bash(npm run qa:*)",
       "Bash(npm run lint:*)",
       "Bash(npm run lint:php:*)",
+      "Bash(npm run lint:phpstan:*)",
       "Bash(npm run lint:php:deprecations:*)",
       "Bash(npm run lint:js:*)",
       "Bash(npm run format:*)",
@@ -40,6 +41,9 @@
       "mcp__playwright__browser_handle_dialog",
       "mcp__playwright__browser_hover",
       "mcp__playwright__browser_press_key"
+    ],
+    "ask": [
+      "Bash(npm run lint:phpstan:baseline:*)"
     ]
   }
 }

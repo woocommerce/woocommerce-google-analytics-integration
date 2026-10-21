@@ -8,22 +8,23 @@ Stack: PHP with no production Composer dependencies, JavaScript built with `@wor
 | Task | Command |
 |---|---|
 | Start / stop dev site | `npm run env:start` / `npm run env:stop` |
-| All lint checks | `npm run lint` (`lint:php`, `lint:php:deprecations`, `lint:js`) |
+| All lint checks | `npm run lint` (`lint:php`, `lint:php:deprecations`, `lint:phpstan`, `lint:js`) |
 | Format | `npm run format` |
 | Everything CI checks without a database | `npm run qa` |
 | Tests | `npm run test:php`, `npm run test:js`, `npm run test:e2e` |
 
-- Setup: `npm install`, `composer install` (dev tools only: PHPCS, PHPUnit). Use the Node version in `.nvmrc` (`nvm use`).
+- Setup: `npm install`, `composer install` (dev tools only: PHPCS, PHPStan, PHPUnit). Use the Node version in `.nvmrc` (`nvm use`).
 - Build: `npm run dev` (unminified), `npm run start` (watch), `npm run build` (production bundle, `.pot` file and plugin zip).
 - The dev site runs at `http://localhost:8888`. `env:start`/`env:stop` are aliases for `wp-env:dev:up`/`wp-env:dev:down`.
 - `test:php` and `test:e2e` run in a separate test site: `npm run wp-env:up`, `http://localhost:8889`, `admin`/`password`. See the `running-tests` skill.
 - `qa` = `lint` + `test:js` and needs no Docker. CI also runs PHPUnit, E2E, Plugin Check and a build.
-- `lint:js` fails on warnings too (`--max-warnings 0`). There is no `lint:css` or `lint:phpstan`.
-- `.claude/settings.json` lets Claude Code run `npm ci`, `npm install` (no arguments), `qa`, `lint`, `lint:php`, `lint:php:deprecations`, `lint:js`, `format`, `test:js`, `test:php`, `test:php:setup`, `test:e2e`, `test:e2e:debug-log`, `env:start`, `env:stop`, `wp-env:up`, `wp-env:down`, `wp-env:dev:up`, `wp-env:dev:down` and `dev` without asking.
+- `lint:js` fails on warnings too (`--max-warnings 0`). There is no `lint:css`.
+- `lint:phpstan` runs PHPStan at level 9 (`phpstan.neon.dist`). Errors that were already in the code are listed in `phpstan-baseline.neon`; any new error fails. Fix new errors, don't add them to the baseline. After you fix a listed error, run `npm run lint:phpstan:baseline` to remove it from the list.
+- `.claude/settings.json` lets Claude Code run `npm ci`, `npm install` (no arguments), `qa`, `lint`, `lint:php`, `lint:php:deprecations`, `lint:phpstan`, `lint:js`, `format`, `test:js`, `test:php`, `test:php:setup`, `test:e2e`, `test:e2e:debug-log`, `env:start`, `env:stop`, `wp-env:up`, `wp-env:down`, `wp-env:dev:up`, `wp-env:dev:down` and `dev` without asking. It asks before `lint:phpstan:baseline`.
 
 ## Git hooks
 
-On commit, Husky runs lint-staged on staged files. To turn checks off, set these in `.env` in the repository root (gitignored): `MP_GIT_HOOKS_ENABLE=false` turns off all hooks; `MP_GIT_HOOKS_ESLINT=false` and `MP_GIT_HOOKS_CODE_SNIFFER=false` turn off one check each. Hooks only see staged files, so still run `npm run qa` before pushing. Do not use `--no-verify`.
+On commit, Husky runs lint-staged on staged files. To turn checks off, set these in `.env` in the repository root (gitignored): `MP_GIT_HOOKS_ENABLE=false` turns off all hooks; `MP_GIT_HOOKS_ESLINT=false`, `MP_GIT_HOOKS_CODE_SNIFFER=false` and `MP_GIT_HOOKS_PHPSTAN=false` turn off one check each. Hooks only see staged files (PHPStan checks the whole plugin when a PHP file is staged), so still run `npm run qa` before pushing. Do not use `--no-verify`.
 
 The lint-staged scripts are in `tasks/`.
 

@@ -1,2 +1,235 @@
 parameters:
-	ignoreErrors: []
+	ignoreErrors:
+		-
+			message: '#^Property WooCommerce\:\:\$integrations \(WC_Integrations\) in empty\(\) is not falsy\.$#'
+			identifier: empty.property
+			count: 1
+			path: includes/abilities/class-wc-google-analytics-get-tracking-settings-ability.php
+
+		-
+			message: '#^Call to an undefined method WC_Abstract_Order\:\:get_order_number\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: includes/class-wc-abstract-google-analytics-js.php
+
+		-
+			message: '#^Call to an undefined method WC_Order_Item\:\:get_product\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: includes/class-wc-abstract-google-analytics-js.php
+
+		-
+			message: '#^Call to an undefined method WC_Order_Item\:\:get_subtotal\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: includes/class-wc-abstract-google-analytics-js.php
+
+		-
+			message: '#^Call to an undefined method WC_Order_Item\:\:get_total\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: includes/class-wc-abstract-google-analytics-js.php
+
+		-
+			message: '#^Call to an undefined method WC_Order\|WC_Order_Refund\:\:key_is_valid\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: includes/class-wc-abstract-google-analytics-js.php
+
+		-
+			message: '#^Cannot access property \$name on mixed\.$#'
+			identifier: property.nonObject
+			count: 1
+			path: includes/class-wc-abstract-google-analytics-js.php
+
+		-
+			message: '#^Cannot access property \$term_id on mixed\.$#'
+			identifier: property.nonObject
+			count: 3
+			path: includes/class-wc-abstract-google-analytics-js.php
+
+		-
+			message: '#^Parameter \#1 \$number of function wc_format_decimal expects float\|string, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: includes/class-wc-abstract-google-analytics-js.php
+
+		-
+			message: '#^Parameter \#1 \$object_or_string of function is_a expects object, array\|WC_Product given\.$#'
+			identifier: argument.type
+			count: 1
+			path: includes/class-wc-abstract-google-analytics-js.php
+
+		-
+			message: '#^Parameter \#1 \$text of function esc_js expects string, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: includes/class-wc-abstract-google-analytics-js.php
+
+		-
+			message: '#^Parameter \#1 \$var of function wc_clean expects array\|string, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: includes/class-wc-abstract-google-analytics-js.php
+
+		-
+			message: '#^Parameter \#2 \$data of method WC_Abstract_Google_Analytics_JS\:\:set_script_data\(\) expects array\|string, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: includes/class-wc-abstract-google-analytics-js.php
+
+		-
+			message: '#^Parameter \#2 \$src of function wp_register_script expects non\-empty\-string\|false, '''' given\.$#'
+			identifier: argument.type
+			count: 1
+			path: includes/class-wc-abstract-google-analytics-js.php
+
+		-
+			message: '#^Parameter \#2 \$value of method WC_Data\:\:update_meta_data\(\) expects array\|string, int given\.$#'
+			identifier: argument.type
+			count: 1
+			path: includes/class-wc-abstract-google-analytics-js.php
+
+		-
+			message: '#^Parameter \#4 \$quantity of method WC_Abstract_Google_Analytics_JS\:\:get_formatted_product\(\) expects bool\|int, int\|string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: includes/class-wc-abstract-google-analytics-js.php
+
+		-
+			message: '#^Action callback returns bool but should not return anything\.$#'
+			identifier: return.void
+			count: 1
+			path: includes/class-wc-google-analytics.php
+
+		-
+			message: '#^Method WC_Google_Analytics\:\:add_wc_setup_task\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: includes/class-wc-google-analytics.php
+
+		-
+			message: '#^Method WC_Google_Analytics\:\:init_form_fields\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: includes/class-wc-google-analytics.php
+
+		-
+			message: '#^Method WC_Google_Analytics\:\:show_options_info\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: includes/class-wc-google-analytics.php
+
+		-
+			message: '#^Binary operation "\." between ''https\://www…'' and mixed results in an error\.$#'
+			identifier: binaryOp.invalid
+			count: 1
+			path: includes/class-wc-google-gtag-js.php
+
+		-
+			message: '#^Call to an undefined method WC_Abstract_Google_Analytics_JS\:\:get_enabled_events_for_settings\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: includes/class-wc-google-gtag-js.php
+
+		-
+			message: '#^Call to an undefined method WC_Abstract_Google_Analytics_JS\:\:register_scripts\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: includes/class-wc-google-gtag-js.php
+
+		-
+			message: '#^Cannot assign offset string to string\.$#'
+			identifier: offsetAssign.dimType
+			count: 2
+			path: includes/class-wc-google-gtag-js.php
+
+		-
+			message: '#^Method WC_Google_Gtag_JS\:\:get_script_data\(\) should return string but returns string\|false\.$#'
+			identifier: return.type
+			count: 1
+			path: includes/class-wc-google-gtag-js.php
+
+		-
+			message: '#^Parameter \#1 \$handle of function wp_enqueue_script expects non\-empty\-string, string given\.$#'
+			identifier: argument.type
+			count: 3
+			path: includes/class-wc-google-gtag-js.php
+
+		-
+			message: '#^Parameter \#1 \$handle of function wp_register_script expects non\-empty\-string, string given\.$#'
+			identifier: argument.type
+			count: 3
+			path: includes/class-wc-google-gtag-js.php
+
+		-
+			message: '#^Parameter \#1 \$text of function esc_js expects string, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: includes/class-wc-google-gtag-js.php
+
+		-
+			message: '#^Parameter \#2 \$callback of function array_filter expects \(callable\(lowercase\-string\)\: bool\)\|null, ''strlen'' given\.$#'
+			identifier: argument.type
+			count: 1
+			path: includes/class-wc-google-gtag-js.php
+
+		-
+			message: '#^Parameter \#2 \$src of function wp_register_script expects non\-empty\-string\|false, '''' given\.$#'
+			identifier: argument.type
+			count: 2
+			path: includes/class-wc-google-gtag-js.php
+
+		-
+			message: '#^Parameter \#2 \$src of function wp_register_script expects non\-empty\-string\|false, string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: includes/class-wc-google-gtag-js.php
+
+		-
+			message: '#^Parameter \#2 \$str of function explode expects string, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: includes/class-wc-google-gtag-js.php
+
+		-
+			message: '#^Parameter \#3 \$deps of function wp_register_script expects array\<non\-empty\-string\>, array\{string\} given\.$#'
+			identifier: argument.type
+			count: 1
+			path: includes/class-wc-google-gtag-js.php
+
+		-
+			message: '#^Property WC_Google_Gtag_JS\:\:\$script_data \(string\) does not accept default value of type array\.$#'
+			identifier: property.defaultValue
+			count: 1
+			path: includes/class-wc-google-gtag-js.php
+
+		-
+			message: '#^Action callback returns WC_Google_Analytics_Integration but should not return anything\.$#'
+			identifier: return.void
+			count: 1
+			path: woocommerce-google-analytics-integration.php
+
+		-
+			message: '#^Method WC_Google_Analytics_Integration\:\:get_integration\(\) should return WC_Google_Analytics but returns mixed\.$#'
+			identifier: return.type
+			count: 1
+			path: woocommerce-google-analytics-integration.php
+
+		-
+			message: '#^Method WC_Google_Analytics_Integration\:\:load_plugin_textdomain\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: woocommerce-google-analytics-integration.php
+
+		-
+			message: '#^Method WC_Google_Analytics_Integration\:\:maybe_show_ga_pro_notices\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: woocommerce-google-analytics-integration.php
+
+		-
+			message: '#^Method WC_Google_Analytics_Integration\:\:woocommerce_missing_notice\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: woocommerce-google-analytics-integration.php

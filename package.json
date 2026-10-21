@@ -14,7 +14,7 @@
   },
   "devDependencies": {
     "@playwright/test": "~1.61.0",
-    "@wordpress/env": "^11.16.0",
+    "@wordpress/env": "^12.0.0",
     "@wordpress/eslint-plugin": "^25.10.0",
     "@wordpress/scripts": "^35.0.0",
     "@wordpress/url": "^4.56.0",
@@ -30,9 +30,6 @@
     "@babel/core": "^7.29.6",
     "@babel/runtime": "^7.27.6",
     "markdown-it": "^14.3.2",
-    "@wordpress/env": {
-      "adm-zip": "^0.6.1"
-    },
     "@wordpress/scripts": {
       "adm-zip": "^0.6.1",
       "webpack-dev-server": "^5.2.6"

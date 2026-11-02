@@ -9,6 +9,7 @@ on:
 permissions:
   pull-requests: write
   contents: write
+  security-events: read
   statuses: write
 
 jobs:
@@ -17,6 +18,7 @@ jobs:
     permissions:
       pull-requests: write
       contents: write
+      security-events: read
       statuses: write
     with:
       event-name: ${{ github.event_name }}

@@ -38,14 +38,15 @@ jobs:
           npm run build
           echo "::endgroup::"
 
+      # workflow_run: a call from dev-build-after-auto-merge.yml.
       - name: Publish dev build to GitHub
-        if: ${{ github.event_name == 'push' && github.ref_name == 'trunk' }}
+        if: ${{ (github.event_name == 'push' || github.event_name == 'workflow_run') && github.ref_name == 'trunk' }}
         uses: woocommerce/grow/publish-extension-dev-build@e981c25267d29c39ff6ab1ae4ea09b267efae86c # actions-v3.0.6
         with:
           extension-asset-path: woocommerce-google-analytics-integration.zip
 
       - name: Publish build artifact
-        if: ${{ ! ( github.event_name == 'push' && github.ref_name == 'trunk' ) }}
+        if: ${{ ! ( (github.event_name == 'push' || github.event_name == 'workflow_run') && github.ref_name == 'trunk' ) }}
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: woocommerce-google-analytics-integration.zip

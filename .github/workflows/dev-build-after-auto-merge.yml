@@ -1,0 +1,25 @@
+name: Dev build after auto-merge
+
+# A merge by the Dependabot auto-merge workflow starts no push run, so
+# build.yml would not publish a dev build for it.
+on:
+  workflow_run:
+    workflows:
+      - Dependabot auto-merge
+    types:
+      - completed
+    branches:
+      - trunk
+
+jobs:
+  build:
+    # Only after the daily run, and only when trunk moved during it, which a merge does.
+    if: ${{ github.event.workflow_run.event == 'schedule' && github.event.workflow_run.head_sha != github.sha }}
+    # Same group as build.yml’s push runs, so two runs never publish at once;
+    # the later one cancels the earlier.
+    concurrency:
+      group: Build-${{ github.ref }}
+      cancel-in-progress: true
+    permissions:
+      contents: write
+    uses: ./.github/workflows/build.yml

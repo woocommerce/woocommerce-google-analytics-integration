@@ -9,16 +9,14 @@ on:
 permissions:
   pull-requests: write
   contents: write
-  security-events: read
   statuses: write
 
 jobs:
   dependabot-auto-merge:
-    uses: Automattic/dependabot-auto-merge-action/.github/workflows/dependabot-auto-merge.yml@18ae5f5b428fa2350538f3016df0055b78b1856d # v1.7
+    uses: Automattic/dependabot-auto-merge-action/.github/workflows/dependabot-auto-merge.yml@4c5a1f301898cbdaf3a8a045ae2e0f7010cf7bc8 # v1.7.1
     permissions:
       pull-requests: write
       contents: write
-      security-events: read
       statuses: write
     with:
       event-name: ${{ github.event_name }}

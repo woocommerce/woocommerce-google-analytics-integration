@@ -267,17 +267,24 @@ export const parsePriceFromDOM = ( priceText ) => {
 		return window.accounting.unformat( amount, decimalSeparator );
 	}
 
+	const escape = ( text ) => text.replace( /[.*+?^${}()|[\]\\-]/g, '\\$&' );
+
 	// Manual parsing using currency settings
 	// Remove whitespace and anything else that is not a digit or a separator
-	let cleaned = amount.replace( /[^\d.,]/g, '' );
+	let cleaned = amount.replace(
+		new RegExp(
+			`[^\\d.,${ escape( decimalSeparator ) }${ escape( thousandSeparator ) }]`,
+			'g'
+		),
+		''
+	);
 
 	// Remove thousand separators
 	if ( thousandSeparator ) {
-		const escapedThousand = thousandSeparator.replace(
-			/[.*+?^${}()|[\]\\]/g,
-			'\\$&'
+		cleaned = cleaned.replace(
+			new RegExp( escape( thousandSeparator ), 'g' ),
+			''
 		);
-		cleaned = cleaned.replace( new RegExp( escapedThousand, 'g' ), '' );
 	}
 
 	// Convert decimal separator to standard period for parseFloat

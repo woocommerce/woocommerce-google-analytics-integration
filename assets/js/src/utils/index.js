@@ -257,14 +257,18 @@ export const parsePriceFromDOM = ( priceText ) => {
 
 	const { decimalSeparator = '.', thousandSeparator = ',' } = currency;
 
+	// Keep only the amount, from its first digit to its last, so a currency
+	// symbol with a dot in it (Bs., د.إ) is not read as a decimal separator.
+	const amount = priceText.replace( /^\D+|\D+$/g, '' );
+
 	// Use WooCommerce's accounting.js library if available (most reliable)
 	if ( typeof window.accounting?.unformat === 'function' ) {
-		return window.accounting.unformat( priceText, decimalSeparator );
+		return window.accounting.unformat( amount, decimalSeparator );
 	}
 
 	// Manual parsing using currency settings
-	// Remove currency symbols and whitespace, keeping only digits and separators
-	let cleaned = priceText.replace( /[^\d.,]/g, '' ).trim();
+	// Remove whitespace and anything else that is not a digit or a separator
+	let cleaned = amount.replace( /[^\d.,]/g, '' );
 
 	// Remove thousand separators
 	if ( thousandSeparator ) {

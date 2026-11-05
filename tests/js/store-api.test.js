@@ -450,6 +450,10 @@ test( 'prices read from the page follow the store’s separators', () => {
 			1234.56,
 		],
 		[ '¥1,200', { decimalSeparator: '.', thousandSeparator: ',' }, 1200 ],
+		// Currency symbols with a dot, before the amount.
+		[ 'Bs.1,234.56', {}, 1234.56 ],
+		[ 'د.إ 1,234.56', {}, 1234.56 ],
+		[ '1,234.56 лв.', {}, 1234.56 ],
 		[ '', {}, 0 ],
 		[ 'Free', {}, 0 ],
 	];
@@ -466,7 +470,7 @@ test( 'prices read from the page use accounting.js when the page has it', () => 
 		unformat: ( text, decimal ) => `${ text } with ${ decimal }`,
 	};
 
-	assert.strictEqual( parsePriceFromDOM( '9,99' ), '9,99 with ,' );
+	assert.strictEqual( parsePriceFromDOM( 'Bs.9,99' ), '9,99 with ,' );
 } );
 
 test( 'prices read from the page are 0 without currency settings', () => {

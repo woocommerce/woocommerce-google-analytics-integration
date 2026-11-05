@@ -131,12 +131,15 @@ class WC_Google_Analytics_Tracking_Settings_Service {
 	}
 
 	/**
-	 * Get the measurement ID prefix used in tracking summaries.
+	 * Get the measurement ID prefix used in tracking summaries: UA, G, GT,
+	 * an empty string for no prefix, or X for any other.
+	 *
+	 * @since x.x.x Public, so the usage tracking data reports the same prefix.
 	 *
 	 * @param string $measurement_id Measurement ID.
 	 * @return string
 	 */
-	private static function get_measurement_id_prefix( string $measurement_id ): string {
+	public static function get_measurement_id_prefix( string $measurement_id ): string {
 		$prefix = strstr( strtoupper( $measurement_id ), '-', true );
 
 		if ( false === $prefix ) {

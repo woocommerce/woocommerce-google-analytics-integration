@@ -448,17 +448,15 @@ class Configuration extends EventsDataTest {
 	}
 
 	/**
-	 * Test that GA ID prefix is extracted correctly for various formats.
+	 * The usage tracking data reports the same ID prefix as the settings service,
+	 * whose test covers each ID format.
 	 *
 	 * @return void
 	 */
-	public function test_track_settings_ga_id_prefix_extraction() {
+	public function test_track_settings_reports_the_measurement_id_prefix() {
 		$cases = [
-			'G-XXXX'  => 'G',
-			'GT-XXXX' => 'GT',
-			'UA-XXXX' => 'UA',
-			''        => '',
-			'ZZ-XXXX' => 'X',
+			'g-abc'    => 'G',
+			'NOHYPHEN' => '',
 		];
 
 		foreach ( $cases as $ga_id => $expected_prefix ) {
@@ -475,11 +473,7 @@ class Configuration extends EventsDataTest {
 			);
 			$data = $ga->track_settings( [] );
 
-			$this->assertEquals(
-				$expected_prefix,
-				$data['wc-google-analytics']['ga_id'],
-				"GA ID prefix for '{$ga_id}' should be '{$expected_prefix}'"
-			);
+			$this->assertSame( $expected_prefix, $data['wc-google-analytics']['ga_id'], $ga_id );
 		}
 	}
 

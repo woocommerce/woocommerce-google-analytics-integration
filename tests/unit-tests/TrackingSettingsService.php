@@ -48,6 +48,40 @@ class TrackingSettingsService extends WP_UnitTestCase {
 	}
 
 	/**
+	 * The ID prefix sent with the usage tracking data and the Abilities API.
+	 *
+	 * @dataProvider measurement_id_prefixes
+	 *
+	 * @param string $measurement_id Stored tracking ID.
+	 * @param string $expected       Expected prefix.
+	 * @return void
+	 */
+	public function test_get_measurement_id_prefix( string $measurement_id, string $expected ) {
+		$this->assertSame(
+			$expected,
+			\WC_Google_Analytics_Tracking_Settings_Service::get_measurement_id_prefix( $measurement_id )
+		);
+	}
+
+	/**
+	 * Tracking IDs and their prefixes.
+	 *
+	 * @return array<string, array{string, string}>
+	 */
+	public function measurement_id_prefixes(): array {
+		return array(
+			'GA4'                => array( 'G-ABC123', 'G' ),
+			'lower case'         => array( 'g-abc123', 'G' ),
+			'Google tag'         => array( 'GT-ABC123', 'GT' ),
+			'Universal'          => array( 'UA-123-1', 'UA' ),
+			'other product'      => array( 'AW-123', 'X' ),
+			'empty'              => array( '', '' ),
+			'no hyphen'          => array( 'NOHYPHEN', '' ),
+			'starts with hyphen' => array( '-X', '' ),
+		);
+	}
+
+	/**
 	 * Test an empty settings snapshot returns stable false/empty values.
 	 *
 	 * @return void

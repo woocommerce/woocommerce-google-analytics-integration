@@ -1,28 +1,7 @@
 name: JavaScript Unit Tests
 
 on:
-  push:
-    branches:
-      - trunk
-    paths:
-      - "**.js"
-      - includes/class-wc-google-gtag-js.php
-      - package.json
-      - package-lock.json
-      - .nvmrc
-      - .github/workflows/js-unit-tests.yml
-  pull_request:
-    paths:
-      - "**.js"
-      - includes/class-wc-google-gtag-js.php
-      - package.json
-      - package-lock.json
-      - .nvmrc
-      - .github/workflows/js-unit-tests.yml
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  workflow_call:
 
 env:
   FORCE_COLOR: 2

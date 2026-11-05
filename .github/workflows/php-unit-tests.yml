@@ -1,28 +1,7 @@
 name: PHP Unit Tests
 
 on:
-  push:
-    branches:
-      - trunk
-    paths:
-      - "**.php"
-      - composer.json
-      - composer.lock
-      - package.json
-      - package-lock.json
-      - phpunit.xml.dist
-      - .github/workflows/php-unit-tests.yml
-      - "bin/*.sh"
-  pull_request:
-    paths:
-      - "**.php"
-      - composer.json
-      - composer.lock
-      - package.json
-      - package-lock.json
-      - phpunit.xml.dist
-      - .github/workflows/php-unit-tests.yml
-      - "bin/*.sh"
+  workflow_call:
   workflow_dispatch:
     inputs:
       php-version:
@@ -34,10 +13,6 @@ on:
       wc-rc-version:
         description: 'WooCommerce version for Release Candidate (ex. 8.7.0-rc.1)'
         default: 'latest'
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
 
 jobs:
   GetMatrix:

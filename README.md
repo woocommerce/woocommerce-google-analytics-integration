@@ -1,9 +1,6 @@
 # Google Analytics for WooCommerce
 
-[![PHP Coding Standards](https://github.com/woocommerce/woocommerce-google-analytics-integration/actions/workflows/php-coding-standards.yml/badge.svg)](https://github.com/woocommerce/woocommerce-google-analytics-integration/actions/workflows/php-coding-standards.yml)
-[![PHP Unit Tests](https://github.com/woocommerce/woocommerce-google-analytics-integration/actions/workflows/php-unit-tests.yml/badge.svg)](https://github.com/woocommerce/woocommerce-google-analytics-integration/actions/workflows/php-unit-tests.yml)
-[![JavaScript Linting](https://github.com/woocommerce/woocommerce-google-analytics-integration/actions/workflows/js-linting.yml/badge.svg)](https://github.com/woocommerce/woocommerce-google-analytics-integration/actions/workflows/js-linting.yml)
-[![JavaScript Unit Tests](https://github.com/woocommerce/woocommerce-google-analytics-integration/actions/workflows/js-unit-tests.yml/badge.svg)](https://github.com/woocommerce/woocommerce-google-analytics-integration/actions/workflows/js-unit-tests.yml)
+[![Checks](https://github.com/woocommerce/woocommerce-google-analytics-integration/actions/workflows/checks.yml/badge.svg)](https://github.com/woocommerce/woocommerce-google-analytics-integration/actions/workflows/checks.yml)
 [![Build](https://github.com/woocommerce/woocommerce-google-analytics-integration/actions/workflows/build.yml/badge.svg)](https://github.com/woocommerce/woocommerce-google-analytics-integration/actions/workflows/build.yml)
 
 WordPress plugin: Provides the integration between WooCommerce and Google Analytics.
@@ -78,7 +75,7 @@ To remove the Docker container and images (this will **delete everything** in th
 
 `npm run wp-env:destroy`
 
-On GitHub Actions, E2E tests run on every pull request (except documentation-only changes) and on pushes to `trunk` and `release/*` branches. To run them manually, for example against a WordPress or WooCommerce release candidate, open [the workflow](../../actions/workflows/e2e-tests.yml) and follow [these instructions](https://docs.github.com/en/actions/managing-workflow-runs/manually-running-a-workflow?tool=webui).
+On GitHub Actions, E2E tests run on every pull request (except documentation-only changes) and on pushes to `trunk` and `release/*` branches, as part of the `checks.yml` workflow. To run them manually, for example against a WordPress or WooCommerce release candidate, open [the workflow](../../actions/workflows/e2e-tests.yml) and follow [these instructions](https://docs.github.com/en/actions/managing-workflow-runs/manually-running-a-workflow?tool=webui).
 
 ## Local development environment
 

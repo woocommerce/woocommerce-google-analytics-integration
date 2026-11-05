@@ -28,6 +28,15 @@ registerHooks( {
 			throw error;
 		}
 	},
+	// Tell Node the sources are ES modules, which webpack knows from their syntax.
+	load( url, context, nextLoad ) {
+		return nextLoad(
+			url,
+			url.includes( '/assets/js/src/' )
+				? { ...context, format: 'module' }
+				: context
+		);
+	},
 } );
 
 const SRC = path.join( __dirname, '..', '..', '..', 'assets', 'js', 'src' );

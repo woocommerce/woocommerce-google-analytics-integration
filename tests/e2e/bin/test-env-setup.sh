@@ -11,7 +11,7 @@ wp-env run cli $CONFIG_ARG wp theme activate twentytwentytwo
 
 # WC_VERSION picks a WooCommerce version, such as 11.1.0 or 11.3.0-rc.1. Without it, the latest.
 echo -e "Install WooCommerce ${WC_VERSION:-latest} \n"
-wp-env run cli $CONFIG_ARG -- wp plugin install woocommerce --activate ${WC_VERSION:+--version="$WC_VERSION" --force}
+wp-env run cli $CONFIG_ARG -- wp plugin install woocommerce --activate ${WC_VERSION:+--version="$WC_VERSION" --force} || exit 1
 
 echo -e 'Install WP Consent API \n'
 wp-env run cli $CONFIG_ARG -- wp plugin install wp-consent-api --activate

@@ -86,10 +86,8 @@ After triggering:
 Start the local WordPress environment with the WooCommerce beta installed:
 
 ```bash
-npm run wp-env:up   # test site, port 8889
 npm run build
-npm run -- wp-env run cli --config=.wp-env.test.json -- wp plugin update woocommerce --version="<VERSION>"
-npm run -- wp-env run cli --config=.wp-env.test.json -- wp wc update
+WC_VERSION="<VERSION>" npm run wp-env:up   # test site, port 8889, with that WooCommerce version
 ```
 
 Then use the Playwright MCP browser to perform these smoke tests:

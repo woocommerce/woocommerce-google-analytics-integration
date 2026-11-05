@@ -1,19 +1,7 @@
 name: E2E Tests
 
 on:
-  push:
-    branches:
-      - trunk
-      - "release/**"
-  pull_request:
-    paths-ignore:
-      - "**.md"
-      - "docs/**"
-      - "wordpress_org_assets/**"
-      - ".github/ISSUE_TEMPLATE/**"
-      - "changelog.txt"
-      - "readme.txt"
-      - "languages/**"
+  workflow_call:
   workflow_dispatch:
     inputs:
       wp-rc-version:
@@ -21,15 +9,11 @@ on:
       wc-rc-version:
         description: 'WooCommerce version for Release Candidate (ex. 8.0.0-rc.1)'
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 jobs:
   E2ETests:
     name: E2E Tests
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     env:
       FORCE_COLOR: 2
     steps:
@@ -78,6 +62,11 @@ jobs:
 
       - name: Run tests
         run: npm run test:e2e
+
+      # A test that passed only on retry still passes the job, so list it.
+      - name: Report tests that passed only on retry
+        if: ${{ !cancelled() }}
+        run: node tests/e2e/bin/report-results.js tests/e2e/test-results/results.json
 
       - name: Check PHP debug log
         if: ${{ !cancelled() && steps.wp-env-start.outcome == 'success' }}

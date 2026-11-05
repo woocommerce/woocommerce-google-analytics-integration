@@ -57,6 +57,8 @@ The `MP_` prefix comes from MailPoet, so one `.env` works in every plugin repo. 
 
 ## What CI runs
 
+`checks.yml` runs on every PR, on pushes to `trunk` and `release/*`, and by hand (a manual run runs every job). It calls the workflows below and ends with “All checks”, the job to require on trunk: it fails when any job failed and passes when a job was skipped because none of its files changed. A new test job goes into its `needs`.
+
 | Workflow | Check |
 |---|---|
 | `php-coding-standards.yml` | `vendor/bin/phpcs` on all files, at PHP 7.4 |
@@ -65,6 +67,6 @@ The `MP_` prefix comes from MailPoet, so one `.env` works in every plugin repo. 
 | `js-unit-tests.yml` | `npm run test:js` |
 | `php-unit-tests.yml` | `bin/lint-php-deprecations.sh` and PHPUnit on a PHP and WooCommerce matrix |
 | `e2e-tests.yml` | Production build, then Playwright on the test wp-env site |
-| `build.yml`, `plugin-check.yml` | Plugin zip and the WordPress.org Plugin Check |
+| `build.yml`, the `plugin-check` job in `checks.yml` | Plugin zip and the WordPress.org Plugin Check |
 
 `npm run qa` covers the first four and the deprecation check with your local PHP. For PHPUnit and E2E, see the `running-tests` skill.

@@ -1,26 +1,7 @@
 name: JavaScript Linting
 
 on:
-  push:
-    branches:
-      - trunk
-    paths:
-      - "**.js"
-      - "**.mjs"
-      - "**.cjs"
-      - package.json
-      - .github/workflows/js-linting.yml
-  pull_request:
-    paths:
-      - "**.js"
-      - "**.mjs"
-      - "**.cjs"
-      - package.json
-      - .github/workflows/js-linting.yml
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  workflow_call:
 
 env:
   FORCE_COLOR: 2

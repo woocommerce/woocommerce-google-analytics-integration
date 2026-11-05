@@ -75,7 +75,7 @@ To remove the Docker container and images (this will **delete everything** in th
 
 `npm run wp-env:destroy`
 
-On GitHub Actions, E2E tests run on every pull request (except documentation-only changes) and on pushes to `trunk` and `release/*` branches, as part of the `checks.yml` workflow. To run them manually, for example against a WordPress or WooCommerce release candidate, open [the workflow](../../actions/workflows/e2e-tests.yml) and follow [these instructions](https://docs.github.com/en/actions/managing-workflow-runs/manually-running-a-workflow?tool=webui).
+On GitHub Actions, E2E tests run on every pull request (except documentation-only changes) and on pushes to `trunk` and `release/*` branches, as part of the `checks.yml` workflow. A failed test is retried once; the job summary lists every test that passed only on retry. To run them manually, for example against a WordPress or WooCommerce release candidate, open [the workflow](../../actions/workflows/e2e-tests.yml) and follow [these instructions](https://docs.github.com/en/actions/managing-workflow-runs/manually-running-a-workflow?tool=webui).
 
 ## Local development environment
 

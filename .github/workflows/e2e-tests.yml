@@ -63,6 +63,11 @@ jobs:
       - name: Run tests
         run: npm run test:e2e
 
+      # A test that passed only on retry still passes the job, so list it.
+      - name: Report tests that passed only on retry
+        if: ${{ !cancelled() }}
+        run: node tests/e2e/bin/report-results.js tests/e2e/test-results/results.json
+
       - name: Check PHP debug log
         if: ${{ !cancelled() && steps.wp-env-start.outcome == 'success' }}
         run: npm run test:e2e:debug-log

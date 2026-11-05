@@ -55,7 +55,7 @@ CI runs PHPUnit this way, on a matrix of PHP and WooCommerce versions (`.github/
 
 `npm run test:e2e-dev` runs the tests in a visible browser with the Playwright debugger. One spec: `npm run test:e2e -- tests/e2e/specs/<file>.test.js`. Failure screenshots land in `tests/e2e/test-results/`.
 
-On GitHub Actions, E2E runs from `checks.yml` on every PR (except docs-only changes) and on pushes to `trunk` and `release/*`. CI retries a failed test once, and the job summary lists every test that passed only on retry. To test a WordPress or WooCommerce RC, run the `e2e-tests.yml` or `php-unit-tests.yml` workflow by hand with its RC inputs (see the `beta-compat-test` skill).
+On GitHub Actions, E2E runs from `checks.yml` on every PR (except docs-only changes), on pushes to `trunk` and `release/*`, and on a manual run of `checks.yml`. Every Monday, `e2e-versions.yml` also runs it on the newest WooCommerce release (a beta or RC when one is out) and on the minimum version from the plugin header; that run blocks nothing. CI retries a failed test once, and the job summary lists every test that passed only on retry. To test a WordPress or WooCommerce RC, run the `e2e-tests.yml` or `php-unit-tests.yml` workflow by hand with its RC inputs. Locally, `WC_VERSION=11.1.0 npm run wp-env:up` sets up the test site with that WooCommerce version (see the `beta-compat-test` skill).
 
 ## PHP versions
 

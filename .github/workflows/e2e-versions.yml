@@ -1,0 +1,61 @@
+name: E2E on other WooCommerce versions
+
+# Every week, and by hand: the E2E tests on the newest WooCommerce release,
+# a beta or RC when one is out, and on the oldest version the plugin supports.
+# A new WooCommerce release can break tracking without a change here. These
+# runs only report; the pull request checks keep using the latest release.
+
+on:
+  schedule:
+    - cron: "0 5 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  versions:
+    name: Newest and minimum WooCommerce
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      newest: ${{ steps.versions.outputs.newest }}
+      minimum: ${{ steps.versions.outputs.minimum }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # The newest by version, not by date: a patch for the current release
+      # often comes out after the next beta. "11.3.0-rc.1" sorts before "11.3.0".
+      - name: Read the versions
+        id: versions
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          newest=$(gh release list --repo woocommerce/woocommerce --limit 50 --json tagName --jq '.[].tagName' \
+            | grep -E '^[0-9]+\.[0-9]+\.[0-9]+(-(beta|rc)\.[0-9]+)?$' \
+            | sed 's/-/~/' | sort -V | tail -n 1 | sed 's/~/-/')
+          minimum=$(sed -n 's/^ \* WC requires at least: *//p' woocommerce-google-analytics-integration.php)
+          # WordPress.org names the first release of 11.1 11.1.0.
+          [[ -z $minimum || $minimum == *.*.* ]] || minimum="$minimum.0"
+          if [ -z "$newest" ] || [ -z "$minimum" ]; then
+            echo "::error::Could not read the versions: newest '$newest', minimum '$minimum'."
+            exit 1
+          fi
+          echo "newest=$newest" >> "$GITHUB_OUTPUT"
+          echo "minimum=$minimum" >> "$GITHUB_OUTPUT"
+
+  e2e-tests:
+    name: WooCommerce ${{ matrix.woocommerce }}
+    needs: versions
+    strategy:
+      fail-fast: false
+      matrix:
+        woocommerce:
+          - ${{ needs.versions.outputs.newest }}
+          - ${{ needs.versions.outputs.minimum }}
+    uses: ./.github/workflows/e2e-tests.yml
+    with:
+      wc-rc-version: ${{ matrix.woocommerce }}

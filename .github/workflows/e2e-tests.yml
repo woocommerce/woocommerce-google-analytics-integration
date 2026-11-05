@@ -2,6 +2,11 @@ name: E2E Tests
 
 on:
   workflow_call:
+    inputs:
+      wc-rc-version:
+        description: The WooCommerce version to test with. Empty for the latest.
+        type: string
+        default: ''
   workflow_dispatch:
     inputs:
       wp-rc-version:
@@ -39,6 +44,8 @@ jobs:
 
       - name: Start wp-env container
         id: wp-env-start
+        env:
+          WC_VERSION: ${{ inputs.wc-rc-version }}
         run: npm run wp-env:up
 
       - name: Install WP release candidate (optional)
@@ -48,14 +55,6 @@ jobs:
         run: |
           npm run -- wp-env run cli --config=.wp-env.test.json -- wp core update --version="${INPUT_WP_RC_VERSION}"
           npm run -- wp-env run cli --config=.wp-env.test.json -- wp core update-db
-
-      - name: Install WC release candidate (optional)
-        if: github.event.inputs.wc-rc-version != ''
-        env:
-          INPUT_WC_RC_VERSION: ${{ github.event.inputs.wc-rc-version }}
-        run: |
-          npm run -- wp-env run cli --config=.wp-env.test.json -- wp plugin update woocommerce --version="${INPUT_WC_RC_VERSION}"
-          npm run -- wp-env run cli --config=.wp-env.test.json -- wp wc update
 
       - name: Download and install Chromium browser.
         run: npx playwright install chromium

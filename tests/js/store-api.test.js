@@ -450,7 +450,7 @@ test( 'prices read from the page follow the store’s separators', () => {
 			1234.56,
 		],
 		[ '¥1,200', { decimalSeparator: '.', thousandSeparator: ',' }, 1200 ],
-		// Currency symbols with a dot, before the amount.
+		// Currency symbols with a dot, before or after the amount.
 		[ 'Bs.1,234.56', {}, 1234.56 ],
 		[ 'د.إ 1,234.56', {}, 1234.56 ],
 		[ '1,234.56 лв.', {}, 1234.56 ],

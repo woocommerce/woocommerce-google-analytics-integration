@@ -67,6 +67,7 @@ jobs:
           - php: 8.4
             wp-version: latest
             wc-versions: latest
+            coverage: pcov # Measured on one row only, it slows the run down
 
     steps:
       - name: Checkout repository
@@ -76,6 +77,7 @@ jobs:
         uses: woocommerce/grow/prepare-php@e981c25267d29c39ff6ab1ae4ea09b267efae86c # actions-v3.0.6
         with:
           php-version: "${{ matrix.php }}"
+          coverage: "${{ matrix.coverage || 'none' }}"
 
       - name: Lint PHP files for deprecations
         run: ./bin/lint-php-deprecations.sh
@@ -90,6 +92,7 @@ jobs:
         env:
           WP_VERSION: ${{ matrix.wp-version }}
           MATRIX_WC_VERSIONS: ${{ matrix.wc-versions }}
+          COVERAGE: ${{ matrix.coverage }}
         run: |
           read -ra WC_VERSIONS <<< "$(echo "$MATRIX_WC_VERSIONS" | sed -r "s/ *, */ /g")"
 
@@ -106,8 +109,16 @@ jobs:
             fi
             echo "::endgroup::"
 
-            vendor/bin/phpunit
+            if [ -n "$COVERAGE" ]; then
+              php -d pcov.directory="$GITHUB_WORKSPACE" -d pcov.exclude="~/(vendor|tests)/~" vendor/bin/phpunit --coverage-clover clover.xml
+            else
+              vendor/bin/phpunit
+            fi
           done
+
+      - name: List files without test coverage
+        if: ${{ matrix.coverage }}
+        run: node tests/bin/list-uncovered-files.js clover.xml "$GITHUB_WORKSPACE" >> "$GITHUB_STEP_SUMMARY"
 
   ReleaseCandidateUnitTests:
     if: inputs.php-version != ''

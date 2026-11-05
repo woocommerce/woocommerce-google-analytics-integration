@@ -48,6 +48,10 @@ class WC_Google_Analytics extends WC_Integration {
 			}
 		}
 
+		// Saving the settings form trims the ID, but an ID stored another way
+		// (WP-CLI, an import, the legacy option) can still have spaces around it.
+		$this->settings['ga_id'] = trim( (string) $this->settings['ga_id'] );
+
 		add_action( 'admin_notices', array( $this, 'universal_analytics_upgrade_notice' ) );
 
 		include_once 'class-wc-abstract-google-analytics-js.php';

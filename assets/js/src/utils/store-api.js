@@ -378,7 +378,7 @@ export const getUpdateItemChangeFromResponse = (
 	}
 
 	const product =
-		quantityDelta > 0 ? updatedItem : ( previousItem ?? lastSeenItem );
+		quantityDelta > 0 ? updatedItem : ( lastSeenItem ?? previousItem );
 
 	if ( ! product ) {
 		return null;

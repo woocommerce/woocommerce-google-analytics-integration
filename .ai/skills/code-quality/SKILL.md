@@ -57,7 +57,7 @@ The `MP_` prefix comes from MailPoet, so one `.env` works in every plugin repo. 
 
 ## What CI runs
 
-`checks.yml` runs on every PR and on pushes to `trunk` and `release/*`. It calls the workflows below and ends with “All checks”, the job to require on trunk: it fails when any job failed and passes when a job was skipped because none of its files changed. A new test job goes into its `needs`.
+`checks.yml` runs on every PR, on pushes to `trunk` and `release/*`, and by hand (a manual run runs every job). It calls the workflows below and ends with “All checks”, the job to require on trunk: it fails when any job failed and passes when a job was skipped because none of its files changed. A new test job goes into its `needs`.
 
 | Workflow | Check |
 |---|---|

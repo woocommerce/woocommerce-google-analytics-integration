@@ -9,6 +9,7 @@ on:
     branches:
       - trunk
       - "release/**"
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -37,6 +38,8 @@ jobs:
 
       - name: Check for relevant changes
         id: filter
+        # A manual run checks everything.
+        if: github.event_name != 'workflow_dispatch'
         uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d # v4.0.3
         with:
           filters: |
@@ -67,6 +70,7 @@ jobs:
       # E2E skips a pull request only when every changed file is documentation.
       - name: Check for changes the E2E tests can see
         id: e2e
+        if: github.event_name != 'workflow_dispatch'
         uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d # v4.0.3
         with:
           predicate-quantifier: every
@@ -85,7 +89,7 @@ jobs:
   # the check the Dependabot auto-merge ruleset requires.
   build:
     name: Build extension bundle
-    if: github.event_name == 'pull_request'
+    if: github.event_name != 'push'
     uses: ./.github/workflows/build.yml
 
   plugin-check:
@@ -115,13 +119,13 @@ jobs:
   php-unit-tests:
     name: PHP unit tests
     needs: changes
-    if: needs.changes.outputs.php == 'true'
+    if: needs.changes.outputs.php != 'false'
     uses: ./.github/workflows/php-unit-tests.yml
 
   php-coding-standards:
     name: PHP coding standards
     needs: changes
-    if: needs.changes.outputs.php == 'true'
+    if: needs.changes.outputs.php != 'false'
     uses: ./.github/workflows/php-coding-standards.yml
 
   php-static-analysis:
@@ -131,19 +135,19 @@ jobs:
   js-unit-tests:
     name: JavaScript unit tests
     needs: changes
-    if: needs.changes.outputs.js == 'true'
+    if: needs.changes.outputs.js != 'false'
     uses: ./.github/workflows/js-unit-tests.yml
 
   js-linting:
     name: JavaScript linting
     needs: changes
-    if: needs.changes.outputs.js == 'true'
+    if: needs.changes.outputs.js != 'false'
     uses: ./.github/workflows/js-linting.yml
 
   e2e-tests:
     name: E2E tests
     needs: changes
-    if: needs.changes.outputs.e2e == 'true'
+    if: needs.changes.outputs.e2e != 'false'
     uses: ./.github/workflows/e2e-tests.yml
 
   # The check the trunk ruleset requires. It fails when any job failed or was

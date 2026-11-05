@@ -15,8 +15,10 @@ on:
         default: 'latest'
 
 jobs:
+  # checks.yml calls this workflow, also on its own manual runs, so tell a
+  # manual run of this workflow apart by its php-version input.
   GetMatrix:
-    if: github.event_name != 'workflow_dispatch'
+    if: inputs.php-version == ''
     name: Get WP and WC version Matrix
     runs-on: ubuntu-latest
     timeout-minutes: 5
@@ -40,7 +42,7 @@ jobs:
           includeRC: true # If an RC is upcoming, test it preferably.
 
   UnitTests:
-    if: github.event_name != 'workflow_dispatch'
+    if: inputs.php-version == ''
     name: PHP unit tests - PHP ${{ matrix.php }}, WP ${{ matrix.wp-version || 'latest' }}, WC ${{ matrix.wc-versions || 'latest' }}
     runs-on: ubuntu-latest
     timeout-minutes: 5
@@ -108,7 +110,7 @@ jobs:
           done
 
   ReleaseCandidateUnitTests:
-    if: github.event_name == 'workflow_dispatch'
+    if: inputs.php-version != ''
     name: PHP unit tests (for Release Candidates)
     runs-on: ubuntu-latest
     timeout-minutes: 5

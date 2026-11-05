@@ -230,3 +230,55 @@ export const getProductFromID = ( search, products, cart ) => {
 		)
 	);
 };
+
+/**
+ * Get currency settings from our plugin's settings.
+ *
+ * @return {Object|undefined} Currency object with decimalSeparator, thousandSeparator, precision.
+ */
+export const getCurrencySettings = () => window.ga4w?.settings?.currency;
+
+/**
+ * Parse a price string into a numeric value using currency settings.
+ *
+ * @param {string} priceText - The raw price text from DOM (e.g., "$1,234.56" or "1.234,56 €").
+ * @return {number} The parsed price as a float, or 0 if parsing failed.
+ */
+export const parsePriceFromDOM = ( priceText ) => {
+	if ( ! priceText ) {
+		return 0;
+	}
+
+	const currency = getCurrencySettings();
+	// Currency settings should be always available this is only safe check
+	if ( ! currency ) {
+		return 0;
+	}
+
+	const { decimalSeparator = '.', thousandSeparator = ',' } = currency;
+
+	// Use WooCommerce's accounting.js library if available (most reliable)
+	if ( typeof window.accounting?.unformat === 'function' ) {
+		return window.accounting.unformat( priceText, decimalSeparator );
+	}
+
+	// Manual parsing using currency settings
+	// Remove currency symbols and whitespace, keeping only digits and separators
+	let cleaned = priceText.replace( /[^\d.,]/g, '' ).trim();
+
+	// Remove thousand separators
+	if ( thousandSeparator ) {
+		const escapedThousand = thousandSeparator.replace(
+			/[.*+?^${}()|[\]\\]/g,
+			'\\$&'
+		);
+		cleaned = cleaned.replace( new RegExp( escapedThousand, 'g' ), '' );
+	}
+
+	// Convert decimal separator to standard period for parseFloat
+	if ( decimalSeparator !== '.' ) {
+		cleaned = cleaned.replace( decimalSeparator, '.' );
+	}
+
+	return parseFloat( cleaned ) || 0;
+};

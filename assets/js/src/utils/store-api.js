@@ -466,7 +466,7 @@ export const parseBatchRequestBody = ( body ) => {
  * Resolve every tracked cart change from a Store API batch request/response pair.
  *
  * A batch bundles sub-requests under `requests` and returns their results, in
- * the same order, under `responses`. Each cart sub-response body is the full
+ * the same order, under `responses`. Most cart sub-response bodies are the full
  * cart at that point, matched against the previous cart state to pick out the
  * change.
  *

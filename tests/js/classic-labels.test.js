@@ -174,11 +174,19 @@ test( 'the shipping tier leaves out the tax label after the price', () => {
 	);
 } );
 
-test( 'placing an order with no payment method, a free order, sends no add_payment_info', () => {
+/**
+ * Places a classic checkout order and returns the events it sends.
+ *
+ * @param {Object[]} paymentInputs The payment method inputs on the page.
+ * @return {Array} The events, as [ name, data ].
+ */
+const placeOrder = ( paymentInputs = [] ) => {
 	let submit;
 	const sent = [];
 	document.body = { addEventListener() {} };
 	document.addEventListener = () => {};
+	document.querySelectorAll = ( selector ) =>
+		selector.includes( 'payment_method' ) ? paymentInputs : [];
 	document.querySelector = ( selector ) =>
 		selector === 'form.checkout'
 			? {
@@ -187,7 +195,6 @@ test( 'placing an order with no payment method, a free order, sends no add_payme
 					},
 				}
 			: null;
-	window.document = document;
 
 	classicTracking(
 		( eventName ) => ( data ) => sent.push( [ eventName, data ] ),
@@ -195,9 +202,28 @@ test( 'placing an order with no payment method, a free order, sends no add_payme
 	);
 	submit();
 
+	return sent;
+};
+
+test( 'placing an order with no payment method, a free order, sends no add_payment_info', () => {
+	assert.deepStrictEqual( placeOrder(), [] );
+} );
+
+test( 'placing an order with a payment method sends add_payment_info', () => {
+	const events = placeOrder( [
+		input( {
+			checked: true,
+			value: 'cod',
+			labels: [ label( 'Cash on delivery' ) ],
+		} ),
+	] );
+
 	assert.deepStrictEqual(
-		sent.map( ( [ eventName ] ) => eventName ),
-		[]
+		events.map( ( [ eventName, { paymentType } ] ) => [
+			eventName,
+			paymentType,
+		] ),
+		[ [ 'add_payment_info', 'Cash on delivery' ] ]
 	);
 } );
 

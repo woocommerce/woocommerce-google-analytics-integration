@@ -31,7 +31,6 @@ jobs:
     outputs:
       php: ${{ steps.filter.outputs.php }}
       js: ${{ steps.filter.outputs.js }}
-      e2e: ${{ steps.e2e.outputs.e2e }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -66,24 +65,6 @@ jobs:
               - package.json
               - package-lock.json
               - .nvmrc
-
-      # E2E skips a pull request only when every changed file is documentation.
-      - name: Check for changes the E2E tests can see
-        id: e2e
-        if: github.event_name != 'workflow_dispatch'
-        uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d # v4.0.3
-        with:
-          predicate-quantifier: every
-          filters: |
-            e2e:
-              - "**"
-              - "!**.md"
-              - "!docs/**"
-              - "!wordpress_org_assets/**"
-              - "!.github/ISSUE_TEMPLATE/**"
-              - "!changelog.txt"
-              - "!readme.txt"
-              - "!languages/**"
 
   # The job and called job names make “Build extension bundle / Build extension bundle”,
   # the check the Dependabot auto-merge ruleset requires.
@@ -144,10 +125,10 @@ jobs:
     if: needs.changes.outputs.js != 'false'
     uses: ./.github/workflows/js-linting.yml
 
+  # Runs on every pull request, like PHPStan: a new WordPress or WooCommerce
+  # release can break it without a change here.
   e2e-tests:
     name: E2E tests
-    needs: changes
-    if: needs.changes.outputs.e2e != 'false'
     uses: ./.github/workflows/e2e-tests.yml
 
   # The check the trunk ruleset requires. It fails when any job failed or was

@@ -31,7 +31,6 @@ jobs:
     outputs:
       php: ${{ steps.filter.outputs.php }}
       js: ${{ steps.filter.outputs.js }}
-      e2e: ${{ steps.e2e.outputs.e2e }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -45,16 +44,11 @@ jobs:
           filters: |
             php:
               - .github/workflows/checks.yml
-              - .github/workflows/php-unit-tests.yml
               - .github/workflows/php-coding-standards.yml
               - "**.php"
               - composer.json
               - composer.lock
-              - package.json
-              - package-lock.json
               - phpcs.xml.dist
-              - phpunit.xml.dist
-              - "bin/*.sh"
             js:
               - .github/workflows/checks.yml
               - .github/workflows/js-unit-tests.yml
@@ -66,24 +60,6 @@ jobs:
               - package.json
               - package-lock.json
               - .nvmrc
-
-      # E2E skips a pull request only when every changed file is documentation.
-      - name: Check for changes the E2E tests can see
-        id: e2e
-        if: github.event_name != 'workflow_dispatch'
-        uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d # v4.0.3
-        with:
-          predicate-quantifier: every
-          filters: |
-            e2e:
-              - "**"
-              - "!**.md"
-              - "!docs/**"
-              - "!wordpress_org_assets/**"
-              - "!.github/ISSUE_TEMPLATE/**"
-              - "!changelog.txt"
-              - "!readme.txt"
-              - "!languages/**"
 
   # The job and called job names make “Build extension bundle / Build extension bundle”,
   # the check the Dependabot auto-merge ruleset requires.
@@ -116,10 +92,10 @@ jobs:
           ignore-codes: |
             trademarked_term
 
+  # The PHP unit and E2E tests run on every pull request, like PHPStan: a new
+  # WordPress or WooCommerce release can break them without a change here.
   php-unit-tests:
     name: PHP unit tests
-    needs: changes
-    if: needs.changes.outputs.php != 'false'
     uses: ./.github/workflows/php-unit-tests.yml
 
   php-coding-standards:
@@ -146,8 +122,6 @@ jobs:
 
   e2e-tests:
     name: E2E tests
-    needs: changes
-    if: needs.changes.outputs.e2e != 'false'
     uses: ./.github/workflows/e2e-tests.yml
 
   # The check the trunk ruleset requires. It fails when any job failed or was

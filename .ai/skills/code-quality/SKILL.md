@@ -67,6 +67,7 @@ The `MP_` prefix comes from MailPoet, so one `.env` works in every plugin repo. 
 | `js-unit-tests.yml` | `npm run test:js` |
 | `php-unit-tests.yml` | `bin/lint-php-deprecations.sh` and PHPUnit on a PHP and WooCommerce matrix |
 | `e2e-tests.yml` | Production build, then Playwright on the test wp-env site |
+| `e2e-versions.yml` | Weekly, outside `checks.yml`: `e2e-tests.yml` on the newest and the minimum WooCommerce |
 | `build.yml`, the `plugin-check` job in `checks.yml` | Plugin zip and the WordPress.org Plugin Check |
 
 `npm run qa` covers the first four and the deprecation check with your local PHP. For PHPUnit and E2E, see the `running-tests` skill.

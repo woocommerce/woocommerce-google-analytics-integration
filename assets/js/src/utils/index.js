@@ -230,3 +230,67 @@ export const getProductFromID = ( search, products, cart ) => {
 		)
 	);
 };
+
+/**
+ * Get currency settings from our plugin's settings.
+ *
+ * @return {Object|undefined} Currency object with decimalSeparator, thousandSeparator, precision.
+ */
+export const getCurrencySettings = () => window.ga4w?.settings?.currency;
+
+/**
+ * Parse a price string into a numeric value using currency settings.
+ *
+ * @param {string} priceText - The raw price text from DOM (e.g., "$1,234.56" or "1.234,56 €").
+ * @return {number} The parsed price as a float, or 0 if parsing failed.
+ */
+export const parsePriceFromDOM = ( priceText ) => {
+	if ( ! priceText ) {
+		return 0;
+	}
+
+	const currency = getCurrencySettings();
+	// Currency settings should be always available this is only safe check
+	if ( ! currency ) {
+		return 0;
+	}
+
+	const { decimalSeparator = '.', thousandSeparator = ',' } = currency;
+
+	// Start at the first digit, so a currency symbol before the amount with a
+	// dot in it (Bs., د.إ) is not read as a decimal separator. Text after the
+	// amount is ignored by both parsers below.
+	const amount = priceText.replace( /^\D+/, '' );
+
+	// Use WooCommerce's accounting.js library if available (most reliable)
+	if ( typeof window.accounting?.unformat === 'function' ) {
+		return window.accounting.unformat( amount, decimalSeparator );
+	}
+
+	const escape = ( text ) => text.replace( /[.*+?^${}()|[\]\\-]/g, '\\$&' );
+
+	// Manual parsing using currency settings
+	// Remove whitespace and anything else that is not a digit or a separator
+	let cleaned = amount.replace(
+		new RegExp(
+			`[^\\d.,${ escape( decimalSeparator ) }${ escape( thousandSeparator ) }]`,
+			'g'
+		),
+		''
+	);
+
+	// Remove thousand separators
+	if ( thousandSeparator ) {
+		cleaned = cleaned.replace(
+			new RegExp( escape( thousandSeparator ), 'g' ),
+			''
+		);
+	}
+
+	// Convert decimal separator to standard period for parseFloat
+	if ( decimalSeparator !== '.' ) {
+		cleaned = cleaned.replace( decimalSeparator, '.' );
+	}
+
+	return parseFloat( cleaned ) || 0;
+};

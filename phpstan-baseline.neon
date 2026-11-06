@@ -187,12 +187,6 @@ parameters:
 			path: includes/class-wc-google-gtag-js.php
 
 		-
-			message: '#^Parameter \#2 \$str of function explode expects string, mixed given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/class-wc-google-gtag-js.php
-
-		-
 			message: '#^Parameter \#3 \$deps of function wp_register_script expects array\<non\-empty\-string\>, array\{string\} given\.$#'
 			identifier: argument.type
 			count: 1

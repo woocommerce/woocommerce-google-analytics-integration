@@ -91,6 +91,18 @@ class Configuration extends EventsDataTest {
 	}
 
 	/**
+	 * The snippet reads the domains with the settings service, so it lower-cases them too.
+	 *
+	 * @return void
+	 */
+	public function test_get_site_tag_config_linker_domains_are_lower_case() {
+		$gtag   = new WC_Google_Gtag_JS( [ 'ga_linker_cross_domains' => 'EXAMPLE.com,Sub.Example.ORG' ] );
+		$config = $gtag->get_site_tag_config();
+
+		$this->assertSame( [ 'example.com', 'sub.example.org' ], $config['linker']['domains'] );
+	}
+
+	/**
 	 * Test that whitespace in linker domains is trimmed.
 	 *
 	 * @return void

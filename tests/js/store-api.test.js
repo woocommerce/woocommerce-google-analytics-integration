@@ -326,21 +326,19 @@ test( 'a quantity decrease is a remove_from_cart valued from the line before', (
 	assert.strictEqual( change.product.totals.line_total, '3000' );
 } );
 
-test( 'a decrease is valued from the last cart the Store API returned', () => {
+test( 'a decrease after a coupon is valued from the cart before it, with the coupon', () => {
 	const key = newKey();
-	// The last response had the line at 16.00 a unit; the page cart still has 15.00.
-	api.rememberCartItems( {
-		items: [ line( key, 3, { totals: { line_total: '4800' } } ) ],
-	} );
+	// The last add response saw 15.00 a unit; a coupon then halved it in the cart.
+	api.rememberCartItems( { items: [ line( key, 3 ) ] } );
 
 	const change = api.getUpdateItemChangeFromResponse(
 		{ key, quantity: 1 },
-		{ items: [ line( key, 1, { totals: { line_total: '1600' } } ) ] },
-		{ items: [ line( key, 3 ) ] }
+		{ items: [ line( key, 1, { totals: { line_total: '750' } } ) ] },
+		{ items: [ line( key, 3, { totals: { line_total: '2250' } } ) ] }
 	);
 
 	assert.strictEqual( change.quantity, 2 );
-	assert.strictEqual( change.product.totals.line_total, '3200' );
+	assert.strictEqual( change.product.totals.line_total, '1500' );
 } );
 
 test( 'a quantity set to 0 is a remove_from_cart of the whole line', () => {

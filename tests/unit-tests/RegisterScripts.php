@@ -64,6 +64,18 @@ class RegisterScripts extends WP_UnitTestCase {
 	}
 
 	/**
+	 * A quote in the measurement id stays inside the snippet's string.
+	 *
+	 * @return void
+	 */
+	public function test_inline_snippet_escapes_the_measurement_id() {
+		$gtag    = new WC_Google_Gtag_JS( [ 'ga_id' => 'G-A"B' ] );
+		$snippet = $this->get_inline_snippet( $gtag->gtag_script_handle );
+
+		$this->assertStringContainsString( 'gtag("config", "G-A&quot;B"', $snippet );
+	}
+
+	/**
 	 * The plugin identifies itself to Google through a developer id, which must be
 	 * present in the snippet.
 	 *

@@ -1,0 +1,36 @@
+name: 'Trunk failure watch'
+
+# When the trunk build fails: retries it once, then mentions the person who
+# merged in Slack, and again every hour on weekdays until trunk is green.
+
+on:
+  workflow_run:
+    workflows:
+      - Build
+      - Checks
+    types: [completed]
+    branches: [trunk]
+  schedule:
+    - cron: '23 * * * 1-5'
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  alert:
+    name: 'Alert'
+    if: ${{ github.repository_owner == 'woocommerce' && (github.event_name != 'workflow_run' || (github.event.workflow_run.event == 'push' && github.event.workflow_run.conclusion == 'failure')) }}
+    permissions:
+      actions: write
+      contents: read
+      pull-requests: read
+    uses: mailpoet/mailpoet/.github/workflows/trunk-failure-alert.yml@trunk
+    with:
+      channel: C08H5HJ3VLG # ballade-dev-feeds
+      workflows: |
+        Build
+        Checks
+      run_id: ${{ github.event.workflow_run.id }}
+    secrets:
+      SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+      SLACK_USER_MAP: ${{ secrets.SLACK_USER_MAP }}

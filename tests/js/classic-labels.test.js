@@ -255,6 +255,10 @@ test( 'the selected option is the checked radio, a select, or the only hidden in
 	document.inputs = [ hidden ];
 	assert.strictEqual( getSelectedCheckoutOption( 'any' ), hidden );
 
+	// A checked radio wins over a hidden field placed before it.
+	document.inputs = [ hidden, checked ];
+	assert.strictEqual( getSelectedCheckoutOption( 'any' ), checked );
+
 	document.inputs = [ input( { value: 'a' } ) ];
 	assert.strictEqual( getSelectedCheckoutOption( 'any' ), undefined );
 } );

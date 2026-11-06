@@ -7,13 +7,16 @@ const classicCartItemSelector =
 	'.woocommerce-cart-form .woocommerce-cart-form__cart-item, .woocommerce-cart-form .cart_item';
 
 // A store with one shipping method renders it as a hidden input, not a radio.
-export const getSelectedCheckoutOption = ( selector ) =>
-	Array.from( document.querySelectorAll( selector ) ).find(
-		( element ) =>
-			element.checked ||
-			element.tagName === 'SELECT' ||
-			element.type === 'hidden'
+export const getSelectedCheckoutOption = ( selector ) => {
+	const elements = Array.from( document.querySelectorAll( selector ) );
+
+	return (
+		elements.find( ( { checked } ) => checked ) ??
+		elements.find(
+			( { tagName, type } ) => tagName === 'SELECT' || type === 'hidden'
+		)
 	);
+};
 
 // A hidden input has no `labels`, so look its <label for="..."> up by id.
 const getLabel = ( element ) =>

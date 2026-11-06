@@ -74,7 +74,7 @@ class WC_Google_Analytics_Tracking_Settings_Service {
 	}
 
 	/**
-	 * Parse linker domains for API-oriented output.
+	 * Parse linker domains for the Abilities API and the gtag config that storefront pages send to Google.
 	 *
 	 * @param string $domains Comma-separated domains.
 	 * @return array

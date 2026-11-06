@@ -91,27 +91,15 @@ class Configuration extends EventsDataTest {
 	}
 
 	/**
-	 * Test that whitespace in linker domains is trimmed.
+	 * The snippet reads the domains with the settings service, whose test covers each rule.
 	 *
 	 * @return void
 	 */
-	public function test_get_site_tag_config_linker_domains_with_whitespace() {
-		$gtag   = new WC_Google_Gtag_JS( [ 'ga_linker_cross_domains' => 'example.com, example.net' ] );
+	public function test_get_site_tag_config_linker_domains_use_the_settings_service() {
+		$gtag   = new WC_Google_Gtag_JS( [ 'ga_linker_cross_domains' => ' EXAMPLE.com, bad domain' ] );
 		$config = $gtag->get_site_tag_config();
 
-		$this->assertEquals( [ 'example.com', 'example.net' ], $config['linker']['domains'] );
-	}
-
-	/**
-	 * Test that invalid linker domains are ignored.
-	 *
-	 * @return void
-	 */
-	public function test_get_site_tag_config_linker_domains_rejects_invalid_domains() {
-		$gtag   = new WC_Google_Gtag_JS( [ 'ga_linker_cross_domains' => 'example.com, bad domain, https://example.net, sub.example.org, example, -bad.com, ok-store.co.uk, shop.xn--p1ai' ] );
-		$config = $gtag->get_site_tag_config();
-
-		$this->assertEquals( [ 'example.com', 'sub.example.org', 'ok-store.co.uk', 'shop.xn--p1ai' ], $config['linker']['domains'] );
+		$this->assertSame( [ 'example.com' ], $config['linker']['domains'] );
 	}
 
 	/**

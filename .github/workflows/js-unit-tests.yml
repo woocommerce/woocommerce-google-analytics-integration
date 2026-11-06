@@ -21,5 +21,19 @@ jobs:
           node-version-file: ".nvmrc"
 
       # tests/js reads the redaction helper out of class-wc-google-gtag-js.php.
+      # The coverage goes to the job summary. It only reports.
       - name: Run JavaScript unit tests
-        run: npm run test:js
+        shell: bash
+        env:
+          FORCE_COLOR: 0
+        run: |
+          npm run test:js:coverage | tee test-output.txt
+          {
+            echo "### JavaScript line coverage"
+            echo
+            echo "Lists only the source files the tests load."
+            echo
+            echo '```'
+            sed -n '/start of coverage report/,/end of coverage report/p' test-output.txt | sed -e 's/^ℹ //' -e '/of coverage report/d'
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"

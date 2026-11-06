@@ -65,6 +65,7 @@
     "lint:phpstan:baseline": "vendor/bin/phpstan analyse --memory-limit=2G --generate-baseline --allow-empty-baseline",
     "lint:php:deprecations": "./bin/lint-php-deprecations.sh",
     "test:js": "node --test \"tests/js/**/*.test.js\"",
+    "test:js:coverage": "node --test --experimental-test-coverage --test-coverage-include=\"assets/js/src/**\" \"tests/js/**/*.test.js\"",
     "format": "wp-scripts format '**/*.{js,mjs,cjs}'",
     "qa": "npm run lint && npm run test:js",
     "archive": "composer archive --file=$npm_package_name --format=zip",

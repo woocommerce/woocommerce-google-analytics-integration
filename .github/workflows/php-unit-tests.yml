@@ -118,6 +118,7 @@ jobs:
 
       - name: List files without test coverage
         if: ${{ matrix.coverage }}
+        continue-on-error: true
         run: node tests/bin/list-uncovered-files.js clover.xml "$GITHUB_WORKSPACE" >> "$GITHUB_STEP_SUMMARY"
 
   ReleaseCandidateUnitTests:

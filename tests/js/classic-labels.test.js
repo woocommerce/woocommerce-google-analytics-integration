@@ -16,6 +16,7 @@ const assert = require( 'node:assert' );
 const loadSource = require( './helpers/load-source' );
 
 const {
+	classicTracking,
 	getCheckoutOptionLabel,
 	getSelectedCheckoutOption,
 	getShippingTierLabel,
@@ -23,15 +24,17 @@ const {
 
 /**
  * A stand-in for a <label>: text parts, where a price part sits in a
- * `.woocommerce-Price-amount` element.
+ * `.woocommerce-Price-amount` element and a tax part in a `.tax_label` one.
  *
- * @param {...(string|{price: string})} parts Label text parts.
+ * @param {...(string|{price: string}|{taxLabel: string})} parts Label text parts.
  * @return {Object} The label.
  */
 const label = ( ...parts ) => {
 	const nodes = parts.map( ( part ) => ( {
-		text: part.price ?? part,
-		isPrice: part.price !== undefined,
+		text: part.price ?? part.taxLabel ?? part,
+		className:
+			( part.price !== undefined && '.woocommerce-Price-amount' ) ||
+			( part.taxLabel !== undefined && '.tax_label' ),
 		removed: false,
 		remove() {
 			this.removed = true;
@@ -46,8 +49,10 @@ const label = ( ...parts ) => {
 				.join( '' );
 		},
 		querySelectorAll( selector ) {
-			assert.strictEqual( selector, '.woocommerce-Price-amount' );
-			return nodes.filter( ( { isPrice } ) => isPrice );
+			return nodes.filter(
+				( { className } ) =>
+					className && selector.split( ', ' ).includes( className )
+			);
 		},
 		cloneNode: () => label( ...parts ),
 	};
@@ -152,6 +157,48 @@ test( 'the shipping tier is the label without its price', () => {
 		'flat_rate:1'
 	);
 	assert.strictEqual( getShippingTierLabel( undefined ), undefined );
+} );
+
+test( 'the shipping tier leaves out the tax label after the price', () => {
+	assert.strictEqual(
+		getShippingTierLabel(
+			input( {
+				labels: [
+					label( 'Flat rate: ', { price: '$4.00' }, ' ', {
+						taxLabel: '(incl. VAT)',
+					} ),
+				],
+			} )
+		),
+		'Flat rate'
+	);
+} );
+
+test( 'placing an order with no payment method, a free order, sends no add_payment_info', () => {
+	let submit;
+	const sent = [];
+	document.body = { addEventListener() {} };
+	document.addEventListener = () => {};
+	document.querySelector = ( selector ) =>
+		selector === 'form.checkout'
+			? {
+					addEventListener: ( name, callback ) => {
+						submit = callback;
+					},
+				}
+			: null;
+	window.document = document;
+
+	classicTracking(
+		( eventName ) => ( data ) => sent.push( [ eventName, data ] ),
+		{ events: [], cart: { items: [ {} ] } }
+	);
+	submit();
+
+	assert.deepStrictEqual(
+		sent.map( ( [ eventName ] ) => eventName ),
+		[]
+	);
 } );
 
 test( 'the only shipping method, a hidden input, is labelled by its label for it', () => {

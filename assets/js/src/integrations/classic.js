@@ -57,7 +57,7 @@ export const getShippingTierLabel = ( element ) => {
 	if ( label ) {
 		const clone = label.cloneNode( true );
 		clone
-			.querySelectorAll( '.woocommerce-Price-amount' )
+			.querySelectorAll( '.woocommerce-Price-amount, .tax_label' )
 			.forEach( ( node ) => node.remove() );
 
 		// With the price removed we are left with "Flat rate:" — drop the
@@ -193,13 +193,16 @@ export function classicTracking(
 			}
 
 			if ( ! paymentInfoTracked ) {
-				trackPaymentInfo(
-					getCheckoutOptionLabel(
-						getSelectedCheckoutOption(
-							checkoutPaymentMethodSelector
-						)
-					)
+				// A free order has no payment methods to choose from.
+				const paymentElement = getSelectedCheckoutOption(
+					checkoutPaymentMethodSelector
 				);
+
+				if ( paymentElement ) {
+					trackPaymentInfo(
+						getCheckoutOptionLabel( paymentElement )
+					);
+				}
 			}
 		} );
 

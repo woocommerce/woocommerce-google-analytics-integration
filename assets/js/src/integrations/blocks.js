@@ -559,6 +559,37 @@ const getAddedQuantity = ( item, cartBefore, requestedQuantity ) => {
 };
 
 /**
+ * Add the product categories known to the page to a Store API cart item.
+ * Store API cart items have no categories, so events built from them would
+ * be sent without item_category. Never throws: unreadable page data leaves
+ * the item unchanged.
+ *
+ * @param {Object} product Store API cart item.
+ * @return {Object} The cart item, with categories when the page has them.
+ */
+const withPageProductCategories = ( product ) => {
+	if ( product?.categories?.length ) {
+		return product;
+	}
+
+	let categories;
+	try {
+		categories = getProductFromID(
+			product?.id,
+			window.ga4w?.data?.products
+		)?.categories;
+	} catch ( error ) {
+		warnTrackingError(
+			'could not read product categories from the page data.',
+			error
+		);
+		return product;
+	}
+
+	return categories?.length ? { ...product, categories } : product;
+};
+
+/**
  * Scale a cart line item's line total to the quantity being reported.
  *
  * A Store API cart line's `line_total` covers its current quantity. When the
@@ -874,7 +905,10 @@ const trackStoreApiAddToCart = ( getEventHandler ) => {
 
 						markRecentlyAdded( product );
 						storeApiEventHandler( eventName, {
-							product: { ...product, quantity },
+							product: {
+								...withPageProductCategories( product ),
+								quantity,
+							},
 						} );
 					}, trackDelay );
 				}

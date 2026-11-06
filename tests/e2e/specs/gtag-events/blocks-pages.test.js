@@ -29,7 +29,11 @@ import {
 	createProductCollectionBlockShopPage,
 	createRelatedProductsPage,
 } from '../../utils/create-page';
-import { getEventData, trackGtagEvent } from '../../utils/track-event';
+import {
+	getAllEventData,
+	getEventData,
+	trackGtagEvent,
+} from '../../utils/track-event';
 
 const config = require( '../../config/default' );
 const simpleProductPrice = parseFloat( config.products.simple.regular_price );
@@ -65,6 +69,7 @@ test.describe( 'GTag events on block pages', () => {
 				ca: 'Uncategorized',
 				qt: '1',
 				pr: simpleProductPrice.toString(),
+				va: '',
 			} );
 		} );
 	} );
@@ -895,7 +900,55 @@ test.describe( 'GTag events on block pages', () => {
 				ca: 'Uncategorized',
 				qt: '1',
 				pr: simpleProductPrice.toString(),
+				va: '',
 			} );
+		} );
+	} );
+
+	test( 'Add to cart event is sent once for one click in a product collection block', async ( {
+		page,
+	} ) => {
+		await createProductCollectionBlockShopPage();
+
+		const trackedRequests = [];
+		page.on( 'request', ( request ) => {
+			if ( request.url().includes( 'google-analytics.com/g/collect' ) ) {
+				trackedRequests.push( request );
+			}
+		} );
+
+		await page.goto( 'product-collection-block-shop' );
+		await waitForStoreApiInterceptor( page );
+
+		const event = trackGtagEvent( page, 'add_to_cart' );
+		await blockProductAddToCart( page, simpleProductID );
+		await event;
+
+		// The Store API interceptor sends its event shortly after the add
+		// resolves, so allow time for a duplicate to show up.
+		await page.waitForTimeout( 1000 );
+
+		// Count what the plugin passed to gtag as well, as gtag may batch hits.
+		const queuedEvents = await page.evaluate(
+			() =>
+				window.dataLayer.filter(
+					( entry ) =>
+						entry[ 0 ] === 'event' && entry[ 1 ] === 'add_to_cart'
+				).length
+		);
+		expect( queuedEvents ).toBe( 1 );
+
+		const events = trackedRequests.flatMap( ( request ) =>
+			getAllEventData( request, 'add_to_cart' )
+		);
+		expect( events ).toHaveLength( 1 );
+		expect( events[ 0 ].product1 ).toEqual( {
+			id: simpleProductID.toString(),
+			nm: 'Simple product',
+			ca: 'Uncategorized',
+			qt: '1',
+			pr: simpleProductPrice.toString(),
+			va: '',
 		} );
 	} );
 
@@ -1054,6 +1107,7 @@ test.describe( 'GTag events on block pages', () => {
 				ca: 'Uncategorized',
 				qt: '1',
 				pr: simpleProductPrice.toString(),
+				va: '',
 			} );
 		} );
 	} );

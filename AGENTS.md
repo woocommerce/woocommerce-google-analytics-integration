@@ -77,6 +77,7 @@ A change to an externally exposed surface must state its BC impact in the PR des
 ## Gotchas
 
 - Do not add production PHP dependencies with Composer. The plugin ships without `vendor/`.
+- Product Bundles and Composite Products are tested with stubs in `tests/unit-tests/DataFormatting.php`. When you change `get_catalog_price()`, also check it once by hand with the real plugins, and say so in the PR.
 - gtag.js loads from Google, so the PHPCS warning `WordPress.WP.EnqueuedResourceParameters.MissingVersion` is suppressed on purpose.
 - There are two wp-env configs: `.wp-env.json` is the dev site (port 8888) and `.wp-env.test.json` is the test site (port 8889) that PHPUnit, E2E and CI use. `wp-env run cli` commands for tests need `--config=.wp-env.test.json`.
 - The main branch is `trunk`, not `main` or `master`.

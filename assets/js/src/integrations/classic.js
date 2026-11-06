@@ -6,17 +6,33 @@ const checkoutShippingMethodSelector =
 const classicCartItemSelector =
 	'.woocommerce-cart-form .woocommerce-cart-form__cart-item, .woocommerce-cart-form .cart_item';
 
-const getSelectedCheckoutOption = ( selector ) =>
-	Array.from( document.querySelectorAll( selector ) ).find(
-		( element ) => element.checked || element.tagName === 'SELECT'
+// A store with one shipping method renders it as a hidden input, not a radio.
+export const getSelectedCheckoutOption = ( selector ) => {
+	const elements = Array.from( document.querySelectorAll( selector ) );
+
+	return (
+		elements.find( ( { checked } ) => checked ) ??
+		elements.find(
+			( { tagName, type } ) => tagName === 'SELECT' || type === 'hidden'
+		)
 	);
+};
+
+// A hidden input has no `labels`, so look its <label for="..."> up by id.
+const getLabel = ( element ) =>
+	element.labels?.[ 0 ] ||
+	element.closest( 'label' ) ||
+	( element.id &&
+		document.querySelector(
+			`label[for="${ window.CSS.escape( element.id ) }"]`
+		) );
 
 // Return the user-facing label for a shipping or payment input. For radios,
 // WooCommerce renders the human label as the text content of the associated
 // <label for="..."> element. For selects we fall back to the selected option's
 // text. The raw `value` (e.g. "free_shipping:1") is kept as a last resort so we
 // never emit an empty `shipping_tier`/`payment_type`.
-const getCheckoutOptionLabel = ( element ) => {
+export const getCheckoutOptionLabel = ( element ) => {
 	if ( ! element ) {
 		return undefined;
 	}
@@ -26,9 +42,7 @@ const getCheckoutOptionLabel = ( element ) => {
 		return selectedOption?.text?.trim() || element.value;
 	}
 
-	const label = element.labels?.[ 0 ] || element.closest( 'label' );
-
-	return label?.textContent?.trim() || element.value;
+	return getLabel( element )?.textContent?.trim() || element.value;
 };
 
 // Return the shipping tier name without the price suffix. WooCommerce renders
@@ -36,17 +50,17 @@ const getCheckoutOptionLabel = ( element ) => {
 // `.woocommerce-Price-amount` element. GA4's `shipping_tier` is the tier name
 // (e.g. "Flat rate"), not the price — and dropping the cost also keeps it
 // consistent with the block checkout, which reports the Store API rate name.
-const getShippingTierLabel = ( element ) => {
+export const getShippingTierLabel = ( element ) => {
 	if ( ! element ) {
 		return undefined;
 	}
 
-	const label = element.labels?.[ 0 ] || element.closest( 'label' );
+	const label = getLabel( element );
 
 	if ( label ) {
 		const clone = label.cloneNode( true );
 		clone
-			.querySelectorAll( '.woocommerce-Price-amount' )
+			.querySelectorAll( '.woocommerce-Price-amount, .tax_label' )
 			.forEach( ( node ) => node.remove() );
 
 		// With the price removed we are left with "Flat rate:" — drop the
@@ -182,13 +196,16 @@ export function classicTracking(
 			}
 
 			if ( ! paymentInfoTracked ) {
-				trackPaymentInfo(
-					getCheckoutOptionLabel(
-						getSelectedCheckoutOption(
-							checkoutPaymentMethodSelector
-						)
-					)
+				// A free order has no payment methods to choose from.
+				const paymentElement = getSelectedCheckoutOption(
+					checkoutPaymentMethodSelector
 				);
+
+				if ( paymentElement ) {
+					trackPaymentInfo(
+						getCheckoutOptionLabel( paymentElement )
+					);
+				}
 			}
 		} );
 

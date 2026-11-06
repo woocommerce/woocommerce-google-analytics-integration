@@ -2,8 +2,8 @@
 
 namespace GoogleAnalyticsIntegration\Tests;
 
-use WC_Google_Gtag_JS;
 use WC_Abstract_Google_Analytics_JS;
+use WC_Google_Gtag_JS;
 use WP_UnitTestCase;
 
 /**
@@ -19,6 +19,8 @@ use WP_UnitTestCase;
  * @package GoogleAnalyticsIntegration\Tests
  */
 class RegisterScripts extends WP_UnitTestCase {
+
+	use ResetsGtagInstance;
 
 	/**
 	 * Start each test from a clean script registry and singleton so the
@@ -59,6 +61,18 @@ class RegisterScripts extends WP_UnitTestCase {
 		$this->assertStringContainsString( 'window.dataLayer = window.dataLayer', $snippet, 'Snippet should initialize the dataLayer' );
 		$this->assertStringContainsString( 'function gtag(', $snippet, 'Snippet should define the default gtag function' );
 		$this->assertStringContainsString( 'gtag("config", "G-TEST123"', $snippet, 'Snippet should configure the property with the measurement id' );
+	}
+
+	/**
+	 * A quote in the measurement id stays inside the snippet's string.
+	 *
+	 * @return void
+	 */
+	public function test_inline_snippet_escapes_the_measurement_id() {
+		$gtag    = new WC_Google_Gtag_JS( [ 'ga_id' => 'G-A"B' ] );
+		$snippet = $this->get_inline_snippet( $gtag->gtag_script_handle );
+
+		$this->assertStringContainsString( 'gtag("config", "G-A&quot;B"', $snippet );
 	}
 
 	/**
@@ -262,18 +276,5 @@ class RegisterScripts extends WP_UnitTestCase {
 
 		$scripts = $registered->extra[ $position ] ?? [];
 		return implode( "\n", array_filter( (array) $scripts, 'is_string' ) );
-	}
-
-	/**
-	 * Reset the shared tracking singleton.
-	 *
-	 * @return void
-	 */
-	private function reset_gtag_instance(): void {
-		$property = new \ReflectionProperty( WC_Abstract_Google_Analytics_JS::class, 'instance' );
-		if ( PHP_VERSION_ID < 80100 ) {
-			$property->setAccessible( true );
-		}
-		$property->setValue( null, null );
 	}
 }

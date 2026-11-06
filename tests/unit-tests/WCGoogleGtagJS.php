@@ -14,6 +14,8 @@ use WC_Helper_Product;
  */
 class WCGoogleGtagJS extends EventsDataTest {
 
+	use ResetsGtagInstance;
+
 	/**
 	 * Check that `WC_Google_Gtag_JS` registers and enqueues the `assets/js/build/main.js` script
 	 *
@@ -318,19 +320,6 @@ class WCGoogleGtagJS extends EventsDataTest {
 			wp_scripts()->registered['google-tag-manager']->src,
 			'Rehydration should re-register the gtag script with the new ga_id'
 		);
-	}
-
-	/**
-	 * Reset the shared tracking singleton so a test can exercise the no-instance path.
-	 *
-	 * @return void
-	 */
-	private function reset_gtag_instance(): void {
-		$property = new \ReflectionProperty( \WC_Abstract_Google_Analytics_JS::class, 'instance' );
-		if ( PHP_VERSION_ID < 80100 ) {
-			$property->setAccessible( true );
-		}
-		$property->setValue( null, null );
 	}
 
 	/**

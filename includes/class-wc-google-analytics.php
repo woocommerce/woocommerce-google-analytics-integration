@@ -48,6 +48,10 @@ class WC_Google_Analytics extends WC_Integration {
 			}
 		}
 
+		// Saving the settings form trims the ID, but an ID stored another way
+		// (WP-CLI, an import, the legacy option) can still have spaces around it.
+		$this->settings['ga_id'] = trim( (string) $this->settings['ga_id'] );
+
 		add_action( 'admin_notices', array( $this, 'universal_analytics_upgrade_notice' ) );
 
 		include_once 'class-wc-abstract-google-analytics-js.php';
@@ -242,13 +246,8 @@ class WC_Google_Analytics extends WC_Integration {
 			'linker_cross_domains'          => $settings['ga_linker_cross_domains'],
 		);
 
-		// ID prefix, blank, or X for unknown
-		$prefix = strstr( strtoupper( $settings['ga_id'] ), '-', true );
-		if ( in_array( $prefix, array( 'UA', 'G', 'GT' ), true ) || empty( $prefix ) ) {
-			$data['wc-google-analytics']['ga_id'] = $prefix;
-		} else {
-			$data['wc-google-analytics']['ga_id'] = 'X';
-		}
+		require_once __DIR__ . '/class-wc-google-analytics-tracking-settings-service.php';
+		$data['wc-google-analytics']['ga_id'] = WC_Google_Analytics_Tracking_Settings_Service::get_measurement_id_prefix( (string) $settings['ga_id'] );
 
 		return $data;
 	}

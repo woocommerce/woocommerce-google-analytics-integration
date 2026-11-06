@@ -2,7 +2,6 @@
 
 namespace GoogleAnalyticsIntegration\Tests;
 
-use WC_Abstract_Google_Analytics_JS;
 use WC_Google_Gtag_JS;
 use WC_Helper_Order;
 use WC_Helper_Product;
@@ -14,6 +13,8 @@ use WP_UnitTestCase;
  * @package GoogleAnalyticsIntegration\Tests
  */
 class PurchaseTracking extends WP_UnitTestCase {
+
+	use ResetsGtagInstance;
 
 	/** @var WC_Google_Gtag_JS */
 	private $gtag;
@@ -103,6 +104,26 @@ class PurchaseTracking extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Pending and on-hold orders are tracked, for example when the customer comes
+	 * back from an outside payment page before the payment is confirmed.
+	 *
+	 * @return void
+	 */
+	public function test_pending_and_on_hold_orders_are_tracked() {
+		foreach ( [ 'pending', 'on-hold' ] as $status ) {
+			$order = WC_Helper_Order::create_order( 0, WC_Helper_Product::create_simple_product() );
+			$order->update_status( $status );
+			$_GET['key'] = $order->get_order_key();
+
+			do_action( 'woocommerce_thankyou', $order->get_id() );
+
+			$data = json_decode( $this->gtag->get_script_data(), true );
+			$this->assertSame( (string) $order->get_id(), (string) $data['order']['id'], $status );
+			$this->assertSame( '1', wc_get_order( $order->get_id() )->get_meta( '_ga_tracked' ), $status );
+		}
+	}
+
+	/**
 	 * Failed orders must not be tracked.
 	 *
 	 * @return void
@@ -149,18 +170,5 @@ class PurchaseTracking extends WP_UnitTestCase {
 		$data = json_decode( $gtag->get_script_data(), true );
 		$this->assertArrayNotHasKey( 'order', $data );
 		$this->assertSame( '', wc_get_order( $this->order->get_id() )->get_meta( '_ga_tracked' ) );
-	}
-
-	/**
-	 * Clear the singleton set by the constructor so it does not leak into later tests.
-	 *
-	 * @return void
-	 */
-	private function reset_gtag_instance(): void {
-		$property = new \ReflectionProperty( WC_Abstract_Google_Analytics_JS::class, 'instance' );
-		if ( PHP_VERSION_ID < 80100 ) {
-			$property->setAccessible( true );
-		}
-		$property->setValue( null, null );
 	}
 }

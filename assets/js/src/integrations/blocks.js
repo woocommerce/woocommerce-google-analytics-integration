@@ -15,6 +15,7 @@ import {
 	getBatchCartChanges,
 	getUpdateItemChangeFromResponse,
 	getAddItemFromResponse,
+	rememberCartResponse,
 } from '../utils/store-api';
 import { ACTION_PREFIX, NAMESPACE } from '../constants';
 
@@ -296,7 +297,20 @@ const trackStoreApiAddToCart = ( getEventHandler ) => {
 		const bodyPromise = shouldTrack ? getRequestBody( input, init ) : null;
 		const response = await originalFetch.apply( this, args );
 
-		if ( ! shouldTrack || ! response?.ok ) {
+		if ( ! response?.ok ) {
+			return response;
+		}
+
+		if ( ! shouldTrack ) {
+			try {
+				await rememberCartResponse( input, init, response );
+			} catch ( error ) {
+				warnTrackingError(
+					'could not parse the Store API cart response.',
+					error
+				);
+			}
+
 			return response;
 		}
 

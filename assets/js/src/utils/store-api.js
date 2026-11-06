@@ -195,6 +195,26 @@ export const parseUpdateItemRequestKey = ( body ) =>
 export const getCartItemKey = ( item ) => item?.key ?? item?.id;
 
 /**
+ * Put the items last seen in a Store API response over the cart from before a
+ * request. That cart can be the one from page load, which holds no later changes.
+ *
+ * @param {Object} cart Cart data before the request.
+ * @return {Object} The cart with the last seen items, or as given when there is no cart.
+ */
+const withLastSeenItems = ( cart ) => {
+	if ( ! Array.isArray( cart?.items ) ) {
+		return cart;
+	}
+
+	const items = new Map(
+		cart.items.map( ( item ) => [ getCartItemKey( item ), item ] )
+	);
+	lastSeenCartItems.forEach( ( item, key ) => items.set( key, item ) );
+
+	return { ...cart, items: [ ...items.values() ] };
+};
+
+/**
  * Find the item that was added in the Store API response.
  *
  * Prefers the line that actually changed — a newly added line, or an existing
@@ -315,9 +335,10 @@ export const getAddItemFromResponse = (
 	cartBefore
 ) => {
 	const { productId, quantity } = parseAddItemRequestBody( requestBody );
-	const product = getAddedCartItem( cartAfter, cartBefore, productId );
+	const before = withLastSeenItems( cartBefore );
+	const product = getAddedCartItem( cartAfter, before, productId );
 	const addedQuantity = product
-		? getAddedQuantity( product, cartBefore, quantity )
+		? getAddedQuantity( product, before, quantity )
 		: quantity;
 
 	// The requested quantity can exceed what the line actually holds when the

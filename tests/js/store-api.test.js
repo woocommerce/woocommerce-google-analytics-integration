@@ -215,6 +215,65 @@ test( 'an add capped by stock reports what the cart actually got', () => {
 	assert.strictEqual( change.product.totals.line_total, '1500' );
 } );
 
+test( 'an add compares with the last cart the Store API returned, not stale page data', () => {
+	const first = newKey();
+	const second = newKey();
+	// An earlier add on this page; the page cart is still empty.
+	api.rememberCartItems( { items: [ line( first, 1, { id: 10 } ) ] } );
+
+	const change = api.getAddItemFromResponse(
+		{ id: 20, quantity: 1 },
+		{
+			items: [
+				line( first, 1, { id: 10 } ),
+				line( second, 1, { id: 20 } ),
+			],
+		},
+		{ items: [] }
+	);
+
+	assert.strictEqual( change.product.id, 20 );
+	assert.strictEqual( change.quantity, 1 );
+} );
+
+test( 'an add after other changes on the page reports the units it added', () => {
+	const cases = [
+		// [ last seen quantity, page cart quantity, requested, cart after, reported ]
+		[ 1, 3, 3, 4, 3 ], // An update lowered the line after page load.
+		[ 2, 0, 5, 3, 1 ], // An earlier add, and this one capped by stock.
+		[ 2, 0, 1, 3, 1 ], // A second add of one unit.
+	];
+
+	for ( const [ seen, page, requested, after, reported ] of cases ) {
+		const key = newKey();
+		api.rememberCartItems( { items: [ line( key, seen ) ] } );
+
+		const change = api.getAddItemFromResponse(
+			{ id: 12, quantity: requested },
+			{ items: [ line( key, after ) ] },
+			{ items: page ? [ line( key, page ) ] : [] }
+		);
+
+		assert.strictEqual( change.quantity, reported );
+		assert.strictEqual(
+			change.product.totals.line_total,
+			String( 1500 * reported )
+		);
+	}
+} );
+
+test( 'an add the server raised reports the units the cart really got', () => {
+	const key = newKey();
+	const change = api.getAddItemFromResponse(
+		{ id: 12, quantity: 1 },
+		{ items: [ line( key, 6 ) ] },
+		{ items: [] }
+	);
+
+	assert.strictEqual( change.quantity, 6 );
+	assert.strictEqual( change.product.totals.line_total, '9000' );
+} );
+
 test( 'without the cart before, an add is matched by product ID and capped at the line', () => {
 	const key = newKey();
 	const change = api.getAddItemFromResponse(

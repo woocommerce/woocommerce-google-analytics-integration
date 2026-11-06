@@ -2,8 +2,8 @@
 
 namespace GoogleAnalyticsIntegration\Tests;
 
-use WC_Google_Gtag_JS;
 use WC_Abstract_Google_Analytics_JS;
+use WC_Google_Gtag_JS;
 use WP_UnitTestCase;
 
 /**
@@ -19,6 +19,8 @@ use WP_UnitTestCase;
  * @package GoogleAnalyticsIntegration\Tests
  */
 class RegisterScripts extends WP_UnitTestCase {
+
+	use ResetsGtagInstance;
 
 	/**
 	 * Start each test from a clean script registry and singleton so the
@@ -262,18 +264,5 @@ class RegisterScripts extends WP_UnitTestCase {
 
 		$scripts = $registered->extra[ $position ] ?? [];
 		return implode( "\n", array_filter( (array) $scripts, 'is_string' ) );
-	}
-
-	/**
-	 * Reset the shared tracking singleton.
-	 *
-	 * @return void
-	 */
-	private function reset_gtag_instance(): void {
-		$property = new \ReflectionProperty( WC_Abstract_Google_Analytics_JS::class, 'instance' );
-		if ( PHP_VERSION_ID < 80100 ) {
-			$property->setAccessible( true );
-		}
-		$property->setValue( null, null );
 	}
 }

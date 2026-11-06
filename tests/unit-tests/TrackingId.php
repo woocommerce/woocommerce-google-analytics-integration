@@ -2,7 +2,6 @@
 
 namespace GoogleAnalyticsIntegration\Tests;
 
-use WC_Abstract_Google_Analytics_JS;
 use WC_Google_Analytics;
 use WC_Google_Analytics_Tracking_Settings_Service;
 use WP_UnitTestCase;
@@ -17,6 +16,8 @@ require_once dirname( __DIR__, 2 ) . '/includes/class-wc-google-analytics-tracki
  */
 class TrackingId extends WP_UnitTestCase {
 
+	use ResetsGtagInstance;
+
 	/**
 	 * Start each test without stored settings and with a fresh tracking singleton.
 	 *
@@ -26,6 +27,7 @@ class TrackingId extends WP_UnitTestCase {
 		parent::set_up();
 		delete_option( 'woocommerce_google_analytics_settings' );
 		delete_option( 'woocommerce_ga_id' );
+		wp_deregister_script( 'google-tag-manager' );
 		$this->reset_gtag_instance();
 	}
 
@@ -77,7 +79,7 @@ class TrackingId extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Today's behaviour: the ID "0" counts as no ID.
+	 * Today’s behaviour: the ID "0" counts as no ID.
 	 *
 	 * @return void
 	 */
@@ -100,19 +102,5 @@ class TrackingId extends WP_UnitTestCase {
 
 		$this->assertSame( 'G-LEGACY1', $ga->get_option( 'ga_id' ) );
 		$this->assertTrue( $ga->is_setup_complete() );
-	}
-
-	/**
-	 * Clear the shared tracking singleton.
-	 *
-	 * @return void
-	 */
-	private function reset_gtag_instance(): void {
-		wp_deregister_script( 'google-tag-manager' );
-		$property = new \ReflectionProperty( WC_Abstract_Google_Analytics_JS::class, 'instance' );
-		if ( PHP_VERSION_ID < 80100 ) {
-			$property->setAccessible( true );
-		}
-		$property->setValue( null, null );
 	}
 }

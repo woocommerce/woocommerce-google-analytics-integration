@@ -13,11 +13,21 @@
  */
 const lastSeenCartItems = new Map();
 
+// The page has seen a Store API cart, so its items are the whole cart.
+let hasSeenCart = false;
+
+export const forgetCartItems = () => {
+	lastSeenCartItems.clear();
+	hasSeenCart = false;
+};
+
 export const rememberCartItems = ( cart ) => {
 	if ( ! Array.isArray( cart?.items ) ) {
 		return;
 	}
 
+	forgetCartItems();
+	hasSeenCart = true;
 	cart.items.forEach( ( item ) => {
 		if ( item?.key !== undefined && item?.key !== null ) {
 			lastSeenCartItems.set( item.key, item );
@@ -28,6 +38,7 @@ export const rememberCartItems = ( cart ) => {
 const STORE_API_ADD_ITEM_PATH = /\/wc\/store(?:\/v\d+)?\/cart\/add-item/;
 const STORE_API_UPDATE_ITEM_PATH = /\/wc\/store(?:\/v\d+)?\/cart\/update-item/;
 const STORE_API_BATCH_PATH = /\/wc\/store(?:\/v\d+)?\/batch/;
+const STORE_API_CART_PATH = /\/wc\/store(?:\/v\d+)?\/cart(?:\/|$)/;
 
 /**
  * Resolve the method and pathname of a same-origin fetch call.
@@ -115,6 +126,20 @@ export const isStoreApiBatchRequest = ( input, init = {} ) => {
 };
 
 /**
+ * Check whether a fetch call goes to a Store API cart route, whose response is the
+ * whole cart: applying a coupon or removing an item, for example.
+ *
+ * @param {Request|string|URL} input Fetch input.
+ * @param {Object}             init  Fetch options.
+ * @return {boolean} Whether the request is a Store API cart request.
+ */
+export const isStoreApiCartRequest = ( input, init = {} ) => {
+	const info = getStoreApiRequestInfo( input, init );
+
+	return !! info && STORE_API_CART_PATH.test( info.pathname );
+};
+
+/**
  * Get the request body without consuming the original Request object.
  *
  * @param {Request|string|URL} input Fetch input.
@@ -195,24 +220,16 @@ export const parseUpdateItemRequestKey = ( body ) =>
 export const getCartItemKey = ( item ) => item?.key ?? item?.id;
 
 /**
- * Put the items last seen in a Store API response over the cart from before a
- * request. That cart can be the one from page load, which holds no later changes.
+ * Use the cart last seen in a Store API response instead of the cart from before
+ * a request, which can be the one from page load and hold no later changes.
  *
  * @param {Object} cart Cart data before the request.
- * @return {Object} The cart with the last seen items, or as given when there is no cart.
+ * @return {Object} The cart to compare with.
  */
-const withLastSeenItems = ( cart ) => {
-	if ( ! Array.isArray( cart?.items ) ) {
-		return cart;
-	}
-
-	const items = new Map(
-		cart.items.map( ( item ) => [ getCartItemKey( item ), item ] )
-	);
-	lastSeenCartItems.forEach( ( item, key ) => items.set( key, item ) );
-
-	return { ...cart, items: [ ...items.values() ] };
-};
+const withLastSeenItems = ( cart ) =>
+	hasSeenCart && Array.isArray( cart?.items )
+		? { ...cart, items: [ ...lastSeenCartItems.values() ] }
+		: cart;
 
 /**
  * Find the item that was added in the Store API response.
@@ -399,7 +416,7 @@ export const getUpdateItemChangeFromResponse = (
 	}
 
 	const product =
-		quantityDelta > 0 ? updatedItem : ( previousItem ?? lastSeenItem );
+		quantityDelta > 0 ? updatedItem : ( lastSeenItem ?? previousItem );
 
 	if ( ! product ) {
 		return null;
@@ -462,10 +479,7 @@ export const getBatchCartChanges = (
 
 	requests.forEach( ( request, index ) => {
 		const path = request?.path ?? '';
-		const isAddItem = STORE_API_ADD_ITEM_PATH.test( path );
-		const isUpdateItem = STORE_API_UPDATE_ITEM_PATH.test( path );
-
-		if ( ! isAddItem && ! isUpdateItem ) {
+		if ( ! STORE_API_CART_PATH.test( path ) ) {
 			return;
 		}
 
@@ -477,6 +491,15 @@ export const getBatchCartChanges = (
 		}
 
 		const cartAfter = subResponse.body;
+		const isAddItem = STORE_API_ADD_ITEM_PATH.test( path );
+		const isUpdateItem = STORE_API_UPDATE_ITEM_PATH.test( path );
+
+		if ( ! isAddItem && ! isUpdateItem ) {
+			rememberCartItems( cartAfter );
+			previousCart = cartAfter;
+			return;
+		}
+
 		const change = isAddItem
 			? getAddItemFromResponse( request.body, cartAfter, previousCart )
 			: getUpdateItemChangeFromResponse(

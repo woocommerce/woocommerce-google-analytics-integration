@@ -21,6 +21,7 @@ const { parsePriceFromDOM } = loadSource( 'utils/index.js' );
 const ORIGIN = 'https://shop.test';
 
 beforeEach( () => {
+	api.forgetCartItems();
 	globalThis.window = {
 		location: { origin: ORIGIN },
 		ga4w: { settings: {} },
@@ -326,19 +327,83 @@ test( 'a quantity decrease is a remove_from_cart valued from the line before', (
 	assert.strictEqual( change.product.totals.line_total, '3000' );
 } );
 
-test( 'a decrease after a coupon is valued from the cart before it, with the coupon', () => {
+test( 'a decrease after a coupon is valued from the coupon response, not stale page data', () => {
 	const key = newKey();
-	// The last add response saw 15.00 a unit; a coupon then halved it in the cart.
 	api.rememberCartItems( { items: [ line( key, 3 ) ] } );
+	// The apply-coupon response halves the price; the page cart keeps the old one.
+	api.rememberCartItems( {
+		items: [ line( key, 3, { totals: { line_total: '2250' } } ) ],
+	} );
 
 	const change = api.getUpdateItemChangeFromResponse(
 		{ key, quantity: 1 },
 		{ items: [ line( key, 1, { totals: { line_total: '750' } } ) ] },
-		{ items: [ line( key, 3, { totals: { line_total: '2250' } } ) ] }
+		{ items: [ line( key, 3 ) ] }
 	);
 
 	assert.strictEqual( change.quantity, 2 );
 	assert.strictEqual( change.product.totals.line_total, '1500' );
+} );
+
+test( 'a line removed and added again reports all its units', () => {
+	const key = newKey();
+	api.rememberCartItems( { items: [ line( key, 3 ) ] } );
+	// The remove-item response no longer has the line; the page cart still does.
+	api.rememberCartItems( { items: [] } );
+
+	const change = api.getAddItemFromResponse(
+		{ id: 12, quantity: 5 },
+		{ items: [ line( key, 5 ) ] },
+		{ items: [ line( key, 3 ) ] }
+	);
+
+	assert.strictEqual( change.quantity, 5 );
+	assert.strictEqual( change.product.totals.line_total, '7500' );
+} );
+
+test( 'other cart requests in a batch count for the changes after them', () => {
+	const key = newKey();
+	const changes = api.getBatchCartChanges(
+		{
+			requests: [
+				{ path: '/wc/store/v1/cart/remove-item', body: { key } },
+				{
+					path: '/wc/store/v1/cart/add-item',
+					body: { id: 12, quantity: 5 },
+				},
+			],
+		},
+		{
+			responses: [
+				{ status: 200, body: { items: [] } },
+				{ status: 201, body: { items: [ line( key, 5 ) ] } },
+			],
+		},
+		{ items: [ line( key, 3 ) ] }
+	);
+
+	assert.deepStrictEqual(
+		changes.map( ( { eventName, quantity } ) => [ eventName, quantity ] ),
+		[ [ 'add_to_cart', 5 ] ]
+	);
+} );
+
+test( 'every Store API cart route counts as a cart request', () => {
+	for ( const [ url, init, expected ] of [
+		[ '/wp-json/wc/store/v1/cart', {}, true ],
+		[ '/wp-json/wc/store/cart/apply-coupon', post, true ],
+		[ '/wp-json/wc/store/v1/cart/remove-item?_locale=user', post, true ],
+		[ '/?rest_route=/wc/store/v1/cart/remove-coupon', post, true ],
+		[ '/wp-json/wc/store/v1/cart-extra', post, false ],
+		[ '/wp-json/wc/store/v1/products', {}, false ],
+		[ 'https://other.test/wp-json/wc/store/v1/cart', {}, false ],
+	] ) {
+		assert.strictEqual(
+			api.isStoreApiCartRequest( url, init ),
+			expected,
+			url
+		);
+	}
 } );
 
 test( 'a quantity set to 0 is a remove_from_cart of the whole line', () => {

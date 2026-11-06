@@ -15,6 +15,7 @@ import {
 	getBatchCartChanges,
 	getUpdateItemChangeFromResponse,
 	getAddItemFromResponse,
+	isStoreApiCartRequest,
 } from '../utils/store-api';
 import { ACTION_PREFIX, NAMESPACE } from '../constants';
 
@@ -296,7 +297,24 @@ const trackStoreApiAddToCart = ( getEventHandler ) => {
 		const bodyPromise = shouldTrack ? getRequestBody( input, init ) : null;
 		const response = await originalFetch.apply( this, args );
 
-		if ( ! shouldTrack || ! response?.ok ) {
+		if ( ! response?.ok ) {
+			return response;
+		}
+
+		// Other cart requests, such as a coupon or a removal, send no event here
+		// but change the cart that later changes are compared with.
+		if ( ! shouldTrack ) {
+			if ( isStoreApiCartRequest( input, init ) ) {
+				try {
+					rememberCartItems( await response.clone().json() );
+				} catch ( error ) {
+					warnTrackingError(
+						'could not parse the Store API cart response.',
+						error
+					);
+				}
+			}
+
 			return response;
 		}
 

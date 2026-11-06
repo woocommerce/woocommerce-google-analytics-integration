@@ -44,16 +44,11 @@ jobs:
           filters: |
             php:
               - .github/workflows/checks.yml
-              - .github/workflows/php-unit-tests.yml
               - .github/workflows/php-coding-standards.yml
               - "**.php"
               - composer.json
               - composer.lock
-              - package.json
-              - package-lock.json
               - phpcs.xml.dist
-              - phpunit.xml.dist
-              - "bin/*.sh"
             js:
               - .github/workflows/checks.yml
               - .github/workflows/js-unit-tests.yml
@@ -97,10 +92,10 @@ jobs:
           ignore-codes: |
             trademarked_term
 
+  # The PHP unit and E2E tests run on every pull request, like PHPStan: a new
+  # WordPress or WooCommerce release can break them without a change here.
   php-unit-tests:
     name: PHP unit tests
-    needs: changes
-    if: needs.changes.outputs.php != 'false'
     uses: ./.github/workflows/php-unit-tests.yml
 
   php-coding-standards:
@@ -125,8 +120,6 @@ jobs:
     if: needs.changes.outputs.js != 'false'
     uses: ./.github/workflows/js-linting.yml
 
-  # Runs on every pull request, like PHPStan: a new WordPress or WooCommerce
-  # release can break it without a change here.
   e2e-tests:
     name: E2E tests
     uses: ./.github/workflows/e2e-tests.yml

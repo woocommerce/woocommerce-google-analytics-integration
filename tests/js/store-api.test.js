@@ -388,6 +388,121 @@ test( 'other cart requests in a batch count for the changes after them', () => {
 	);
 } );
 
+test( 'a coupon in a batch updates the cart that a later decrease is valued from', () => {
+	const key = newKey();
+	api.getBatchCartChanges(
+		{ requests: [ { path: '/wc/store/v1/cart/apply-coupon', body: {} } ] },
+		{
+			responses: [
+				{
+					status: 200,
+					body: {
+						items: [
+							line( key, 3, { totals: { line_total: '2250' } } ),
+						],
+					},
+				},
+			],
+		},
+		{ items: [ line( key, 3 ) ] }
+	);
+
+	const change = api.getUpdateItemChangeFromResponse(
+		{ key, quantity: 1 },
+		{ items: [ line( key, 1, { totals: { line_total: '750' } } ) ] },
+		{ items: [ line( key, 3 ) ] }
+	);
+
+	assert.strictEqual( change.product.totals.line_total, '1500' );
+} );
+
+test( 'an update in a batch compares with the removal before it', () => {
+	const key = newKey();
+	const changes = api.getBatchCartChanges(
+		{
+			requests: [
+				{ path: '/wc/store/v1/cart/remove-item', body: { key } },
+				{
+					path: '/wc/store/v1/cart/update-item',
+					body: { key, quantity: 2 },
+				},
+			],
+		},
+		{
+			responses: [
+				{ status: 200, body: { items: [] } },
+				{ status: 200, body: { items: [ line( key, 2 ) ] } },
+			],
+		},
+		{ items: [ line( key, 3 ) ] }
+	);
+
+	assert.deepStrictEqual(
+		changes.map( ( { eventName, quantity } ) => [ eventName, quantity ] ),
+		[ [ 'add_to_cart', 2 ] ]
+	);
+} );
+
+test( 'a batch reply that is not a cart does not replace the cart', () => {
+	const key = newKey();
+	const changes = api.getBatchCartChanges(
+		{
+			requests: [
+				{ path: '/wc/store/v1/cart/items', body: {} },
+				{
+					path: '/wc/store/v1/cart/add-item',
+					body: { id: 12, quantity: 5 },
+				},
+			],
+		},
+		{
+			responses: [
+				{ status: 201, body: line( newKey(), 1 ) },
+				{ status: 200, body: { items: [ line( key, 4 ) ] } },
+			],
+		},
+		{ items: [ line( key, 3 ) ] }
+	);
+
+	assert.strictEqual( changes[ 0 ].quantity, 1 );
+} );
+
+test( 'the response of a cart request is recorded, and stays readable for the page', async () => {
+	const key = newKey();
+	const response = new Response(
+		JSON.stringify( {
+			items: [ line( key, 3, { totals: { line_total: '2250' } } ) ],
+		} )
+	);
+
+	await api.rememberCartResponse(
+		'/wp-json/wc/store/v1/cart/apply-coupon',
+		post,
+		response
+	);
+
+	const change = api.getUpdateItemChangeFromResponse(
+		{ key, quantity: 1 },
+		{ items: [ line( key, 1 ) ] },
+		{ items: [ line( key, 3 ) ] }
+	);
+
+	assert.strictEqual( change.product.totals.line_total, '1500' );
+	assert.strictEqual( response.bodyUsed, false );
+} );
+
+test( 'the response of any other request is not read', async () => {
+	const response = new Response( 'not json' );
+
+	await api.rememberCartResponse(
+		'/wp-json/wc/store/v1/products',
+		{},
+		response
+	);
+
+	assert.strictEqual( await response.text(), 'not json' );
+} );
+
 test( 'every Store API cart route counts as a cart request', () => {
 	for ( const [ url, init, expected ] of [
 		[ '/wp-json/wc/store/v1/cart', {}, true ],

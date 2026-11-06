@@ -126,8 +126,8 @@ export const isStoreApiBatchRequest = ( input, init = {} ) => {
 };
 
 /**
- * Check whether a fetch call goes to a Store API cart route, whose response is the
- * whole cart: applying a coupon or removing an item, for example.
+ * Check whether a fetch call goes to a Store API cart route. Most of them answer
+ * with the whole cart: applying a coupon or removing an item, for example.
  *
  * @param {Request|string|URL} input Fetch input.
  * @param {Object}             init  Fetch options.
@@ -137,6 +137,21 @@ export const isStoreApiCartRequest = ( input, init = {} ) => {
 	const info = getStoreApiRequestInfo( input, init );
 
 	return !! info && STORE_API_CART_PATH.test( info.pathname );
+};
+
+/**
+ * Record the cart from the response of a Store API cart request that sends no
+ * event of its own, as it changes the cart that later changes are compared with.
+ *
+ * @param {Request|string|URL} input    Fetch input.
+ * @param {Object}             init     Fetch options.
+ * @param {Response}           response Fetch response, left readable.
+ * @return {Promise<void>} Resolves once the cart is recorded.
+ */
+export const rememberCartResponse = async ( input, init, response ) => {
+	if ( isStoreApiCartRequest( input, init ) ) {
+		rememberCartItems( await response.clone().json() );
+	}
 };
 
 /**
@@ -227,9 +242,7 @@ export const getCartItemKey = ( item ) => item?.key ?? item?.id;
  * @return {Object} The cart to compare with.
  */
 const withLastSeenItems = ( cart ) =>
-	hasSeenCart && Array.isArray( cart?.items )
-		? { ...cart, items: [ ...lastSeenCartItems.values() ] }
-		: cart;
+	hasSeenCart ? { ...cart, items: [ ...lastSeenCartItems.values() ] } : cart;
 
 /**
  * Find the item that was added in the Store API response.
@@ -491,31 +504,33 @@ export const getBatchCartChanges = (
 		}
 
 		const cartAfter = subResponse.body;
-		const isAddItem = STORE_API_ADD_ITEM_PATH.test( path );
-		const isUpdateItem = STORE_API_UPDATE_ITEM_PATH.test( path );
+		let change = null;
 
-		if ( ! isAddItem && ! isUpdateItem ) {
-			rememberCartItems( cartAfter );
-			previousCart = cartAfter;
-			return;
+		if ( STORE_API_ADD_ITEM_PATH.test( path ) ) {
+			change = getAddItemFromResponse(
+				request.body,
+				cartAfter,
+				previousCart
+			);
+		} else if ( STORE_API_UPDATE_ITEM_PATH.test( path ) ) {
+			change = getUpdateItemChangeFromResponse(
+				request.body,
+				cartAfter,
+				previousCart
+			);
 		}
-
-		const change = isAddItem
-			? getAddItemFromResponse( request.body, cartAfter, previousCart )
-			: getUpdateItemChangeFromResponse(
-					request.body,
-					cartAfter,
-					previousCart
-				);
 
 		if ( change ) {
 			changes.push( change );
 		}
 
 		// Record items after reading the delta so a later update-item (in this
-		// batch or a subsequent request) compares against the new state.
-		rememberCartItems( cartAfter );
-		previousCart = cartAfter;
+		// batch or a subsequent request) compares against the new state. Some
+		// cart routes answer with something other than the whole cart.
+		if ( Array.isArray( cartAfter?.items ) ) {
+			rememberCartItems( cartAfter );
+			previousCart = cartAfter;
+		}
 	} );
 
 	return changes;

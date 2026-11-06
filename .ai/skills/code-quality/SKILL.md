@@ -64,7 +64,7 @@ The `MP_` prefix comes from MailPoet, so one `.env` works in every plugin repo. 
 | `php-coding-standards.yml` | `vendor/bin/phpcs` on all files, at PHP 7.4 |
 | `php-static-analysis.yml` | PHPStan, at PHP 8.4 |
 | `js-linting.yml` | `npm run lint:js` with GitHub annotations |
-| `js-unit-tests.yml` | `npm run test:js` |
+| `js-unit-tests.yml` | `npm run test:js:coverage`: the JS tests, with line coverage in the job summary; the coverage only reports |
 | `php-unit-tests.yml` | `bin/lint-php-deprecations.sh` and PHPUnit on a PHP and WooCommerce matrix. The PHP 8.4 row writes the line coverage and the files no test reaches to the job summary; it only reports. |
 | `e2e-tests.yml` | Production build, then Playwright on the test wp-env site |
 | `e2e-versions.yml` | Weekly, outside `checks.yml`: `e2e-tests.yml` on the newest and the minimum WooCommerce |

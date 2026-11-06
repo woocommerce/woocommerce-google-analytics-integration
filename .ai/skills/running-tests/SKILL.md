@@ -7,7 +7,7 @@ description: Use when running Google Analytics for WooCommerce tests – PHPUnit
 
 ## JS unit tests
 
-`npm run test:js` runs `tests/js/**/*.test.js` with the Node.js test runner. No Docker needed. It is part of `npm run qa`.
+`npm run test:js` runs `tests/js/**/*.test.js` with the Node.js test runner. No Docker needed. It is part of `npm run qa`. `npm run test:js:coverage` also prints line coverage, for the source files the tests load; CI writes it to the job summary.
 
 One file: `node --test tests/js/<file>.test.js`. One test: add `--test-name-pattern="<name>"`.
 

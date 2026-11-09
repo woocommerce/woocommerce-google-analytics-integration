@@ -26,7 +26,7 @@ jobs:
         # This generates the documentation string. The `id` property is used to reference the output in the next step.
       - name: Generate hook documentation
         id: generate-hook-docs
-        uses: woocommerce/grow/hook-documentation@e981c25267d29c39ff6ab1ae4ea09b267efae86c # actions-v3.0.6
+        uses: woocommerce/grow/hook-documentation@9a5eac21da12c7fe3261724aab734dbe827170d8 # actions-v3.0.7
         with:
           source-directories: includes/,woocommerce-google-analytics-integration.php
 

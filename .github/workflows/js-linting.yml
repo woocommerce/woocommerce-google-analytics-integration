@@ -16,12 +16,12 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Prepare node
-        uses: woocommerce/grow/prepare-node@e981c25267d29c39ff6ab1ae4ea09b267efae86c # actions-v3.0.6
+        uses: woocommerce/grow/prepare-node@9a5eac21da12c7fe3261724aab734dbe827170d8 # actions-v3.0.7
         with:
           node-version-file: ".nvmrc"
 
       - name: Prepare annotation formatter
-        uses: woocommerce/grow/eslint-annotation@e981c25267d29c39ff6ab1ae4ea09b267efae86c # actions-v3.0.6
+        uses: woocommerce/grow/eslint-annotation@9a5eac21da12c7fe3261724aab734dbe827170d8 # actions-v3.0.7
 
       - name: Lint JavaScript and annotate linting problems
         run: npm run lint:js -- --format ./eslintFormatter.cjs

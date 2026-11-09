@@ -89,8 +89,10 @@ jobs:
           # Keep results in annotations and the uploaded artifact, not a PR comment.
           repo-token: ''
           # The plugin name and slug are already published and cannot change.
+          # woorelease fails a release when "Tested up to" is missing from the plugin header.
           ignore-codes: |
             trademarked_term
+            plugin_header_tested_up_to_not_allowed
 
   # The PHP unit and E2E tests run on every pull request, like PHPStan: a new
   # WordPress or WooCommerce release can break them without a change here.

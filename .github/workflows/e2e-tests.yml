@@ -17,7 +17,7 @@ on:
 jobs:
   E2ETests:
     name: E2E Tests
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     timeout-minutes: 20
     env:
       FORCE_COLOR: 2

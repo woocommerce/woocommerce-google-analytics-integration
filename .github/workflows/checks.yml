@@ -71,7 +71,7 @@ jobs:
   plugin-check:
     name: WP.org Plugin Check
     needs: build
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     timeout-minutes: 15
     steps:
       - name: Download extension bundle

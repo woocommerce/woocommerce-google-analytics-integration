@@ -44,7 +44,7 @@ jobs:
   UnitTests:
     if: inputs.php-version == ''
     name: PHP unit tests - PHP ${{ matrix.php }}, WP ${{ matrix.wp-version || 'latest' }}, WC ${{ matrix.wc-versions || 'latest' }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     timeout-minutes: 5
     needs: GetMatrix
     strategy:

@@ -38,6 +38,7 @@
       "lighthouse": "^13.4.1"
     },
     "qs": "~6.16.1",
+    "isomorphic-git": "^1.38.6",
     "uuid": "11.1.1",
     "minimatch": "^3.1.4",
     "@typescript-eslint/typescript-estree": {

@@ -37,7 +37,9 @@ add_action(
 		</details>
 		<script>
 			( function () {
-				var storageKey = 'ga4wPreviewEvents';
+				// playground.wordpress.net serves each temporary store under /scope:<id>/.
+				var scope = ( window.location.pathname.match( /^\/scope:[^/]+/ ) || [ '' ] )[ 0 ];
+				var storageKey = 'ga4wPreviewEvents' + scope;
 				var closedKey = 'ga4wPreviewClosed';
 				var panel = document.getElementById( 'ga4w-preview-log' );
 				var list = document.getElementById( 'ga4w-preview-list' );
@@ -116,7 +118,7 @@ add_action(
 				}
 
 				entries.forEach( render );
-				add( { page: window.location.pathname } );
+				add( { page: window.location.pathname.slice( scope.length ) } );
 
 				window.setInterval( function () {
 					var layer = window.dataLayer;

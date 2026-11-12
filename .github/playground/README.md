@@ -25,14 +25,8 @@ The run ID in the artifact name ties a link to one run: a link never mixes the z
 - `G-PREVIEW` is not a Google Analytics property. Google's gtag.js loads, and no data reaches a report. To see data in Google Analytics, save the ID of a property you own in the settings.
 - Every link starts a new temporary store in the browser tab. Nothing is kept after the tab is closed.
 - Only WooCommerce and this plugin are installed. Extensions the plugin integrates with, such as the WP Consent API, Product Bundles and Composite Products, are not.
-- Pull requests from forks and from Dependabot get no comment: their workflow runs have a read-only token and no secrets.
+- Pull requests from forks and from Dependabot get no comment: their workflow runs have a read-only token.
 - Playground's artifact proxy serves the `wordpress`, `automattic` and `woocommerce` organizations, and lists the first 30 workflows of a repository to find `Checks` by name.
-
-## Jetpack Beta and Jurassic Ninja
-
-These are Option 1 and Option 2 of the comment. Both install from the Jetpack Beta Builder, which takes builds only from a plugin registered with it. They work when the repository secret `JETPACK_BETA_BUILDER_SECRET` is set and the Jetpack Beta Builder accepts the build. Without the secret, the workflow skips those steps, and the comment keeps both headings and says under each that it is not available yet and what it needs.
-
-Jurassic Ninja creates a site only for a logged-in visitor. Without a login, its link opens the Jurassic Ninja homepage and no site, so the comment says to log in first.
 
 ## Run a preview locally
 

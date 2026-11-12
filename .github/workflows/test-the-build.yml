@@ -1,15 +1,11 @@
 name: Test the build
 
-# Adds or updates the "Test the build" comment of a pull request: ways to try
-# the build without a development environment. checks.yml calls it after the
-# build. See .github/playground/README.md.
+# Adds or updates the "Test the build" comment of a pull request: links that
+# open the build in WordPress Playground, with no development environment.
+# checks.yml calls it after the build. See .github/playground/README.md.
 
 on:
   workflow_call:
-    secrets:
-      JETPACK_BETA_BUILDER_SECRET:
-        description: Webhook secret of the Jetpack Beta Builder. Without it, the comment marks Jetpack Beta and Jurassic Ninja as not available yet.
-        required: false
 
 permissions:
   contents: read
@@ -55,76 +51,6 @@ jobs:
           path: preview
           if-no-files-found: error
           retention-days: 14
-
-      # Jetpack Beta and Jurassic Ninja both install from the Jetpack Beta Builder,
-      # which takes builds only from a registered plugin with a webhook secret.
-      - name: Check for the Jetpack Beta Builder secret
-        id: beta
-        env:
-          SECRET: ${{ secrets.JETPACK_BETA_BUILDER_SECRET }}
-        run: |
-          if [ -n "$SECRET" ]; then
-            echo "enabled=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "enabled=false" >> "$GITHUB_OUTPUT"
-            echo "JETPACK_BETA_BUILDER_SECRET is not set: the comment marks Jetpack Beta and Jurassic Ninja as not available yet." >> "$GITHUB_STEP_SUMMARY"
-          fi
-
-      # Jetpack Beta Builder expects <slug>-dev.zip with the folder <slug>-dev, so the
-      # dev build installs next to the released plugin, and reads the version from
-      # the plugin header and the readme.
-      - name: Prepare the dev build for Jetpack Beta Builder
-        id: dev-build
-        if: steps.beta.outputs.enabled == 'true'
-        run: |
-          unzip -q "preview/$PLUGIN_SLUG.zip" -d beta
-          cd beta
-
-          VERSION=$( sed -n 's/^ \* Version: //p' "$PLUGIN_SLUG/$PLUGIN_SLUG.php" | head -n1 )
-          IFS=. read -r MAJOR MINOR PATCH <<< "$VERSION"
-          DEV_VERSION="$MAJOR.$MINOR.$(( PATCH + 1 ))-dev_PR-${PR_NUMBER}_commit-${PR_HEAD_SHA:0:7}"
-
-          sed -i "s/^ \* Version: .*$/ * Version: $DEV_VERSION/" "$PLUGIN_SLUG/$PLUGIN_SLUG.php"
-          sed -i "s/define( 'WC_GOOGLE_ANALYTICS_INTEGRATION_VERSION', '[^']*' )/define( 'WC_GOOGLE_ANALYTICS_INTEGRATION_VERSION', '$DEV_VERSION' )/" "$PLUGIN_SLUG/$PLUGIN_SLUG.php"
-          sed -i "s/^Stable tag: .*$/Stable tag: $DEV_VERSION/" "$PLUGIN_SLUG/readme.txt"
-
-          mv "$PLUGIN_SLUG" "$PLUGIN_SLUG-dev"
-          zip -q -r "$PLUGIN_SLUG-dev.zip" "$PLUGIN_SLUG-dev"
-          rm -rf "$PLUGIN_SLUG-dev"
-
-          echo "version=$DEV_VERSION" >> "$GITHUB_OUTPUT"
-
-      - name: Publish the dev build for Jetpack Beta Builder
-        if: steps.beta.outputs.enabled == 'true'
-        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
-        with:
-          name: plugins # The name Jetpack Beta Builder looks for.
-          path: beta
-          if-no-files-found: error
-          # Jetpack Beta Builder copies it right away.
-          retention-days: 1
-
-      # A refused build must not cost the pull request its Playground links.
-      - name: Inform Jetpack Beta Builder
-        id: inform
-        if: steps.beta.outputs.enabled == 'true'
-        env:
-          SECRET: ${{ secrets.JETPACK_BETA_BUILDER_SECRET }}
-          DEV_VERSION: ${{ steps.dev-build.outputs.version }}
-        run: |
-          PLUGIN_DATA=$( jq -cn --arg slug "$PLUGIN_SLUG" --arg version "$DEV_VERSION" '{ ($slug): { version: $version } }' )
-
-          if curl -sS --fail -L \
-            --url "https://betadownload.jetpack.me/gh-action.php?run_id=$GITHUB_RUN_ID&pr=$PR_NUMBER&commit=$GITHUB_SHA" \
-            --form-string "repo=$GITHUB_REPOSITORY" \
-            --form-string "branch=$PR_HEAD_REF" \
-            --form-string "plugins=$PLUGIN_DATA" \
-            --form-string "secret=$SECRET"; then
-            echo "informed=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "informed=false" >> "$GITHUB_OUTPUT"
-            echo "::warning::Jetpack Beta Builder did not take the build. The comment marks Jetpack Beta and Jurassic Ninja as not available."
-          fi
 
       # WordPress Playground runs in the visitor's browser and fetches public URLs only.
       # Its artifact proxy serves the artifacts of this pull request's runs, and finds
@@ -172,46 +98,13 @@ jobs:
       - name: Add or update the comment
         env:
           GH_TOKEN: ${{ github.token }}
-          BETA_BUILDER: ${{ steps.inform.outputs.informed }}
           PLAYGROUND_STORE_URL: ${{ steps.playground.outputs.store_url }}
           PLAYGROUND_SETTINGS_URL: ${{ steps.playground.outputs.settings_url }}
         run: |
-          JURASSIC_NINJA_URL="https://jurassic.ninja/create/?jetpack-beta&nojetpack&woocommerce&woocommerce-import-sample-data&branches.$PLUGIN_SLUG=$( jq -rn --arg ref "$PR_HEAD_REF" '$ref|@uri|gsub( "%2F"; "/" )' )"
-
-          # The comment always has the three options. One that cannot work yet keeps
-          # its heading and says what it needs, and has no link.
-          if [ "$BETA_BUILDER" = "true" ]; then
-            JETPACK_BETA="- Install and activate [Jetpack Beta](https://jetpack.com/beta/#download-and-install).
-          - Use this build by searching for PR number \`${PR_NUMBER}\` or branch name \`${PR_HEAD_REF}\` in your-test.site/wp-admin/admin.php?page=jetpack-beta&plugin=${PLUGIN_SLUG}
-
-          :information_source: The plugin sends nothing until your site has a tracking ID in WooCommerce > Settings > Integrations > Google Analytics. It does not track administrators: check the storefront logged out."
-            JURASSIC_NINJA=":warning: Log in at [jurassic.ninja](https://jurassic.ninja/) first. Without a login, the link below takes you to the Jurassic Ninja homepage and no site is created.
-
-          :rocket: [Launch a JN site with this branch and sample products](${JURASSIC_NINJA_URL}) :rocket:
-
-          :information_source: The site starts with no tracking ID: the plugin sends nothing until you save one in WooCommerce > Settings > Integrations > Google Analytics. It does not track administrators: check the storefront in a private window."
-          else
-            if [ "$BETA_BUILDER" = "false" ]; then
-              REASON="the Jetpack Beta Builder did not take this build. See the \"Inform Jetpack Beta Builder\" step of the workflow run"
-            else
-              REASON="this plugin is not set up with the Jetpack Beta Builder. It needs a registration there, and the webhook secret of that registration as the \`JETPACK_BETA_BUILDER_SECRET\` secret of this repository"
-            fi
-            JETPACK_BETA=":construction: Not available yet: ${REASON}."
-            JURASSIC_NINJA=":construction: Not available yet. Jurassic Ninja installs a branch through Jetpack Beta, so it needs what Option 1 needs."
-          fi
-
           cat > comment.md <<EOF
           ### Test the build
 
-          #### Option 1. Jetpack Beta
-
-          ${JETPACK_BETA}
-
-          #### Option 2. Jurassic Ninja - available for logged-in A12s
-
-          ${JURASSIC_NINJA}
-
-          #### Option 3. WordPress Playground - runs in your browser
+          #### WordPress Playground - runs in your browser
 
           - :shopping_cart: [Open the store as a visitor](${PLAYGROUND_STORE_URL}): a shop with three sample products. A panel in the corner lists each event the build sends while you browse, add to the cart and check out. Click its title to fold it.
           - :gear: [Open the settings as an administrator](${PLAYGROUND_SETTINGS_URL}): WooCommerce > Settings > Integrations > Google Analytics.

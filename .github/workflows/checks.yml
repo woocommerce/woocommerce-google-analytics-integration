@@ -128,7 +128,7 @@ jobs:
 
   # Not a check, so not under “All checks”: a comment that fails to post must not
   # block a merge. A pull request from a fork or from Dependabot gets a read-only
-  # token and no secrets, so it gets no comment.
+  # token, so it gets no comment.
   test-the-build:
     name: Test the build
     needs: build
@@ -140,8 +140,6 @@ jobs:
       contents: read
       pull-requests: write
     uses: ./.github/workflows/test-the-build.yml
-    secrets:
-      JETPACK_BETA_BUILDER_SECRET: ${{ secrets.JETPACK_BETA_BUILDER_SECRET }}
 
   # The check the trunk ruleset requires. It fails when any job failed or was
   # cancelled, and passes when a job was skipped because its files did not

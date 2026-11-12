@@ -126,9 +126,24 @@ jobs:
     name: E2E tests
     uses: ./.github/workflows/e2e-tests.yml
 
+  # Not a check, so not under “All checks”: a comment that fails to post must not
+  # block a merge. A pull request from a fork or from Dependabot gets a read-only
+  # token, so it gets no comment.
+  test-the-build:
+    name: Test the build
+    needs: build
+    if: >-
+      github.event_name == 'pull_request'
+      && github.event.pull_request.head.repo.full_name == github.repository
+      && github.event.pull_request.user.login != 'dependabot[bot]'
+    permissions:
+      contents: read
+      pull-requests: write
+    uses: ./.github/workflows/test-the-build.yml
+
   # The check the trunk ruleset requires. It fails when any job failed or was
   # cancelled, and passes when a job was skipped because its files did not
-  # change. List every job of this workflow under needs.
+  # change. List every job of this workflow under needs, except test-the-build.
   all-checks:
     name: All checks
     if: always()

@@ -70,4 +70,6 @@ The `MP_` prefix comes from MailPoet, so one `.env` works in every plugin repo. 
 | `e2e-versions.yml` | Weekly, outside `checks.yml`: `e2e-tests.yml` on the newest and the minimum WooCommerce |
 | `build.yml`, the `plugin-check` job in `checks.yml` | Plugin zip and the WordPress.org Plugin Check |
 
+`checks.yml` also calls `test-the-build.yml` after the build. It is not a check and is not under “All checks”: it adds the “Test the build” comment, with WordPress Playground links to the build, to pull requests, except those from forks and from Dependabot. See `.github/playground/README.md`.
+
 `npm run qa` covers the first four and the deprecation check with your local PHP. For PHPUnit and E2E, see the `running-tests` skill.

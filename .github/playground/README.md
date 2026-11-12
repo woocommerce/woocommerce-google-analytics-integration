@@ -30,7 +30,9 @@ The run ID in the artifact name ties a link to one run: a link never mixes the z
 
 ## Jetpack Beta and Jurassic Ninja
 
-The comment also offers these two when the repository secret `JETPACK_BETA_BUILDER_SECRET` is set and the Jetpack Beta Builder accepts the build. Both install from the Jetpack Beta Builder, which takes builds only from a plugin registered with it. Without the secret, the workflow skips those steps and the comment has the Playground links only.
+These are Option 1 and Option 2 of the comment. Both install from the Jetpack Beta Builder, which takes builds only from a plugin registered with it. They work when the repository secret `JETPACK_BETA_BUILDER_SECRET` is set and the Jetpack Beta Builder accepts the build. Without the secret, the workflow skips those steps, and the comment keeps both headings and says under each that it is not available yet and what it needs.
+
+Jurassic Ninja creates a site only for a logged-in visitor. Without a login, its link opens the Jurassic Ninja homepage and no site, so the comment says to log in first.
 
 ## Run a preview locally
 

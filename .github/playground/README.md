@@ -17,7 +17,7 @@ The run ID in the artifact name ties a link to one run: a link never mixes the z
 
 ## The two links
 
-- **Store, as a visitor.** Not logged in, opens `/shop/`. This is the one that shows events.
+- **Store, as a visitor.** Opens `/shop/`, not logged in: playground.wordpress.net logs every visitor in as an administrator unless the link has `?login=no`, so this link has it. This is the one that shows events.
 - **Settings, as an administrator.** Opens WooCommerce > Settings > Integrations > Google Analytics. The plugin prints no tracking code for administrators, so the storefront shows no events until you log out. Log in again at `/wp-admin` with `admin` / `password`.
 
 ## Limits

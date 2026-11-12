@@ -90,8 +90,10 @@ jobs:
                 } )
               }' )
 
+          # playground.wordpress.net logs every visitor in as an administrator unless
+          # the link has login=no, and the plugin does not track administrators.
           {
-            echo "store_url=https://playground.wordpress.net/#$( jq -rn --argjson blueprints "$BLUEPRINTS" '$blueprints.store|tojson|@uri' )"
+            echo "store_url=https://playground.wordpress.net/?login=no#$( jq -rn --argjson blueprints "$BLUEPRINTS" '$blueprints.store|tojson|@uri' )"
             echo "settings_url=https://playground.wordpress.net/#$( jq -rn --argjson blueprints "$BLUEPRINTS" '$blueprints.settings|tojson|@uri' )"
           } >> "$GITHUB_OUTPUT"
 

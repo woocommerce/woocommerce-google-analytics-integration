@@ -640,13 +640,14 @@ export function classicTracking(
 						cart
 					);
 
-					getEventHandler( 'add_to_cart' )( {
-						product: addedProduct,
-					} );
-
 					// The button adds through the Store API, so the interceptor
-					// in blocks.js sees this add again when the server answers.
+					// in blocks.js sees this add again when the server answers,
+					// and leaves it out. With no data for the product, the event
+					// would have no item: the interceptor sends the add.
 					if ( addedProduct ) {
+						getEventHandler( 'add_to_cart' )( {
+							product: addedProduct,
+						} );
 						rememberClickedAdd( productId );
 					}
 				} else if (

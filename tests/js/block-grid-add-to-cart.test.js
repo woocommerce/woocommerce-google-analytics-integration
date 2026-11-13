@@ -74,10 +74,11 @@ const newProduct = () => {
 /**
  * Shows products in a block product grid, each with an "Add to cart" button.
  *
- * @param {Object[]} products The products of the page.
+ * @param {Object[]} products               The products of the grid.
+ * @param {Object[]} [productData=products] The products the page has data for.
  * @return {function(Object): void} Clicks the button of a product.
  */
-const showGrid = ( products ) => {
+const showGrid = ( products, productData = products ) => {
 	const clicks = new Map();
 	const cards = products.map( ( product ) => {
 		const button = {
@@ -99,7 +100,7 @@ const showGrid = ( products ) => {
 
 	document.querySelectorAll = ( selector ) =>
 		selector.includes( '.wc-block-product-template .product' ) ? cards : [];
-	classicTracking( getEventHandler, { products } );
+	classicTracking( getEventHandler, { products: productData } );
 
 	return ( product ) => clicks.get( product.id )();
 };
@@ -139,10 +140,11 @@ const serverAnswers = async ( product, quantity = 1 ) => {
 	} );
 };
 
+// The item of each add_to_cart event, or null for an event with no item.
 const addToCartItems = () =>
 	sent
 		.filter( ( [ , eventName ] ) => eventName === 'add_to_cart' )
-		.map( ( [ , , data ] ) => data.items[ 0 ] );
+		.map( ( [ , , data ] ) => data.items[ 0 ] ?? null );
 
 // The event of the click listener, from the product data of the page.
 const fromClick = ( product ) => ( {
@@ -266,4 +268,18 @@ test( 'a click that the server never answered stops covering adds after a minute
 		fromClick( product ),
 		fromStoreApi( product ),
 	] );
+} );
+
+test( 'a click on a product the page has no data for sends add_to_cart once, when the server answers', async ( t ) => {
+	mockTime( t );
+	const product = newProduct();
+	const click = showGrid( [ product ], [] );
+
+	click( product );
+	assert.deepStrictEqual( addToCartItems(), [] );
+
+	await serverAnswers( product );
+	wait( t, 1000 );
+
+	assert.deepStrictEqual( addToCartItems(), [ fromStoreApi( product ) ] );
 } );

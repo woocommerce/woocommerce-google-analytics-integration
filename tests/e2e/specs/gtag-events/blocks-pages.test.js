@@ -29,7 +29,11 @@ import {
 	createProductCollectionBlockShopPage,
 	createRelatedProductsPage,
 } from '../../utils/create-page';
-import { getEventData, trackGtagEvent } from '../../utils/track-event';
+import {
+	getAllEventData,
+	getEventData,
+	trackGtagEvent,
+} from '../../utils/track-event';
 
 const config = require( '../../config/default' );
 const simpleProductPrice = parseFloat( config.products.simple.regular_price );
@@ -66,6 +70,54 @@ test.describe( 'GTag events on block pages', () => {
 				qt: '1',
 				pr: simpleProductPrice.toString(),
 			} );
+		} );
+	} );
+
+	test( 'Add to cart event is sent once for one click on a shop page button', async ( {
+		page,
+	} ) => {
+		const addToCartEvents = [];
+		page.on( 'request', ( request ) => {
+			if ( request.url().includes( 'google-analytics.com/g/collect' ) ) {
+				addToCartEvents.push(
+					...getAllEventData( request, 'add_to_cart' )
+				);
+			}
+		} );
+		const firstAddToCart = trackGtagEvent( page, 'add_to_cart' );
+
+		await page.goto( 'shop?orderby=date' );
+		await waitForStoreApiInterceptor( page );
+
+		// The click listener of the product card sends the event on the click.
+		// The button adds through the Store API, and the interceptor must not
+		// send the same add again when the server answers.
+		const serverAnswer = page.waitForResponse(
+			( response ) =>
+				response.url().includes( '/wc/store/v1/batch' ) &&
+				response.request().method() === 'POST'
+		);
+		await blockProductAddToCart( page, simpleProductID );
+		await firstAddToCart;
+		await serverAnswer;
+
+		// Time for the interceptor to send its event, and for gtag to pass it on.
+		await page.waitForTimeout( 1000 );
+
+		const pushedAddToCartEvents = await page.evaluate(
+			() =>
+				Array.from( window.dataLayer ).filter(
+					( entry ) =>
+						entry[ 0 ] === 'event' && entry[ 1 ] === 'add_to_cart'
+				).length
+		);
+
+		expect( pushedAddToCartEvents ).toBe( 1 );
+		expect( addToCartEvents ).toHaveLength( 1 );
+		expect( addToCartEvents[ 0 ].product1 ).toMatchObject( {
+			id: simpleProductID.toString(),
+			ca: 'Uncategorized',
+			qt: '1',
 		} );
 	} );
 

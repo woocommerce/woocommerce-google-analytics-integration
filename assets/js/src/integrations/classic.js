@@ -1,4 +1,4 @@
-import { getProductFromID } from '../utils';
+import { getProductFromID, rememberClickedAdd } from '../utils';
 
 const checkoutPaymentMethodSelector = 'input[name="payment_method"]';
 const checkoutShippingMethodSelector =
@@ -634,13 +634,22 @@ export function classicTracking(
 
 				if ( isAddToCartButton ) {
 					// Add to cart.
-					getEventHandler( 'add_to_cart' )( {
-						product: getProductFromID(
-							parseInt( productId ),
-							products,
-							cart
-						),
-					} );
+					const addedProduct = getProductFromID(
+						parseInt( productId ),
+						products,
+						cart
+					);
+
+					// The button adds through the Store API, so the interceptor
+					// in blocks.js sees this add again when the server answers,
+					// and leaves it out. With no data for the product, the event
+					// would have no item: the interceptor sends the add.
+					if ( addedProduct ) {
+						getEventHandler( 'add_to_cart' )( {
+							product: addedProduct,
+						} );
+						rememberClickedAdd( productId );
+					}
 				} else if (
 					! productCard.closest( '.wc-block-product-template' ) &&
 					( viewLink || button || nameLink )

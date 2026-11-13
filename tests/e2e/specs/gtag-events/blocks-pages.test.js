@@ -91,11 +91,28 @@ test.describe( 'GTag events on block pages', () => {
 
 		// The click listener of the product card sends the event on the click.
 		// The button adds through the Store API, and the interceptor must not
-		// send the same add again when the server answers ("1 in cart").
+		// send the same add again when the server answers.
+		const serverAnswer = page.waitForResponse(
+			( response ) =>
+				response.url().includes( '/wc/store/v1/batch' ) &&
+				response.request().method() === 'POST'
+		);
 		await blockProductAddToCart( page, simpleProductID );
 		await firstAddToCart;
+		await serverAnswer;
+
+		// Time for the interceptor to send its event, and for gtag to pass it on.
 		await page.waitForTimeout( 1000 );
 
+		const pushedAddToCartEvents = await page.evaluate(
+			() =>
+				Array.from( window.dataLayer ).filter(
+					( entry ) =>
+						entry[ 0 ] === 'event' && entry[ 1 ] === 'add_to_cart'
+				).length
+		);
+
+		expect( pushedAddToCartEvents ).toBe( 1 );
 		expect( addToCartEvents ).toHaveLength( 1 );
 		expect( addToCartEvents[ 0 ].product1 ).toMatchObject( {
 			id: simpleProductID.toString(),

@@ -3,6 +3,7 @@ import {
 	addUniqueAction,
 	getProductFromID,
 	cacheBlockProducts,
+	forgetClickedAdd,
 	getCurrencySettings,
 	parsePriceFromDOM,
 } from '../utils';
@@ -372,6 +373,15 @@ const trackStoreApiAddToCart = ( getEventHandler ) => {
 						storeApiEventHandler( eventName, {
 							product: { ...product, quantity },
 						} );
+						return;
+					}
+
+					// The click listener of a block product grid (classic.js)
+					// sends add_to_cart on the click, before the request. The
+					// response can come any time later, so the window that
+					// matches the hook below cannot match a click: each click
+					// accounts for one add-item of its product.
+					if ( forgetClickedAdd( product.id ) ) {
 						return;
 					}
 

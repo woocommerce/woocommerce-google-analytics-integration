@@ -27,6 +27,57 @@ export const cacheBlockProducts = ( products ) => {
 	} );
 };
 
+/*
+ * Adds that the click listener of a block product grid (classic.js) has sent
+ * as add_to_cart: the time of each click, by product ID. The button adds
+ * through the Store API, so the fetch interceptor (blocks.js) sees the same add
+ * again when the server answers, and reads this to leave it out.
+ */
+const clickedAdds = new Map();
+
+/*
+ * How long a click stays in clickedAdds. A click whose add never reaches the
+ * interceptor (the request failed, or the button sent none) must not leave out
+ * a later add of the same product. Longer than a server takes to answer.
+ */
+const CLICKED_ADD_LIFETIME = 60000;
+
+const getClickedAdds = ( productId ) =>
+	( clickedAdds.get( String( productId ) ) ?? [] ).filter(
+		( clickedAt ) => Date.now() - clickedAt < CLICKED_ADD_LIFETIME
+	);
+
+/**
+ * Records that add_to_cart was sent on a click on a product's "Add to cart" button.
+ *
+ * @param {number|string} productId The ID of the product.
+ */
+export const rememberClickedAdd = ( productId ) => {
+	clickedAdds.set( String( productId ), [
+		...getClickedAdds( productId ),
+		Date.now(),
+	] );
+};
+
+/**
+ * Tells whether add_to_cart was already sent for an add of a product, on the
+ * click that started it. Each click accounts for one add.
+ *
+ * @param {number|string} productId The ID of the product.
+ * @return {boolean} Whether a click accounts for the add.
+ */
+export const forgetClickedAdd = ( productId ) => {
+	const [ clickedAt, ...laterClicks ] = getClickedAdds( productId );
+
+	if ( laterClicks.length ) {
+		clickedAdds.set( String( productId ), laterClicks );
+	} else {
+		clickedAdds.delete( String( productId ) );
+	}
+
+	return clickedAt !== undefined;
+};
+
 const formatVariation = ( variation ) => {
 	if ( ! Array.isArray( variation ) ) {
 		return variation;

@@ -101,6 +101,7 @@ Skills live in `.ai/skills/` (`.claude/skills` links there). Claude Code loads t
 - `creating-pull-requests` – run the checks, fill the template and changelog entry, push and open the PR.
 - `code-quality` – lint, format, `qa`, hook switches and what CI runs.
 - `running-tests` – PHPUnit, JS and E2E tests, the wp-env setup and PHP version bumps.
+- `writing-tests` – decide whether a change needs a test, pick the suite, write it and prove it catches a regression.
 - `reviewing-code` – review a PR or local changes against these rules.
 - `writing-changelog` – the `### Changelog entry` section and the `changelog: none` label.
 - `beta-compat-test` – test the released plugin against a WooCommerce beta or RC.

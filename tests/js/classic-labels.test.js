@@ -1,7 +1,7 @@
 /**
  * Unit tests for the labels the classic checkout sends as shipping_tier and
  * payment_type, read from the checkout form.
- * Run with `npm run test:js`.
+ * Run with `pnpm run test:js`.
  */
 
 /**

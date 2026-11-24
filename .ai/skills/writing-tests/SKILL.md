@@ -46,7 +46,7 @@ Pick the **lowest** level that can catch the failure. Go one level up only when 
 
 | You need to test… | Use | Why |
 |---|---|---|
-| JS logic in `assets/js/src/` (event payloads, Store API parsing, labels), or JS embedded in a PHP string | JS unit, `tests/js/` | Node.js test runner, no Docker, part of `npm run qa` |
+| JS logic in `assets/js/src/` (event payloads, Store API parsing, labels), or JS embedded in a PHP string | JS unit, `tests/js/` | Node.js test runner, no Docker, part of `pnpm run qa` |
 | PHP logic: event data, settings, script registration, notices, abilities | PHPUnit, `tests/unit-tests/` | Real WordPress and WooCommerce on the wp-env test site; the only PHP suite |
 | A gtag request that only a real browser on a classic or block page sends, or consent with the real WP Consent API | E2E, `tests/e2e/specs/` | Only place a page actually sends events |
 
@@ -113,7 +113,7 @@ PHPUnit: the WooCommerce test helpers the bootstrap loads (`WC_Helper_Product`, 
 
 - **Red before green.** Run each new test before the fix and watch it fail for the reason it exists (the assertion about the bug, not a syntax error or a missing fixture). Then fix, and watch it pass. Never commit a test you haven’t seen pass; if you can’t run it, say so.
 - **Break what it protects.** Delete the guard, flip the condition or return early, confirm the test fails, then restore the file and confirm it passes. If it still passes with the guard removed, tighten the assertion or drop the test. This is required for security fixes.
-- **Run the JS tests often:** `node --test tests/js/<file>.test.js`. PHPUnit and E2E need the wp-env test site: run `npm run test:php -- --filter <TestClass or method>` or one E2E spec for the tests you touched. Before pushing, run `npm run qa` and the PHPUnit or E2E tests that cover the code you changed; CI runs the full suites. Don’t start two PHPUnit runs at the same time on one test site: they share the `wordpress_test` database.
+- **Run the JS tests often:** `node --test tests/js/<file>.test.js`. PHPUnit and E2E need the wp-env test site: run `pnpm run test:php --filter <TestClass or method>` or one E2E spec for the tests you touched. Before pushing, run `pnpm run qa` and the PHPUnit or E2E tests that cover the code you changed; CI runs the full suites. Don’t start two PHPUnit runs at the same time on one test site: they share the `wordpress_test` database.
 
 ## 6. Reviewing tests you didn’t write
 

@@ -1,7 +1,7 @@
 /**
  * Unit tests for the event data the tracker sends to Google Analytics:
  * prices, discounts, order value, product IDs, variations and categories.
- * Run with `npm run test:js`.
+ * Run with `pnpm run test:js`.
  */
 
 /**

@@ -100,6 +100,11 @@ install_test_suite() {
   if [[ $WP_VERSION =~ ^[0-9]+\.[0-9]+\-(beta|RC)[0-9]+$ ]]; then
     local WP_BRANCH=${WP_VERSION%\-*}
     local WP_TESTS_TAG="branches/$WP_BRANCH"
+    # Core creates the release branch late in the cycle; until then the RC lives on trunk.
+    if ! svn ls "https://develop.svn.wordpress.org/branches/$WP_BRANCH" >/dev/null 2>&1; then
+      echo "branches/$WP_BRANCH not found, using trunk"
+      WP_TESTS_TAG="trunk"
+    fi
 
   elif [[ $WP_VERSION =~ ^[0-9]+\.[0-9]+$ ]]; then
     local WP_TESTS_TAG="branches/$WP_VERSION"

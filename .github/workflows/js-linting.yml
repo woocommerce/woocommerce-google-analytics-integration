@@ -24,4 +24,4 @@ jobs:
         uses: woocommerce/grow/eslint-annotation@9a5eac21da12c7fe3261724aab734dbe827170d8 # actions-v3.0.7
 
       - name: Lint JavaScript and annotate linting problems
-        run: npm run lint:js -- --format ./eslintFormatter.cjs
+        run: pnpm run lint:js --format ./eslintFormatter.cjs

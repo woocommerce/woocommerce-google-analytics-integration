@@ -39,28 +39,28 @@ jobs:
       - name: Build production bundle
         run: |
           echo "::group::Build log"
-          npm run build
+          pnpm run build
           echo "::endgroup::"
 
       - name: Start wp-env container
         id: wp-env-start
         env:
           WC_VERSION: ${{ inputs.wc-rc-version }}
-        run: npm run wp-env:up
+        run: pnpm run wp-env:up
 
       - name: Install WP release candidate (optional)
         if: github.event.inputs.wp-rc-version != ''
         env:
           INPUT_WP_RC_VERSION: ${{ github.event.inputs.wp-rc-version }}
         run: |
-          npm run -- wp-env run cli --config=.wp-env.test.json -- wp core update --version="${INPUT_WP_RC_VERSION}"
-          npm run -- wp-env run cli --config=.wp-env.test.json -- wp core update-db
+          pnpm exec wp-env run cli --config=.wp-env.test.json -- wp core update --version="${INPUT_WP_RC_VERSION}"
+          pnpm exec wp-env run cli --config=.wp-env.test.json -- wp core update-db
 
       - name: Download and install Chromium browser.
-        run: npx playwright install chromium
+        run: pnpm exec playwright install chromium
 
       - name: Run tests
-        run: npm run test:e2e
+        run: pnpm run test:e2e
 
       # A test that passed only on retry still passes the job, so list it.
       - name: Report tests that passed only on retry
@@ -69,7 +69,7 @@ jobs:
 
       - name: Check PHP debug log
         if: ${{ !cancelled() && steps.wp-env-start.outcome == 'success' }}
-        run: npm run test:e2e:debug-log
+        run: pnpm run test:e2e:debug-log
 
       - name: Archive e2e failure screenshots
         if: ${{ always() }}

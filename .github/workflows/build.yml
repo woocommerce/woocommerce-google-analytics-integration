@@ -35,7 +35,7 @@ jobs:
       - name: Build production bundle
         run: |
           echo "::group::Build log"
-          npm run build
+          pnpm run build
           echo "::endgroup::"
 
       # workflow_run: a call from dev-build-after-auto-merge.yml.

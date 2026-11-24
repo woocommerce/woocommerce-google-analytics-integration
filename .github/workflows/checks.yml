@@ -58,7 +58,8 @@ jobs:
               - "**.cjs"
               - includes/class-wc-google-gtag-js.php
               - package.json
-              - package-lock.json
+              - pnpm-lock.yaml
+              - pnpm-workspace.yaml
               - .nvmrc
 
   # The job and called job names make “Build extension bundle / Build extension bundle”,

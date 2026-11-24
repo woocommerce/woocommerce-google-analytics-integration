@@ -1,6 +1,6 @@
 *** Changelog ***
 
-= 2.4.4 - 2026-10-20 =
+= 2.4.5 - 2026-11-24 =
 * Dev - Add shared npm scripts, a pre-commit hook, Dependabot for GitHub Actions and a Node 24 pin.
 * Dev - Declare GPL-3.0-or-later in package metadata to match the plugin header.
 * Dev - Require yoast/phpunit-polyfills 1.1.5 or newer for PHP 8.5.

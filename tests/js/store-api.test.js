@@ -130,7 +130,7 @@ test( 'request bodies are read as JSON, form data or an object', () => {
 	assert.deepStrictEqual( api.coerceRequestBodyData( null ), {} );
 } );
 
-test( 'only whole numbers above zero count as an ID or quantity', () => {
+test( 'only whole numbers above zero count as an ID', () => {
 	for ( const [ value, expected ] of [
 		[ '3', 3 ],
 		[ 3, 3 ],
@@ -149,7 +149,7 @@ test( 'only whole numbers above zero count as an ID or quantity', () => {
 	assert.strictEqual( api.toPositiveInteger( 'abc', 1 ), 1 );
 } );
 
-test( 'an add-item body gives the product and a quantity of at least 1', () => {
+test( 'an add-item body gives the product, and a quantity of 1 when it has none above zero', () => {
 	assert.deepStrictEqual(
 		api.parseAddItemRequestBody( '{"id":"12","quantity":"3"}' ),
 		{ productId: 12, quantity: 3 }
@@ -683,6 +683,92 @@ test( 'a line total is scaled to the reported units and rounded', () => {
 		api.scaleLineTotalToQuantity( emptyLine, 1 ),
 		emptyLine
 	);
+} );
+
+// Stores can allow decimal quantities (0.5 kg) by filtering woocommerce_stock_amount to floatval.
+
+test( 'an add-item body keeps a decimal quantity, but not a decimal product ID', () => {
+	assert.deepStrictEqual(
+		api.parseAddItemRequestBody( '{"id":"12","quantity":"1.5"}' ),
+		{ productId: 12, quantity: 1.5 }
+	);
+	assert.deepStrictEqual(
+		api.parseAddItemRequestBody( { id: 12, quantity: 0.5 } ),
+		{ productId: 12, quantity: 0.5 }
+	);
+} );
+
+test( 'an add of a decimal quantity to a new line reports that quantity', () => {
+	const key = newKey();
+	const change = api.getAddItemFromResponse(
+		{ id: 12, quantity: 0.5 },
+		{ items: [ line( key, 0.5 ) ] },
+		{ items: [] }
+	);
+
+	assert.strictEqual( change.quantity, 0.5 );
+	assert.strictEqual( change.product.totals.line_total, '750' );
+} );
+
+test( 'an add to a line with a decimal quantity reports only the added units', () => {
+	const key = newKey();
+	const change = api.getAddItemFromResponse(
+		{ id: 12, quantity: 1 },
+		{ items: [ line( key, 2.5 ) ] },
+		{ items: [ line( key, 1.5 ) ] }
+	);
+
+	assert.strictEqual( change.quantity, 1 );
+	assert.strictEqual( change.product.totals.line_total, '1500' );
+} );
+
+test( 'a decimal quantity increase is an add_to_cart of the decimal difference', () => {
+	const key = newKey();
+	const change = api.getUpdateItemChangeFromResponse(
+		{ key, quantity: 2 },
+		{ items: [ line( key, 2 ) ] },
+		{ items: [ line( key, 1.5 ) ] }
+	);
+
+	assert.strictEqual( change.eventName, 'add_to_cart' );
+	assert.strictEqual( change.quantity, 0.5 );
+	assert.strictEqual( change.product.totals.line_total, '750' );
+} );
+
+test( 'a decimal quantity decrease is a remove_from_cart of the decimal difference', () => {
+	const key = newKey();
+	const change = api.getUpdateItemChangeFromResponse(
+		{ key, quantity: 1.5 },
+		{ items: [ line( key, 1.5 ) ] },
+		{ items: [ line( key, 2 ) ] }
+	);
+
+	assert.strictEqual( change.eventName, 'remove_from_cart' );
+	assert.strictEqual( change.quantity, 0.5 );
+	assert.strictEqual( change.product.totals.line_total, '750' );
+} );
+
+test( 'a decimal quantity change reports the difference without float noise', () => {
+	const key = newKey();
+	const change = api.getUpdateItemChangeFromResponse(
+		{ key, quantity: 0.3 },
+		{ items: [ line( key, 0.3 ) ] },
+		{ items: [ line( key, 0.1 ) ] }
+	);
+
+	// 0.3 - 0.1 is 0.19999999999999998 in floating point.
+	assert.strictEqual( change.quantity, 0.2 );
+} );
+
+test( 'a line total with a decimal line quantity is scaled per unit', () => {
+	const scaled = ( lineTotal, lineQuantity, quantity ) =>
+		api.scaleLineTotalToQuantity(
+			{ quantity: lineQuantity, totals: { line_total: lineTotal } },
+			quantity
+		).totals.line_total;
+
+	assert.strictEqual( scaled( '1500', 1.5, 0.5 ), '500' );
+	assert.strictEqual( scaled( '500', 0.5, 0.5 ), '500' );
 } );
 
 test( 'prices read from the page follow the store’s separators', () => {

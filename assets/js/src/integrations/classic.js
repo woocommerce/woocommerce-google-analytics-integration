@@ -1,4 +1,4 @@
-import { getProductFromID, rememberClickedAdd } from '../utils';
+import { getProductFromID, rememberClickedAdd, roundQuantity } from '../utils';
 
 const checkoutPaymentMethodSelector = 'input[name="payment_method"]';
 const checkoutShippingMethodSelector =
@@ -73,6 +73,61 @@ export const getShippingTierLabel = ( element ) => {
 	}
 
 	return getCheckoutOptionLabel( element );
+};
+
+/**
+ * Get the unit price of a classic cart snapshot item, whose price covers its
+ * whole quantity. The quantity may be a decimal (0.5 kg).
+ *
+ * @param {Object} cartProduct Cart snapshot item.
+ * @return {number|null} The unit price, or null when it cannot be worked out.
+ */
+export const getCartItemUnitPrice = ( cartProduct ) => {
+	const previousQuantity = parseFloat( cartProduct?.quantity );
+	const linePrice = parseInt( cartProduct?.prices?.price, 10 );
+
+	if (
+		! Number.isFinite( previousQuantity ) ||
+		previousQuantity <= 0 ||
+		! Number.isFinite( linePrice )
+	) {
+		return null;
+	}
+
+	return linePrice / previousQuantity;
+};
+
+/**
+ * Read the quantity a classic cart row's input holds. It may be a decimal
+ * (0.5 kg), and 0 is kept because it removes the line.
+ *
+ * @param {Element} row Classic cart item row.
+ * @return {number} The quantity, or NaN when the row has no readable input.
+ */
+export const getCartRowQuantity = ( row ) =>
+	parseFloat( row?.querySelector( 'input.qty' )?.value );
+
+/**
+ * Work out the event for a classic cart quantity change. Quantities may be
+ * decimals (0.5 kg).
+ *
+ * @param {number|string} previousQuantity Quantity before the change.
+ * @param {number|string} newQuantity      Quantity after the change.
+ * @return {{ eventName: string, quantity: number }|null} The event and the units it covers, or null when nothing changed.
+ */
+export const getCartQuantityChange = ( previousQuantity, newQuantity ) => {
+	const delta = roundQuantity(
+		parseFloat( newQuantity ) - parseFloat( previousQuantity )
+	);
+
+	if ( ! Number.isFinite( delta ) || delta === 0 ) {
+		return null;
+	}
+
+	return {
+		eventName: delta > 0 ? 'add_to_cart' : 'remove_from_cart',
+		quantity: Math.abs( delta ),
+	};
 };
 
 /**
@@ -313,21 +368,6 @@ export function classicTracking(
 		} );
 	}
 
-	function getCartItemUnitPrice( cartProduct ) {
-		const previousQuantity = parseInt( cartProduct?.quantity, 10 );
-		const linePrice = parseInt( cartProduct?.prices?.price, 10 );
-
-		if (
-			! Number.isFinite( previousQuantity ) ||
-			previousQuantity < 1 ||
-			! Number.isFinite( linePrice )
-		) {
-			return null;
-		}
-
-		return linePrice / previousQuantity;
-	}
-
 	function getQuantityChangeProduct( cartProduct, quantity ) {
 		const unitPrice = getCartItemUnitPrice( cartProduct );
 
@@ -418,10 +458,7 @@ export function classicTracking(
 		document
 			.querySelectorAll( classicCartItemSelector )
 			.forEach( ( item ) => {
-				const newQuantity = parseInt(
-					item.querySelector( 'input.qty' )?.value,
-					10
-				);
+				const newQuantity = getCartRowQuantity( item );
 				const productID = parseInt(
 					item.querySelector( '.remove[data-product_id]' )?.dataset
 						.product_id,
@@ -453,10 +490,7 @@ export function classicTracking(
 		document
 			.querySelectorAll( classicCartItemSelector )
 			.forEach( ( item ) => {
-				const newQuantity = parseInt(
-					item.querySelector( 'input.qty' )?.value,
-					10
-				);
+				const newQuantity = getCartRowQuantity( item );
 
 				if ( ! Number.isFinite( newQuantity ) ) {
 					return;
@@ -471,24 +505,18 @@ export function classicTracking(
 					item,
 					productID
 				);
-				const previousQuantity = parseInt(
-					matchedProduct?.quantity,
-					10
-				);
+				const change = matchedProduct
+					? getCartQuantityChange(
+							matchedProduct.quantity,
+							newQuantity
+						)
+					: null;
 
-				if (
-					! matchedProduct ||
-					! Number.isFinite( previousQuantity ) ||
-					newQuantity === previousQuantity
-				) {
+				if ( ! change ) {
 					return;
 				}
 
-				const eventName =
-					newQuantity > previousQuantity
-						? 'add_to_cart'
-						: 'remove_from_cart';
-				const quantity = Math.abs( newQuantity - previousQuantity );
+				const { eventName, quantity } = change;
 
 				getEventHandler( eventName )( {
 					product: getQuantityChangeProduct(

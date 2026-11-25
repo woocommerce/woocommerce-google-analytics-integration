@@ -6,7 +6,8 @@
     "license": "GPL-3.0-or-later",
     "archive": {
         "exclude": [
-            "!/assets/js/build"
+            "!/assets/js/build",
+            ".DS_Store"
         ]
     },
     "require-dev": {

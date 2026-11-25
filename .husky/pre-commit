@@ -3,4 +3,4 @@
 
 [ "$MP_GIT_HOOKS_ENABLE" != "true" ] && exit 0
 
-npx lint-staged
+pnpm exec lint-staged

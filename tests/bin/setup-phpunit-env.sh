@@ -4,14 +4,14 @@
 # Ensures WooCommerce is installed and downloads the WooCommerce test framework
 # files (not included in the wordpress.org zip) that PHPUnit bootstrap requires.
 #
-# Usage: npm run test:php:setup [-- --wc-version=X.Y.Z]
+# Usage: pnpm run test:php:setup [--wc-version=X.Y.Z]
 #
-# This script only needs to be run once after `npm run wp-env:up`.
+# This script only needs to be run once after `pnpm run wp-env:up`.
 
 set -e
 
 # Target the wp-env environment named by WP_ENV_CONFIG_FILE (set by the
-# test:php:setup npm script) so the PHPUnit setup runs in the test environment
+# test:php:setup script in package.json) so the PHPUnit setup runs in the test environment
 # rather than the default one.
 CONFIG_ARG="${WP_ENV_CONFIG_FILE:+--config=$WP_ENV_CONFIG_FILE}"
 
@@ -91,4 +91,4 @@ echo "==> Installing plugin composer dependencies..."
 wp-env run cli $CONFIG_ARG --env-cwd=wp-content/plugins/woocommerce-google-analytics-integration composer install --no-interaction 2>&1 | tail -3
 
 echo ""
-echo "==> PHPUnit environment ready. Run tests with: npm run test:php"
+echo "==> PHPUnit environment ready. Run tests with: pnpm run test:php"

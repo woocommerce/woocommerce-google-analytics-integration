@@ -9,13 +9,13 @@ description: Use when linting, formatting or checking Google Analytics for WooCo
 
 | Command | What it runs |
 |---|---|
-| `npm run lint` | `lint:php`, `lint:php:deprecations`, `lint:phpstan`, `lint:js` |
-| `npm run lint:php` | PHPCS with WordPress Coding Standards (`phpcs.xml.dist`). Needs `composer install`. |
-| `npm run lint:php:deprecations` | `bin/lint-php-deprecations.sh`: `php -l` on every PHP file with your local PHP, failing on compile-time deprecations. |
-| `npm run lint:phpstan` | PHPStan at level 9 (`phpstan.neon.dist`). See [PHPStan](#phpstan). Needs `composer install`. |
-| `npm run lint:js` | ESLint (`eslint.config.mjs`, `@wordpress/eslint-plugin/recommended`), which also checks Prettier formatting. Fails on warnings (`--max-warnings 0`). |
-| `npm run format` | Prettier (`wp-prettier`) on JS files. |
-| `npm run qa` | `lint` + `test:js`. Run it before every push. |
+| `pnpm run lint` | `lint:php`, `lint:php:deprecations`, `lint:phpstan`, `lint:js` |
+| `pnpm run lint:php` | PHPCS with WordPress Coding Standards (`phpcs.xml.dist`). Needs `composer install`. |
+| `pnpm run lint:php:deprecations` | `bin/lint-php-deprecations.sh`: `php -l` on every PHP file with your local PHP, failing on compile-time deprecations. |
+| `pnpm run lint:phpstan` | PHPStan at level 9 (`phpstan.neon.dist`). See [PHPStan](#phpstan). Needs `composer install`. |
+| `pnpm run lint:js` | ESLint (`eslint.config.mjs`, `@wordpress/eslint-plugin/recommended`), which also checks Prettier formatting. Fails on warnings (`--max-warnings 0`). |
+| `pnpm run format` | Prettier (`wp-prettier`) on JS files. |
+| `pnpm run qa` | `lint` + `test:js`. Run it before every push. |
 
 There is no CSS lint.
 
@@ -24,25 +24,25 @@ There is no CSS lint.
 Level 9, configured in `phpstan.neon.dist`. Errors that were already in the code are listed in `phpstan-baseline.neon`, so only new errors fail.
 
 ```bash
-npm run lint:phpstan            # the whole plugin
-npm run lint:phpstan:baseline   # rewrite phpstan-baseline.neon
+pnpm run lint:phpstan            # the whole plugin
+pnpm run lint:phpstan:baseline   # rewrite phpstan-baseline.neon
 ```
 
 - Fix a new error instead of adding it to the baseline. Don't hide it with a cast, an inline `@var` or a wider type.
 - On existing public and protected methods, fix types in the docblock. A new native type can break code that extends the class.
-- After you fix a listed error, run `npm run lint:phpstan:baseline`. A listed error that no longer happens fails the check too.
+- After you fix a listed error, run `pnpm run lint:phpstan:baseline`. A listed error that no longer happens fails the check too.
 - To change the config only for yourself, create `phpstan.neon` (gitignored) that includes `phpstan.neon.dist`. PHPStan reads it first.
 
 ## One file
 
 - PHP: `vendor/bin/phpcs <file>`; fix what can be fixed with `vendor/bin/phpcbf <file>`.
-- JS: `npx eslint --max-warnings 0 <file>`; fix with `npx eslint --fix <file>`.
+- JS: `pnpm exec eslint --max-warnings 0 <file>`; fix with `pnpm exec eslint --fix <file>`.
 
 PHPCS output help: <https://github.com/squizlabs/PHP_CodeSniffer/wiki/Usage#printing-progress-information>.
 
 ## Pre-commit hook
 
-`npm install` sets up Husky and lint-staged. On commit, `tasks/lint-staged-php.sh` runs PHPCS on staged PHP files and then PHPStan on the whole plugin, and `tasks/lint-staged-js.sh` runs ESLint (`--max-warnings 0 --no-warn-ignored`) on staged JS files. A problem blocks the commit.
+`pnpm install` sets up Husky and lint-staged. On commit, `tasks/lint-staged-php.sh` runs PHPCS on staged PHP files and then PHPStan on the whole plugin, and `tasks/lint-staged-js.sh` runs ESLint (`--max-warnings 0 --no-warn-ignored`) on staged JS files. A problem blocks the commit.
 
 Switches go in `.env` in the repository root (gitignored); `.husky/common.sh` reads it:
 
@@ -53,7 +53,7 @@ MP_GIT_HOOKS_PHPSTAN=false       # skip PHPStan
 MP_GIT_HOOKS_ESLINT=false        # skip ESLint
 ```
 
-The `MP_` prefix comes from MailPoet, so one `.env` works in every plugin repo. Do not use `--no-verify`. The hook only sees staged files, so it does not replace `npm run qa`.
+The `MP_` prefix comes from MailPoet, so one `.env` works in every plugin repo. Do not use `--no-verify`. The hook only sees staged files, so it does not replace `pnpm run qa`.
 
 ## What CI runs
 
@@ -63,8 +63,8 @@ The `MP_` prefix comes from MailPoet, so one `.env` works in every plugin repo. 
 |---|---|
 | `php-coding-standards.yml` | `vendor/bin/phpcs` on all files, at PHP 7.4 |
 | `php-static-analysis.yml` | PHPStan, at PHP 8.4 |
-| `js-linting.yml` | `npm run lint:js` with GitHub annotations |
-| `js-unit-tests.yml` | `npm run test:js:coverage`: the JS tests, with line coverage in the job summary; the coverage only reports |
+| `js-linting.yml` | `pnpm run lint:js` with GitHub annotations |
+| `js-unit-tests.yml` | `pnpm run test:js:coverage`: the JS tests, with line coverage in the job summary; the coverage only reports |
 | `php-unit-tests.yml` | `bin/lint-php-deprecations.sh` and PHPUnit on a PHP and WooCommerce matrix. The PHP 8.4 row writes the line coverage and the files no test reaches to the job summary; it only reports. |
 | `e2e-tests.yml` | Production build, then Playwright on the test wp-env site |
 | `e2e-versions.yml` | Weekly, outside `checks.yml`: `e2e-tests.yml` on the newest and the minimum WooCommerce |
@@ -72,4 +72,4 @@ The `MP_` prefix comes from MailPoet, so one `.env` works in every plugin repo. 
 
 `checks.yml` also calls `test-the-build.yml` after the build. It is not a check and is not under “All checks”: it adds the “Test the build” comment, with WordPress Playground links to the build, to pull requests, except those from forks and from Dependabot. See `.github/playground/README.md`.
 
-`npm run qa` covers the first four and the deprecation check with your local PHP. For PHPUnit and E2E, see the `running-tests` skill.
+`pnpm run qa` covers the first four and the deprecation check with your local PHP. For PHPUnit and E2E, see the `running-tests` skill.

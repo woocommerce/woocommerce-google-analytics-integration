@@ -1,7 +1,7 @@
 /**
  * Unit tests for the Store API helpers that decide which add_to_cart and
  * remove_from_cart events the block cart, checkout and add-to-cart blocks send.
- * Run with `npm run test:js`.
+ * Run with `pnpm run test:js`.
  */
 
 /**

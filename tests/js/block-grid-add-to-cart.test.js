@@ -2,7 +2,7 @@
  * Unit tests for add_to_cart from the "Add to cart" button of a block product
  * grid. Two parts of the plugin see that add: the click listener on the
  * product card, and the Store API interceptor once the server answers.
- * Run with `npm run test:js`.
+ * Run with `pnpm run test:js`.
  */
 
 /**

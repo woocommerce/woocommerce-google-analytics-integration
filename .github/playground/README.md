@@ -33,7 +33,7 @@ The run ID in the artifact name ties a link to one run: a link never mixes the z
 Build the zip, then run the same steps against it with the Playground CLI (Node 20.18 or newer):
 
 ```sh
-npm run build
+pnpm run build
 mkdir -p /tmp/ga4w-preview/playground
 cp woocommerce-google-analytics-integration.zip /tmp/ga4w-preview/
 cp .github/playground/*.php /tmp/ga4w-preview/playground/
@@ -48,7 +48,7 @@ cat > /tmp/ga4w-preview/blueprint.json <<'EOF'
   ]
 }
 EOF
-npx @wp-playground/cli@3.1.64 server --blueprint=/tmp/ga4w-preview/blueprint.json --mount=/tmp/ga4w-preview:/tmp/pr
+pnpm dlx @wp-playground/cli@3.1.64 server --blueprint=/tmp/ga4w-preview/blueprint.json --mount=/tmp/ga4w-preview:/tmp/pr
 ```
 
 Open `http://127.0.0.1:9400/shop/`.

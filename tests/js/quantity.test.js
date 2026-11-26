@@ -81,11 +81,26 @@ test( 'a classic cart line moved to a new quantity keeps its unit price', () => 
 	assert.deepStrictEqual( getCartProductForQuantity( line, 1 ), {
 		quantity: 1,
 		prices: { price: 1500 },
-		totals: { line_total: '1500' },
+		totals: undefined,
 	} );
-	assert.deepStrictEqual( getCartProductForQuantity( line, 0.5 ).totals, {
-		line_total: '750',
-	} );
+
+	const odd = { quantity: 1, totals: { line_total: '899' } };
+	for ( const quantity of [ 0.5, 0.25, 3 ] ) {
+		assert.strictEqual(
+			getUnitPrice( getCartProductForQuantity( odd, quantity ) ),
+			899,
+			String( quantity )
+		);
+	}
+	assert.strictEqual(
+		getUnitPrice(
+			getCartProductForQuantity(
+				{ quantity: 2, totals: { line_total: '0' } },
+				1
+			)
+		),
+		0
+	);
 } );
 
 test( 'a classic cart quantity change reports the decimal difference', () => {

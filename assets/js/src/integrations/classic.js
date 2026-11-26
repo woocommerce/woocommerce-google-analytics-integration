@@ -81,8 +81,8 @@ export const getShippingTierLabel = ( element ) => {
 };
 
 /**
- * Move a classic cart line to another quantity, keeping its unit price and
- * scaling its line total to match. The quantity may be a decimal (0.5 kg).
+ * Move a classic cart line to another quantity, keeping its unit price. The
+ * quantity may be a decimal (0.5 kg).
  *
  * @since x.x.x
  *
@@ -97,6 +97,7 @@ export const getCartProductForQuantity = ( cartProduct, quantity ) => {
 		return { ...cartProduct, quantity };
 	}
 
+	// A line total rounded for the new quantity would shift the unit price read back from it.
 	return {
 		...cartProduct,
 		quantity,
@@ -104,10 +105,7 @@ export const getCartProductForQuantity = ( cartProduct, quantity ) => {
 			...cartProduct.prices,
 			price: Math.round( unitPrice ),
 		},
-		totals: {
-			...cartProduct.totals,
-			line_total: String( Math.round( unitPrice * quantity ) ),
-		},
+		totals: undefined,
 	};
 };
 

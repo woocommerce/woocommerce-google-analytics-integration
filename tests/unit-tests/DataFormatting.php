@@ -731,6 +731,55 @@ class DataFormatting extends EventsDataTest {
 	}
 
 	/**
+	 * Test that the quantity given to a formatted product, as the add_to_cart
+	 * event reports it, keeps a decimal when the store allows decimal quantities.
+	 *
+	 * @return void
+	 */
+	public function test_get_formatted_product_supports_decimal_quantity() {
+		// Core registers intval on this filter; decimal-quantity extensions swap it for floatval.
+		remove_filter( 'woocommerce_stock_amount', 'intval' );
+		add_filter( 'woocommerce_stock_amount', 'floatval' );
+
+		try {
+			$formatted = $this->gtag->get_formatted_product( $this->get_product(), 0, false, '1.5' );
+
+			$this->assertSame( 1.5, $formatted['quantity'] );
+		} finally {
+			remove_filter( 'woocommerce_stock_amount', 'floatval' );
+			add_filter( 'woocommerce_stock_amount', 'intval' );
+		}
+	}
+
+	/**
+	 * Test that a store with whole-number quantities keeps reporting an integer.
+	 *
+	 * @return void
+	 */
+	public function test_get_formatted_product_keeps_integer_quantity() {
+		$formatted = $this->gtag->get_formatted_product( $this->get_product(), 0, false, '2' );
+
+		$this->assertSame( 2, $formatted['quantity'] );
+	}
+
+	/**
+	 * Test that a quantity that is not a number is left out instead of being
+	 * reported as 0 or 1.
+	 *
+	 * @return void
+	 */
+	public function test_get_formatted_product_leaves_out_non_numeric_quantity() {
+		foreach ( [
+			'abc'  => 'abc',
+			'true' => true,
+		] as $label => $quantity ) {
+			$formatted = $this->gtag->get_formatted_product( $this->get_product(), 0, false, $quantity );
+
+			$this->assertArrayNotHasKey( 'quantity', $formatted, $label );
+		}
+	}
+
+	/**
 	 * Test that a null cart returns an empty array.
 	 *
 	 * @return void

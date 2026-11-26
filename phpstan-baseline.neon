@@ -91,12 +91,6 @@ parameters:
 			path: includes/class-wc-abstract-google-analytics-js.php
 
 		-
-			message: '#^Parameter \#4 \$quantity of method WC_Abstract_Google_Analytics_JS\:\:get_formatted_product\(\) expects bool\|int, int\|string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/class-wc-abstract-google-analytics-js.php
-
-		-
 			message: '#^Action callback returns bool but should not return anything\.$#'
 			identifier: return.void
 			count: 1

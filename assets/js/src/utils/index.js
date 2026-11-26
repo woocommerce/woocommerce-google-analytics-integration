@@ -162,6 +162,30 @@ export const getProductImpressionObject = ( product, listName ) => {
 };
 
 /**
+ * Read a quantity above zero, keeping its decimals for stores that allow
+ * decimal quantities through the `woocommerce_stock_amount` filter.
+ *
+ * @param {*} value    The quantity to read.
+ * @param {*} fallback Returned when the value is not a number above zero.
+ * @return {number|*} The quantity, or the fallback.
+ */
+export const parseQuantity = ( value, fallback = null ) => {
+	const parsed = parseFloat( value );
+
+	return Number.isFinite( parsed ) && parsed > 0 ? parsed : fallback;
+};
+
+/**
+ * Round a quantity to remove floating point noise from quantity maths,
+ * such as 0.3 - 0.1 giving 0.19999999999999998. Six decimal places is far
+ * finer than any store's quantity step, so a smaller change rounds to 0.
+ *
+ * @param {number} quantity The quantity to round.
+ * @return {number} The rounded quantity.
+ */
+export const roundQuantity = ( quantity ) => Math.round( quantity * 1e6 ) / 1e6;
+
+/**
  * Returns the price of a product formatted as a string.
  *
  * @param {string} price                 - The price to parse

@@ -309,7 +309,7 @@ abstract class WC_Abstract_Google_Analytics_JS {
 	 * @param int                   $variation_id Variation product ID.
 	 * @param array|bool            $variation An array containing product variation attributes to include in the product data.
 	 *                              For the "variation" type products, we'll use product->get_attributes.
-	 * @param bool|int              $quantity  Quantity to include in the formatted product object
+	 * @param bool|int|float|string $quantity  Quantity to include in the formatted product object
 	 *
 	 * @return array
 	 */
@@ -334,8 +334,9 @@ abstract class WC_Abstract_Google_Analytics_JS {
 			'currency_minor_unit' => wc_get_price_decimals(),
 		);
 
-		if ( $quantity ) {
-			$formatted['quantity'] = (int) $quantity;
+		if ( $quantity && is_numeric( $quantity ) ) {
+			// Follows the store's woocommerce_stock_amount filter: an int by default, a float when an extension allows decimal quantities.
+			$formatted['quantity'] = wc_stock_amount( (float) $quantity );
 		}
 
 		return $formatted;
@@ -498,11 +499,11 @@ abstract class WC_Abstract_Google_Analytics_JS {
 	 * Capture the product added to the cart so it can either be rendered now
 	 * (no redirect) or persisted into the WC session (if WC will redirect).
 	 *
-	 * @param string     $cart_item_key Cart item key.
-	 * @param int        $product_id    Product ID being added.
-	 * @param int|string $quantity      Quantity added.
-	 * @param int        $variation_id  Variation ID (0 if not a variation).
-	 * @param array      $variation     Variation attributes.
+	 * @param string           $cart_item_key Cart item key.
+	 * @param int              $product_id    Product ID being added.
+	 * @param int|float|string $quantity      Quantity added (a float when the store allows decimal quantities).
+	 * @param int              $variation_id  Variation ID (0 if not a variation).
+	 * @param array            $variation     Variation attributes.
 	 *
 	 * @return void
 	 */

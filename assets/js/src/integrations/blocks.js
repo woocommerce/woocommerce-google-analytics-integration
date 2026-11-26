@@ -6,6 +6,7 @@ import {
 	forgetClickedAdd,
 	getCurrencySettings,
 	parsePriceFromDOM,
+	parseQuantity,
 } from '../utils';
 import {
 	rememberCartItems,
@@ -227,7 +228,7 @@ const getProductFromDOM = ( cartItem ) => {
 		'.wc-block-components-quantity-selector__input'
 	);
 	const quantity = quantityInput
-		? parseInt( quantityInput.value, 10 ) || 1
+		? parseQuantity( quantityInput.value, 1 )
 		: 1;
 
 	// Try to get price - look for the sale price first, then regular price

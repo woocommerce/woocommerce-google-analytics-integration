@@ -3,6 +3,8 @@
  * changes to track. blocks.js uses them in its fetch interceptor.
  */
 
+import { parseQuantity, roundQuantity } from './index';
+
 /*
  * Last item observed for each cart line item (keyed by Store API line item
  * key), recorded from every Store API cart response the interceptor sees. A
@@ -213,7 +215,7 @@ export const parseAddItemRequestBody = ( body ) => {
 
 	return {
 		productId: toPositiveInteger( data.id ),
-		quantity: toPositiveInteger( data.quantity, 1 ),
+		quantity: parseQuantity( data.quantity, 1 ),
 	};
 };
 
@@ -286,7 +288,7 @@ export const getAddedCartItem = ( cartAfter, cartBefore, requestProductId ) => {
 };
 
 export const getAddedQuantity = ( item, cartBefore, requestedQuantity ) => {
-	const itemQuantity = parseInt( item?.quantity, 10 );
+	const itemQuantity = parseFloat( item?.quantity );
 
 	if (
 		Array.isArray( cartBefore?.items ) &&
@@ -296,10 +298,12 @@ export const getAddedQuantity = ( item, cartBefore, requestedQuantity ) => {
 			( beforeItem ) =>
 				getCartItemKey( beforeItem ) === getCartItemKey( item )
 		);
-		const previousQuantity = parseInt( previousItem?.quantity ?? 0, 10 );
+		const previousQuantity = parseFloat( previousItem?.quantity ?? 0 );
 
 		if ( Number.isFinite( previousQuantity ) ) {
-			const addedQuantity = itemQuantity - previousQuantity;
+			const addedQuantity = roundQuantity(
+				itemQuantity - previousQuantity
+			);
 
 			if ( addedQuantity > 0 ) {
 				return addedQuantity;
@@ -328,7 +332,7 @@ export const getAddedQuantity = ( item, cartBefore, requestedQuantity ) => {
  * @return {Object} The item, with `totals.line_total` scaled to the reported units.
  */
 export const scaleLineTotalToQuantity = ( item, quantity ) => {
-	const newQuantity = parseInt( item?.quantity, 10 );
+	const newQuantity = parseFloat( item?.quantity );
 	const lineTotal = parseInt( item?.totals?.line_total, 10 );
 
 	if (
@@ -421,8 +425,10 @@ export const getUpdateItemChangeFromResponse = (
 		previousQuantity = previousItem.quantity ?? 0;
 	}
 
-	const newQuantity = parseInt( updatedItem?.quantity ?? 0, 10 );
-	const quantityDelta = newQuantity - parseInt( previousQuantity, 10 );
+	const newQuantity = parseFloat( updatedItem?.quantity ?? 0 );
+	const quantityDelta = roundQuantity(
+		newQuantity - parseFloat( previousQuantity )
+	);
 
 	if ( ! Number.isFinite( quantityDelta ) || quantityDelta === 0 ) {
 		return null;

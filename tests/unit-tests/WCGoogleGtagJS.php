@@ -126,6 +126,67 @@ class WCGoogleGtagJS extends EventsDataTest {
 	}
 
 	/**
+	 * Test that `view_cart` is marked only on the cart page with items in the cart.
+	 *
+	 * @return void
+	 */
+	public function test_view_cart_is_marked_on_cart_page_with_items(): void {
+		if ( ! WC()->cart ) {
+			wc_load_cart();
+		}
+		WC()->cart->empty_cart();
+
+		$cart_page_id = self::factory()->post->create( array( 'post_type' => 'page' ) );
+		update_option( 'woocommerce_cart_page_id', $cart_page_id );
+		$other_page_id = self::factory()->post->create( array( 'post_type' => 'page' ) );
+
+		$cases = array(
+			'empty cart on the cart page' => array( $cart_page_id, false, false ),
+			'items on another page'       => array( $other_page_id, true, false ),
+			'items on the cart page'      => array( $cart_page_id, true, true ),
+		);
+
+		try {
+			foreach ( $cases as $name => list( $page_id, $add_item, $expected ) ) {
+				if ( $add_item && WC()->cart->is_empty() ) {
+					WC()->cart->add_to_cart( WC_Helper_Product::create_simple_product()->get_id() );
+				}
+				$this->go_to( get_permalink( $page_id ) );
+				$this->reset_cart_page_cache();
+
+				$gtag = new WC_Google_Gtag_JS();
+				$this->assertNotFalse( has_action( 'wp_head', array( $gtag, 'maybe_append_view_cart_event' ) ) );
+				$gtag->maybe_append_view_cart_event();
+				$script_data = json_decode( $gtag->get_script_data(), true );
+
+				$this->assertSame( $expected, in_array( 'view_cart', $script_data['events'] ?? array(), true ), $name );
+			}
+		} finally {
+			WC()->cart->empty_cart();
+			delete_option( 'woocommerce_cart_page_id' );
+			$this->reset_cart_page_cache();
+		}
+	}
+
+	/**
+	 * Clear WooCommerce's per-request `is_cart()` result, which `go_to()` doesn't reset.
+	 *
+	 * @return void
+	 */
+	private function reset_cart_page_cache(): void {
+		$class = \Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils::class;
+		if ( ! class_exists( $class ) || ! property_exists( $class, 'is_cart_page' ) ) {
+			return;
+		}
+
+		$property = new \ReflectionProperty( $class, 'is_cart_page' );
+		if ( PHP_VERSION_ID < 80100 ) {
+			$property->setAccessible( true );
+		}
+		$property->setValue( null, null );
+	}
+
+	/**
 	 * Test that script data is correctly set
 	 *
 	 * @return void
@@ -253,6 +314,7 @@ class WCGoogleGtagJS extends EventsDataTest {
 			'ga_ecommerce_tracking_enabled'           => array( 'purchase' ),
 			'ga_event_tracking_enabled'               => array( 'add_to_cart' ),
 			'ga_enhanced_remove_from_cart_enabled'    => array( 'remove_from_cart' ),
+			'ga_enhanced_view_cart_enabled'           => array( 'view_cart' ),
 			'ga_enhanced_product_impression_enabled'  => array( 'view_item_list' ),
 			'ga_enhanced_product_click_enabled'       => array( 'select_content' ),
 			'ga_enhanced_product_detail_view_enabled' => array( 'view_item' ),

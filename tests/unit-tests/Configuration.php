@@ -523,6 +523,7 @@ class Configuration extends EventsDataTest {
 			'ga_ecommerce_tracking_enabled',
 			'ga_event_tracking_enabled',
 			'ga_enhanced_remove_from_cart_enabled',
+			'ga_enhanced_view_cart_enabled',
 			'ga_enhanced_product_impression_enabled',
 			'ga_enhanced_product_click_enabled',
 			'ga_enhanced_product_detail_view_enabled',
@@ -533,6 +534,8 @@ class Configuration extends EventsDataTest {
 		foreach ( $expected_keys as $key ) {
 			$this->assertArrayHasKey( $key, $settings, "Expected '{$key}' to be present in settings after construction with partial defaults." );
 		}
+
+		$this->assertEquals( 'yes', $settings['ga_enhanced_view_cart_enabled'] );
 
 		// The value set by maybe_set_defaults() should be preserved, not overwritten.
 		$this->assertEquals( 'product_id', $settings['ga_product_identifier'] );

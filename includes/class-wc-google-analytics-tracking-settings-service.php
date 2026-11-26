@@ -66,6 +66,7 @@ class WC_Google_Analytics_Tracking_Settings_Service {
 			'purchase'         => 'ga_ecommerce_tracking_enabled',
 			'add_to_cart'      => 'ga_event_tracking_enabled',
 			'remove_from_cart' => 'ga_enhanced_remove_from_cart_enabled',
+			'view_cart'        => 'ga_enhanced_view_cart_enabled',
 			'view_item_list'   => 'ga_enhanced_product_impression_enabled',
 			'select_content'   => 'ga_enhanced_product_click_enabled',
 			'view_item'        => 'ga_enhanced_product_detail_view_enabled',

@@ -151,6 +151,7 @@ class Abilities extends WP_UnitTestCase {
 				'purchase',
 				'add_to_cart',
 				'remove_from_cart',
+				'view_cart',
 				'view_item_list',
 				'select_content',
 				'view_item',
@@ -223,7 +224,7 @@ class Abilities extends WP_UnitTestCase {
 		$this->assertTrue( $result['event_tracking']['purchase'] );
 		$this->assertFalse( $result['event_tracking']['add_to_cart'] );
 		$this->assertSame(
-			array( 'purchase', 'remove_from_cart', 'view_item_list', 'view_item', 'begin_checkout' ),
+			array( 'purchase', 'remove_from_cart', 'view_cart', 'view_item_list', 'view_item', 'begin_checkout' ),
 			$result['enabled_events']
 		);
 		$this->assertSame( WC_GOOGLE_ANALYTICS_INTEGRATION_VERSION, $result['plugin_version'] );

@@ -101,6 +101,106 @@ test( 'checkout value falls back to unit price times quantity for a line without
 	assert.strictEqual( data.value, 30 );
 } );
 
+const groupedBundle = [
+	cartItem( { id: 13, totals: { line_total: '4000' } } ),
+	cartItem( { id: 10, totals: { line_total: '1600' } } ),
+	cartItem( { id: 11, totals: { line_total: '2400' } } ),
+];
+const totals = ( overrides ) => ( {
+	currency_code: 'GBP',
+	currency_minor_unit: 2,
+	...overrides,
+} );
+
+test( 'checkout value counts a grouped bundle once, from the cart totals', () => {
+	const data = events.begin_checkout( {
+		storeCart: cart( groupedBundle, {
+			totals: totals( {
+				total_price: '5300',
+				total_tax: '800',
+				total_shipping: '500',
+				total_fees: '0',
+			} ),
+		} ),
+	} );
+
+	assert.strictEqual( data.value, 40 );
+} );
+
+test( 'checkout value keeps the line sum when it is within 1 cent per line of the cart totals', () => {
+	const data = events.begin_checkout( {
+		storeCart: cart(
+			[
+				cartItem( { totals: { line_total: '1500' } } ),
+				cartItem( { id: 11, totals: { line_total: '1273' } } ),
+			],
+			{
+				totals: totals( {
+					total_price: '3772',
+					total_tax: '500',
+					total_shipping: '500',
+					total_fees: '0',
+				} ),
+			}
+		),
+	} );
+
+	assert.strictEqual( data.value, 27.73 );
+} );
+
+test( 'checkout value treats missing shipping as 0 and subtracts negative fees', () => {
+	const data = events.begin_checkout( {
+		storeCart: cart( groupedBundle, {
+			totals: totals( {
+				total_price: '4500',
+				total_tax: '800',
+				total_shipping: null,
+				total_fees: '-300',
+			} ),
+		} ),
+	} );
+
+	assert.strictEqual( data.value, 40 );
+} );
+
+test( 'checkout value never switches up to a higher cart-totals value', () => {
+	const data = events.begin_checkout( {
+		storeCart: cart( [ cartItem() ], {
+			totals: totals( {
+				total_price: '9000',
+				total_tax: '0',
+				total_shipping: '0',
+				total_fees: '0',
+			} ),
+		} ),
+	} );
+
+	assert.strictEqual( data.value, 30 );
+} );
+
+test( 'checkout value uses the tolerance in minor units for a zero-decimal currency', () => {
+	const data = events.begin_checkout( {
+		storeCart: cart(
+			[
+				cartItem( { id: 13, totals: { line_total: '4000' } } ),
+				cartItem( { id: 10, totals: { line_total: '4000' } } ),
+			],
+			{
+				totals: {
+					currency_code: 'JPY',
+					currency_minor_unit: 0,
+					total_price: '4000',
+					total_tax: '0',
+					total_shipping: '0',
+					total_fees: '0',
+				},
+			}
+		),
+	} );
+
+	assert.strictEqual( data.value, 4000 );
+} );
+
 test( 'view_cart sends nothing for an empty cart', () => {
 	for ( const storeCart of [ undefined, cart( [] ) ] ) {
 		assert.strictEqual( events.view_cart( { storeCart } ), false );

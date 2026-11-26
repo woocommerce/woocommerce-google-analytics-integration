@@ -1,4 +1,9 @@
-import { getProductFromID, rememberClickedAdd, roundQuantity } from '../utils';
+import {
+	getProductFromID,
+	getUnitPrice,
+	rememberClickedAdd,
+	roundQuantity,
+} from '../utils';
 
 const checkoutPaymentMethodSelector = 'input[name="payment_method"]';
 const checkoutShippingMethodSelector =
@@ -76,25 +81,34 @@ export const getShippingTierLabel = ( element ) => {
 };
 
 /**
- * Get the unit price of a classic cart snapshot item, whose price covers its
- * whole quantity. The quantity may be a decimal (0.5 kg).
+ * Move a classic cart line to another quantity, keeping its unit price and
+ * scaling its line total to match. The quantity may be a decimal (0.5 kg).
  *
- * @param {Object} cartProduct Cart snapshot item.
- * @return {number|null} The unit price, or null when it cannot be worked out.
+ * @since x.x.x
+ *
+ * @param {Object} cartProduct Cart line from the page-load cart.
+ * @param {number} quantity    The new quantity.
+ * @return {Object} The cart line at the new quantity.
  */
-export const getCartItemUnitPrice = ( cartProduct ) => {
-	const previousQuantity = parseFloat( cartProduct?.quantity );
-	const linePrice = parseInt( cartProduct?.prices?.price, 10 );
+export const getCartProductForQuantity = ( cartProduct, quantity ) => {
+	const unitPrice = getUnitPrice( cartProduct );
 
-	if (
-		! Number.isFinite( previousQuantity ) ||
-		previousQuantity <= 0 ||
-		! Number.isFinite( linePrice )
-	) {
-		return null;
+	if ( ! Number.isFinite( unitPrice ) ) {
+		return { ...cartProduct, quantity };
 	}
 
-	return linePrice / previousQuantity;
+	return {
+		...cartProduct,
+		quantity,
+		prices: {
+			...cartProduct.prices,
+			price: Math.round( unitPrice ),
+		},
+		totals: {
+			...cartProduct.totals,
+			line_total: String( Math.round( unitPrice * quantity ) ),
+		},
+	};
 };
 
 /**
@@ -368,40 +382,6 @@ export function classicTracking(
 		} );
 	}
 
-	function getQuantityChangeProduct( cartProduct, quantity ) {
-		const unitPrice = getCartItemUnitPrice( cartProduct );
-
-		if ( null === unitPrice ) {
-			return { ...cartProduct, quantity };
-		}
-
-		return {
-			...cartProduct,
-			quantity,
-			prices: {
-				...cartProduct.prices,
-				price: Math.round( unitPrice ),
-			},
-		};
-	}
-
-	function getCartSnapshotProduct( cartProduct, quantity ) {
-		const unitPrice = getCartItemUnitPrice( cartProduct );
-
-		if ( null === unitPrice ) {
-			return { ...cartProduct, quantity };
-		}
-
-		return {
-			...cartProduct,
-			quantity,
-			prices: {
-				...cartProduct.prices,
-				price: Math.round( unitPrice * quantity ),
-			},
-		};
-	}
-
 	function getCartItemKeyFromRow( item ) {
 		const inputName = item.querySelector( 'input.qty' )?.name;
 		return inputName?.match( /^cart\[([^\]]+)\]\[qty]$/ )?.[ 1 ];
@@ -471,7 +451,7 @@ export function classicTracking(
 
 				if ( matchedProduct && Number.isFinite( newQuantity ) ) {
 					syncedItems.push(
-						getCartSnapshotProduct( matchedProduct, newQuantity )
+						getCartProductForQuantity( matchedProduct, newQuantity )
 					);
 				}
 			} );
@@ -519,7 +499,7 @@ export function classicTracking(
 				const { eventName, quantity } = change;
 
 				getEventHandler( eventName )( {
-					product: getQuantityChangeProduct(
+					product: getCartProductForQuantity(
 						matchedProduct,
 						quantity
 					),

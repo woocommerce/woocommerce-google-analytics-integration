@@ -1,7 +1,7 @@
 /**
  * Unit tests for how quantities are read and compared, including stores that
  * allow decimal quantities (0.5 kg) by filtering woocommerce_stock_amount.
- * Run with `npm run test:js`.
+ * Run with `pnpm run test:js`.
  */
 
 /**
@@ -15,8 +15,9 @@ const assert = require( 'node:assert' );
  */
 const loadSource = require( './helpers/load-source' );
 
-const { parseQuantity, roundQuantity } = loadSource( 'utils/index.js' );
-const { getCartItemUnitPrice, getCartQuantityChange, getCartRowQuantity } =
+const { getUnitPrice, parseQuantity, roundQuantity } =
+	loadSource( 'utils/index.js' );
+const { getCartProductForQuantity, getCartQuantityChange, getCartRowQuantity } =
 	loadSource( 'integrations/classic.js' );
 
 /**
@@ -48,23 +49,43 @@ test( 'a quantity keeps its decimals and falls back when it is not above zero', 
 	assert.strictEqual( parseQuantity( 'abc', 1 ), 1 );
 } );
 
-test( 'the classic cart unit price divides the line price by a decimal quantity', () => {
+test( 'a cart line unit price divides the line total by a decimal quantity', () => {
+	for ( const [ quantity, lineTotal ] of [
+		[ 1.5, '1500' ],
+		[ 0.5, '500' ],
+		[ 2, '2000' ],
+	] ) {
+		assert.strictEqual(
+			getUnitPrice( {
+				quantity,
+				prices: { price: 999 },
+				totals: { line_total: lineTotal },
+			} ),
+			1000,
+			String( quantity )
+		);
+	}
 	assert.strictEqual(
-		getCartItemUnitPrice( { quantity: 1.5, prices: { price: 1500 } } ),
+		getUnitPrice( { quantity: 2, prices: { price: '1000' } } ),
 		1000
 	);
-	assert.strictEqual(
-		getCartItemUnitPrice( { quantity: 0.5, prices: { price: 500 } } ),
-		1000
-	);
-	assert.strictEqual(
-		getCartItemUnitPrice( { quantity: 2, prices: { price: 2000 } } ),
-		1000
-	);
-	assert.strictEqual(
-		getCartItemUnitPrice( { quantity: 0, prices: { price: 0 } } ),
-		null
-	);
+} );
+
+test( 'a classic cart line moved to a new quantity keeps its unit price', () => {
+	const line = {
+		quantity: 3,
+		prices: { price: 1500 },
+		totals: { line_total: '4500' },
+	};
+
+	assert.deepStrictEqual( getCartProductForQuantity( line, 1 ), {
+		quantity: 1,
+		prices: { price: 1500 },
+		totals: { line_total: '1500' },
+	} );
+	assert.deepStrictEqual( getCartProductForQuantity( line, 0.5 ).totals, {
+		line_total: '750',
+	} );
 } );
 
 test( 'a classic cart quantity change reports the decimal difference', () => {

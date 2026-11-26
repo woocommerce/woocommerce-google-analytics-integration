@@ -173,6 +173,12 @@ class WC_Google_Analytics extends WC_Integration {
 				'checkboxgroup' => '',
 				'default'       => 'yes',
 			),
+			'ga_enhanced_view_cart_enabled'           => array(
+				'label'         => __( 'View Cart Events', 'woocommerce-google-analytics-integration' ),
+				'type'          => 'checkbox',
+				'checkboxgroup' => '',
+				'default'       => 'yes',
+			),
 
 			'ga_enhanced_product_impression_enabled'  => array(
 				'label'         => __( 'Product Impressions from Listing Pages', 'woocommerce-google-analytics-integration' ),

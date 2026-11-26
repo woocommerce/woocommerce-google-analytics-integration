@@ -104,6 +104,28 @@ test( 'checkout value falls back to the price of a static server cart line', () 
 	assert.strictEqual( data.value, 45 );
 } );
 
+test( 'view_cart sends nothing for an empty cart', () => {
+	for ( const storeCart of [ undefined, cart( [] ) ] ) {
+		assert.strictEqual( events.view_cart( { storeCart } ), false );
+	}
+} );
+
+test( 'view_cart sends the currency, line-total value and items of the page-load cart', () => {
+	const data = events.view_cart( {
+		storeCart: cart( [
+			cartItem( { totals: undefined, prices: { price: '4500' } } ),
+			cartItem( { id: 11, totals: undefined, prices: { price: '999' } } ),
+		] ),
+	} );
+
+	assert.strictEqual( data.currency, 'USD' );
+	assert.strictEqual( data.value, 54.99 );
+	assert.deepStrictEqual(
+		data.items.map( ( item ) => item.item_id ),
+		[ 10, 11 ]
+	);
+} );
+
 test( 'checkout value follows the currency minor unit', () => {
 	for ( const [ minorUnit, lineTotal, expected ] of [
 		[ 0, '1200', 1200 ], // JPY

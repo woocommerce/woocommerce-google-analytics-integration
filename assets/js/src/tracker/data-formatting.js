@@ -102,6 +102,18 @@ const getCheckoutData = ( storeCart ) => {
 };
 
 /**
+ * Formats data for the view_cart event
+ *
+ * @since x.x.x
+ *
+ * @param {Object} params           The function params
+ * @param {Object} params.storeCart The cart object
+ */
+export const view_cart = ( { storeCart } ) => {
+	return getCheckoutData( storeCart );
+};
+
+/**
  * Formats data for the begin_checkout event
  *
  * @param {Object} params           The function params

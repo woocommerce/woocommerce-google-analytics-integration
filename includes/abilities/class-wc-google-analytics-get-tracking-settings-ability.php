@@ -217,6 +217,7 @@ class WC_Google_Analytics_Get_Tracking_Settings_Ability implements AbilityDefini
 			'purchase',
 			'add_to_cart',
 			'remove_from_cart',
+			'view_cart',
 			'view_item_list',
 			'select_content',
 			'view_item',

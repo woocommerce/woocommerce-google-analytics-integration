@@ -326,6 +326,8 @@ export const getAddedQuantity = ( item, cartBefore, requestedQuantity ) => {
  * stays in step with the reported quantity. The reported quantity may exceed
  * the line's quantity (e.g. a decrease whose remaining line is smaller than the
  * removed units), in which case the per-unit price is scaled up accordingly.
+ * The scaled total is not rounded, so the unit price read back from it is the
+ * line's own.
  *
  * @param {Object} item     Store API cart item.
  * @param {number} quantity Quantity being reported.
@@ -348,9 +350,7 @@ export const scaleLineTotalToQuantity = ( item, quantity ) => {
 		...item,
 		totals: {
 			...item.totals,
-			line_total: String(
-				Math.round( ( lineTotal * quantity ) / newQuantity )
-			),
+			line_total: String( ( lineTotal * quantity ) / newQuantity ),
 		},
 	};
 };

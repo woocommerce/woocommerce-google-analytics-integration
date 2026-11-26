@@ -199,7 +199,7 @@ export const roundQuantity = ( quantity ) => Math.round( quantity * 1e6 ) / 1e6;
  * @return {number} The unit price, or NaN when there is no price.
  */
 export const getUnitPrice = ( product, quantity = product?.quantity ) => {
-	const lineTotal = parseInt( product?.totals?.line_total, 10 );
+	const lineTotal = parseFloat( product?.totals?.line_total );
 	const lineQuantity = parseQuantity( quantity );
 
 	if ( Number.isFinite( lineTotal ) && lineQuantity ) {

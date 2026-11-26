@@ -16,7 +16,8 @@ const assert = require( 'node:assert' );
 const loadSource = require( './helpers/load-source' );
 
 const api = loadSource( 'utils/store-api.js' );
-const { parsePriceFromDOM } = loadSource( 'utils/index.js' );
+const { getProductFieldObject, parsePriceFromDOM } =
+	loadSource( 'utils/index.js' );
 
 const ORIGIN = 'https://shop.test';
 
@@ -666,17 +667,38 @@ test( 'a batch that cannot be read reports nothing', () => {
 	);
 } );
 
-test( 'a line total is scaled to the reported units and rounded', () => {
+test( 'a line total is scaled to the reported units at the line’s unit price', () => {
 	const scaled = ( lineTotal, lineQuantity, quantity ) =>
 		api.scaleLineTotalToQuantity(
 			{ quantity: lineQuantity, totals: { line_total: lineTotal } },
 			quantity
 		).totals.line_total;
 
-	assert.strictEqual( scaled( '1000', 3, 1 ), '333' );
-	assert.strictEqual( scaled( '1000', 3, 2 ), '667' );
 	assert.strictEqual( scaled( '1000', 1, 3 ), '3000' );
 	assert.strictEqual( scaled( '1000', 3, 0 ), '0' );
+
+	// The reported item price is the line's unit price, whatever units are reported.
+	for ( const [ lineTotal, lineQuantity, quantity, price ] of [
+		[ '1000', 3, 1, 3.33 ],
+		[ '1000', 3, 2, 3.33 ],
+		[ '1349', 1.5, 0.5, 8.99 ],
+		[ '1246', 1.01, 0.01, 12.34 ],
+	] ) {
+		const product = api.scaleLineTotalToQuantity(
+			{
+				quantity: lineQuantity,
+				prices: { price: '0', currency_minor_unit: 2 },
+				totals: { line_total: lineTotal },
+			},
+			quantity
+		);
+
+		assert.strictEqual(
+			getProductFieldObject( { ...product, quantity } ).price,
+			price,
+			`${ lineTotal } over ${ lineQuantity }, ${ quantity } reported`
+		);
+	}
 
 	const emptyLine = { quantity: 0, totals: { line_total: '0' } };
 	assert.strictEqual(

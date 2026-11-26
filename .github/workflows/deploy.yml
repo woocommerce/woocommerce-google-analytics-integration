@@ -46,8 +46,8 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  # woocommerce/woo-product-deploy trunk @ 2026-09-10
-  WOO_PRODUCT_DEPLOY_SHA: c36d132b80747d6a96569712d69937177d7a0274
+  # woocommerce/woo-product-deploy trunk @ 2026-11-26
+  WOO_PRODUCT_DEPLOY_SHA: 742e2f7e92b387608510ccdb3f0ba0d9a7f41e46
 
 jobs:
   validate:
@@ -180,7 +180,5 @@ jobs:
           deploy_pat: ${{ secrets.ORG_DEPLOY_SECRET }}
           wporg_username: ${{ inputs.deploy_wporg && secrets.WPORG_SVN_USERNAME || '' }}
           wporg_password: ${{ inputs.deploy_wporg && secrets.WPORG_SVN_PASSWORD || '' }}
-          # Empty credentials skip QIT: its activation tests hang on the pinned qit-action v1.
-          # Revert once woocommerce/woo-product-deploy#13 is merged and pinned here.
-          partner_user: ''
-          partner_secret: ''
+          partner_user: ${{ secrets.ORG_PARTNER_USER }}
+          partner_secret: ${{ secrets.ORG_PARTNER_DEPLOY_SECRET }}

@@ -6,7 +6,7 @@
 CONFIG_ARG="${WP_ENV_CONFIG_FILE:+--config=$WP_ENV_CONFIG_FILE}"
 
 log=$(wp-env run cli $CONFIG_ARG -- bash -c 'cat /var/www/html/wp-content/debug.log') || {
-  echo "Could not read wp-content/debug.log. Is WP_DEBUG_LOG on and the log created (npm run test:e2e creates it)?"
+  echo "Could not read wp-content/debug.log. Is WP_DEBUG_LOG on and the log created (pnpm run test:e2e creates it)?"
   exit 1
 }
 log=$(tr -d '\r' <<< "$log")

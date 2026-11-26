@@ -10,7 +10,8 @@ tests export-ignore
 README.md export-ignore
 .nvmrc export-ignore
 package.json export-ignore
-package-lock.json export-ignore
+pnpm-lock.yaml export-ignore
+pnpm-workspace.yaml export-ignore
 composer.json export-ignore
 composer.lock export-ignore
 phpunit.xml.dist export-ignore
@@ -36,3 +37,7 @@ eslint.config.mjs export-ignore
 .claude export-ignore
 AGENTS.md export-ignore
 CLAUDE.md export-ignore
+.phpunit.result.cache export-ignore
+.eslintcache export-ignore
+.DS_Store export-ignore
+.git export-ignore

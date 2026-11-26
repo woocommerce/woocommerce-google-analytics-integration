@@ -7,24 +7,24 @@ Stack: PHP with no production Composer dependencies, JavaScript built with `@wor
 
 | Task | Command |
 |---|---|
-| Start / stop dev site | `npm run env:start` / `npm run env:stop` |
-| All lint checks | `npm run lint` (`lint:php`, `lint:php:deprecations`, `lint:phpstan`, `lint:js`) |
-| Format | `npm run format` |
-| Everything CI checks without a database | `npm run qa` |
-| Tests | `npm run test:php`, `npm run test:js`, `npm run test:e2e` |
+| Start / stop dev site | `pnpm run env:start` / `pnpm run env:stop` |
+| All lint checks | `pnpm run lint` (`lint:php`, `lint:php:deprecations`, `lint:phpstan`, `lint:js`) |
+| Format | `pnpm run format` |
+| Everything CI checks without a database | `pnpm run qa` |
+| Tests | `pnpm run test:php`, `pnpm run test:js`, `pnpm run test:e2e` |
 
-- Setup: `npm install`, `composer install` (dev tools only: PHPCS, PHPStan, PHPUnit). Use the Node version in `.nvmrc` (`nvm use`).
-- Build: `npm run dev` (unminified), `npm run start` (watch), `npm run build` (production bundle, `.pot` file and plugin zip).
+- Setup: enable Corepack (`corepack enable`) or install pnpm 11, then `pnpm install`, `composer install` (dev tools only: PHPCS, PHPStan, PHPUnit). Use the Node version in `.nvmrc` (`nvm use`).
+- Build: `pnpm run dev` (unminified), `pnpm run start` (watch), `pnpm run build` (production bundle, `.pot` file and plugin zip).
 - The dev site runs at `http://localhost:8888`. `env:start`/`env:stop` are aliases for `wp-env:dev:up`/`wp-env:dev:down`.
-- `test:php` and `test:e2e` run in a separate test site: `npm run wp-env:up`, `http://localhost:8889`, `admin`/`password`. See the `running-tests` skill.
+- `test:php` and `test:e2e` run in a separate test site: `pnpm run wp-env:up`, `http://localhost:8889`, `admin`/`password`. See the `running-tests` skill.
 - `qa` = `lint` + `test:js` and needs no Docker. CI also runs PHPUnit, E2E, Plugin Check and a build.
 - `lint:js` fails on warnings too (`--max-warnings 0`). There is no `lint:css`.
-- `lint:phpstan` runs PHPStan at level 9 (`phpstan.neon.dist`). Errors that were already in the code are listed in `phpstan-baseline.neon`; any new error fails. Fix new errors, don't add them to the baseline. After you fix a listed error, run `npm run lint:phpstan:baseline` to remove it from the list.
-- `.claude/settings.json` lets Claude Code run `npm ci`, `npm install` (no arguments), `qa`, `lint`, `lint:php`, `lint:php:deprecations`, `lint:phpstan`, `lint:js`, `format`, `test:js`, `test:php`, `test:php:setup`, `test:e2e`, `test:e2e:debug-log`, `env:start`, `env:stop`, `wp-env:up`, `wp-env:down`, `wp-env:dev:up`, `wp-env:dev:down` and `dev` without asking. It asks before `lint:phpstan:baseline`.
+- `lint:phpstan` runs PHPStan at level 9 (`phpstan.neon.dist`). Errors that were already in the code are listed in `phpstan-baseline.neon`; any new error fails. Fix new errors, don't add them to the baseline. After you fix a listed error, run `pnpm run lint:phpstan:baseline` to remove it from the list.
+- `.claude/settings.json` lets Claude Code run `pnpm install` (no arguments or `--frozen-lockfile`), `qa`, `lint`, `lint:php`, `lint:php:deprecations`, `lint:phpstan`, `lint:js`, `format`, `test:js`, `test:php`, `test:php:setup`, `test:e2e`, `test:e2e:debug-log`, `env:start`, `env:stop`, `wp-env:up`, `wp-env:down`, `wp-env:dev:up`, `wp-env:dev:down` and `dev` (as `pnpm <script>` or `pnpm run <script>`) without asking. It asks before `lint:phpstan:baseline`.
 
 ## Git hooks
 
-On commit, Husky runs lint-staged on staged files. To turn checks off, set these in `.env` in the repository root (gitignored): `MP_GIT_HOOKS_ENABLE=false` turns off all hooks; `MP_GIT_HOOKS_ESLINT=false`, `MP_GIT_HOOKS_CODE_SNIFFER=false` and `MP_GIT_HOOKS_PHPSTAN=false` turn off one check each. Hooks only see staged files (PHPStan checks the whole plugin when a PHP file is staged), so still run `npm run qa` before pushing. Do not use `--no-verify`.
+On commit, Husky runs lint-staged on staged files. To turn checks off, set these in `.env` in the repository root (gitignored): `MP_GIT_HOOKS_ENABLE=false` turns off all hooks; `MP_GIT_HOOKS_ESLINT=false`, `MP_GIT_HOOKS_CODE_SNIFFER=false` and `MP_GIT_HOOKS_PHPSTAN=false` turn off one check each. Hooks only see staged files (PHPStan checks the whole plugin when a PHP file is staged), so still run `pnpm run qa` before pushing. Do not use `--no-verify`.
 
 The lint-staged scripts are in `tasks/`.
 
@@ -55,11 +55,11 @@ tests/js/                                     – JS unit tests (Node.js test ru
 
 ## Code rules
 
-- PHP: WordPress Coding Standards (`npm run lint:php`). Tabs. Short array syntax `[]`. Yoda conditions are not required (turned off in `phpcs.xml.dist`).
+- PHP: WordPress Coding Standards (`pnpm run lint:php`). Tabs. Short array syntax `[]`. Yoda conditions are not required (turned off in `phpcs.xml.dist`).
 - Text domain: `woocommerce-google-analytics-integration` in every translatable string.
 - `manage_woocommerce` is a known custom capability. Hook names may use `/` as a delimiter.
 - JS: `@wordpress/eslint-plugin/recommended`. Use `@wordpress/i18n` for translations and `@wordpress/hooks` for extensibility.
-- Edit JS in `assets/js/src/`, then run `npm run dev` or `npm run start`.
+- Edit JS in `assets/js/src/`, then run `pnpm run dev` or `pnpm run start`.
 - Formatting: PHP and JS use tabs (width 4); JSON and YAML use 2 spaces. All files: UTF-8, LF, final newline.
 - `WC_GOOGLE_ANALYTICS_INTEGRATION_MIN_WC_VER` is the minimum WooCommerce version. Do not use newer WooCommerce APIs without a compatibility check.
 - Tag new hooks, functions and methods `@since x.x.x`. Woorelease replaces it with the version in the paths listed in `package.json` `config.version_replace_paths`.
@@ -108,6 +108,6 @@ Skills live in `.ai/skills/` (`.claude/skills` links there). Claude Code loads t
 
 ## Boundaries
 
-- **Always:** run `npm run qa` and the tests for the code you touched before pushing; sanitize input and escape output; follow the PR template; use the plugin text domain.
-- **Ask first:** new Composer or npm dependencies; CI workflow changes; changes to a surface listed under Backward compatibility; raising the minimum PHP or WooCommerce version.
+- **Always:** run `pnpm run qa` and the tests for the code you touched before pushing; sanitize input and escape output; follow the PR template; use the plugin text domain.
+- **Ask first:** new Composer or pnpm dependencies; CI workflow changes; changes to a surface listed under Backward compatibility; raising the minimum PHP or WooCommerce version.
 - **Never:** commit to `trunk`; commit `.env`, secrets or API keys; edit generated or vendored files (`assets/js/build/`, `vendor/`, `node_modules/`, `docs/Hooks.md`); skip hooks with `--no-verify`; hard-code a tracking ID.

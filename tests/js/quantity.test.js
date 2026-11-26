@@ -74,7 +74,7 @@ test( 'a cart line unit price divides the line total by a decimal quantity', () 
 test( 'a classic cart line moved to a new quantity keeps its unit price', () => {
 	const line = {
 		quantity: 3,
-		prices: { price: 1500 },
+		prices: { price: 1600 },
 		totals: { line_total: '4500' },
 	};
 

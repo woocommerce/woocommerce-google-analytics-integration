@@ -256,9 +256,9 @@ abstract class WC_Abstract_Google_Analytics_JS {
 	/**
 	 * Returns an array of cart data in the required format
 	 *
-	 * Items and coupons follow the Store API cart shape: `prices.price` is the
-	 * unit price, `totals.line_total` covers the whole quantity, and coupons are
-	 * a list of `code` records.
+	 * Items and coupons follow the Store API cart shape: `totals.line_total`
+	 * covers the whole quantity, `prices.price` is the unit price (after coupons,
+	 * unlike the Store API), and coupons are a list of `code` records.
 	 *
 	 * @return array
 	 */

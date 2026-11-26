@@ -189,8 +189,8 @@ export const roundQuantity = ( quantity ) => Math.round( quantity * 1e6 ) / 1e6;
  * Get the price of one unit of a product or cart line, in minor units.
  *
  * A cart line's `totals.line_total` covers its whole quantity and is net of
- * coupons. It is also the only right price for a Product Bundles container,
- * whose `prices.price` is the bundle's base price.
+ * coupons. It is also the right price for a Product Bundles container, whose
+ * `prices.price` can be the bundle's base price.
  *
  * @since x.x.x
  *

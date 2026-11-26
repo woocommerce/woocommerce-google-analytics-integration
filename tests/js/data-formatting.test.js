@@ -200,6 +200,18 @@ test( 'an item is priced per unit, from its line total or its unit price', () =>
 		).price,
 		15
 	);
+	assert.strictEqual(
+		getProductFieldObject(
+			cartItem( { quantity: 3, totals: { line_total: '2000' } } )
+		).price,
+		6.67
+	);
+	// A coupon lowers the line total, not prices.price.
+	assert.strictEqual(
+		getProductFieldObject( cartItem( { totals: { line_total: '2700' } } ) )
+			.price,
+		13.5
+	);
 	// The Store API sends a free line as the string '0', which is kept.
 	assert.strictEqual(
 		getProductFieldObject( cartItem( { totals: { line_total: '0' } } ) )

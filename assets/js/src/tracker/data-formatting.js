@@ -5,6 +5,7 @@ import {
 	getProductId,
 	formatPrice,
 	getCartCoupon,
+	parseQuantity,
 } from '../utils';
 
 /* eslint-disable camelcase */
@@ -90,7 +91,9 @@ const getCheckoutData = ( storeCart ) => {
 			total +
 			parseInt(
 				item.totals?.line_total ??
-					Math.round( item.prices.price * item.quantity ),
+					Math.round(
+						item.prices.price * parseQuantity( item.quantity, 1 )
+					),
 				10
 			),
 		0
@@ -100,7 +103,7 @@ const getCheckoutData = ( storeCart ) => {
 		currency: totals.currency_code,
 		value: formatPrice( value, totals.currency_minor_unit ),
 		...getCartCoupon( storeCart ),
-		items: storeCart.items.map( getProductFieldObject ),
+		items: storeCart.items.map( ( item ) => getProductFieldObject( item ) ),
 	};
 };
 

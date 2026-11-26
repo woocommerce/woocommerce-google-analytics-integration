@@ -336,9 +336,6 @@ export const getAddItemFromResponse = (
 		? getAddedQuantity( product, before, quantity )
 		: quantity;
 
-	// The requested quantity can exceed what the line actually holds when the
-	// add is capped by available stock; value at most the full line so the
-	// reported price never exceeds the real line total.
 	return product
 		? {
 				eventName: 'add_to_cart',

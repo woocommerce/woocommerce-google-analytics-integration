@@ -24,6 +24,7 @@ class TrackingSettingsService extends WP_UnitTestCase {
 				'purchase'         => 'ga_ecommerce_tracking_enabled',
 				'add_to_cart'      => 'ga_event_tracking_enabled',
 				'remove_from_cart' => 'ga_enhanced_remove_from_cart_enabled',
+				'view_cart'        => 'ga_enhanced_view_cart_enabled',
 				'view_item_list'   => 'ga_enhanced_product_impression_enabled',
 				'select_content'   => 'ga_enhanced_product_click_enabled',
 				'view_item'        => 'ga_enhanced_product_detail_view_enabled',
@@ -123,6 +124,7 @@ class TrackingSettingsService extends WP_UnitTestCase {
 				'ga_ecommerce_tracking_enabled'           => 'yes',
 				'ga_event_tracking_enabled'               => 'no',
 				'ga_enhanced_remove_from_cart_enabled'    => 'yes',
+				'ga_enhanced_view_cart_enabled'           => 'yes',
 				'ga_enhanced_product_impression_enabled'  => 'no',
 				'ga_enhanced_product_click_enabled'       => 'yes',
 				'ga_enhanced_product_detail_view_enabled' => 'no',
@@ -139,10 +141,11 @@ class TrackingSettingsService extends WP_UnitTestCase {
 		$this->assertFalse( $settings['track_404_enabled'] );
 		$this->assertTrue( $settings['linker']['allow_incoming'] );
 		$this->assertSame( array( 'store.example.com', 'checkout.example.net' ), $settings['linker']['domains'] );
-		$this->assertSame( array( 'purchase', 'remove_from_cart', 'select_content', 'begin_checkout' ), $settings['enabled_events'] );
+		$this->assertSame( array( 'purchase', 'remove_from_cart', 'view_cart', 'select_content', 'begin_checkout' ), $settings['enabled_events'] );
 		$this->assertTrue( $settings['event_tracking']['purchase'] );
 		$this->assertFalse( $settings['event_tracking']['add_to_cart'] );
 		$this->assertTrue( $settings['event_tracking']['remove_from_cart'] );
+		$this->assertTrue( $settings['event_tracking']['view_cart'] );
 		$this->assertFalse( $settings['event_tracking']['view_item_list'] );
 		$this->assertTrue( $settings['event_tracking']['select_content'] );
 		$this->assertFalse( $settings['event_tracking']['view_item'] );

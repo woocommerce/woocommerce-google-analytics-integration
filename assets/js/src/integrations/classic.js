@@ -1,6 +1,6 @@
 import {
+	getProductForQuantity,
 	getProductFromID,
-	getUnitPrice,
 	rememberClickedAdd,
 	roundQuantity,
 } from '../utils';
@@ -78,35 +78,6 @@ export const getShippingTierLabel = ( element ) => {
 	}
 
 	return getCheckoutOptionLabel( element );
-};
-
-/**
- * Move a classic cart line to another quantity, keeping its unit price. The
- * quantity may be a decimal (0.5 kg).
- *
- * @since x.x.x
- *
- * @param {Object} cartProduct Cart line from the page-load cart.
- * @param {number} quantity    The new quantity.
- * @return {Object} The cart line at the new quantity.
- */
-export const getCartProductForQuantity = ( cartProduct, quantity ) => {
-	const unitPrice = getUnitPrice( cartProduct );
-
-	if ( ! Number.isFinite( unitPrice ) ) {
-		return { ...cartProduct, quantity };
-	}
-
-	// A line total rounded for the new quantity would shift the unit price read back from it.
-	return {
-		...cartProduct,
-		quantity,
-		prices: {
-			...cartProduct.prices,
-			price: Math.round( unitPrice ),
-		},
-		totals: undefined,
-	};
 };
 
 /**
@@ -449,7 +420,7 @@ export function classicTracking(
 
 				if ( matchedProduct && Number.isFinite( newQuantity ) ) {
 					syncedItems.push(
-						getCartProductForQuantity( matchedProduct, newQuantity )
+						getProductForQuantity( matchedProduct, newQuantity )
 					);
 				}
 			} );
@@ -497,10 +468,7 @@ export function classicTracking(
 				const { eventName, quantity } = change;
 
 				getEventHandler( eventName )( {
-					product: getCartProductForQuantity(
-						matchedProduct,
-						quantity
-					),
+					product: getProductForQuantity( matchedProduct, quantity ),
 				} );
 			} );
 	}

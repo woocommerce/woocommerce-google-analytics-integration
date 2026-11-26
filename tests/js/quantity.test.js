@@ -15,10 +15,16 @@ const assert = require( 'node:assert' );
  */
 const loadSource = require( './helpers/load-source' );
 
-const { getUnitPrice, parseQuantity, roundQuantity } =
-	loadSource( 'utils/index.js' );
-const { getCartProductForQuantity, getCartQuantityChange, getCartRowQuantity } =
-	loadSource( 'integrations/classic.js' );
+const {
+	getProductFieldObject,
+	getProductForQuantity,
+	getUnitPrice,
+	parseQuantity,
+	roundQuantity,
+} = loadSource( 'utils/index.js' );
+const { getCartQuantityChange, getCartRowQuantity } = loadSource(
+	'integrations/classic.js'
+);
 
 /**
  * A stand-in for a classic cart row whose `input.qty` holds the given value.
@@ -71,14 +77,14 @@ test( 'a cart line unit price divides the line total by a decimal quantity', () 
 	);
 } );
 
-test( 'a classic cart line moved to a new quantity keeps its unit price', () => {
+test( 'a cart line moved to a new quantity keeps its unit price', () => {
 	const line = {
 		quantity: 3,
 		prices: { price: 1600 },
 		totals: { line_total: '4500' },
 	};
 
-	assert.deepStrictEqual( getCartProductForQuantity( line, 1 ), {
+	assert.deepStrictEqual( getProductForQuantity( line, 1 ), {
 		quantity: 1,
 		prices: { price: 1500 },
 		totals: undefined,
@@ -87,20 +93,45 @@ test( 'a classic cart line moved to a new quantity keeps its unit price', () => 
 	const odd = { quantity: 1, totals: { line_total: '899' } };
 	for ( const quantity of [ 0.5, 0.25, 3 ] ) {
 		assert.strictEqual(
-			getUnitPrice( getCartProductForQuantity( odd, quantity ) ),
+			getUnitPrice( getProductForQuantity( odd, quantity ) ),
 			899,
 			String( quantity )
 		);
 	}
 	assert.strictEqual(
 		getUnitPrice(
-			getCartProductForQuantity(
+			getProductForQuantity(
 				{ quantity: 2, totals: { line_total: '0' } },
 				1
 			)
 		),
 		0
 	);
+} );
+
+test( 'the units of a quantity change are priced like the whole line', () => {
+	globalThis.window = { ga4w: { settings: {} } };
+
+	for ( const [ lineTotal, lineQuantity, quantity ] of [
+		[ '1000', 3, 1 ],
+		[ '1000', 3, 2 ],
+		[ '1349', 1.5, 0.5 ],
+		[ '1246', 1.01, 0.01 ],
+		[ '806', 0.8, 0.3 ],
+	] ) {
+		const line = {
+			quantity: lineQuantity,
+			prices: { price: '0', currency_minor_unit: 2 },
+			totals: { line_total: lineTotal },
+		};
+
+		assert.strictEqual(
+			getProductFieldObject( getProductForQuantity( line, quantity ) )
+				.price,
+			getProductFieldObject( line ).price,
+			`${ lineTotal } over ${ lineQuantity }, ${ quantity } reported`
+		);
+	}
 } );
 
 test( 'a classic cart quantity change reports the decimal difference', () => {

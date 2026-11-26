@@ -155,6 +155,7 @@ class WCGoogleGtagJS extends EventsDataTest {
 				$this->reset_cart_page_cache();
 
 				$gtag = new WC_Google_Gtag_JS();
+				$this->assertNotFalse( has_action( 'wp_head', array( $gtag, 'maybe_append_view_cart_event' ) ) );
 				$gtag->maybe_append_view_cart_event();
 				$script_data = json_decode( $gtag->get_script_data(), true );
 

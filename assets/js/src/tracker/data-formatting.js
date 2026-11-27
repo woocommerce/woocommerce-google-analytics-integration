@@ -64,12 +64,16 @@ export const remove_from_cart = ( { product, quantity = 1 } ) => {
 	};
 };
 
-/*
- * GA4 `value` excludes shipping and tax. Line totals add up to it and stay the
- * same across the funnel. Bundles, Composites and Mix and Match also put the
- * group total on the parent line, so the children count twice: then use the
- * cart totals. Rounding at subtotal can move the sum by 1 minor unit per line.
- * https://developers.google.com/analytics/devguides/collection/ga4/reference/events#add_shipping_info
+/**
+ * Gets the items value of the cart, in minor units, without tax or shipping.
+ * Container extensions also put their children's totals on the parent line, so
+ * the cart items value (subtotal less discounts) wins when the line sum is
+ * higher by more than the 1 minor unit per line that rounding at subtotal can add.
+ *
+ * @since x.x.x
+ *
+ * @param {Object} storeCart The cart object
+ * @return {number} The items value.
  */
 const getItemsValue = ( storeCart ) => {
 	const lineSum = storeCart.items.reduce(
@@ -86,15 +90,13 @@ const getItemsValue = ( storeCart ) => {
 	);
 	const totals = storeCart.totals;
 
-	if ( totals?.total_tax === undefined ) {
+	if ( totals?.total_items === undefined ) {
 		return lineSum;
 	}
 
 	const cartItemsValue =
-		parseInt( totals.total_price, 10 ) -
-		parseInt( totals.total_tax, 10 ) -
-		parseInt( totals.total_shipping ?? 0, 10 ) -
-		parseInt( totals.total_fees ?? 0, 10 );
+		parseInt( totals.total_items, 10 ) -
+		parseInt( totals.total_discount ?? 0, 10 );
 
 	return lineSum - cartItemsValue > storeCart.items.length
 		? cartItemsValue

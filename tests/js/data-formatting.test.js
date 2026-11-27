@@ -112,73 +112,52 @@ const totals = ( overrides ) => ( {
 	...overrides,
 } );
 
-test( 'checkout value counts a grouped bundle once, from the cart totals', () => {
+const twoLines = [
+	cartItem( { totals: { line_total: '1500' } } ),
+	cartItem( { id: 11, totals: { line_total: '1273' } } ),
+];
+
+test( 'checkout value counts a grouped bundle once, from the cart items', () => {
 	const data = events.begin_checkout( {
 		storeCart: cart( groupedBundle, {
-			totals: totals( {
-				total_price: '5300',
-				total_tax: '800',
-				total_shipping: '500',
-				total_fees: '0',
-			} ),
+			totals: totals( { total_items: '4000', total_discount: '0' } ),
 		} ),
 	} );
 
 	assert.strictEqual( data.value, 40 );
 } );
 
-test( 'checkout value keeps the line sum when it is within 1 cent per line of the cart totals', () => {
+test( 'checkout value keeps the line sum when it is within 1 cent per line of the cart items', () => {
 	const data = events.begin_checkout( {
-		storeCart: cart(
-			[
-				cartItem( { totals: { line_total: '1500' } } ),
-				cartItem( { id: 11, totals: { line_total: '1273' } } ),
-			],
-			{
-				totals: totals( {
-					total_price: '3772',
-					total_tax: '500',
-					total_shipping: '500',
-					total_fees: '0',
-				} ),
-			}
-		),
+		storeCart: cart( twoLines, {
+			totals: totals( { total_items: '2772', total_discount: '0' } ),
+		} ),
 	} );
 
 	assert.strictEqual( data.value, 27.73 );
 } );
 
-test( 'checkout value treats missing shipping as 0 and subtracts negative fees', () => {
+test( 'checkout value subtracts the cart discount when it counts a grouped bundle once', () => {
 	const data = events.begin_checkout( {
 		storeCart: cart( groupedBundle, {
-			totals: totals( {
-				total_price: '4500',
-				total_tax: '800',
-				total_shipping: null,
-				total_fees: '-300',
-			} ),
+			totals: totals( { total_items: '4000', total_discount: '400' } ),
 		} ),
 	} );
 
-	assert.strictEqual( data.value, 40 );
+	assert.strictEqual( data.value, 36 );
 } );
 
-test( 'checkout value never switches up to a higher cart-totals value', () => {
+test( 'checkout value never switches up to a higher cart items value', () => {
 	const data = events.begin_checkout( {
 		storeCart: cart( [ cartItem() ], {
-			totals: totals( {
-				total_price: '9000',
-				total_tax: '0',
-				total_shipping: '0',
-				total_fees: '0',
-			} ),
+			totals: totals( { total_items: '9000', total_discount: '0' } ),
 		} ),
 	} );
 
 	assert.strictEqual( data.value, 30 );
 } );
 
-test( 'checkout value uses the tolerance in minor units for a zero-decimal currency', () => {
+test( 'checkout value switches to the cart items value in a zero-decimal currency', () => {
 	const data = events.begin_checkout( {
 		storeCart: cart(
 			[
@@ -189,16 +168,48 @@ test( 'checkout value uses the tolerance in minor units for a zero-decimal curre
 				totals: {
 					currency_code: 'JPY',
 					currency_minor_unit: 0,
-					total_price: '4000',
-					total_tax: '0',
-					total_shipping: '0',
-					total_fees: '0',
+					total_items: '4000',
+					total_discount: '0',
 				},
 			}
 		),
 	} );
 
 	assert.strictEqual( data.value, 4000 );
+} );
+
+test( 'checkout value switches only when the gap is more than 1 per line', () => {
+	const lines = [
+		cartItem( { totals: { line_total: '1001' } } ),
+		cartItem( { id: 11, totals: { line_total: '1001' } } ),
+	];
+	const valueFor = ( totalItems ) =>
+		events.begin_checkout( {
+			storeCart: cart( lines, {
+				totals: totals( {
+					total_items: totalItems,
+					total_discount: '0',
+				} ),
+			} ),
+		} ).value;
+
+	assert.strictEqual( valueFor( '2000' ), 20.02 );
+	assert.strictEqual( valueFor( '1999' ), 19.99 );
+} );
+
+test( 'checkout value ignores a lower total_price from a gift card or account funds', () => {
+	const data = events.begin_checkout( {
+		storeCart: cart( twoLines, {
+			totals: totals( {
+				total_items: '2773',
+				total_discount: '0',
+				total_price: '0',
+				total_tax: '500',
+			} ),
+		} ),
+	} );
+
+	assert.strictEqual( data.value, 27.73 );
 } );
 
 test( 'view_cart sends nothing for an empty cart', () => {

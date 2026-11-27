@@ -13,7 +13,7 @@ permissions:
 
 jobs:
   dependabot-auto-merge:
-    uses: Automattic/dependabot-auto-merge-action/.github/workflows/dependabot-auto-merge.yml@89949a072099163f39d096c60775dc75917e476b # v1.8.2
+    uses: Automattic/dependabot-auto-merge-action/.github/workflows/dependabot-auto-merge.yml@72605bf3275654beac67f550eeb3292169a87652 # v1.9
     permissions:
       pull-requests: write
       contents: write

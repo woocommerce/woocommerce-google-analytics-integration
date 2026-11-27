@@ -1,7 +1,7 @@
 /**
  * Unit tests for how quantities are read and compared, including stores that
  * allow decimal quantities (0.5 kg) by filtering woocommerce_stock_amount.
- * Run with `npm run test:js`.
+ * Run with `pnpm run test:js`.
  */
 
 /**
@@ -15,9 +15,16 @@ const assert = require( 'node:assert' );
  */
 const loadSource = require( './helpers/load-source' );
 
-const { parseQuantity, roundQuantity } = loadSource( 'utils/index.js' );
-const { getCartItemUnitPrice, getCartQuantityChange, getCartRowQuantity } =
-	loadSource( 'integrations/classic.js' );
+const {
+	getProductFieldObject,
+	getProductForQuantity,
+	getUnitPrice,
+	parseQuantity,
+	roundQuantity,
+} = loadSource( 'utils/index.js' );
+const { getCartQuantityChange, getCartRowQuantity } = loadSource(
+	'integrations/classic.js'
+);
 
 /**
  * A stand-in for a classic cart row whose `input.qty` holds the given value.
@@ -48,23 +55,83 @@ test( 'a quantity keeps its decimals and falls back when it is not above zero', 
 	assert.strictEqual( parseQuantity( 'abc', 1 ), 1 );
 } );
 
-test( 'the classic cart unit price divides the line price by a decimal quantity', () => {
+test( 'a cart line unit price divides the line total by a decimal quantity', () => {
+	for ( const [ quantity, lineTotal ] of [
+		[ 1.5, '1500' ],
+		[ 0.5, '500' ],
+		[ 2, '2000' ],
+	] ) {
+		assert.strictEqual(
+			getUnitPrice( {
+				quantity,
+				prices: { price: 999 },
+				totals: { line_total: lineTotal },
+			} ),
+			1000,
+			String( quantity )
+		);
+	}
 	assert.strictEqual(
-		getCartItemUnitPrice( { quantity: 1.5, prices: { price: 1500 } } ),
+		getUnitPrice( { quantity: 2, prices: { price: '1000' } } ),
 		1000
 	);
+} );
+
+test( 'a cart line moved to a new quantity keeps its unit price', () => {
+	const line = {
+		quantity: 3,
+		prices: { price: 1600 },
+		totals: { line_total: '4500' },
+	};
+
+	assert.deepStrictEqual( getProductForQuantity( line, 1 ), {
+		quantity: 1,
+		prices: { price: 1500 },
+		totals: undefined,
+	} );
+
+	const odd = { quantity: 1, totals: { line_total: '899' } };
+	for ( const quantity of [ 0.5, 0.25, 3 ] ) {
+		assert.strictEqual(
+			getUnitPrice( getProductForQuantity( odd, quantity ) ),
+			899,
+			String( quantity )
+		);
+	}
 	assert.strictEqual(
-		getCartItemUnitPrice( { quantity: 0.5, prices: { price: 500 } } ),
-		1000
+		getUnitPrice(
+			getProductForQuantity(
+				{ quantity: 2, totals: { line_total: '0' } },
+				1
+			)
+		),
+		0
 	);
-	assert.strictEqual(
-		getCartItemUnitPrice( { quantity: 2, prices: { price: 2000 } } ),
-		1000
-	);
-	assert.strictEqual(
-		getCartItemUnitPrice( { quantity: 0, prices: { price: 0 } } ),
-		null
-	);
+} );
+
+test( 'the units of a quantity change are priced like the whole line', () => {
+	globalThis.window = { ga4w: { settings: {} } };
+
+	for ( const [ lineTotal, lineQuantity, quantity ] of [
+		[ '1000', 3, 1 ],
+		[ '1000', 3, 2 ],
+		[ '1349', 1.5, 0.5 ],
+		[ '1246', 1.01, 0.01 ],
+		[ '806', 0.8, 0.3 ],
+	] ) {
+		const line = {
+			quantity: lineQuantity,
+			prices: { price: '0', currency_minor_unit: 2 },
+			totals: { line_total: lineTotal },
+		};
+
+		assert.strictEqual(
+			getProductFieldObject( getProductForQuantity( line, quantity ) )
+				.price,
+			getProductFieldObject( line ).price,
+			`${ lineTotal } over ${ lineQuantity }, ${ quantity } reported`
+		);
+	}
 } );
 
 test( 'a classic cart quantity change reports the decimal difference', () => {

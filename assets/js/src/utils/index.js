@@ -110,14 +110,14 @@ export const getProductFieldObject = ( product, quantity ) => {
 		variantData.item_variant = formatVariation( product.variation );
 	}
 
+	const itemQuantity = product.quantity ?? quantity;
 	const data = {
 		item_id: getProductId( product ),
 		item_name: product.name,
 		...getProductCategories( product ),
-		quantity: product.quantity ?? quantity,
+		quantity: itemQuantity,
 		price: formatPrice(
-			// Use line total for bundled products, if available.
-			product.totals?.line_total || product.prices.price,
+			Math.round( getUnitPrice( product, itemQuantity ) ),
 			product.prices.currency_minor_unit
 		),
 		...variantData,
@@ -184,6 +184,60 @@ export const parseQuantity = ( value, fallback = null ) => {
  * @return {number} The rounded quantity.
  */
 export const roundQuantity = ( quantity ) => Math.round( quantity * 1e6 ) / 1e6;
+
+/**
+ * Get the price of one unit of a product or cart line, in minor units.
+ *
+ * A cart line's `totals.line_total` covers its whole quantity and is net of
+ * coupons. It is also the right price for a Product Bundles container, whose
+ * `prices.price` can be the bundle's base price.
+ *
+ * @since x.x.x
+ *
+ * @param {Object} product    Product or cart line.
+ * @param {*}      [quantity] Quantity the line total covers.
+ * @return {number} The unit price, or NaN when there is no price.
+ */
+export const getUnitPrice = ( product, quantity = product?.quantity ) => {
+	const lineTotal = parseFloat( product?.totals?.line_total );
+	const lineQuantity = parseQuantity( quantity );
+
+	if ( Number.isFinite( lineTotal ) && lineQuantity ) {
+		return lineTotal / lineQuantity;
+	}
+
+	return parseInt( product?.prices?.price, 10 );
+};
+
+/**
+ * Move a cart line to another quantity, keeping the unit price of the whole
+ * line. Used for the units of a quantity change. The quantity may be a
+ * decimal (0.5 kg).
+ *
+ * @since x.x.x
+ *
+ * @param {Object} product  Cart line.
+ * @param {number} quantity The quantity being reported.
+ * @return {Object} The cart line at that quantity, priced per unit.
+ */
+export const getProductForQuantity = ( product, quantity ) => {
+	const unitPrice = getUnitPrice( product );
+
+	if ( ! Number.isFinite( unitPrice ) ) {
+		return { ...product, quantity };
+	}
+
+	// A line total scaled to the new quantity would shift the unit price read back from it.
+	return {
+		...product,
+		quantity,
+		prices: {
+			...product.prices,
+			price: Math.round( unitPrice ),
+		},
+		totals: undefined,
+	};
+};
 
 /**
  * Returns the price of a product formatted as a string.

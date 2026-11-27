@@ -5,6 +5,7 @@ import {
 	getProductId,
 	formatPrice,
 	getCartCoupon,
+	parseQuantity,
 } from '../utils';
 
 /* eslint-disable camelcase */
@@ -79,17 +80,22 @@ const getCheckoutData = ( storeCart ) => {
 	 * checkouts — which otherwise read carts in different states (live vs
 	 * page-load) and shapes.
 	 *
-	 * Each line total is already net of discounts and tax. The live cart exposes
-	 * it as `item.totals.line_total` (with `prices.price` being the unit price),
-	 * while the static server cart has no `totals` and stores the line total
-	 * directly in `prices.price` — both in minor units, summed as integers to
+	 * Each line total is already net of discounts and tax. The live cart and the
+	 * page-load cart both expose it as `item.totals.line_total` (with
+	 * `prices.price` being the unit price), in minor units, summed as integers to
 	 * avoid floating-point drift.
 	 * https://developers.google.com/analytics/devguides/collection/ga4/reference/events#add_shipping_info
 	 */
 	const value = storeCart.items.reduce(
 		( total, item ) =>
 			total +
-			parseInt( item.totals?.line_total ?? item.prices.price, 10 ),
+			parseInt(
+				item.totals?.line_total ??
+					Math.round(
+						item.prices.price * parseQuantity( item.quantity, 1 )
+					),
+				10
+			),
 		0
 	);
 
@@ -97,7 +103,7 @@ const getCheckoutData = ( storeCart ) => {
 		currency: totals.currency_code,
 		value: formatPrice( value, totals.currency_minor_unit ),
 		...getCartCoupon( storeCart ),
-		items: storeCart.items.map( getProductFieldObject ),
+		items: storeCart.items.map( ( item ) => getProductFieldObject( item ) ),
 	};
 };
 

@@ -3,7 +3,7 @@
  * changes to track. blocks.js uses them in its fetch interceptor.
  */
 
-import { parseQuantity, roundQuantity } from './index';
+import { getProductForQuantity, parseQuantity, roundQuantity } from './index';
 
 /*
  * Last item observed for each cart line item (keyed by Store API line item
@@ -317,45 +317,6 @@ export const getAddedQuantity = ( item, cartBefore, requestedQuantity ) => {
 };
 
 /**
- * Scale a cart line item's line total to the quantity being reported.
- *
- * A Store API cart line's `line_total` covers its current quantity. When the
- * reported quantity differs from that — a partial add, a quantity increase, or
- * a decrease valued from the reduced remaining line — the line total is
- * rescaled to the reported units at the line's per-unit price so the price
- * stays in step with the reported quantity. The reported quantity may exceed
- * the line's quantity (e.g. a decrease whose remaining line is smaller than the
- * removed units), in which case the per-unit price is scaled up accordingly.
- *
- * @param {Object} item     Store API cart item.
- * @param {number} quantity Quantity being reported.
- * @return {Object} The item, with `totals.line_total` scaled to the reported units.
- */
-export const scaleLineTotalToQuantity = ( item, quantity ) => {
-	const newQuantity = parseFloat( item?.quantity );
-	const lineTotal = parseInt( item?.totals?.line_total, 10 );
-
-	if (
-		! Number.isFinite( lineTotal ) ||
-		! Number.isFinite( newQuantity ) ||
-		! Number.isFinite( quantity ) ||
-		! newQuantity
-	) {
-		return item;
-	}
-
-	return {
-		...item,
-		totals: {
-			...item.totals,
-			line_total: String(
-				Math.round( ( lineTotal * quantity ) / newQuantity )
-			),
-		},
-	};
-};
-
-/**
  * Resolve the added product and quantity for a single Store API add-item call.
  *
  * @param {*}      requestBody Add-item request body.
@@ -375,13 +336,10 @@ export const getAddItemFromResponse = (
 		? getAddedQuantity( product, before, quantity )
 		: quantity;
 
-	// The requested quantity can exceed what the line actually holds when the
-	// add is capped by available stock; value at most the full line so the
-	// reported price never exceeds the real line total.
 	return product
 		? {
 				eventName: 'add_to_cart',
-				product: scaleLineTotalToQuantity( product, addedQuantity ),
+				product: getProductForQuantity( product, addedQuantity ),
 				quantity: addedQuantity,
 				isAddItem: true,
 			}
@@ -445,7 +403,7 @@ export const getUpdateItemChangeFromResponse = (
 
 	return {
 		eventName: quantityDelta > 0 ? 'add_to_cart' : 'remove_from_cart',
-		product: scaleLineTotalToQuantity( product, quantity ),
+		product: getProductForQuantity( product, quantity ),
 		quantity,
 	};
 };

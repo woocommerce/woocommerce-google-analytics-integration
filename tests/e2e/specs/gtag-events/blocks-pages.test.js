@@ -194,8 +194,7 @@ test.describe( 'GTag events on block pages', () => {
 				id: updateProductID.toString(),
 				nm: 'Simple product',
 				qt: '2',
-				// Price reflects the two added units (the scaled line total).
-				pr: ( simpleProductPrice * 2 ).toString(),
+				pr: simpleProductPrice.toString(),
 			} );
 		} );
 	} );
@@ -219,7 +218,7 @@ test.describe( 'GTag events on block pages', () => {
 				id: updateProductID.toString(),
 				nm: 'Simple product',
 				qt: '2',
-				pr: ( simpleProductPrice * 2 ).toString(),
+				pr: simpleProductPrice.toString(),
 			} );
 		} );
 	} );
@@ -319,7 +318,7 @@ test.describe( 'GTag events on block pages', () => {
 				id: updateProductID.toString(),
 				nm: 'Simple product',
 				qt: '2',
-				pr: ( simpleProductPrice * 2 ).toString(),
+				pr: simpleProductPrice.toString(),
 			} );
 		} );
 	} );

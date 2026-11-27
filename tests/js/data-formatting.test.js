@@ -93,15 +93,12 @@ test( 'checkout value is the sum of line totals, without shipping or tax', () =>
 	assert.strictEqual( data.currency, 'USD' );
 } );
 
-test( 'checkout value falls back to the price of a static server cart line', () => {
-	// The server cart has no totals and stores the line total in prices.price.
+test( 'checkout value falls back to unit price times quantity for a line without totals', () => {
 	const data = events.begin_checkout( {
-		storeCart: cart( [
-			cartItem( { totals: undefined, prices: { price: '4500' } } ),
-		] ),
+		storeCart: cart( [ cartItem( { totals: undefined } ) ] ),
 	} );
 
-	assert.strictEqual( data.value, 45 );
+	assert.strictEqual( data.value, 30 );
 } );
 
 test( 'view_cart sends nothing for an empty cart', () => {
@@ -113,16 +110,24 @@ test( 'view_cart sends nothing for an empty cart', () => {
 test( 'view_cart sends the currency, line-total value and items of the page-load cart', () => {
 	const data = events.view_cart( {
 		storeCart: cart( [
-			cartItem( { totals: undefined, prices: { price: '4500' } } ),
-			cartItem( { id: 11, totals: undefined, prices: { price: '999' } } ),
+			cartItem( { quantity: 3, totals: { line_total: '4500' } } ),
+			cartItem( {
+				id: 11,
+				quantity: 1,
+				prices: { price: '999', currency_minor_unit: 2 },
+				totals: { line_total: '999' },
+			} ),
 		] ),
 	} );
 
 	assert.strictEqual( data.currency, 'USD' );
 	assert.strictEqual( data.value, 54.99 );
 	assert.deepStrictEqual(
-		data.items.map( ( item ) => item.item_id ),
-		[ 10, 11 ]
+		data.items.map( ( { item_id: id, price } ) => [ id, price ] ),
+		[
+			[ 10, 15 ],
+			[ 11, 9.99 ],
+		]
 	);
 } );
 
@@ -183,17 +188,52 @@ test( 'shipping tier and payment type are added only when set', () => {
 	);
 } );
 
-test( 'an item is priced from its line total, or its unit price without one', () => {
-	assert.strictEqual( getProductFieldObject( cartItem() ).price, 30 );
+test( 'an item is priced per unit, from its line total or its unit price', () => {
+	assert.strictEqual( getProductFieldObject( cartItem() ).price, 15 );
 	assert.strictEqual(
 		getProductFieldObject( cartItem( { totals: undefined } ) ).price,
 		15
+	);
+	assert.strictEqual(
+		getProductFieldObject(
+			cartItem( { quantity: 0.5, totals: { line_total: '750' } } )
+		).price,
+		15
+	);
+	assert.strictEqual(
+		getProductFieldObject(
+			cartItem( { quantity: 3, totals: { line_total: '2000' } } )
+		).price,
+		6.67
+	);
+	// A coupon lowers the line total, not prices.price.
+	assert.strictEqual(
+		getProductFieldObject( cartItem( { totals: { line_total: '2700' } } ) )
+			.price,
+		13.5
 	);
 	// The Store API sends a free line as the string '0', which is kept.
 	assert.strictEqual(
 		getProductFieldObject( cartItem( { totals: { line_total: '0' } } ) )
 			.price,
 		0
+	);
+} );
+
+test( 'a bundle is priced from its line total, not its base price', () => {
+	const bundle = cartItem( {
+		prices: { price: '0', currency_minor_unit: 2 },
+		totals: { line_total: '5000' },
+	} );
+
+	assert.strictEqual( getProductFieldObject( bundle ).price, 25 );
+	assert.strictEqual(
+		getProductFieldObject( {
+			...bundle,
+			quantity: 1,
+			totals: { line_total: '2500' },
+		} ).price,
+		25
 	);
 } );
 

@@ -174,7 +174,11 @@ test( 'an add of a new line reports that line and its quantity', () => {
 
 	assert.deepStrictEqual( change, {
 		eventName: 'add_to_cart',
-		product: line( key, 2 ),
+		product: {
+			...line( key, 2 ),
+			prices: { price: 1500 },
+			totals: undefined,
+		},
 		quantity: 2,
 		isAddItem: true,
 	} );
@@ -189,7 +193,7 @@ test( 'an add to a line already in the cart reports only the added units', () =>
 	);
 
 	assert.strictEqual( change.quantity, 2 );
-	assert.strictEqual( change.product.totals.line_total, '3000' );
+	assert.strictEqual( change.product.prices.price, 1500 );
 } );
 
 test( 'an add of another variation of the same product reports the new line', () => {
@@ -213,7 +217,7 @@ test( 'an add capped by stock reports what the cart actually got', () => {
 	);
 
 	assert.strictEqual( change.quantity, 1 );
-	assert.strictEqual( change.product.totals.line_total, '1500' );
+	assert.strictEqual( change.product.prices.price, 1500 );
 } );
 
 test( 'an add compares with the last cart the Store API returned, not stale page data', () => {
@@ -256,10 +260,7 @@ test( 'an add after other changes on the page reports the units it added', () =>
 		);
 
 		assert.strictEqual( change.quantity, reported );
-		assert.strictEqual(
-			change.product.totals.line_total,
-			String( 1500 * reported )
-		);
+		assert.strictEqual( change.product.prices.price, 1500 );
 	}
 } );
 
@@ -272,7 +273,7 @@ test( 'an add the server raised reports the units the cart really got', () => {
 	);
 
 	assert.strictEqual( change.quantity, 6 );
-	assert.strictEqual( change.product.totals.line_total, '9000' );
+	assert.strictEqual( change.product.prices.price, 1500 );
 } );
 
 test( 'without the cart before, an add is matched by product ID and capped at the line', () => {
@@ -311,7 +312,7 @@ test( 'a quantity increase is an add_to_cart of the difference', () => {
 
 	assert.strictEqual( change.eventName, 'add_to_cart' );
 	assert.strictEqual( change.quantity, 2 );
-	assert.strictEqual( change.product.totals.line_total, '3000' );
+	assert.strictEqual( change.product.prices.price, 1500 );
 } );
 
 test( 'a quantity decrease is a remove_from_cart valued from the line before', () => {
@@ -324,7 +325,7 @@ test( 'a quantity decrease is a remove_from_cart valued from the line before', (
 
 	assert.strictEqual( change.eventName, 'remove_from_cart' );
 	assert.strictEqual( change.quantity, 2 );
-	assert.strictEqual( change.product.totals.line_total, '3000' );
+	assert.strictEqual( change.product.prices.price, 1500 );
 } );
 
 test( 'a decrease after a coupon is valued from the coupon response, not stale page data', () => {
@@ -342,7 +343,7 @@ test( 'a decrease after a coupon is valued from the coupon response, not stale p
 	);
 
 	assert.strictEqual( change.quantity, 2 );
-	assert.strictEqual( change.product.totals.line_total, '1500' );
+	assert.strictEqual( change.product.prices.price, 750 );
 } );
 
 test( 'a line removed and added again reports all its units', () => {
@@ -358,7 +359,7 @@ test( 'a line removed and added again reports all its units', () => {
 	);
 
 	assert.strictEqual( change.quantity, 5 );
-	assert.strictEqual( change.product.totals.line_total, '7500' );
+	assert.strictEqual( change.product.prices.price, 1500 );
 } );
 
 test( 'other cart requests in a batch count for the changes after them', () => {
@@ -413,7 +414,7 @@ test( 'a coupon in a batch updates the cart that a later decrease is valued from
 		{ items: [ line( key, 3 ) ] }
 	);
 
-	assert.strictEqual( change.product.totals.line_total, '1500' );
+	assert.strictEqual( change.product.prices.price, 750 );
 } );
 
 test( 'an update in a batch compares with the removal before it', () => {
@@ -487,7 +488,7 @@ test( 'the response of a cart request is recorded, and stays readable for the pa
 		{ items: [ line( key, 3 ) ] }
 	);
 
-	assert.strictEqual( change.product.totals.line_total, '1500' );
+	assert.strictEqual( change.product.prices.price, 750 );
 	assert.strictEqual( response.bodyUsed, false );
 } );
 
@@ -531,7 +532,7 @@ test( 'a quantity set to 0 is a remove_from_cart of the whole line', () => {
 
 	assert.strictEqual( change.eventName, 'remove_from_cart' );
 	assert.strictEqual( change.quantity, 3 );
-	assert.strictEqual( change.product.totals.line_total, '4500' );
+	assert.strictEqual( change.product.prices.price, 1500 );
 } );
 
 test( 'an update compares with the last cart the Store API returned, not stale page data', () => {
@@ -666,25 +667,6 @@ test( 'a batch that cannot be read reports nothing', () => {
 	);
 } );
 
-test( 'a line total is scaled to the reported units and rounded', () => {
-	const scaled = ( lineTotal, lineQuantity, quantity ) =>
-		api.scaleLineTotalToQuantity(
-			{ quantity: lineQuantity, totals: { line_total: lineTotal } },
-			quantity
-		).totals.line_total;
-
-	assert.strictEqual( scaled( '1000', 3, 1 ), '333' );
-	assert.strictEqual( scaled( '1000', 3, 2 ), '667' );
-	assert.strictEqual( scaled( '1000', 1, 3 ), '3000' );
-	assert.strictEqual( scaled( '1000', 3, 0 ), '0' );
-
-	const emptyLine = { quantity: 0, totals: { line_total: '0' } };
-	assert.strictEqual(
-		api.scaleLineTotalToQuantity( emptyLine, 1 ),
-		emptyLine
-	);
-} );
-
 // Stores can allow decimal quantities (0.5 kg) by filtering woocommerce_stock_amount to floatval.
 
 test( 'an add-item body keeps a decimal quantity, but not a decimal product ID', () => {
@@ -707,7 +689,7 @@ test( 'an add of a decimal quantity to a new line reports that quantity', () => 
 	);
 
 	assert.strictEqual( change.quantity, 0.5 );
-	assert.strictEqual( change.product.totals.line_total, '750' );
+	assert.strictEqual( change.product.prices.price, 1500 );
 } );
 
 test( 'an add to a line with a decimal quantity reports only the added units', () => {
@@ -719,7 +701,7 @@ test( 'an add to a line with a decimal quantity reports only the added units', (
 	);
 
 	assert.strictEqual( change.quantity, 1 );
-	assert.strictEqual( change.product.totals.line_total, '1500' );
+	assert.strictEqual( change.product.prices.price, 1500 );
 } );
 
 test( 'a decimal quantity increase is an add_to_cart of the decimal difference', () => {
@@ -732,7 +714,7 @@ test( 'a decimal quantity increase is an add_to_cart of the decimal difference',
 
 	assert.strictEqual( change.eventName, 'add_to_cart' );
 	assert.strictEqual( change.quantity, 0.5 );
-	assert.strictEqual( change.product.totals.line_total, '750' );
+	assert.strictEqual( change.product.prices.price, 1500 );
 } );
 
 test( 'a decimal quantity decrease is a remove_from_cart of the decimal difference', () => {
@@ -745,7 +727,7 @@ test( 'a decimal quantity decrease is a remove_from_cart of the decimal differen
 
 	assert.strictEqual( change.eventName, 'remove_from_cart' );
 	assert.strictEqual( change.quantity, 0.5 );
-	assert.strictEqual( change.product.totals.line_total, '750' );
+	assert.strictEqual( change.product.prices.price, 1500 );
 } );
 
 test( 'a decimal quantity change reports the difference without float noise', () => {
@@ -758,17 +740,6 @@ test( 'a decimal quantity change reports the difference without float noise', ()
 
 	// 0.3 - 0.1 is 0.19999999999999998 in floating point.
 	assert.strictEqual( change.quantity, 0.2 );
-} );
-
-test( 'a line total with a decimal line quantity is scaled per unit', () => {
-	const scaled = ( lineTotal, lineQuantity, quantity ) =>
-		api.scaleLineTotalToQuantity(
-			{ quantity: lineQuantity, totals: { line_total: lineTotal } },
-			quantity
-		).totals.line_total;
-
-	assert.strictEqual( scaled( '1500', 1.5, 0.5 ), '500' );
-	assert.strictEqual( scaled( '500', 0.5, 0.5 ), '500' );
 } );
 
 test( 'prices read from the page follow the store’s separators', () => {

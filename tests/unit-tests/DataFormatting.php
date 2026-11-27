@@ -5,6 +5,7 @@ namespace GoogleAnalyticsIntegration\Tests;
 use WC_Google_Gtag_JS;
 use WC_Helper_Product;
 use WC_Helper_Customer;
+use WC_Coupon;
 use WC_Helper_Order;
 use WC_Product_Simple;
 
@@ -831,11 +832,37 @@ class DataFormatting extends EventsDataTest {
 		$this->assertEquals( 2, $item['quantity'] );
 		$this->assertArrayHasKey( 'prices', $item );
 		$this->assertEquals( wc_get_price_decimals(), $item['prices']['currency_minor_unit'] );
+		$this->assertSame( [], $formatted['coupons'] );
 
 		$totals = $formatted['totals'];
 		$this->assertEquals( get_woocommerce_currency(), $totals['currency_code'] );
 		$this->assertEquals( wc_get_price_decimals(), $totals['currency_minor_unit'] );
 		$this->assertIsInt( $totals['total_price'] );
+	}
+
+	/**
+	 * Test that a cart line sends its unit price and its line total, after coupons.
+	 *
+	 * @return void
+	 */
+	public function test_get_formatted_cart_sends_unit_price_and_line_total() {
+		$product = WC_Helper_Product::create_simple_product( true, [ 'regular_price' => 15 ] );
+		$coupon  = new WC_Coupon();
+		$coupon->set_code( 'save10' );
+		$coupon->set_discount_type( 'percent' );
+		$coupon->set_amount( 10 );
+		$coupon->save();
+
+		WC()->cart->add_to_cart( $product->get_id(), 3 );
+		WC()->cart->apply_coupon( 'save10' );
+		WC()->cart->calculate_totals();
+
+		$formatted = $this->gtag->get_formatted_cart();
+		$item      = $formatted['items'][0];
+
+		$this->assertEquals( 1350, $item['prices']['price'] );
+		$this->assertEquals( 4050, $item['totals']['line_total'] );
+		$this->assertSame( [ [ 'code' => 'save10' ] ], $formatted['coupons'] );
 	}
 
 	/**

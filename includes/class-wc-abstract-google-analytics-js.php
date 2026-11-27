@@ -256,6 +256,10 @@ abstract class WC_Abstract_Google_Analytics_JS {
 	/**
 	 * Returns an array of cart data in the required format
 	 *
+	 * Items and coupons follow the Store API cart shape: `totals.line_total`
+	 * covers the whole quantity, `prices.price` is the unit price (after coupons,
+	 * unlike the Store API), and coupons are a list of `code` records.
+	 *
 	 * @return array
 	 */
 	public function get_formatted_cart(): array {
@@ -272,14 +276,21 @@ abstract class WC_Abstract_Google_Analytics_JS {
 				continue;
 			}
 
+			// Quantities may be decimal (woocommerce_stock_amount filter). A zero-quantity line has a zero total.
+			$quantity     = (float) $item['quantity'];
+			$unit_divisor = $quantity > 0 ? $quantity : 1;
+
 			$items[] = array_merge(
 				$this->get_formatted_product_data( $product ),
 				array(
 					'key'      => $cart_item_key,
 					'quantity' => $item['quantity'],
 					'prices'   => array(
-						'price'               => $this->get_formatted_price( $item['line_total'] ),
+						'price'               => $this->get_formatted_price( (float) $item['line_total'] / $unit_divisor ),
 						'currency_minor_unit' => wc_get_price_decimals(),
+					),
+					'totals'   => array(
+						'line_total' => $this->get_formatted_price( $item['line_total'] ),
 					),
 				)
 			);
@@ -287,7 +298,12 @@ abstract class WC_Abstract_Google_Analytics_JS {
 
 		return array(
 			'items'   => $items,
-			'coupons' => $cart->get_coupons(),
+			'coupons' => array_map(
+				function ( $code ) {
+					return array( 'code' => $code );
+				},
+				array_values( $cart->get_applied_coupons() )
+			),
 			'totals'  => array(
 				'currency_code'       => get_woocommerce_currency(),
 				'total_price'         => $this->get_formatted_price( $cart->get_total( 'edit' ) ),

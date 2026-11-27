@@ -76,6 +76,10 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 	 * @return void
 	 */
 	public function render_checkout_cart_data(): void {
+		if ( 'yes' !== $this->get_setting( 'ga_enhanced_checkout_process_enabled' ) ) {
+			return;
+		}
+
 		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- The fragment is escaped when built.
 		echo $this->get_checkout_cart_fragment();
 	}
@@ -101,6 +105,10 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 	 * @return array
 	 */
 	public function update_checkout_cart_fragment( $fragments ): array {
+		if ( 'yes' !== $this->get_setting( 'ga_enhanced_checkout_process_enabled' ) ) {
+			return $fragments;
+		}
+
 		$fragments['#ga4w-checkout-cart'] = $this->get_checkout_cart_fragment();
 
 		return $fragments;

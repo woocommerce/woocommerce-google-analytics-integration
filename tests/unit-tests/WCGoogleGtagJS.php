@@ -17,6 +17,63 @@ class WCGoogleGtagJS extends EventsDataTest {
 	use ResetsGtagInstance;
 
 	/**
+	 * Test checkout cart data when checkout tracking is enabled.
+	 *
+	 * @return void
+	 */
+	public function test_checkout_cart_data_enabled(): void {
+		$gtag = new WC_Google_Gtag_JS(
+			array( 'ga_enhanced_checkout_process_enabled' => 'yes' )
+		);
+
+		ob_start();
+		do_action( 'woocommerce_checkout_before_order_review' );
+		$output = ob_get_clean();
+
+		$this->assertStringContainsString( 'id="ga4w-checkout-cart"', $output );
+		$this->assertStringContainsString( 'hidden', $output );
+		$this->assertStringContainsString( 'data-cart="', $output );
+
+		$processor = new \WP_HTML_Tag_Processor( $output );
+		$this->assertTrue( $processor->next_tag( 'DIV' ) );
+		$this->assertSame(
+			json_decode( wp_json_encode( $gtag->get_formatted_cart() ), true ),
+			json_decode( $processor->get_attribute( 'data-cart' ), true )
+		);
+
+		$fragments = array( '.existing' => '<div>Existing</div>' );
+		$result    = apply_filters( 'woocommerce_update_order_review_fragments', $fragments );
+
+		$this->assertArrayHasKey( '#ga4w-checkout-cart', $result );
+		$this->assertSame( $output, $result['#ga4w-checkout-cart'] );
+		$this->assertSame( $fragments['.existing'], $result['.existing'] );
+	}
+
+	/**
+	 * Test checkout cart data when checkout tracking is disabled.
+	 *
+	 * @return void
+	 */
+	public function test_checkout_cart_data_disabled(): void {
+		$gtag = new WC_Google_Gtag_JS(
+			array( 'ga_enhanced_checkout_process_enabled' => 'no' )
+		);
+
+		ob_start();
+		do_action( 'woocommerce_checkout_before_order_review' );
+		$output = ob_get_clean();
+
+		$this->assertSame( '', $output );
+
+		$fragments = array( '.existing' => '<div>Existing</div>' );
+
+		$this->assertSame(
+			$fragments,
+			apply_filters( 'woocommerce_update_order_review_fragments', $fragments )
+		);
+	}
+
+	/**
 	 * Check that `WC_Google_Gtag_JS` registers and enqueues the `assets/js/build/main.js` script
 	 *
 	 * @return void

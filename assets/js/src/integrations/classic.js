@@ -152,10 +152,29 @@ export function classicTracking(
 	let cartSnapshot = cart;
 	const cartQuantityTrackedForms = new WeakSet();
 
+	const getCheckoutCart = () => {
+		const cartData = document.querySelector( '#ga4w-checkout-cart' )
+			?.dataset?.cart;
+
+		if ( cartData ) {
+			try {
+				const latestCart = JSON.parse( cartData );
+
+				if ( Array.isArray( latestCart?.items ) ) {
+					return latestCart;
+				}
+			} catch {
+				// Fall back to the original cart.
+			}
+		}
+
+		return cart;
+	};
+
 	const trackShippingInfo = ( shippingTier ) => {
 		shippingInfoTracked = true;
 		getEventHandler( 'add_shipping_info' )( {
-			storeCart: cart,
+			storeCart: getCheckoutCart(),
 			shippingTier,
 		} );
 	};
@@ -163,7 +182,7 @@ export function classicTracking(
 	const trackPaymentInfo = ( paymentType ) => {
 		paymentInfoTracked = true;
 		getEventHandler( 'add_payment_info' )( {
-			storeCart: cart,
+			storeCart: getCheckoutCart(),
 			paymentType,
 		} );
 	};

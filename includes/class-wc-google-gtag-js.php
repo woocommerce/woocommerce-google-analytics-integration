@@ -53,12 +53,58 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 
 		$this->map_hooks();
 
+		add_action(
+			'woocommerce_checkout_before_order_review',
+			array( $this, 'render_checkout_cart_data' )
+		);
+
+		add_filter(
+			'woocommerce_update_order_review_fragments',
+			array( $this, 'update_checkout_cart_fragment' )
+		);
+
 		$this->register_scripts();
 		// Setup frontend scripts
 		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_tracker' ), 5 );
 		add_action( 'wp_footer', array( $this, 'inline_script_data' ) );
 	}
 
+	/**
+	 * Render the current classic checkout cart data.
+	 *
+	 * @since x.x.x
+	 * @return void
+	 */
+	public function render_checkout_cart_data(): void {
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- The fragment is escaped when built.
+		echo $this->get_checkout_cart_fragment();
+	}
+
+	/**
+	 * Build the checkout cart data fragment.
+	 *
+	 * @since x.x.x
+	 * @return string
+	 */
+	private function get_checkout_cart_fragment(): string {
+		return sprintf(
+			'<div id="ga4w-checkout-cart" hidden data-cart="%s"></div>',
+			esc_attr( wp_json_encode( $this->get_formatted_cart() ) ?: '' )
+		);
+	}
+
+	/**
+	 * Refresh tracking data after classic checkout updates.
+	 *
+	 * @since x.x.x
+	 * @param array $fragments Checkout fragments.
+	 * @return array
+	 */
+	public function update_checkout_cart_fragment( $fragments ): array {
+		$fragments['#ga4w-checkout-cart'] = $this->get_checkout_cart_fragment();
+
+		return $fragments;
+	}
 	/**
 	 * Register manager and tracker scripts.
 	 * Call early so other extensions could add inline data to it.

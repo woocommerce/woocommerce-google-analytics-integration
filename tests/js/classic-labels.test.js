@@ -262,3 +262,92 @@ test( 'the selected option is the checked radio, a select, or the only hidden in
 	document.inputs = [ input( { value: 'a' } ) ];
 	assert.strictEqual( getSelectedCheckoutOption( 'any' ), undefined );
 } );
+
+test( 'checkout events use the latest cart after applying and removing a coupon', () => {
+	const originalCart = {
+		items: [ { quantity: 2, totals: { line_total: '3000' } } ],
+		coupons: [],
+		totals: { total_price: '3000' },
+	};
+
+	const updatedCart = {
+		items: [ { quantity: 2, totals: { line_total: '2700' } } ],
+		coupons: [ { code: 'save10' } ],
+		totals: { total_price: '2700' },
+	};
+
+	let currentCart = originalCart;
+	let change;
+	const sent = [];
+
+	document.body = {
+		addEventListener( name, callback ) {
+			if ( name === 'change' ) {
+				change = callback;
+			}
+		},
+	};
+
+	document.addEventListener = () => {};
+
+	document.querySelector = ( selector ) =>
+		selector === '#ga4w-checkout-cart'
+			? {
+					dataset: {
+						cart: JSON.stringify( currentCart ),
+					},
+				}
+			: null;
+
+	classicTracking(
+		( eventName ) => ( data ) => sent.push( [ eventName, data ] ),
+		{ events: [], cart: originalCart }
+	);
+
+	const shippingInput = input( {
+		value: 'flat_rate:1',
+		checked: true,
+		labels: [ label( 'Flat rate' ) ],
+		closest: () => ( {} ),
+		matches: ( selector ) => selector.includes( 'shipping_method' ),
+	} );
+
+	const paymentInput = input( {
+		value: 'cod',
+		checked: true,
+		labels: [ label( 'Cash on delivery' ) ],
+		closest: () => ( {} ),
+		matches: ( selector ) => selector.includes( 'payment_method' ),
+	} );
+
+	// Apply coupon.
+	currentCart = updatedCart;
+
+	change( { target: shippingInput } );
+	change( { target: paymentInput } );
+
+	// Remove coupon.
+	currentCart = originalCart;
+
+	change( { target: shippingInput } );
+	change( { target: paymentInput } );
+
+	assert.deepStrictEqual( sent, [
+		[
+			'add_shipping_info',
+			{ storeCart: updatedCart, shippingTier: 'Flat rate' },
+		],
+		[
+			'add_payment_info',
+			{ storeCart: updatedCart, paymentType: 'Cash on delivery' },
+		],
+		[
+			'add_shipping_info',
+			{ storeCart: originalCart, shippingTier: 'Flat rate' },
+		],
+		[
+			'add_payment_info',
+			{ storeCart: originalCart, paymentType: 'Cash on delivery' },
+		],
+	] );
+} );

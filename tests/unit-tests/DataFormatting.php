@@ -5,6 +5,7 @@ namespace GoogleAnalyticsIntegration\Tests;
 use WC_Google_Gtag_JS;
 use WC_Helper_Product;
 use WC_Helper_Customer;
+use WC_Coupon;
 use WC_Helper_Order;
 use WC_Product_Simple;
 
@@ -731,6 +732,55 @@ class DataFormatting extends EventsDataTest {
 	}
 
 	/**
+	 * Test that the quantity given to a formatted product, as the add_to_cart
+	 * event reports it, keeps a decimal when the store allows decimal quantities.
+	 *
+	 * @return void
+	 */
+	public function test_get_formatted_product_supports_decimal_quantity() {
+		// Core registers intval on this filter; decimal-quantity extensions swap it for floatval.
+		remove_filter( 'woocommerce_stock_amount', 'intval' );
+		add_filter( 'woocommerce_stock_amount', 'floatval' );
+
+		try {
+			$formatted = $this->gtag->get_formatted_product( $this->get_product(), 0, false, '1.5' );
+
+			$this->assertSame( 1.5, $formatted['quantity'] );
+		} finally {
+			remove_filter( 'woocommerce_stock_amount', 'floatval' );
+			add_filter( 'woocommerce_stock_amount', 'intval' );
+		}
+	}
+
+	/**
+	 * Test that a store with whole-number quantities keeps reporting an integer.
+	 *
+	 * @return void
+	 */
+	public function test_get_formatted_product_keeps_integer_quantity() {
+		$formatted = $this->gtag->get_formatted_product( $this->get_product(), 0, false, '2' );
+
+		$this->assertSame( 2, $formatted['quantity'] );
+	}
+
+	/**
+	 * Test that a quantity that is not a number is left out instead of being
+	 * reported as 0 or 1.
+	 *
+	 * @return void
+	 */
+	public function test_get_formatted_product_leaves_out_non_numeric_quantity() {
+		foreach ( [
+			'abc'  => 'abc',
+			'true' => true,
+		] as $label => $quantity ) {
+			$formatted = $this->gtag->get_formatted_product( $this->get_product(), 0, false, $quantity );
+
+			$this->assertArrayNotHasKey( 'quantity', $formatted, $label );
+		}
+	}
+
+	/**
 	 * Test that a null cart returns an empty array.
 	 *
 	 * @return void
@@ -782,11 +832,37 @@ class DataFormatting extends EventsDataTest {
 		$this->assertEquals( 2, $item['quantity'] );
 		$this->assertArrayHasKey( 'prices', $item );
 		$this->assertEquals( wc_get_price_decimals(), $item['prices']['currency_minor_unit'] );
+		$this->assertSame( [], $formatted['coupons'] );
 
 		$totals = $formatted['totals'];
 		$this->assertEquals( get_woocommerce_currency(), $totals['currency_code'] );
 		$this->assertEquals( wc_get_price_decimals(), $totals['currency_minor_unit'] );
 		$this->assertIsInt( $totals['total_price'] );
+	}
+
+	/**
+	 * Test that a cart line sends its unit price and its line total, after coupons.
+	 *
+	 * @return void
+	 */
+	public function test_get_formatted_cart_sends_unit_price_and_line_total() {
+		$product = WC_Helper_Product::create_simple_product( true, [ 'regular_price' => 15 ] );
+		$coupon  = new WC_Coupon();
+		$coupon->set_code( 'save10' );
+		$coupon->set_discount_type( 'percent' );
+		$coupon->set_amount( 10 );
+		$coupon->save();
+
+		WC()->cart->add_to_cart( $product->get_id(), 3 );
+		WC()->cart->apply_coupon( 'save10' );
+		WC()->cart->calculate_totals();
+
+		$formatted = $this->gtag->get_formatted_cart();
+		$item      = $formatted['items'][0];
+
+		$this->assertEquals( 1350, $item['prices']['price'] );
+		$this->assertEquals( 4050, $item['totals']['line_total'] );
+		$this->assertSame( [ [ 'code' => 'save10' ] ], $formatted['coupons'] );
 	}
 
 	/**

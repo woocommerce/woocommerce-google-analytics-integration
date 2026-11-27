@@ -91,27 +91,15 @@ class Configuration extends EventsDataTest {
 	}
 
 	/**
-	 * Test that whitespace in linker domains is trimmed.
+	 * The snippet reads the domains with the settings service, whose test covers each rule.
 	 *
 	 * @return void
 	 */
-	public function test_get_site_tag_config_linker_domains_with_whitespace() {
-		$gtag   = new WC_Google_Gtag_JS( [ 'ga_linker_cross_domains' => 'example.com, example.net' ] );
+	public function test_get_site_tag_config_linker_domains_use_the_settings_service() {
+		$gtag   = new WC_Google_Gtag_JS( [ 'ga_linker_cross_domains' => ' EXAMPLE.com, bad domain' ] );
 		$config = $gtag->get_site_tag_config();
 
-		$this->assertEquals( [ 'example.com', 'example.net' ], $config['linker']['domains'] );
-	}
-
-	/**
-	 * Test that invalid linker domains are ignored.
-	 *
-	 * @return void
-	 */
-	public function test_get_site_tag_config_linker_domains_rejects_invalid_domains() {
-		$gtag   = new WC_Google_Gtag_JS( [ 'ga_linker_cross_domains' => 'example.com, bad domain, https://example.net, sub.example.org, example, -bad.com, ok-store.co.uk, shop.xn--p1ai' ] );
-		$config = $gtag->get_site_tag_config();
-
-		$this->assertEquals( [ 'example.com', 'sub.example.org', 'ok-store.co.uk', 'shop.xn--p1ai' ], $config['linker']['domains'] );
+		$this->assertSame( [ 'example.com' ], $config['linker']['domains'] );
 	}
 
 	/**
@@ -448,17 +436,15 @@ class Configuration extends EventsDataTest {
 	}
 
 	/**
-	 * Test that GA ID prefix is extracted correctly for various formats.
+	 * The usage tracking data reports the same ID prefix as the settings service,
+	 * whose test covers each ID format.
 	 *
 	 * @return void
 	 */
-	public function test_track_settings_ga_id_prefix_extraction() {
+	public function test_track_settings_reports_the_measurement_id_prefix() {
 		$cases = [
-			'G-XXXX'  => 'G',
-			'GT-XXXX' => 'GT',
-			'UA-XXXX' => 'UA',
-			''        => '',
-			'ZZ-XXXX' => 'X',
+			'g-abc'    => 'G',
+			'NOHYPHEN' => '',
 		];
 
 		foreach ( $cases as $ga_id => $expected_prefix ) {
@@ -475,11 +461,7 @@ class Configuration extends EventsDataTest {
 			);
 			$data = $ga->track_settings( [] );
 
-			$this->assertEquals(
-				$expected_prefix,
-				$data['wc-google-analytics']['ga_id'],
-				"GA ID prefix for '{$ga_id}' should be '{$expected_prefix}'"
-			);
+			$this->assertSame( $expected_prefix, $data['wc-google-analytics']['ga_id'], $ga_id );
 		}
 	}
 
@@ -541,6 +523,7 @@ class Configuration extends EventsDataTest {
 			'ga_ecommerce_tracking_enabled',
 			'ga_event_tracking_enabled',
 			'ga_enhanced_remove_from_cart_enabled',
+			'ga_enhanced_view_cart_enabled',
 			'ga_enhanced_product_impression_enabled',
 			'ga_enhanced_product_click_enabled',
 			'ga_enhanced_product_detail_view_enabled',
@@ -551,6 +534,8 @@ class Configuration extends EventsDataTest {
 		foreach ( $expected_keys as $key ) {
 			$this->assertArrayHasKey( $key, $settings, "Expected '{$key}' to be present in settings after construction with partial defaults." );
 		}
+
+		$this->assertEquals( 'yes', $settings['ga_enhanced_view_cart_enabled'] );
 
 		// The value set by maybe_set_defaults() should be preserved, not overwritten.
 		$this->assertEquals( 'product_id', $settings['ga_product_identifier'] );

@@ -3,7 +3,7 @@
  *
  * The helper ships as JavaScript embedded in a PHP string, so the test reads it
  * straight out of the source file and runs it against a stubbed `document`.
- * Run with `npm run test:js`.
+ * Run with `pnpm run test:js`.
  */
 
 /**

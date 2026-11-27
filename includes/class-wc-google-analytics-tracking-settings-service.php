@@ -66,6 +66,7 @@ class WC_Google_Analytics_Tracking_Settings_Service {
 			'purchase'         => 'ga_ecommerce_tracking_enabled',
 			'add_to_cart'      => 'ga_event_tracking_enabled',
 			'remove_from_cart' => 'ga_enhanced_remove_from_cart_enabled',
+			'view_cart'        => 'ga_enhanced_view_cart_enabled',
 			'view_item_list'   => 'ga_enhanced_product_impression_enabled',
 			'select_content'   => 'ga_enhanced_product_click_enabled',
 			'view_item'        => 'ga_enhanced_product_detail_view_enabled',
@@ -74,7 +75,7 @@ class WC_Google_Analytics_Tracking_Settings_Service {
 	}
 
 	/**
-	 * Parse linker domains for API-oriented output.
+	 * Parse linker domains for the Abilities API and the gtag config that storefront pages send to Google.
 	 *
 	 * @param string $domains Comma-separated domains.
 	 * @return array
@@ -90,7 +91,9 @@ class WC_Google_Analytics_Tracking_Settings_Service {
 					static function ( string $domain ) {
 						$domain = trim( $domain );
 
-						// Keep the same domain validation as the storefront gtag path, but return API data instead of JS-escaped data.
+						// Validate the domain as ASCII RFC 1035 / RFC 1123 style. The lookahead caps the total length
+						// at the 253-character DNS limit; each label is 1-63 chars and starts/ends with alphanumerics;
+						// the TLD is 2-63 ASCII chars to allow punycode domains. Invalid entries are silently dropped.
 						if ( preg_match( '/^(?=.{1,253}$)(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])$/i', $domain ) ) {
 							return strtolower( $domain );
 						}
@@ -131,12 +134,15 @@ class WC_Google_Analytics_Tracking_Settings_Service {
 	}
 
 	/**
-	 * Get the measurement ID prefix used in tracking summaries.
+	 * Get the measurement ID prefix used in tracking summaries: UA, G, GT,
+	 * an empty string for no prefix, or X for any other.
+	 *
+	 * @since 2.4.5 Public, so the usage tracking data reports the same prefix.
 	 *
 	 * @param string $measurement_id Measurement ID.
 	 * @return string
 	 */
-	private static function get_measurement_id_prefix( string $measurement_id ): string {
+	public static function get_measurement_id_prefix( string $measurement_id ): string {
 		$prefix = strstr( strtoupper( $measurement_id ), '-', true );
 
 		if ( false === $prefix ) {

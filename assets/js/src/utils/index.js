@@ -59,14 +59,14 @@ export const getProductFieldObject = ( product, quantity ) => {
 		variantData.item_variant = formatVariation( product.variation );
 	}
 
+	const itemQuantity = product.quantity ?? quantity;
 	const data = {
 		item_id: getProductId( product ),
 		item_name: product.name,
 		...getProductCategories( product ),
-		quantity: product.quantity ?? quantity,
+		quantity: itemQuantity,
 		price: formatPrice(
-			// Use line total for bundled products, if available.
-			product.totals?.line_total || product.prices.price,
+			Math.round( getUnitPrice( product, itemQuantity ) ),
 			product.prices.currency_minor_unit
 		),
 		...variantData,
@@ -107,6 +107,84 @@ export const getProductImpressionObject = ( product, listName ) => {
 			product.prices.price,
 			product.prices.currency_minor_unit
 		),
+	};
+};
+
+/**
+ * Read a quantity above zero, keeping its decimals for stores that allow
+ * decimal quantities through the `woocommerce_stock_amount` filter.
+ *
+ * @param {*} value    The quantity to read.
+ * @param {*} fallback Returned when the value is not a number above zero.
+ * @return {number|*} The quantity, or the fallback.
+ */
+export const parseQuantity = ( value, fallback = null ) => {
+	const parsed = parseFloat( value );
+
+	return Number.isFinite( parsed ) && parsed > 0 ? parsed : fallback;
+};
+
+/**
+ * Round a quantity to remove floating point noise from quantity maths,
+ * such as 0.3 - 0.1 giving 0.19999999999999998. Six decimal places is far
+ * finer than any store's quantity step, so a smaller change rounds to 0.
+ *
+ * @param {number} quantity The quantity to round.
+ * @return {number} The rounded quantity.
+ */
+export const roundQuantity = ( quantity ) => Math.round( quantity * 1e6 ) / 1e6;
+
+/**
+ * Get the price of one unit of a product or cart line, in minor units.
+ *
+ * A cart line's `totals.line_total` covers its whole quantity and is net of
+ * coupons. It is also the right price for a Product Bundles container, whose
+ * `prices.price` can be the bundle's base price.
+ *
+ * @since x.x.x
+ *
+ * @param {Object} product    Product or cart line.
+ * @param {*}      [quantity] Quantity the line total covers.
+ * @return {number} The unit price, or NaN when there is no price.
+ */
+export const getUnitPrice = ( product, quantity = product?.quantity ) => {
+	const lineTotal = parseFloat( product?.totals?.line_total );
+	const lineQuantity = parseQuantity( quantity );
+
+	if ( Number.isFinite( lineTotal ) && lineQuantity ) {
+		return lineTotal / lineQuantity;
+	}
+
+	return parseInt( product?.prices?.price, 10 );
+};
+
+/**
+ * Move a cart line to another quantity, keeping the unit price of the whole
+ * line. Used for the units of a quantity change. The quantity may be a
+ * decimal (0.5 kg).
+ *
+ * @since x.x.x
+ *
+ * @param {Object} product  Cart line.
+ * @param {number} quantity The quantity being reported.
+ * @return {Object} The cart line at that quantity, priced per unit.
+ */
+export const getProductForQuantity = ( product, quantity ) => {
+	const unitPrice = getUnitPrice( product );
+
+	if ( ! Number.isFinite( unitPrice ) ) {
+		return { ...product, quantity };
+	}
+
+	// A line total scaled to the new quantity would shift the unit price read back from it.
+	return {
+		...product,
+		quantity,
+		prices: {
+			...product.prices,
+			price: Math.round( unitPrice ),
+		},
+		totals: undefined,
 	};
 };
 
@@ -229,4 +307,68 @@ export const getProductFromID = ( search, products, cart ) => {
 			hasMatchingProductId( id, search )
 		)
 	);
+};
+
+/**
+ * Get currency settings from our plugin's settings.
+ *
+ * @return {Object|undefined} Currency object with decimalSeparator, thousandSeparator, precision.
+ */
+export const getCurrencySettings = () => window.ga4w?.settings?.currency;
+
+/**
+ * Parse a price string into a numeric value using currency settings.
+ *
+ * @param {string} priceText - The raw price text from DOM (e.g., "$1,234.56" or "1.234,56 €").
+ * @return {number} The parsed price as a float, or 0 if parsing failed.
+ */
+export const parsePriceFromDOM = ( priceText ) => {
+	if ( ! priceText ) {
+		return 0;
+	}
+
+	const currency = getCurrencySettings();
+	// Currency settings should be always available this is only safe check
+	if ( ! currency ) {
+		return 0;
+	}
+
+	const { decimalSeparator = '.', thousandSeparator = ',' } = currency;
+
+	// Start at the first digit, so a currency symbol before the amount with a
+	// dot in it (Bs., د.إ) is not read as a decimal separator. Text after the
+	// amount is ignored by both parsers below.
+	const amount = priceText.replace( /^\D+/, '' );
+
+	// Use WooCommerce's accounting.js library if available (most reliable)
+	if ( typeof window.accounting?.unformat === 'function' ) {
+		return window.accounting.unformat( amount, decimalSeparator );
+	}
+
+	const escape = ( text ) => text.replace( /[.*+?^${}()|[\]\\-]/g, '\\$&' );
+
+	// Manual parsing using currency settings
+	// Remove whitespace and anything else that is not a digit or a separator
+	let cleaned = amount.replace(
+		new RegExp(
+			`[^\\d.,${ escape( decimalSeparator ) }${ escape( thousandSeparator ) }]`,
+			'g'
+		),
+		''
+	);
+
+	// Remove thousand separators
+	if ( thousandSeparator ) {
+		cleaned = cleaned.replace(
+			new RegExp( escape( thousandSeparator ), 'g' ),
+			''
+		);
+	}
+
+	// Convert decimal separator to standard period for parseFloat
+	if ( decimalSeparator !== '.' ) {
+		cleaned = cleaned.replace( decimalSeparator, '.' );
+	}
+
+	return parseFloat( cleaned ) || 0;
 };

@@ -1,9 +1,6 @@
 # Google Analytics for WooCommerce
 
-[![PHP Coding Standards](https://github.com/woocommerce/woocommerce-google-analytics-integration/actions/workflows/php-coding-standards.yml/badge.svg)](https://github.com/woocommerce/woocommerce-google-analytics-integration/actions/workflows/php-coding-standards.yml)
-[![PHP Unit Tests](https://github.com/woocommerce/woocommerce-google-analytics-integration/actions/workflows/php-unit-tests.yml/badge.svg)](https://github.com/woocommerce/woocommerce-google-analytics-integration/actions/workflows/php-unit-tests.yml)
-[![JavaScript Linting](https://github.com/woocommerce/woocommerce-google-analytics-integration/actions/workflows/js-linting.yml/badge.svg)](https://github.com/woocommerce/woocommerce-google-analytics-integration/actions/workflows/js-linting.yml)
-[![JavaScript Unit Tests](https://github.com/woocommerce/woocommerce-google-analytics-integration/actions/workflows/js-unit-tests.yml/badge.svg)](https://github.com/woocommerce/woocommerce-google-analytics-integration/actions/workflows/js-unit-tests.yml)
+[![Checks](https://github.com/woocommerce/woocommerce-google-analytics-integration/actions/workflows/checks.yml/badge.svg)](https://github.com/woocommerce/woocommerce-google-analytics-integration/actions/workflows/checks.yml)
 [![Build](https://github.com/woocommerce/woocommerce-google-analytics-integration/actions/workflows/build.yml/badge.svg)](https://github.com/woocommerce/woocommerce-google-analytics-integration/actions/workflows/build.yml)
 
 WordPress plugin: Provides the integration between WooCommerce and Google Analytics.
@@ -14,38 +11,39 @@ Will be required for WooCommerce shops using the integration from WooCommerce 2.
 - [WooCommerce.com product page (free)](https://woocommerce.com/products/woocommerce-google-analytics/)
 - [User documentation](https://woocommerce.com/document/google-analytics-integration/)
 
-## NPM Scripts
+## Scripts
 
-Google Analytics for WooCommerce utilizes npm scripts for task management utilities.
+Google Analytics for WooCommerce uses package.json scripts, run with pnpm, for task management utilities. Enable Corepack (`corepack enable`) or install pnpm 11, then run `pnpm install`.
 
-`npm run build` - Runs the tasks necessary for a release: builds the production JavaScript bundle, generates the language file, and packages the plugin zip.
+`pnpm run build` - Runs the tasks necessary for a release: builds the production JavaScript bundle, generates the language file, and packages the plugin zip.
 
 Shared commands (the same names are used across our plugin repositories):
 
--   `npm run lint` - Runs `lint:php` (PHPCS), `lint:php:deprecations` (PHP syntax and deprecation check with your local PHP) and `lint:js` (ESLint, which also checks Prettier formatting of JavaScript and fails on warnings).
--   `npm run format` - Formats the JavaScript files with Prettier.
--   `npm run qa` - Runs every check that needs no Docker environment: `lint` and `test:js`.
--   `npm run test:js`, `npm run test:php`, `npm run test:e2e` - Run the tests. See below for the setup that `test:php` and `test:e2e` need.
--   `npm run env:start` / `npm run env:stop` - Start or stop the development environment. These are aliases for `wp-env:dev:up` and `wp-env:dev:down`.
+-   `pnpm run lint` - Runs `lint:php` (PHPCS), `lint:php:deprecations` (PHP syntax and deprecation check with your local PHP), `lint:phpstan` (PHPStan) and `lint:js` (ESLint, which also checks Prettier formatting of JavaScript and fails on warnings).
+-   `pnpm run lint:phpstan` - Runs PHPStan (level 9). Errors already in the code are listed in `phpstan-baseline.neon`; new ones fail. `pnpm run lint:phpstan:baseline` rewrites that list after you fix one.
+-   `pnpm run format` - Formats the JavaScript files with Prettier.
+-   `pnpm run qa` - Runs every check that needs no Docker environment: `lint` and `test:js`.
+-   `pnpm run test:js`, `pnpm run test:php`, `pnpm run test:e2e` - Run the tests. See below for the setup that `test:php` and `test:e2e` need.
+-   `pnpm run env:start` / `pnpm run env:stop` - Start or stop the development environment. These are aliases for `wp-env:dev:up` and `wp-env:dev:down`.
 
 ## Unit tests
 
 ### Running JavaScript unit tests
 
-`npm run test:js` runs the tests in `tests/js` with the Node.js test runner. They need no Docker environment.
+`pnpm run test:js` runs the tests in `tests/js` with the Node.js test runner. They need no Docker environment.
 
 ### Running PHP unit tests via wp-env (recommended)
 
 This uses the same Docker environment as E2E tests — no local MySQL, svn, or manual setup required.
 
 1. Make sure Docker is running
-2. `npm run wp-env:up` to start the environment
-3. `npm run test:php:setup` to install WooCommerce from source and dependencies (only needed once after starting the environment)
-4. `npm run test:php` to run all PHPUnit tests
+2. `pnpm run wp-env:up` to start the environment
+3. `pnpm run test:php:setup` to install WooCommerce from source and dependencies (only needed once after starting the environment)
+4. `pnpm run test:php` to run all PHPUnit tests
 
 To test against a specific WooCommerce version:
 
-`npm run test:php:setup -- --wc-version=9.6.0`
+`pnpm run test:php:setup --wc-version=9.6.0`
 
 ### Running PHP unit tests locally (without Docker)
 
@@ -63,48 +61,49 @@ E2E testing uses [wp-env](https://developer.wordpress.org/block-editor/reference
 
 Make sure Docker is running in your machine, and run the following:
 
-`npm run wp-env:up` - This will automatically download and run WordPress in a Docker container. You can access it at http://localhost:8889 (Username: admin, Password: password).
+`pnpm run wp-env:up` - This will automatically download and run WordPress in a Docker container. You can access it at http://localhost:8889 (Username: admin, Password: password).
 
 To install the PlayWright browser locally you can run:
-`npx playwright install chromium`
+`pnpm exec playwright install chromium`
 
 Run E2E testing:
 
--   `npm run test:e2e` to run the test in headless mode.
--   `npm run test:e2e-dev` to run the tests in Chromium browser.
+-   `pnpm run test:e2e` to run the test in headless mode.
+-   `pnpm run test:e2e-dev` to run the tests in Chromium browser.
 
 To remove the Docker container and images (this will **delete everything** in the WordPress Docker container):
 
-`npm run wp-env:destroy`
+`pnpm run wp-env:destroy`
 
-On GitHub Actions, E2E tests run on every pull request (except documentation-only changes) and on pushes to `trunk` and `release/*` branches. To run them manually, for example against a WordPress or WooCommerce release candidate, open [the workflow](../../actions/workflows/e2e-tests.yml) and follow [these instructions](https://docs.github.com/en/actions/managing-workflow-runs/manually-running-a-workflow?tool=webui).
+On GitHub Actions, E2E tests run on every pull request and on pushes to `trunk` and `release/*` branches, as part of the `checks.yml` workflow. A failed test is retried once; the job summary lists every test that passed only on retry. Every Monday, [another workflow](../../actions/workflows/e2e-versions.yml) runs them on the newest WooCommerce beta, RC or release, and on the oldest supported version. To run them manually, for example against a WordPress or WooCommerce release candidate, open [the workflow](../../actions/workflows/e2e-tests.yml) and follow [these instructions](https://docs.github.com/en/actions/managing-workflow-runs/manually-running-a-workflow?tool=webui).
 
 ## Local development environment
 
 The scripts above run against the test environment (`.wp-env.test.json`, port 8889). PHPUnit uses a dedicated `wordpress_test` database (configured in `phpunit.xml.dist`), while the browser-served site and the E2E suite use the separate `wordpress` database in the same MySQL container. PHPUnit and E2E therefore no longer overwrite each other and can be run in any order. A separate development environment is defined in `.wp-env.json` (port 8888) with WooCommerce and the plugin installed, intended for manual work:
 
--   `npm run wp-env:dev:up` to start it at http://localhost:8888
--   `npm run wp-env:dev:down` to stop it
--   `npm run wp-env:dev:destroy` to remove its containers, volumes, and images
+-   `pnpm run wp-env:dev:up` to start it at http://localhost:8888
+-   `pnpm run wp-env:dev:down` to stop it
+-   `pnpm run wp-env:dev:destroy` to remove its containers, volumes, and images
 
 Both environments are isolated and can run at the same time.
 
 ## Coding standards checks
 
 1. Run `composer install` (_if you haven't done so already_)
-2. Run `npm run lint:php`
+2. Run `pnpm run lint:php`
 
 An explanation of output can be [found here](https://github.com/squizlabs/PHP_CodeSniffer/wiki/Usage#printing-progress-information) e.g. what are the S's?
 
 ### Pre-commit hook
 
-`npm install` sets up a Git pre-commit hook ([husky](https://typicode.github.io/husky/) and [lint-staged](https://github.com/lint-staged/lint-staged)). It runs PHPCS on staged PHP files and ESLint on staged JavaScript files, and blocks the commit if they report problems. PHPCS needs `composer install`.
+`pnpm install` sets up a Git pre-commit hook ([husky](https://typicode.github.io/husky/) and [lint-staged](https://github.com/lint-staged/lint-staged)). It runs PHPCS on staged PHP files, PHPStan on the whole plugin, and ESLint on staged JavaScript files, and blocks the commit if they report problems. PHPCS and PHPStan need `composer install`.
 
 To turn checks off, add any of these lines to a `.env` file in the repository root (it is git-ignored):
 
 ```sh
 MP_GIT_HOOKS_ENABLE=false        # skip the whole hook
 MP_GIT_HOOKS_CODE_SNIFFER=false  # skip PHPCS
+MP_GIT_HOOKS_PHPSTAN=false       # skip PHPStan
 MP_GIT_HOOKS_ESLINT=false        # skip ESLint
 ```
 

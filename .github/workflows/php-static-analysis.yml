@@ -1,0 +1,24 @@
+name: PHP Static Analysis
+
+on:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  phpstan:
+    name: PHPStan
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Prepare PHP
+        uses: woocommerce/grow/prepare-php@46efe0b1b6f29cbd79ba37289fb89739420a42e7 # actions-v3.1.0
+        with:
+          php-version: 8.4
+
+      - name: Run PHPStan
+        run: vendor/bin/phpstan analyse --memory-limit=2G --no-progress --error-format=github

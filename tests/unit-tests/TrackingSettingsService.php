@@ -24,6 +24,7 @@ class TrackingSettingsService extends WP_UnitTestCase {
 				'purchase'         => 'ga_ecommerce_tracking_enabled',
 				'add_to_cart'      => 'ga_event_tracking_enabled',
 				'remove_from_cart' => 'ga_enhanced_remove_from_cart_enabled',
+				'view_cart'        => 'ga_enhanced_view_cart_enabled',
 				'view_item_list'   => 'ga_enhanced_product_impression_enabled',
 				'select_content'   => 'ga_enhanced_product_click_enabled',
 				'view_item'        => 'ga_enhanced_product_detail_view_enabled',
@@ -44,6 +45,40 @@ class TrackingSettingsService extends WP_UnitTestCase {
 			\WC_Google_Analytics_Tracking_Settings_Service::parse_linker_domains(
 				' EXAMPLE.com, bad domain, https://example.net, sub.Example.ORG, example, -bad.com, ok-store.co.uk, shop.xn--p1ai '
 			)
+		);
+	}
+
+	/**
+	 * The ID prefix sent with the usage tracking data and the Abilities API.
+	 *
+	 * @dataProvider measurement_id_prefixes
+	 *
+	 * @param string $measurement_id Stored tracking ID.
+	 * @param string $expected       Expected prefix.
+	 * @return void
+	 */
+	public function test_get_measurement_id_prefix( string $measurement_id, string $expected ) {
+		$this->assertSame(
+			$expected,
+			\WC_Google_Analytics_Tracking_Settings_Service::get_measurement_id_prefix( $measurement_id )
+		);
+	}
+
+	/**
+	 * Tracking IDs and their prefixes.
+	 *
+	 * @return array<string, array{string, string}>
+	 */
+	public function measurement_id_prefixes(): array {
+		return array(
+			'GA4'                => array( 'G-ABC123', 'G' ),
+			'lower case'         => array( 'g-abc123', 'G' ),
+			'Google tag'         => array( 'GT-ABC123', 'GT' ),
+			'Universal'          => array( 'UA-123-1', 'UA' ),
+			'other product'      => array( 'AW-123', 'X' ),
+			'empty'              => array( '', '' ),
+			'no hyphen'          => array( 'NOHYPHEN', '' ),
+			'starts with hyphen' => array( '-X', '' ),
 		);
 	}
 
@@ -89,6 +124,7 @@ class TrackingSettingsService extends WP_UnitTestCase {
 				'ga_ecommerce_tracking_enabled'           => 'yes',
 				'ga_event_tracking_enabled'               => 'no',
 				'ga_enhanced_remove_from_cart_enabled'    => 'yes',
+				'ga_enhanced_view_cart_enabled'           => 'yes',
 				'ga_enhanced_product_impression_enabled'  => 'no',
 				'ga_enhanced_product_click_enabled'       => 'yes',
 				'ga_enhanced_product_detail_view_enabled' => 'no',
@@ -105,10 +141,11 @@ class TrackingSettingsService extends WP_UnitTestCase {
 		$this->assertFalse( $settings['track_404_enabled'] );
 		$this->assertTrue( $settings['linker']['allow_incoming'] );
 		$this->assertSame( array( 'store.example.com', 'checkout.example.net' ), $settings['linker']['domains'] );
-		$this->assertSame( array( 'purchase', 'remove_from_cart', 'select_content', 'begin_checkout' ), $settings['enabled_events'] );
+		$this->assertSame( array( 'purchase', 'remove_from_cart', 'view_cart', 'select_content', 'begin_checkout' ), $settings['enabled_events'] );
 		$this->assertTrue( $settings['event_tracking']['purchase'] );
 		$this->assertFalse( $settings['event_tracking']['add_to_cart'] );
 		$this->assertTrue( $settings['event_tracking']['remove_from_cart'] );
+		$this->assertTrue( $settings['event_tracking']['view_cart'] );
 		$this->assertFalse( $settings['event_tracking']['view_item_list'] );
 		$this->assertTrue( $settings['event_tracking']['select_content'] );
 		$this->assertFalse( $settings['event_tracking']['view_item'] );

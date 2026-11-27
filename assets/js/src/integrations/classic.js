@@ -1,4 +1,8 @@
-import { getProductFromID } from '../utils';
+import {
+	getProductForQuantity,
+	getProductFromID,
+	roundQuantity,
+} from '../utils';
 
 const checkoutPaymentMethodSelector = 'input[name="payment_method"]';
 const checkoutShippingMethodSelector =
@@ -6,17 +10,33 @@ const checkoutShippingMethodSelector =
 const classicCartItemSelector =
 	'.woocommerce-cart-form .woocommerce-cart-form__cart-item, .woocommerce-cart-form .cart_item';
 
-const getSelectedCheckoutOption = ( selector ) =>
-	Array.from( document.querySelectorAll( selector ) ).find(
-		( element ) => element.checked || element.tagName === 'SELECT'
+// A store with one shipping method renders it as a hidden input, not a radio.
+export const getSelectedCheckoutOption = ( selector ) => {
+	const elements = Array.from( document.querySelectorAll( selector ) );
+
+	return (
+		elements.find( ( { checked } ) => checked ) ??
+		elements.find(
+			( { tagName, type } ) => tagName === 'SELECT' || type === 'hidden'
+		)
 	);
+};
+
+// A hidden input has no `labels`, so look its <label for="..."> up by id.
+const getLabel = ( element ) =>
+	element.labels?.[ 0 ] ||
+	element.closest( 'label' ) ||
+	( element.id &&
+		document.querySelector(
+			`label[for="${ window.CSS.escape( element.id ) }"]`
+		) );
 
 // Return the user-facing label for a shipping or payment input. For radios,
 // WooCommerce renders the human label as the text content of the associated
 // <label for="..."> element. For selects we fall back to the selected option's
 // text. The raw `value` (e.g. "free_shipping:1") is kept as a last resort so we
 // never emit an empty `shipping_tier`/`payment_type`.
-const getCheckoutOptionLabel = ( element ) => {
+export const getCheckoutOptionLabel = ( element ) => {
 	if ( ! element ) {
 		return undefined;
 	}
@@ -26,9 +46,7 @@ const getCheckoutOptionLabel = ( element ) => {
 		return selectedOption?.text?.trim() || element.value;
 	}
 
-	const label = element.labels?.[ 0 ] || element.closest( 'label' );
-
-	return label?.textContent?.trim() || element.value;
+	return getLabel( element )?.textContent?.trim() || element.value;
 };
 
 // Return the shipping tier name without the price suffix. WooCommerce renders
@@ -36,17 +54,17 @@ const getCheckoutOptionLabel = ( element ) => {
 // `.woocommerce-Price-amount` element. GA4's `shipping_tier` is the tier name
 // (e.g. "Flat rate"), not the price — and dropping the cost also keeps it
 // consistent with the block checkout, which reports the Store API rate name.
-const getShippingTierLabel = ( element ) => {
+export const getShippingTierLabel = ( element ) => {
 	if ( ! element ) {
 		return undefined;
 	}
 
-	const label = element.labels?.[ 0 ] || element.closest( 'label' );
+	const label = getLabel( element );
 
 	if ( label ) {
 		const clone = label.cloneNode( true );
 		clone
-			.querySelectorAll( '.woocommerce-Price-amount' )
+			.querySelectorAll( '.woocommerce-Price-amount, .tax_label' )
 			.forEach( ( node ) => node.remove() );
 
 		// With the price removed we are left with "Flat rate:" — drop the
@@ -59,6 +77,39 @@ const getShippingTierLabel = ( element ) => {
 	}
 
 	return getCheckoutOptionLabel( element );
+};
+
+/**
+ * Read the quantity a classic cart row's input holds. It may be a decimal
+ * (0.5 kg), and 0 is kept because it removes the line.
+ *
+ * @param {Element} row Classic cart item row.
+ * @return {number} The quantity, or NaN when the row has no readable input.
+ */
+export const getCartRowQuantity = ( row ) =>
+	parseFloat( row?.querySelector( 'input.qty' )?.value );
+
+/**
+ * Work out the event for a classic cart quantity change. Quantities may be
+ * decimals (0.5 kg).
+ *
+ * @param {number|string} previousQuantity Quantity before the change.
+ * @param {number|string} newQuantity      Quantity after the change.
+ * @return {{ eventName: string, quantity: number }|null} The event and the units it covers, or null when nothing changed.
+ */
+export const getCartQuantityChange = ( previousQuantity, newQuantity ) => {
+	const delta = roundQuantity(
+		parseFloat( newQuantity ) - parseFloat( previousQuantity )
+	);
+
+	if ( ! Number.isFinite( delta ) || delta === 0 ) {
+		return null;
+	}
+
+	return {
+		eventName: delta > 0 ? 'add_to_cart' : 'remove_from_cart',
+		quantity: Math.abs( delta ),
+	};
 };
 
 /**
@@ -182,13 +233,16 @@ export function classicTracking(
 			}
 
 			if ( ! paymentInfoTracked ) {
-				trackPaymentInfo(
-					getCheckoutOptionLabel(
-						getSelectedCheckoutOption(
-							checkoutPaymentMethodSelector
-						)
-					)
+				// A free order has no payment methods to choose from.
+				const paymentElement = getSelectedCheckoutOption(
+					checkoutPaymentMethodSelector
 				);
+
+				if ( paymentElement ) {
+					trackPaymentInfo(
+						getCheckoutOptionLabel( paymentElement )
+					);
+				}
 			}
 		} );
 
@@ -296,55 +350,6 @@ export function classicTracking(
 		} );
 	}
 
-	function getCartItemUnitPrice( cartProduct ) {
-		const previousQuantity = parseInt( cartProduct?.quantity, 10 );
-		const linePrice = parseInt( cartProduct?.prices?.price, 10 );
-
-		if (
-			! Number.isFinite( previousQuantity ) ||
-			previousQuantity < 1 ||
-			! Number.isFinite( linePrice )
-		) {
-			return null;
-		}
-
-		return linePrice / previousQuantity;
-	}
-
-	function getQuantityChangeProduct( cartProduct, quantity ) {
-		const unitPrice = getCartItemUnitPrice( cartProduct );
-
-		if ( null === unitPrice ) {
-			return { ...cartProduct, quantity };
-		}
-
-		return {
-			...cartProduct,
-			quantity,
-			prices: {
-				...cartProduct.prices,
-				price: Math.round( unitPrice ),
-			},
-		};
-	}
-
-	function getCartSnapshotProduct( cartProduct, quantity ) {
-		const unitPrice = getCartItemUnitPrice( cartProduct );
-
-		if ( null === unitPrice ) {
-			return { ...cartProduct, quantity };
-		}
-
-		return {
-			...cartProduct,
-			quantity,
-			prices: {
-				...cartProduct.prices,
-				price: Math.round( unitPrice * quantity ),
-			},
-		};
-	}
-
 	function getCartItemKeyFromRow( item ) {
 		const inputName = item.querySelector( 'input.qty' )?.name;
 		return inputName?.match( /^cart\[([^\]]+)\]\[qty]$/ )?.[ 1 ];
@@ -401,10 +406,7 @@ export function classicTracking(
 		document
 			.querySelectorAll( classicCartItemSelector )
 			.forEach( ( item ) => {
-				const newQuantity = parseInt(
-					item.querySelector( 'input.qty' )?.value,
-					10
-				);
+				const newQuantity = getCartRowQuantity( item );
 				const productID = parseInt(
 					item.querySelector( '.remove[data-product_id]' )?.dataset
 						.product_id,
@@ -417,7 +419,7 @@ export function classicTracking(
 
 				if ( matchedProduct && Number.isFinite( newQuantity ) ) {
 					syncedItems.push(
-						getCartSnapshotProduct( matchedProduct, newQuantity )
+						getProductForQuantity( matchedProduct, newQuantity )
 					);
 				}
 			} );
@@ -436,10 +438,7 @@ export function classicTracking(
 		document
 			.querySelectorAll( classicCartItemSelector )
 			.forEach( ( item ) => {
-				const newQuantity = parseInt(
-					item.querySelector( 'input.qty' )?.value,
-					10
-				);
+				const newQuantity = getCartRowQuantity( item );
 
 				if ( ! Number.isFinite( newQuantity ) ) {
 					return;
@@ -454,30 +453,21 @@ export function classicTracking(
 					item,
 					productID
 				);
-				const previousQuantity = parseInt(
-					matchedProduct?.quantity,
-					10
-				);
+				const change = matchedProduct
+					? getCartQuantityChange(
+							matchedProduct.quantity,
+							newQuantity
+						)
+					: null;
 
-				if (
-					! matchedProduct ||
-					! Number.isFinite( previousQuantity ) ||
-					newQuantity === previousQuantity
-				) {
+				if ( ! change ) {
 					return;
 				}
 
-				const eventName =
-					newQuantity > previousQuantity
-						? 'add_to_cart'
-						: 'remove_from_cart';
-				const quantity = Math.abs( newQuantity - previousQuantity );
+				const { eventName, quantity } = change;
 
 				getEventHandler( eventName )( {
-					product: getQuantityChangeProduct(
-						matchedProduct,
-						quantity
-					),
+					product: getProductForQuantity( matchedProduct, quantity ),
 				} );
 			} );
 	}

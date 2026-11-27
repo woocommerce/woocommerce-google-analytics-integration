@@ -34,3 +34,6 @@ woocommerce-google-analytics-integration.zip
 
 # Local git hook settings
 .env
+
+# Local PHPStan config, overrides phpstan.neon.dist
+/phpstan.neon

@@ -1,7 +1,7 @@
 {
   "name": "woocommerce-google-analytics-integration",
   "title": "Google Analytics for WooCommerce",
-  "version": "2.4.4",
+  "version": "2.4.5",
   "license": "GPL-3.0-or-later",
   "homepage": "https://wordpress.org/plugins/woocommerce-google-analytics-integration/",
   "repository": {
@@ -14,7 +14,7 @@
   },
   "devDependencies": {
     "@playwright/test": "~1.61.0",
-    "@wordpress/env": "^11.16.0",
+    "@wordpress/env": "^12.0.0",
     "@wordpress/eslint-plugin": "^25.10.0",
     "@wordpress/scripts": "^35.0.0",
     "@wordpress/url": "^4.56.0",
@@ -26,31 +26,6 @@
     "node-wp-i18n": "~1.2.8",
     "prettier": "npm:wp-prettier@^3.9.6"
   },
-  "overrides": {
-    "@babel/core": "^7.29.6",
-    "@babel/runtime": "^7.27.6",
-    "markdown-it": "^14.3.2",
-    "@wordpress/env": {
-      "adm-zip": "^0.6.1"
-    },
-    "@wordpress/scripts": {
-      "adm-zip": "^0.6.1",
-      "webpack-dev-server": "^5.2.6"
-    },
-    "@wordpress/e2e-test-utils-playwright": {
-      "lighthouse": "^13.4.1"
-    },
-    "qs": "^6.16.0",
-    "uuid": "11.1.1",
-    "minimatch": "^3.1.4",
-    "@typescript-eslint/typescript-estree": {
-      "minimatch": "^9.0.7"
-    },
-    "serialize-javascript": "^7.0.5",
-    "schema-utils": {
-      "ajv": "^8.18.0"
-    }
-  },
   "assets": {
     "js": {
       "min": "assets/js/*.min.js",
@@ -61,32 +36,35 @@
     "dev": "NODE_ENV=development wp-scripts build",
     "start": "wp-scripts start",
     "makepot": "wpi18n makepot --domain-path languages --pot-file $npm_package_name.pot --type plugin --main-file $npm_package_name.php --exclude node_modules,tests,docs,assets/js/src",
-    "lint": "npm run lint:php && npm run lint:php:deprecations && npm run lint:js",
+    "lint": "pnpm run lint:php && pnpm run lint:php:deprecations && pnpm run lint:phpstan && pnpm run lint:js",
     "lint:js": "eslint . --max-warnings 0",
     "lint:php": "vendor/bin/phpcs",
+    "lint:phpstan": "vendor/bin/phpstan analyse --memory-limit=2G",
+    "lint:phpstan:baseline": "vendor/bin/phpstan analyse --memory-limit=2G --generate-baseline --allow-empty-baseline",
     "lint:php:deprecations": "./bin/lint-php-deprecations.sh",
     "test:js": "node --test \"tests/js/**/*.test.js\"",
+    "test:js:coverage": "node --test --experimental-test-coverage --test-coverage-include=\"assets/js/src/**\" \"tests/js/**/*.test.js\"",
     "format": "wp-scripts format '**/*.{js,mjs,cjs}'",
-    "qa": "npm run lint && npm run test:js",
+    "qa": "pnpm run lint && pnpm run test:js",
     "archive": "composer archive --file=$npm_package_name --format=zip",
     "postarchive": "rm -rf $npm_package_name && unzip $npm_package_name.zip -d $npm_package_name && rm $npm_package_name.zip && zip -r $npm_package_name.zip $npm_package_name && rm -rf $npm_package_name",
-    "build": "NODE_ENV=production wp-scripts build && npm run makepot &&  npm run archive",
+    "build": "NODE_ENV=production wp-scripts build && pnpm run makepot &&  pnpm run archive",
     "prebuild": "rm -rf ./vendor",
     "pretest:e2e": "wp-env run cli --config=.wp-env.test.json -- bash -c ': > /var/www/html/wp-content/debug.log'",
-    "test:e2e": "npx playwright test --config=tests/e2e/config/playwright.config.js",
+    "test:e2e": "playwright test --config=tests/e2e/config/playwright.config.js",
     "test:e2e:debug-log": "WP_ENV_CONFIG_FILE=.wp-env.test.json ./tests/e2e/bin/check-debug-log.sh",
-    "test:e2e-dev": "npx playwright test --config=tests/e2e/config/playwright.config.js --debug",
+    "test:e2e-dev": "playwright test --config=tests/e2e/config/playwright.config.js --debug",
     "test:php:setup": "WP_ENV_CONFIG_FILE=.wp-env.test.json ./tests/bin/setup-phpunit-env.sh",
     "test:php": "wp-env run cli --config=.wp-env.test.json --env-cwd=wp-content/plugins/woocommerce-google-analytics-integration vendor/bin/phpunit",
     "wp-env": "wp-env",
-    "wp-env:up": "npm run -- wp-env start --update --config=.wp-env.test.json",
-    "wp-env:down": "npm run -- wp-env stop --config=.wp-env.test.json",
-    "wp-env:destroy": "npm run -- wp-env destroy --config=.wp-env.test.json",
-    "wp-env:dev:up": "npm run -- wp-env start --update",
-    "wp-env:dev:down": "npm run -- wp-env stop",
-    "wp-env:dev:destroy": "npm run -- wp-env destroy",
-    "env:start": "npm run wp-env:dev:up",
-    "env:stop": "npm run wp-env:dev:down",
+    "wp-env:up": "wp-env start --update --config=.wp-env.test.json",
+    "wp-env:down": "wp-env stop --config=.wp-env.test.json",
+    "wp-env:destroy": "wp-env destroy --config=.wp-env.test.json",
+    "wp-env:dev:up": "wp-env start --update",
+    "wp-env:dev:down": "wp-env stop",
+    "wp-env:dev:destroy": "wp-env destroy",
+    "env:start": "pnpm run wp-env:dev:up",
+    "env:stop": "pnpm run wp-env:dev:down",
     "prepare": "husky"
   },
   "lint-staged": {
@@ -95,14 +73,16 @@
   },
   "engines": {
     "node": "^24.15.0",
-    "npm": ">=11.10.0"
+    "pnpm": "^11.29.0"
   },
   "config": {
+    "use_pnpm": true,
     "wp_org_slug": "woocommerce-google-analytics-integration",
     "version_replace_paths": [
       "includes",
       "tests",
       "woocommerce-google-analytics-integration.php"
     ]
-  }
+  },
+  "packageManager": "pnpm@11.29.0+sha512.d913f9b37cd5fe6780052e809774edabb7bdcf69a6e6d9b8fd3b38bc052fa8a7d891b6c201a38fb504a07ffce2e5e8c262ef54fb8f57db62f22d353a30bc8a96"
 }

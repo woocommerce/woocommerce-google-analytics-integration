@@ -46,8 +46,8 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  # woocommerce/woo-product-deploy trunk @ 2026-09-10
-  WOO_PRODUCT_DEPLOY_SHA: c36d132b80747d6a96569712d69937177d7a0274
+  # woocommerce/woo-product-deploy trunk @ 2026-11-26
+  WOO_PRODUCT_DEPLOY_SHA: 742e2f7e92b387608510ccdb3f0ba0d9a7f41e46
 
 jobs:
   validate:

@@ -3,7 +3,7 @@ Contributors: woocommerce, automattic, claudiosanches, bor0, royho, laurendaviss
 Tags: woocommerce, google analytics
 Requires at least: 7.0
 Tested up to: 7.1
-Stable tag: 2.4.4
+Stable tag: 2.4.5
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 
@@ -47,6 +47,14 @@ Duplicate Google Analytics code causes a conflict in tracking. Remove any other 
 1. Google Analytics Integration Settings.
 
 == Changelog ==
+
+= 2.4.5 - 2026-11-24 =
+* Fix - Keep cart events right after coupons and removals.
+* Fix - Send `add_to_cart` once, not twice, for a click on the "Add to cart" button of a block product grid.
+* Fix - Send add_shipping_info on classic checkouts with one shipping method.
+* Fix - Send the right product, price and quantity for repeated adds and page-read prices.
+* Fix - Trim spaces around the tracking ID.
+* Update - Bump the minimum required WooCommerce version to 11.2 and the compatibility version to 11.3.
 
 = 2.4.4 - 2026-10-20 =
 * Dev - Add shared npm scripts, a pre-commit hook, Dependabot for GitHub Actions and a Node 24 pin.

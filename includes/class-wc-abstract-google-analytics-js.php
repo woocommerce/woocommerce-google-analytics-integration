@@ -256,6 +256,10 @@ abstract class WC_Abstract_Google_Analytics_JS {
 	/**
 	 * Returns an array of cart data in the required format
 	 *
+	 * Items and coupons follow the Store API cart shape: `totals.line_total`
+	 * covers the whole quantity, `prices.price` is the unit price (after coupons,
+	 * unlike the Store API), and coupons are a list of `code` records.
+	 *
 	 * @return array
 	 */
 	public function get_formatted_cart(): array {
@@ -272,14 +276,21 @@ abstract class WC_Abstract_Google_Analytics_JS {
 				continue;
 			}
 
+			// Quantities may be decimal (woocommerce_stock_amount filter). A zero-quantity line has a zero total.
+			$quantity     = (float) $item['quantity'];
+			$unit_divisor = $quantity > 0 ? $quantity : 1;
+
 			$items[] = array_merge(
 				$this->get_formatted_product_data( $product ),
 				array(
 					'key'      => $cart_item_key,
 					'quantity' => $item['quantity'],
 					'prices'   => array(
-						'price'               => $this->get_formatted_price( $item['line_total'] ),
+						'price'               => $this->get_formatted_price( (float) $item['line_total'] / $unit_divisor ),
 						'currency_minor_unit' => wc_get_price_decimals(),
+					),
+					'totals'   => array(
+						'line_total' => $this->get_formatted_price( $item['line_total'] ),
 					),
 				)
 			);
@@ -287,7 +298,12 @@ abstract class WC_Abstract_Google_Analytics_JS {
 
 		return array(
 			'items'   => $items,
-			'coupons' => $cart->get_coupons(),
+			'coupons' => array_map(
+				function ( $code ) {
+					return array( 'code' => $code );
+				},
+				array_values( $cart->get_applied_coupons() )
+			),
 			'totals'  => array(
 				'currency_code'       => get_woocommerce_currency(),
 				'total_price'         => $this->get_formatted_price( $cart->get_total( 'edit' ) ),
@@ -309,7 +325,7 @@ abstract class WC_Abstract_Google_Analytics_JS {
 	 * @param int                   $variation_id Variation product ID.
 	 * @param array|bool            $variation An array containing product variation attributes to include in the product data.
 	 *                              For the "variation" type products, we'll use product->get_attributes.
-	 * @param bool|int              $quantity  Quantity to include in the formatted product object
+	 * @param bool|int|float|string $quantity  Quantity to include in the formatted product object
 	 *
 	 * @return array
 	 */
@@ -334,8 +350,9 @@ abstract class WC_Abstract_Google_Analytics_JS {
 			'currency_minor_unit' => wc_get_price_decimals(),
 		);
 
-		if ( $quantity ) {
-			$formatted['quantity'] = (int) $quantity;
+		if ( $quantity && is_numeric( $quantity ) ) {
+			// Follows the store's woocommerce_stock_amount filter: an int by default, a float when an extension allows decimal quantities.
+			$formatted['quantity'] = wc_stock_amount( (float) $quantity );
 		}
 
 		return $formatted;
@@ -498,11 +515,11 @@ abstract class WC_Abstract_Google_Analytics_JS {
 	 * Capture the product added to the cart so it can either be rendered now
 	 * (no redirect) or persisted into the WC session (if WC will redirect).
 	 *
-	 * @param string     $cart_item_key Cart item key.
-	 * @param int        $product_id    Product ID being added.
-	 * @param int|string $quantity      Quantity added.
-	 * @param int        $variation_id  Variation ID (0 if not a variation).
-	 * @param array      $variation     Variation attributes.
+	 * @param string           $cart_item_key Cart item key.
+	 * @param int              $product_id    Product ID being added.
+	 * @param int|float|string $quantity      Quantity added (a float when the store allows decimal quantities).
+	 * @param int              $variation_id  Variation ID (0 if not a variation).
+	 * @param array            $variation     Variation attributes.
 	 *
 	 * @return void
 	 */

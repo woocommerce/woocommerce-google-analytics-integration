@@ -74,6 +74,119 @@ test.describe( 'GTag events on block pages', () => {
 		} );
 	} );
 
+	test( 'Add to cart event is sent once for one click on a shop page button', async ( {
+		page,
+	} ) => {
+		const addToCartEvents = [];
+		page.on( 'request', ( request ) => {
+			if ( request.url().includes( 'google-analytics.com/g/collect' ) ) {
+				addToCartEvents.push(
+					...getAllEventData( request, 'add_to_cart' )
+				);
+			}
+		} );
+		const firstAddToCart = trackGtagEvent( page, 'add_to_cart' );
+
+		await page.goto( 'shop?orderby=date' );
+		await waitForStoreApiInterceptor( page );
+
+		// The button adds through the Store API. The interceptor sends the
+		// event when the server answers, and the click listener of the product
+		// card must not send another one on the click.
+		const serverAnswer = page.waitForResponse(
+			( response ) =>
+				response.url().includes( '/wc/store/v1/batch' ) &&
+				response.request().method() === 'POST'
+		);
+		await blockProductAddToCart( page, simpleProductID );
+		await firstAddToCart;
+		await serverAnswer;
+
+		// Time for the interceptor to send its event, and for gtag to pass it on.
+		await page.waitForTimeout( 1000 );
+
+		const pushedAddToCartEvents = await page.evaluate(
+			() =>
+				Array.from( window.dataLayer ).filter(
+					( entry ) =>
+						entry[ 0 ] === 'event' && entry[ 1 ] === 'add_to_cart'
+				).length
+		);
+
+		expect( pushedAddToCartEvents ).toBe( 1 );
+		expect( addToCartEvents ).toHaveLength( 1 );
+		expect( addToCartEvents[ 0 ].product1 ).toMatchObject( {
+			id: simpleProductID.toString(),
+			ca: 'Uncategorized',
+			qt: '1',
+		} );
+	} );
+
+	test( 'Adding the same product twice from a shop page button sends one unit each time', async ( {
+		page,
+	} ) => {
+		const addToCartEvents = [];
+		page.on( 'request', ( request ) => {
+			if ( request.url().includes( 'google-analytics.com/g/collect' ) ) {
+				addToCartEvents.push(
+					...getAllEventData( request, 'add_to_cart' )
+				);
+			}
+		} );
+
+		await page.goto( 'shop?orderby=date' );
+		await waitForStoreApiInterceptor( page );
+
+		const addToCartButton = page
+			.locator( `[data-product_id="${ simpleProductID }"]` )
+			.first();
+
+		// The second add must be compared with the cart after the first one,
+		// not with the empty cart the page loaded with.
+		for ( const inCart of [ '1 in cart', '2 in cart' ] ) {
+			const serverAnswer = page.waitForResponse(
+				( response ) =>
+					response.url().includes( '/wc/store/v1/batch' ) &&
+					response.request().method() === 'POST'
+			);
+			await addToCartButton.click();
+			await expect( addToCartButton.getByText( inCart ) ).toBeVisible();
+			await serverAnswer;
+		}
+
+		// Time for the interceptor to send its events, and for gtag to pass them on.
+		await page.waitForTimeout( 1000 );
+
+		const pushedItems = await page.evaluate( () =>
+			Array.from( window.dataLayer )
+				.filter(
+					( entry ) =>
+						entry[ 0 ] === 'event' && entry[ 1 ] === 'add_to_cart'
+				)
+				.map( ( entry ) => entry[ 2 ].items[ 0 ] )
+		);
+		expect( pushedItems ).toHaveLength( 2 );
+		pushedItems.forEach( ( item ) =>
+			expect( item ).toMatchObject( {
+				quantity: 1,
+				price: simpleProductPrice,
+			} )
+		);
+
+		// gtag batches hits, so the requests can come some time later.
+		await expect
+			.poll( () => addToCartEvents.length, { timeout: 15000 } )
+			.toBeGreaterThanOrEqual( 2 );
+		expect( addToCartEvents ).toHaveLength( 2 );
+		addToCartEvents.forEach( ( event ) =>
+			expect( event.product1 ).toMatchObject( {
+				id: simpleProductID.toString(),
+				qt: '1',
+				pr: simpleProductPrice.toString(),
+			} )
+		);
+	} );
+
 	test( 'Add to cart event is sent after a Store API add item request', async ( {
 		page,
 	} ) => {
@@ -147,8 +260,7 @@ test.describe( 'GTag events on block pages', () => {
 				id: updateProductID.toString(),
 				nm: 'Simple product',
 				qt: '2',
-				// Price reflects the two added units (the scaled line total).
-				pr: ( simpleProductPrice * 2 ).toString(),
+				pr: simpleProductPrice.toString(),
 			} );
 		} );
 	} );
@@ -172,7 +284,7 @@ test.describe( 'GTag events on block pages', () => {
 				id: updateProductID.toString(),
 				nm: 'Simple product',
 				qt: '2',
-				pr: ( simpleProductPrice * 2 ).toString(),
+				pr: simpleProductPrice.toString(),
 			} );
 		} );
 	} );
@@ -272,7 +384,7 @@ test.describe( 'GTag events on block pages', () => {
 				id: updateProductID.toString(),
 				nm: 'Simple product',
 				qt: '2',
-				pr: ( simpleProductPrice * 2 ).toString(),
+				pr: simpleProductPrice.toString(),
 			} );
 		} );
 	} );

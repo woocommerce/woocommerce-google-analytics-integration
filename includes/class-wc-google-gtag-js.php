@@ -311,6 +311,25 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 				);
 			}
 		);
+
+		add_action( 'wp_head', array( $this, 'maybe_append_view_cart_event' ) );
+	}
+
+	/**
+	 * Mark `view_cart` for tracking when the cart page shows a non-empty cart.
+	 *
+	 * The Cart block doesn't run the classic cart hooks, so this checks the page instead.
+	 *
+	 * @since x.x.x
+	 *
+	 * @return void
+	 */
+	public function maybe_append_view_cart_event(): void {
+		if ( ! is_cart() || ! WC()->cart || WC()->cart->is_empty() ) {
+			return;
+		}
+
+		$this->append_event( 'view_cart' );
 	}
 
 	/**
@@ -399,29 +418,11 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 	 * @return array
 	 */
 	private function get_linker_domains(): array {
-		if ( empty( $this->get_setting( 'ga_linker_cross_domains' ) ) ) {
-			return array();
-		}
+		require_once __DIR__ . '/class-wc-google-analytics-tracking-settings-service.php';
 
-		return array_values(
-			array_filter(
-				array_map(
-					function ( string $domain ) {
-						$domain = trim( $domain );
+		$domains = $this->get_setting( 'ga_linker_cross_domains' );
 
-						// Validate the domain as ASCII RFC 1035 / RFC 1123 style. The lookahead caps the total length
-						// at the 253-character DNS limit; each label is 1-63 chars and starts/ends with alphanumerics;
-						// the TLD is 2-63 ASCII chars to allow punycode domains. Invalid entries are silently dropped.
-						if ( preg_match( '/^(?=.{1,253}$)(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])$/i', $domain ) ) {
-							return esc_js( $domain );
-						}
-
-						return null;
-					},
-					explode( ',', $this->get_setting( 'ga_linker_cross_domains' ) )
-				)
-			)
-		);
+		return is_string( $domains ) ? WC_Google_Analytics_Tracking_Settings_Service::parse_linker_domains( $domains ) : array();
 	}
 
 	/**
@@ -592,6 +593,7 @@ class WC_Google_Gtag_JS extends WC_Abstract_Google_Analytics_JS {
 			'purchase'          => 'ga_ecommerce_tracking_enabled',
 			'add_to_cart'       => 'ga_event_tracking_enabled',
 			'remove_from_cart'  => 'ga_enhanced_remove_from_cart_enabled',
+			'view_cart'         => 'ga_enhanced_view_cart_enabled',
 			'view_item_list'    => 'ga_enhanced_product_impression_enabled',
 			'select_content'    => 'ga_enhanced_product_click_enabled',
 			'view_item'         => 'ga_enhanced_product_detail_view_enabled',

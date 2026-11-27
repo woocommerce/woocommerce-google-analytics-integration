@@ -14,7 +14,7 @@ Never run `gh pr create` without this workflow.
 3. **Run the checks** and fix what they report (see `code-quality`):
 
    ```sh
-   npm run qa
+   pnpm run qa
    ```
 
    Also run the PHPUnit or E2E tests that cover the code you changed (see `running-tests`). Commit any formatting fixes before you push.

@@ -7,7 +7,7 @@ description: Use when running Google Analytics for WooCommerce tests – PHPUnit
 
 ## JS unit tests
 
-`npm run test:js` runs `tests/js/**/*.test.js` with the Node.js test runner. No Docker needed. It is part of `npm run qa`.
+`pnpm run test:js` runs `tests/js/**/*.test.js` with the Node.js test runner. No Docker needed. It is part of `pnpm run qa`. `pnpm run test:js:coverage` also prints line coverage, for the source files the tests load; CI writes it to the job summary.
 
 One file: `node --test tests/js/<file>.test.js`. One test: add `--test-name-pattern="<name>"`.
 
@@ -17,21 +17,21 @@ The repo has two isolated `@wordpress/env` configs. Both set `testsEnvironment: 
 
 | Config | Port | Use | Commands |
 |---|---|---|---|
-| `.wp-env.json` | 8888 | Manual dev work (WooCommerce + plugin) | `npm run env:start` / `env:stop`, `wp-env:dev:destroy` |
-| `.wp-env.test.json` | 8889 | PHPUnit, E2E and CI | `npm run wp-env:up` / `wp-env:down` / `wp-env:destroy` |
+| `.wp-env.json` | 8888 | Manual dev work (WooCommerce + plugin) | `pnpm run env:start` / `env:stop`, `wp-env:dev:destroy` |
+| `.wp-env.test.json` | 8889 | PHPUnit, E2E and CI | `pnpm run wp-env:up` / `wp-env:down` / `wp-env:destroy` |
 
 - The test site’s admin login is `admin`/`password`. Both sites can run at the same time.
 - The test config installs Basic Auth for API tests and runs `tests/e2e/bin/test-env-setup.sh` after start and clean.
-- The test npm scripts and CI pass `--config=.wp-env.test.json`. `wp-env run cli` must target it too. Scripts read the config from `WP_ENV_CONFIG_FILE`, which the npm scripts and lifecycle scripts set.
+- The test scripts in `package.json` and CI pass `--config=.wp-env.test.json`. `wp-env run cli` must target it too. Scripts read the config from `WP_ENV_CONFIG_FILE`, which those scripts and the lifecycle scripts set.
 - `wp-env:destroy` deletes everything in the test containers, including volumes and images.
 
 ## PHPUnit (wp-env, recommended)
 
-1. Start Docker, then `npm run wp-env:up`.
-2. `npm run test:php:setup` – creates the `wordpress_test` database, installs WooCommerce if it is missing, and downloads the WooCommerce test helpers from GitHub. Run it once after each start. For a specific WooCommerce version: `npm run test:php:setup -- --wc-version=9.6.0`.
-3. `npm run test:php` – runs every test in `tests/unit-tests/`.
+1. Start Docker, then `pnpm run wp-env:up`.
+2. `pnpm run test:php:setup` – creates the `wordpress_test` database, installs WooCommerce if it is missing, and downloads the WooCommerce test helpers from GitHub. Run it once after each start. For a specific WooCommerce version: `pnpm run test:php:setup --wc-version=9.6.0`.
+3. `pnpm run test:php` – runs every test in `tests/unit-tests/`.
 
-One file or test: `npm run test:php -- --filter <TestClass or method>`.
+One file or test: `pnpm run test:php --filter <TestClass or method>`.
 
 PHPUnit uses its own `wordpress_test` database (`phpunit.xml.dist`). The site at 8889 and E2E use the `wordpress` database in the same MySQL container, so the two suites do not interfere and run in any order.
 
@@ -48,14 +48,14 @@ CI runs PHPUnit this way, on a matrix of PHP and WooCommerce versions (`.github/
 
 ## E2E (Playwright)
 
-1. `npm run build` (or `npm run dev`), then `npm run wp-env:up`.
-2. Once: `npx playwright install chromium`.
-3. `npm run test:e2e` – headless. `pretest:e2e` empties `debug.log` first.
-4. `npm run test:e2e:debug-log` – fails if the plugin wrote lines to `debug.log` during the run.
+1. `pnpm run build` (or `pnpm run dev`), then `pnpm run wp-env:up`.
+2. Once: `pnpm exec playwright install chromium`.
+3. `pnpm run test:e2e` – headless. `pretest:e2e` empties `debug.log` first.
+4. `pnpm run test:e2e:debug-log` – fails if the plugin wrote lines to `debug.log` during the run.
 
-`npm run test:e2e-dev` runs the tests in a visible browser with the Playwright debugger. One spec: `npm run test:e2e -- tests/e2e/specs/<file>.test.js`. Failure screenshots land in `tests/e2e/test-results/`.
+`pnpm run test:e2e-dev` runs the tests in a visible browser with the Playwright debugger. One spec: `pnpm run test:e2e tests/e2e/specs/<file>.test.js`. Failure screenshots land in `tests/e2e/test-results/`.
 
-On GitHub Actions, E2E runs on every PR (except docs-only changes) and on pushes to `trunk` and `release/*`. To test a WordPress or WooCommerce RC, run the `e2e-tests.yml` or `php-unit-tests.yml` workflow by hand with its RC inputs (see the `beta-compat-test` skill).
+On GitHub Actions, E2E runs from `checks.yml` on every PR, on pushes to `trunk` and `release/*`, and on a manual run of `checks.yml`. Every Monday, `e2e-versions.yml` also runs it on the newest WooCommerce release (a beta or RC when one is out) and on the minimum version from the plugin header; that run blocks nothing. CI retries a failed test once, and the job summary lists every test that passed only on retry. To test a WordPress or WooCommerce RC, run the `e2e-tests.yml` or `php-unit-tests.yml` workflow by hand with its RC inputs. Locally, `WC_VERSION=11.1.0 pnpm run wp-env:up` sets up the test site with that WooCommerce version (see the `beta-compat-test` skill).
 
 ## PHP versions
 

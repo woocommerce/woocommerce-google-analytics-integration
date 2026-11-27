@@ -1,0 +1,799 @@
+/**
+ * Unit tests for the Store API helpers that decide which add_to_cart and
+ * remove_from_cart events the block cart, checkout and add-to-cart blocks send.
+ * Run with `pnpm run test:js`.
+ */
+
+/**
+ * External dependencies
+ */
+const { test, beforeEach } = require( 'node:test' );
+const assert = require( 'node:assert' );
+
+/**
+ * Internal dependencies
+ */
+const loadSource = require( './helpers/load-source' );
+
+const api = loadSource( 'utils/store-api.js' );
+const { parsePriceFromDOM } = loadSource( 'utils/index.js' );
+
+const ORIGIN = 'https://shop.test';
+
+beforeEach( () => {
+	api.forgetCartItems();
+	globalThis.window = {
+		location: { origin: ORIGIN },
+		ga4w: { settings: {} },
+	};
+} );
+
+// The last-seen cart items are shared module state, so each test uses its own line keys.
+let keyCount = 0;
+const newKey = () => `line-${ ++keyCount }`;
+
+/**
+ * A Store API cart line with a line total of 15.00 per unit.
+ *
+ * @param {string} key       Line item key.
+ * @param {number} quantity  Line quantity.
+ * @param {Object} overrides Fields to replace.
+ * @return {Object} The cart line.
+ */
+const line = ( key, quantity, overrides = {} ) => ( {
+	key,
+	id: 12,
+	name: 'Hoodie',
+	quantity,
+	totals: { line_total: String( 1500 * quantity ) },
+	...overrides,
+} );
+
+const post = { method: 'POST' };
+
+test( 'Store API requests are matched by method and path, with or without a version', () => {
+	const cases = [
+		[ '/wp-json/wc/store/cart/add-item', post, 'add' ],
+		[ '/wp-json/wc/store/v1/cart/add-item?_locale=user', post, 'add' ],
+		[ `${ ORIGIN }/wp-json/wc/store/v1/cart/add-item`, post, 'add' ],
+		[ '/?rest_route=/wc/store/v1/cart/add-item', post, 'add' ],
+		[ '/wp-json/wc/store/v1/cart/add-item', { method: 'post' }, 'add' ],
+		[ '/wp-json/wc/store/v1/cart/add-item', {}, null ],
+		[ '/wp-json/wc/store/v1/cart/add-item', { method: 'GET' }, null ],
+		[ 'https://other.test/wp-json/wc/store/v1/cart/add-item', post, null ],
+		[ '/wp-json/wc/store/v1/cart/update-item', post, 'update' ],
+		[ '/wp-json/wc/store/update-item', post, null ],
+		[ '/wp-json/wc/store/v1/batch?_locale=user', post, 'batch' ],
+		[ '/wp-json/wc/store/v1/cart', post, null ],
+		[ 'http://[', post, null ],
+	];
+
+	for ( const [ url, init, expected ] of cases ) {
+		assert.deepStrictEqual(
+			[
+				api.isStoreApiAddItemRequest( url, init ) && 'add',
+				api.isStoreApiUpdateItemRequest( url, init ) && 'update',
+				api.isStoreApiBatchRequest( url, init ) && 'batch',
+			].filter( Boolean ),
+			expected ? [ expected ] : [],
+			`${ init.method ?? 'no method' } ${ url }`
+		);
+	}
+} );
+
+test( 'a Request object is matched by its own URL and method', () => {
+	const request = new Request( `${ ORIGIN }/wp-json/wc/store/v1/batch`, {
+		method: 'POST',
+		body: '{}',
+	} );
+
+	assert.strictEqual( api.isStoreApiBatchRequest( request ), true );
+	assert.strictEqual(
+		api.isStoreApiBatchRequest( request, { method: 'GET' } ),
+		false,
+		'init wins over the Request'
+	);
+} );
+
+test( 'the request body is read from init, or from a copy of the Request', async () => {
+	const request = new Request( `${ ORIGIN }/x`, {
+		method: 'POST',
+		body: '{"id":1}',
+	} );
+
+	assert.strictEqual(
+		await api.getRequestBody( '/x', { body: 'a=1' } ),
+		'a=1'
+	);
+	assert.strictEqual( await api.getRequestBody( request ), '{"id":1}' );
+	assert.strictEqual( request.bodyUsed, false, 'the page can still send it' );
+	assert.strictEqual( await api.getRequestBody( '/x' ), null );
+} );
+
+test( 'request bodies are read as JSON, form data or an object', () => {
+	const form = new FormData();
+	form.append( 'id', '5' );
+
+	assert.deepStrictEqual( api.coerceRequestBodyData( '{"id":5}' ), {
+		id: 5,
+	} );
+	assert.deepStrictEqual( api.coerceRequestBodyData( 'id=5&quantity=2' ), {
+		id: '5',
+		quantity: '2',
+	} );
+	assert.deepStrictEqual( api.coerceRequestBodyData( form ), { id: '5' } );
+	assert.deepStrictEqual(
+		api.coerceRequestBodyData( new URLSearchParams( 'id=7' ) ),
+		{ id: '7' }
+	);
+	assert.deepStrictEqual( api.coerceRequestBodyData( { id: 9 } ), { id: 9 } );
+	assert.deepStrictEqual( api.coerceRequestBodyData( null ), {} );
+} );
+
+test( 'only whole numbers above zero count as an ID', () => {
+	for ( const [ value, expected ] of [
+		[ '3', 3 ],
+		[ 3, 3 ],
+		[ '2.7', 2 ],
+		[ 0, null ],
+		[ -2, null ],
+		[ 'abc', null ],
+		[ undefined, null ],
+	] ) {
+		assert.strictEqual(
+			api.toPositiveInteger( value ),
+			expected,
+			String( value )
+		);
+	}
+	assert.strictEqual( api.toPositiveInteger( 'abc', 1 ), 1 );
+} );
+
+test( 'an add-item body gives the product, and a quantity of 1 when it has none above zero', () => {
+	assert.deepStrictEqual(
+		api.parseAddItemRequestBody( '{"id":"12","quantity":"3"}' ),
+		{ productId: 12, quantity: 3 }
+	);
+	assert.deepStrictEqual( api.parseAddItemRequestBody( 'id=12' ), {
+		productId: 12,
+		quantity: 1,
+	} );
+	assert.deepStrictEqual(
+		api.parseAddItemRequestBody( { id: 'x', quantity: 0 } ),
+		{ productId: null, quantity: 1 }
+	);
+} );
+
+test( 'an add of a new line reports that line and its quantity', () => {
+	const key = newKey();
+	const change = api.getAddItemFromResponse(
+		{ id: 12, quantity: 2 },
+		{ items: [ line( key, 2 ) ] },
+		{ items: [] }
+	);
+
+	assert.deepStrictEqual( change, {
+		eventName: 'add_to_cart',
+		product: {
+			...line( key, 2 ),
+			prices: { price: 1500 },
+			totals: undefined,
+		},
+		quantity: 2,
+		isAddItem: true,
+	} );
+} );
+
+test( 'an add to a line already in the cart reports only the added units', () => {
+	const key = newKey();
+	const change = api.getAddItemFromResponse(
+		{ id: 12, quantity: 2 },
+		{ items: [ line( key, 3 ) ] },
+		{ items: [ line( key, 1 ) ] }
+	);
+
+	assert.strictEqual( change.quantity, 2 );
+	assert.strictEqual( change.product.prices.price, 1500 );
+} );
+
+test( 'an add of another variation of the same product reports the new line', () => {
+	const red = newKey();
+	const blue = newKey();
+	const change = api.getAddItemFromResponse(
+		{ id: 12, quantity: 1 },
+		{ items: [ line( red, 1 ), line( blue, 1 ) ] },
+		{ items: [ line( red, 1 ) ] }
+	);
+
+	assert.strictEqual( change.product.key, blue );
+} );
+
+test( 'an add capped by stock reports what the cart actually got', () => {
+	const key = newKey();
+	const change = api.getAddItemFromResponse(
+		{ id: 12, quantity: 5 },
+		{ items: [ line( key, 2 ) ] },
+		{ items: [ line( key, 1 ) ] }
+	);
+
+	assert.strictEqual( change.quantity, 1 );
+	assert.strictEqual( change.product.prices.price, 1500 );
+} );
+
+test( 'an add compares with the last cart the Store API returned, not stale page data', () => {
+	const first = newKey();
+	const second = newKey();
+	// An earlier add on this page; the page cart is still empty.
+	api.rememberCartItems( { items: [ line( first, 1, { id: 10 } ) ] } );
+
+	const change = api.getAddItemFromResponse(
+		{ id: 20, quantity: 1 },
+		{
+			items: [
+				line( first, 1, { id: 10 } ),
+				line( second, 1, { id: 20 } ),
+			],
+		},
+		{ items: [] }
+	);
+
+	assert.strictEqual( change.product.id, 20 );
+	assert.strictEqual( change.quantity, 1 );
+} );
+
+test( 'an add after other changes on the page reports the units it added', () => {
+	const cases = [
+		// [ last seen quantity, page cart quantity, requested, cart after, reported ]
+		[ 1, 3, 3, 4, 3 ], // An update lowered the line after page load.
+		[ 2, 0, 5, 3, 1 ], // An earlier add, and this one capped by stock.
+		[ 2, 0, 1, 3, 1 ], // A second add of one unit.
+	];
+
+	for ( const [ seen, page, requested, after, reported ] of cases ) {
+		const key = newKey();
+		api.rememberCartItems( { items: [ line( key, seen ) ] } );
+
+		const change = api.getAddItemFromResponse(
+			{ id: 12, quantity: requested },
+			{ items: [ line( key, after ) ] },
+			{ items: page ? [ line( key, page ) ] : [] }
+		);
+
+		assert.strictEqual( change.quantity, reported );
+		assert.strictEqual( change.product.prices.price, 1500 );
+	}
+} );
+
+test( 'an add the server raised reports the units the cart really got', () => {
+	const key = newKey();
+	const change = api.getAddItemFromResponse(
+		{ id: 12, quantity: 1 },
+		{ items: [ line( key, 6 ) ] },
+		{ items: [] }
+	);
+
+	assert.strictEqual( change.quantity, 6 );
+	assert.strictEqual( change.product.prices.price, 1500 );
+} );
+
+test( 'without the cart before, an add is matched by product ID and capped at the line', () => {
+	const key = newKey();
+	const change = api.getAddItemFromResponse(
+		{ id: 12, quantity: 5 },
+		{ items: [ line( newKey(), 1, { id: 99 } ), line( key, 3 ) ] },
+		null
+	);
+
+	assert.strictEqual( change.product.key, key );
+	assert.strictEqual( change.quantity, 3 );
+} );
+
+test( 'an add with no matching line in the response reports nothing', () => {
+	const key = newKey();
+	const cartItems = { items: [ line( key, 1 ) ] };
+
+	assert.strictEqual(
+		api.getAddItemFromResponse( { id: 99 }, cartItems, cartItems ),
+		null
+	);
+	assert.strictEqual(
+		api.getAddItemFromResponse( { id: 12 }, { items: [] }, null ),
+		null
+	);
+} );
+
+test( 'a quantity increase is an add_to_cart of the difference', () => {
+	const key = newKey();
+	const change = api.getUpdateItemChangeFromResponse(
+		{ key, quantity: 3 },
+		{ items: [ line( key, 3 ) ] },
+		{ items: [ line( key, 1 ) ] }
+	);
+
+	assert.strictEqual( change.eventName, 'add_to_cart' );
+	assert.strictEqual( change.quantity, 2 );
+	assert.strictEqual( change.product.prices.price, 1500 );
+} );
+
+test( 'a quantity decrease is a remove_from_cart valued from the line before', () => {
+	const key = newKey();
+	const change = api.getUpdateItemChangeFromResponse(
+		{ key, quantity: 1 },
+		{ items: [ line( key, 1 ) ] },
+		{ items: [ line( key, 3 ) ] }
+	);
+
+	assert.strictEqual( change.eventName, 'remove_from_cart' );
+	assert.strictEqual( change.quantity, 2 );
+	assert.strictEqual( change.product.prices.price, 1500 );
+} );
+
+test( 'a decrease after a coupon is valued from the coupon response, not stale page data', () => {
+	const key = newKey();
+	api.rememberCartItems( { items: [ line( key, 3 ) ] } );
+	// The apply-coupon response halves the price; the page cart keeps the old one.
+	api.rememberCartItems( {
+		items: [ line( key, 3, { totals: { line_total: '2250' } } ) ],
+	} );
+
+	const change = api.getUpdateItemChangeFromResponse(
+		{ key, quantity: 1 },
+		{ items: [ line( key, 1, { totals: { line_total: '750' } } ) ] },
+		{ items: [ line( key, 3 ) ] }
+	);
+
+	assert.strictEqual( change.quantity, 2 );
+	assert.strictEqual( change.product.prices.price, 750 );
+} );
+
+test( 'a line removed and added again reports all its units', () => {
+	const key = newKey();
+	api.rememberCartItems( { items: [ line( key, 3 ) ] } );
+	// The remove-item response no longer has the line; the page cart still does.
+	api.rememberCartItems( { items: [] } );
+
+	const change = api.getAddItemFromResponse(
+		{ id: 12, quantity: 5 },
+		{ items: [ line( key, 5 ) ] },
+		{ items: [ line( key, 3 ) ] }
+	);
+
+	assert.strictEqual( change.quantity, 5 );
+	assert.strictEqual( change.product.prices.price, 1500 );
+} );
+
+test( 'other cart requests in a batch count for the changes after them', () => {
+	const key = newKey();
+	const changes = api.getBatchCartChanges(
+		{
+			requests: [
+				{ path: '/wc/store/v1/cart/remove-item', body: { key } },
+				{
+					path: '/wc/store/v1/cart/add-item',
+					body: { id: 12, quantity: 5 },
+				},
+			],
+		},
+		{
+			responses: [
+				{ status: 200, body: { items: [] } },
+				{ status: 201, body: { items: [ line( key, 5 ) ] } },
+			],
+		},
+		{ items: [ line( key, 3 ) ] }
+	);
+
+	assert.deepStrictEqual(
+		changes.map( ( { eventName, quantity } ) => [ eventName, quantity ] ),
+		[ [ 'add_to_cart', 5 ] ]
+	);
+} );
+
+test( 'a coupon in a batch updates the cart that a later decrease is valued from', () => {
+	const key = newKey();
+	api.getBatchCartChanges(
+		{ requests: [ { path: '/wc/store/v1/cart/apply-coupon', body: {} } ] },
+		{
+			responses: [
+				{
+					status: 200,
+					body: {
+						items: [
+							line( key, 3, { totals: { line_total: '2250' } } ),
+						],
+					},
+				},
+			],
+		},
+		{ items: [ line( key, 3 ) ] }
+	);
+
+	const change = api.getUpdateItemChangeFromResponse(
+		{ key, quantity: 1 },
+		{ items: [ line( key, 1, { totals: { line_total: '750' } } ) ] },
+		{ items: [ line( key, 3 ) ] }
+	);
+
+	assert.strictEqual( change.product.prices.price, 750 );
+} );
+
+test( 'an update in a batch compares with the removal before it', () => {
+	const key = newKey();
+	const changes = api.getBatchCartChanges(
+		{
+			requests: [
+				{ path: '/wc/store/v1/cart/remove-item', body: { key } },
+				{
+					path: '/wc/store/v1/cart/update-item',
+					body: { key, quantity: 2 },
+				},
+			],
+		},
+		{
+			responses: [
+				{ status: 200, body: { items: [] } },
+				{ status: 200, body: { items: [ line( key, 2 ) ] } },
+			],
+		},
+		{ items: [ line( key, 3 ) ] }
+	);
+
+	assert.deepStrictEqual(
+		changes.map( ( { eventName, quantity } ) => [ eventName, quantity ] ),
+		[ [ 'add_to_cart', 2 ] ]
+	);
+} );
+
+test( 'a batch reply that is not a cart does not replace the cart', () => {
+	const key = newKey();
+	const changes = api.getBatchCartChanges(
+		{
+			requests: [
+				{ path: '/wc/store/v1/cart/items', body: {} },
+				{
+					path: '/wc/store/v1/cart/add-item',
+					body: { id: 12, quantity: 5 },
+				},
+			],
+		},
+		{
+			responses: [
+				{ status: 201, body: line( newKey(), 1 ) },
+				{ status: 200, body: { items: [ line( key, 4 ) ] } },
+			],
+		},
+		{ items: [ line( key, 3 ) ] }
+	);
+
+	assert.strictEqual( changes[ 0 ].quantity, 1 );
+} );
+
+test( 'the response of a cart request is recorded, and stays readable for the page', async () => {
+	const key = newKey();
+	const response = new Response(
+		JSON.stringify( {
+			items: [ line( key, 3, { totals: { line_total: '2250' } } ) ],
+		} )
+	);
+
+	await api.rememberCartResponse(
+		'/wp-json/wc/store/v1/cart/apply-coupon',
+		post,
+		response
+	);
+
+	const change = api.getUpdateItemChangeFromResponse(
+		{ key, quantity: 1 },
+		{ items: [ line( key, 1 ) ] },
+		{ items: [ line( key, 3 ) ] }
+	);
+
+	assert.strictEqual( change.product.prices.price, 750 );
+	assert.strictEqual( response.bodyUsed, false );
+} );
+
+test( 'the response of any other request is not read', async () => {
+	const response = new Response( 'not json' );
+
+	await api.rememberCartResponse(
+		'/wp-json/wc/store/v1/products',
+		{},
+		response
+	);
+
+	assert.strictEqual( await response.text(), 'not json' );
+} );
+
+test( 'every Store API cart route counts as a cart request', () => {
+	for ( const [ url, init, expected ] of [
+		[ '/wp-json/wc/store/v1/cart', {}, true ],
+		[ '/wp-json/wc/store/cart/apply-coupon', post, true ],
+		[ '/wp-json/wc/store/v1/cart/remove-item?_locale=user', post, true ],
+		[ '/?rest_route=/wc/store/v1/cart/remove-coupon', post, true ],
+		[ '/wp-json/wc/store/v1/cart-extra', post, false ],
+		[ '/wp-json/wc/store/v1/products', {}, false ],
+		[ 'https://other.test/wp-json/wc/store/v1/cart', {}, false ],
+	] ) {
+		assert.strictEqual(
+			api.isStoreApiCartRequest( url, init ),
+			expected,
+			url
+		);
+	}
+} );
+
+test( 'a quantity set to 0 is a remove_from_cart of the whole line', () => {
+	const key = newKey();
+	const change = api.getUpdateItemChangeFromResponse(
+		{ key, quantity: 0 },
+		{ items: [] },
+		{ items: [ line( key, 3 ) ] }
+	);
+
+	assert.strictEqual( change.eventName, 'remove_from_cart' );
+	assert.strictEqual( change.quantity, 3 );
+	assert.strictEqual( change.product.prices.price, 1500 );
+} );
+
+test( 'an update compares with the last cart the Store API returned, not stale page data', () => {
+	const key = newKey();
+	api.rememberCartItems( { items: [ line( key, 4 ) ] } );
+
+	const change = api.getUpdateItemChangeFromResponse(
+		{ key, quantity: 5 },
+		{ items: [ line( key, 5 ) ] },
+		{ items: [ line( key, 1 ) ] }
+	);
+
+	assert.strictEqual( change.quantity, 1 );
+} );
+
+test( 'an update that changes nothing, or names no line, reports nothing', () => {
+	const key = newKey();
+	const items = { items: [ line( key, 2 ) ] };
+
+	assert.strictEqual(
+		api.getUpdateItemChangeFromResponse(
+			{ key, quantity: 2 },
+			items,
+			items
+		),
+		null
+	);
+	assert.strictEqual(
+		api.getUpdateItemChangeFromResponse( { quantity: 2 }, items, items ),
+		null
+	);
+	assert.strictEqual(
+		api.getUpdateItemChangeFromResponse(
+			{ key: newKey(), quantity: 2 },
+			items,
+			items
+		),
+		null
+	);
+} );
+
+test( 'a batch reports each successful cart change in order', () => {
+	const added = newKey();
+	const updated = newKey();
+	const before = { items: [ line( updated, 1, { id: 20 } ) ] };
+	const afterAdd = {
+		items: [ line( updated, 1, { id: 20 } ), line( added, 1 ) ],
+	};
+	const afterUpdate = {
+		items: [ line( updated, 3, { id: 20 } ), line( added, 1 ) ],
+	};
+
+	const changes = api.getBatchCartChanges(
+		JSON.stringify( {
+			requests: [
+				{ path: '/wc/store/v1/cart/add-item', body: { id: 12 } },
+				{ path: '/wc/store/v1/cart/select-shipping-rate', body: {} },
+				{
+					path: '/wc/store/v1/cart/update-item',
+					body: { key: updated, quantity: 3 },
+				},
+				{ path: '/wc/store/v1/cart/add-item', body: { id: 30 } },
+			],
+		} ),
+		{
+			responses: [
+				{ status: 201, body: afterAdd },
+				{ status: 200, body: afterAdd },
+				{ status: 200, body: afterUpdate },
+				// A failed sub-request is skipped even when its body holds a cart.
+				{
+					status: 400,
+					body: {
+						items: [ ...afterUpdate.items, line( newKey(), 1 ) ],
+					},
+				},
+			],
+		},
+		before
+	);
+
+	assert.deepStrictEqual(
+		changes.map( ( { eventName, product, quantity } ) => [
+			eventName,
+			product.key,
+			quantity,
+		] ),
+		[
+			[ 'add_to_cart', added, 1 ],
+			[ 'add_to_cart', updated, 2 ],
+		]
+	);
+} );
+
+test( 'two updates of one line in a batch each compare with the line before them', () => {
+	const key = newKey();
+	// An earlier Store API response saw the line with 1 unit.
+	api.rememberCartItems( { items: [ line( key, 1 ) ] } );
+	const update = ( quantity ) => ( {
+		path: '/wc/store/v1/cart/update-item',
+		body: { key, quantity },
+	} );
+
+	const changes = api.getBatchCartChanges(
+		{ requests: [ update( 3 ), update( 2 ) ] },
+		{
+			responses: [
+				{ status: 200, body: { items: [ line( key, 3 ) ] } },
+				{ status: 200, body: { items: [ line( key, 2 ) ] } },
+			],
+		},
+		{ items: [ line( key, 1 ) ] }
+	);
+
+	assert.deepStrictEqual(
+		changes.map( ( { eventName, quantity } ) => [ eventName, quantity ] ),
+		[
+			[ 'add_to_cart', 2 ],
+			[ 'remove_from_cart', 1 ],
+		]
+	);
+} );
+
+test( 'a batch that cannot be read reports nothing', () => {
+	assert.deepStrictEqual(
+		api.getBatchCartChanges( 'not json', { responses: [] }, null ),
+		[]
+	);
+	assert.deepStrictEqual(
+		api.getBatchCartChanges( { requests: [] }, {}, null ),
+		[]
+	);
+} );
+
+// Stores can allow decimal quantities (0.5 kg) by filtering woocommerce_stock_amount to floatval.
+
+test( 'an add-item body keeps a decimal quantity, but not a decimal product ID', () => {
+	assert.deepStrictEqual(
+		api.parseAddItemRequestBody( '{"id":"12","quantity":"1.5"}' ),
+		{ productId: 12, quantity: 1.5 }
+	);
+	assert.deepStrictEqual(
+		api.parseAddItemRequestBody( { id: 12, quantity: 0.5 } ),
+		{ productId: 12, quantity: 0.5 }
+	);
+} );
+
+test( 'an add of a decimal quantity to a new line reports that quantity', () => {
+	const key = newKey();
+	const change = api.getAddItemFromResponse(
+		{ id: 12, quantity: 0.5 },
+		{ items: [ line( key, 0.5 ) ] },
+		{ items: [] }
+	);
+
+	assert.strictEqual( change.quantity, 0.5 );
+	assert.strictEqual( change.product.prices.price, 1500 );
+} );
+
+test( 'an add to a line with a decimal quantity reports only the added units', () => {
+	const key = newKey();
+	const change = api.getAddItemFromResponse(
+		{ id: 12, quantity: 1 },
+		{ items: [ line( key, 2.5 ) ] },
+		{ items: [ line( key, 1.5 ) ] }
+	);
+
+	assert.strictEqual( change.quantity, 1 );
+	assert.strictEqual( change.product.prices.price, 1500 );
+} );
+
+test( 'a decimal quantity increase is an add_to_cart of the decimal difference', () => {
+	const key = newKey();
+	const change = api.getUpdateItemChangeFromResponse(
+		{ key, quantity: 2 },
+		{ items: [ line( key, 2 ) ] },
+		{ items: [ line( key, 1.5 ) ] }
+	);
+
+	assert.strictEqual( change.eventName, 'add_to_cart' );
+	assert.strictEqual( change.quantity, 0.5 );
+	assert.strictEqual( change.product.prices.price, 1500 );
+} );
+
+test( 'a decimal quantity decrease is a remove_from_cart of the decimal difference', () => {
+	const key = newKey();
+	const change = api.getUpdateItemChangeFromResponse(
+		{ key, quantity: 1.5 },
+		{ items: [ line( key, 1.5 ) ] },
+		{ items: [ line( key, 2 ) ] }
+	);
+
+	assert.strictEqual( change.eventName, 'remove_from_cart' );
+	assert.strictEqual( change.quantity, 0.5 );
+	assert.strictEqual( change.product.prices.price, 1500 );
+} );
+
+test( 'a decimal quantity change reports the difference without float noise', () => {
+	const key = newKey();
+	const change = api.getUpdateItemChangeFromResponse(
+		{ key, quantity: 0.3 },
+		{ items: [ line( key, 0.3 ) ] },
+		{ items: [ line( key, 0.1 ) ] }
+	);
+
+	// 0.3 - 0.1 is 0.19999999999999998 in floating point.
+	assert.strictEqual( change.quantity, 0.2 );
+} );
+
+test( 'prices read from the page follow the store’s separators', () => {
+	const cases = [
+		[ '$1,234.56', {}, 1234.56 ],
+		[
+			'1.234,56 €',
+			{ decimalSeparator: ',', thousandSeparator: '.' },
+			1234.56,
+		],
+		[
+			'1.234.567,89 €',
+			{ decimalSeparator: ',', thousandSeparator: '.' },
+			1234567.89,
+		],
+		[
+			'1 234,56 €',
+			{ decimalSeparator: ',', thousandSeparator: ' ' },
+			1234.56,
+		],
+		[ '¥1,200', { decimalSeparator: '.', thousandSeparator: ',' }, 1200 ],
+		[
+			'12٫50 د.إ',
+			{ decimalSeparator: '٫', thousandSeparator: '٬' },
+			12.5,
+		],
+		[
+			'1٬234٫50',
+			{ decimalSeparator: '٫', thousandSeparator: '٬' },
+			1234.5,
+		],
+		// Currency symbols with a dot, before or after the amount.
+		[ 'Bs.1,234.56', {}, 1234.56 ],
+		[ 'د.إ 1,234.56', {}, 1234.56 ],
+		[ '1,234.56 лв.', {}, 1234.56 ],
+		[ '', {}, 0 ],
+		[ 'Free', {}, 0 ],
+	];
+
+	for ( const [ text, currency, expected ] of cases ) {
+		window.ga4w.settings.currency = currency;
+		assert.strictEqual( parsePriceFromDOM( text ), expected, text );
+	}
+} );
+
+test( 'prices read from the page use accounting.js when the page has it', () => {
+	window.ga4w.settings.currency = { decimalSeparator: ',' };
+	window.accounting = {
+		unformat: ( text, decimal ) => `${ text } with ${ decimal }`,
+	};
+
+	assert.strictEqual( parsePriceFromDOM( 'Bs.9,99' ), '9,99 with ,' );
+} );
+
+test( 'prices read from the page are 0 without currency settings', () => {
+	assert.strictEqual( parsePriceFromDOM( '$5.00' ), 0 );
+} );

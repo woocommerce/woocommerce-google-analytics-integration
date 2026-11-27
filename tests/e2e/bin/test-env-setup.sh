@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # Target the wp-env environment named by WP_ENV_CONFIG_FILE. The test config's
-# lifecycleScripts and the npm scripts set it so every wp-cli call lands in the
+# lifecycleScripts and the package.json scripts set it so every wp-cli call lands in the
 # test environment rather than the default one. When unset it falls back to the
 # default config, so callers configuring the test environment must set it.
 CONFIG_ARG="${WP_ENV_CONFIG_FILE:+--config=$WP_ENV_CONFIG_FILE}"
@@ -9,8 +9,13 @@ CONFIG_ARG="${WP_ENV_CONFIG_FILE:+--config=$WP_ENV_CONFIG_FILE}"
 echo -e 'Activate twentytwentytwo theme \n'
 wp-env run cli $CONFIG_ARG wp theme activate twentytwentytwo
 
-echo -e 'Install WooCommerce \n'
-wp-env run cli $CONFIG_ARG -- wp plugin install woocommerce --activate
+# WC_VERSION picks a WooCommerce version, such as 11.1.0 or 11.3.0-rc.1. Without it, the latest.
+echo -e "Install WooCommerce ${WC_VERSION:-latest} \n"
+wp-env run cli $CONFIG_ARG -- wp plugin install woocommerce --activate ${WC_VERSION:+--version="$WC_VERSION" --force} || exit 1
+if [ -n "$WC_VERSION" ]; then
+	# A site that had another version needs its database updated.
+	wp-env run cli $CONFIG_ARG -- wp wc update || exit 1
+fi
 
 echo -e 'Install WP Consent API \n'
 wp-env run cli $CONFIG_ARG -- wp plugin install wp-consent-api --activate

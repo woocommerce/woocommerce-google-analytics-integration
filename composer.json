@@ -6,14 +6,18 @@
     "license": "GPL-3.0-or-later",
     "archive": {
         "exclude": [
-            "!/assets/js/build"
+            "!/assets/js/build",
+            ".DS_Store"
         ]
     },
     "require-dev": {
         "dealerdirect/phpcodesniffer-composer-installer": "^1.2",
         "wp-coding-standards/wpcs": "^3.0",
         "phpunit/phpunit": "^9.6.38",
-        "yoast/phpunit-polyfills": "^1.1.5"
+        "yoast/phpunit-polyfills": "^1.1.5",
+        "phpstan/phpstan": "^2.3",
+        "szepeviktor/phpstan-wordpress": "^2.0",
+        "php-stubs/woocommerce-stubs": "^11.2"
     },
     "config": {
         "platform": {

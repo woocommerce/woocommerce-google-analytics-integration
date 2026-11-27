@@ -657,7 +657,7 @@ test.describe( 'GTag events on classic pages', () => {
 			expect( data[ 'epn.value' ] ).toEqual(
 				simpleProductPrice.toString()
 			);
-			expect( data[ 'ep.shipping_tier' ] ).toBeTruthy();
+			expect( data[ 'ep.shipping_tier' ] ).toEqual( 'Flat rate' );
 		} );
 	} );
 

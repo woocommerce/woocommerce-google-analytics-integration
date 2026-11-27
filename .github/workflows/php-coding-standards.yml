@@ -1,54 +1,19 @@
 name: PHP Coding Standards
 
 on:
-  push:
-    branches:
-      - trunk
-    paths:
-      - "**.php"
-      - composer.json
-      - composer.lock
-      - .github/workflows/php-coding-standards.yml
-  pull_request:
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  workflow_call:
 
 jobs:
-  check-paths:
-    name: Check changed files
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    outputs:
-      should-run: ${{ steps.changes.outputs.php }}
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-
-      - name: Check for relevant changes
-        uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d # v4.0.3
-        id: changes
-        with:
-          filters: |
-            php:
-              - '**.php'
-              - 'composer.json'
-              - 'composer.lock'
-              - '.github/workflows/php-coding-standards.yml'
-
   phpcs:
     name: PHP coding standards
     runs-on: ubuntu-latest
     timeout-minutes: 5
-    needs: check-paths
-    if: needs.check-paths.outputs.should-run == 'true'
     steps:
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Prepare PHP
-        uses: woocommerce/grow/prepare-php@e981c25267d29c39ff6ab1ae4ea09b267efae86c # actions-v3.0.6
+        uses: woocommerce/grow/prepare-php@46efe0b1b6f29cbd79ba37289fb89739420a42e7 # actions-v3.1.0
         with:
           php-version: 7.4
           tools: cs2pr

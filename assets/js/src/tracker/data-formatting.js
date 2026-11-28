@@ -64,29 +64,19 @@ export const remove_from_cart = ( { product, quantity = 1 } ) => {
 	};
 };
 
-const getCheckoutData = ( storeCart ) => {
-	if ( ! storeCart?.items?.length ) {
-		return false;
-	}
-
-	const totals = storeCart.totals;
-
-	/*
-	 * Per the GA4 spec, `value` is the sum of (price × quantity) for all items
-	 * and must NOT include shipping or tax. WooCommerce's `total_price` bundles
-	 * shipping and tax, so summing the per-line totals instead keeps `value`
-	 * stable across the whole checkout funnel (begin_checkout vs
-	 * add_shipping_info / add_payment_info) and between the block and classic
-	 * checkouts — which otherwise read carts in different states (live vs
-	 * page-load) and shapes.
-	 *
-	 * Each line total is already net of discounts and tax. The live cart and the
-	 * page-load cart both expose it as `item.totals.line_total` (with
-	 * `prices.price` being the unit price), in minor units, summed as integers to
-	 * avoid floating-point drift.
-	 * https://developers.google.com/analytics/devguides/collection/ga4/reference/events#add_shipping_info
-	 */
-	const value = storeCart.items.reduce(
+/**
+ * Gets the items value of the cart, in minor units, without tax or shipping.
+ * Container extensions also put their children's totals on the parent line, so
+ * the cart items value (subtotal less discounts) wins when the line sum is
+ * higher by more than the 1 minor unit per line that rounding at subtotal can add.
+ *
+ * @since x.x.x
+ *
+ * @param {Object} storeCart The cart object
+ * @return {number} The items value.
+ */
+const getItemsValue = ( storeCart ) => {
+	const lineSum = storeCart.items.reduce(
 		( total, item ) =>
 			total +
 			parseInt(
@@ -98,6 +88,28 @@ const getCheckoutData = ( storeCart ) => {
 			),
 		0
 	);
+	const totals = storeCart.totals;
+
+	if ( totals?.total_items === undefined ) {
+		return lineSum;
+	}
+
+	const cartItemsValue =
+		parseInt( totals.total_items, 10 ) -
+		parseInt( totals.total_discount ?? 0, 10 );
+
+	return lineSum - cartItemsValue > storeCart.items.length
+		? cartItemsValue
+		: lineSum;
+};
+
+const getCheckoutData = ( storeCart ) => {
+	if ( ! storeCart?.items?.length ) {
+		return false;
+	}
+
+	const totals = storeCart.totals;
+	const value = getItemsValue( storeCart );
 
 	return {
 		currency: totals.currency_code,

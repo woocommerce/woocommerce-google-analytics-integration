@@ -1,7 +1,6 @@
 import {
 	getProductForQuantity,
 	getProductFromID,
-	rememberClickedAdd,
 	roundQuantity,
 } from '../utils';
 
@@ -568,9 +567,10 @@ export function classicTracking(
 			} );
 		} );
 
-	// Handle select_content and add_to_cart in Products (Beta) block, and
-	// add_to_cart in Product Collection. Product Collection select_content is
-	// tracked through the stable wc-blocks_viewed_product DOM event.
+	// Handle select_content in Products (Beta) block. Product Collection
+	// select_content is tracked through the stable wc-blocks_viewed_product DOM
+	// event. add_to_cart from these cards is tracked by the Store API
+	// interceptor in blocks.js once the add succeeds.
 	// Attach click event listeners to a whole product card, as some links may not have the product_id data attribute.
 	document
 		.querySelectorAll(
@@ -588,13 +588,6 @@ export function classicTracking(
 
 			productCard.addEventListener( 'click', ( event ) => {
 				const target = event.target;
-				// `product-view-link` has no serilized HTML identifier/selector, so we look for the parent block element.
-				const viewLink = target.closest(
-					'.wc-block-components-product-image a, .wc-block-grid__product-link'
-				);
-
-				// Catch name click
-				const nameLink = target.closest( '.wp-block-post-title a' );
 
 				// Catch the enclosing product button.
 				const button = target.closest(
@@ -607,24 +600,20 @@ export function classicTracking(
 					! button.classList.contains( 'product_type_variable' );
 
 				if ( isAddToCartButton ) {
-					// Add to cart.
-					const addedProduct = getProductFromID(
-						parseInt( productId ),
-						products,
-						cart
-					);
+					// Tracked by the Store API interceptor; tracking it here too
+					// sent add_to_cart twice for one click.
+					return;
+				}
 
-					// The button adds through the Store API, so the interceptor
-					// in blocks.js sees this add again when the server answers,
-					// and leaves it out. With no data for the product, the event
-					// would have no item: the interceptor sends the add.
-					if ( addedProduct ) {
-						getEventHandler( 'add_to_cart' )( {
-							product: addedProduct,
-						} );
-						rememberClickedAdd( productId );
-					}
-				} else if (
+				// `product-view-link` has no serilized HTML identifier/selector, so we look for the parent block element.
+				const viewLink = target.closest(
+					'.wc-block-components-product-image a, .wc-block-grid__product-link'
+				);
+
+				// Catch name click
+				const nameLink = target.closest( '.wp-block-post-title a' );
+
+				if (
 					! productCard.closest( '.wc-block-product-template' ) &&
 					( viewLink || button || nameLink )
 				) {

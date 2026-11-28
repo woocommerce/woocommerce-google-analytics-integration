@@ -69,6 +69,7 @@ test.describe( 'GTag events on block pages', () => {
 				ca: 'Uncategorized',
 				qt: '1',
 				pr: simpleProductPrice.toString(),
+				va: '',
 			} );
 		} );
 	} );
@@ -89,9 +90,9 @@ test.describe( 'GTag events on block pages', () => {
 		await page.goto( 'shop?orderby=date' );
 		await waitForStoreApiInterceptor( page );
 
-		// The click listener of the product card sends the event on the click.
-		// The button adds through the Store API, and the interceptor must not
-		// send the same add again when the server answers.
+		// The button adds through the Store API. The interceptor sends the
+		// event when the server answers, and the click listener of the product
+		// card must not send another one on the click.
 		const serverAnswer = page.waitForResponse(
 			( response ) =>
 				response.url().includes( '/wc/store/v1/batch' ) &&
@@ -119,6 +120,71 @@ test.describe( 'GTag events on block pages', () => {
 			ca: 'Uncategorized',
 			qt: '1',
 		} );
+	} );
+
+	test( 'Adding the same product twice from a shop page button sends one unit each time', async ( {
+		page,
+	} ) => {
+		const addToCartEvents = [];
+		page.on( 'request', ( request ) => {
+			if ( request.url().includes( 'google-analytics.com/g/collect' ) ) {
+				addToCartEvents.push(
+					...getAllEventData( request, 'add_to_cart' )
+				);
+			}
+		} );
+
+		await page.goto( 'shop?orderby=date' );
+		await waitForStoreApiInterceptor( page );
+
+		const addToCartButton = page
+			.locator( `[data-product_id="${ simpleProductID }"]` )
+			.first();
+
+		// The second add must be compared with the cart after the first one,
+		// not with the empty cart the page loaded with.
+		for ( const inCart of [ '1 in cart', '2 in cart' ] ) {
+			const serverAnswer = page.waitForResponse(
+				( response ) =>
+					response.url().includes( '/wc/store/v1/batch' ) &&
+					response.request().method() === 'POST'
+			);
+			await addToCartButton.click();
+			await expect( addToCartButton.getByText( inCart ) ).toBeVisible();
+			await serverAnswer;
+		}
+
+		// Time for the interceptor to send its events, and for gtag to pass them on.
+		await page.waitForTimeout( 1000 );
+
+		const pushedItems = await page.evaluate( () =>
+			Array.from( window.dataLayer )
+				.filter(
+					( entry ) =>
+						entry[ 0 ] === 'event' && entry[ 1 ] === 'add_to_cart'
+				)
+				.map( ( entry ) => entry[ 2 ].items[ 0 ] )
+		);
+		expect( pushedItems ).toHaveLength( 2 );
+		pushedItems.forEach( ( item ) =>
+			expect( item ).toMatchObject( {
+				quantity: 1,
+				price: simpleProductPrice,
+			} )
+		);
+
+		// gtag batches hits, so the requests can come some time later.
+		await expect
+			.poll( () => addToCartEvents.length, { timeout: 15000 } )
+			.toBeGreaterThanOrEqual( 2 );
+		expect( addToCartEvents ).toHaveLength( 2 );
+		addToCartEvents.forEach( ( event ) =>
+			expect( event.product1 ).toMatchObject( {
+				id: simpleProductID.toString(),
+				qt: '1',
+				pr: simpleProductPrice.toString(),
+			} )
+		);
 	} );
 
 	test( 'Add to cart event is sent after a Store API add item request', async ( {
@@ -946,7 +1012,55 @@ test.describe( 'GTag events on block pages', () => {
 				ca: 'Uncategorized',
 				qt: '1',
 				pr: simpleProductPrice.toString(),
+				va: '',
 			} );
+		} );
+	} );
+
+	test( 'Add to cart event is sent once for one click in a product collection block', async ( {
+		page,
+	} ) => {
+		await createProductCollectionBlockShopPage();
+
+		const trackedRequests = [];
+		page.on( 'request', ( request ) => {
+			if ( request.url().includes( 'google-analytics.com/g/collect' ) ) {
+				trackedRequests.push( request );
+			}
+		} );
+
+		await page.goto( 'product-collection-block-shop' );
+		await waitForStoreApiInterceptor( page );
+
+		const event = trackGtagEvent( page, 'add_to_cart' );
+		await blockProductAddToCart( page, simpleProductID );
+		await event;
+
+		// The Store API interceptor sends its event shortly after the add
+		// resolves, so allow time for a duplicate to show up.
+		await page.waitForTimeout( 1000 );
+
+		// Count what the plugin passed to gtag as well, as gtag may batch hits.
+		const queuedEvents = await page.evaluate(
+			() =>
+				window.dataLayer.filter(
+					( entry ) =>
+						entry[ 0 ] === 'event' && entry[ 1 ] === 'add_to_cart'
+				).length
+		);
+		expect( queuedEvents ).toBe( 1 );
+
+		const events = trackedRequests.flatMap( ( request ) =>
+			getAllEventData( request, 'add_to_cart' )
+		);
+		expect( events ).toHaveLength( 1 );
+		expect( events[ 0 ].product1 ).toEqual( {
+			id: simpleProductID.toString(),
+			nm: 'Simple product',
+			ca: 'Uncategorized',
+			qt: '1',
+			pr: simpleProductPrice.toString(),
+			va: '',
 		} );
 	} );
 
@@ -1105,6 +1219,7 @@ test.describe( 'GTag events on block pages', () => {
 				ca: 'Uncategorized',
 				qt: '1',
 				pr: simpleProductPrice.toString(),
+				va: '',
 			} );
 		} );
 	} );

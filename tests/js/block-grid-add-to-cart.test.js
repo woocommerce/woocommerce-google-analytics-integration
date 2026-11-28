@@ -1,8 +1,8 @@
 /**
  * Unit tests for add_to_cart from the "Add to cart" button of a block product
- * grid. Two parts of the plugin see that add: the click listener on the
- * product card, and the Store API interceptor once the server answers.
- * Run with `pnpm run test:js`.
+ * grid. The button adds through the Store API, so the add is reported by the
+ * Store API interceptor once the server answers, not by the click listener on
+ * the product card. Run with `pnpm run test:js`.
  */
 
 /**
@@ -19,6 +19,7 @@ const loadSource = require( './helpers/load-source' );
 const ORIGIN = 'https://shop.test';
 const sent = [];
 let cartAfterAdd;
+let subResponseStatus = 201;
 
 // blocks.js wraps window.fetch once, the first time blocksTracking() runs, so
 // the page and the server behind it are set up once for the whole file.
@@ -31,7 +32,9 @@ globalThis.window = {
 		ok: true,
 		clone: () => ( {
 			json: async () => ( {
-				responses: [ { status: 201, body: cartAfterAdd } ],
+				responses: [
+					{ status: subResponseStatus, body: cartAfterAdd },
+				],
 			} ),
 		} ),
 	} ),
@@ -100,6 +103,9 @@ const showGrid = ( products, productData = products ) => {
 
 	document.querySelectorAll = ( selector ) =>
 		selector.includes( '.wc-block-product-template .product' ) ? cards : [];
+	// The cart from page load, which the page never updates: a later add
+	// compares against the last cart the Store API returned instead.
+	window.ga4w.data = { products: productData, cart: { items: [] } };
 	classicTracking( getEventHandler, { products: productData } );
 
 	return ( product ) => clicks.get( product.id )();
@@ -112,6 +118,7 @@ const showGrid = ( products, productData = products ) => {
  * @param {number} quantity The quantity of the product in the cart after the add.
  */
 const serverAnswers = async ( product, quantity = 1 ) => {
+	subResponseStatus = 201;
 	cartAfterAdd = {
 		items: [
 			{
@@ -140,29 +147,53 @@ const serverAnswers = async ( product, quantity = 1 ) => {
 	} );
 };
 
+/**
+ * The server refuses the add (for example a second add of a "Sold individually"
+ * product): the batch succeeds, its add-item sub-request does not.
+ *
+ * @param {Object} product The product the button tried to add.
+ */
+const serverRejects = async ( product ) => {
+	subResponseStatus = 400;
+	cartAfterAdd = { code: 'woocommerce_rest_cart_product_sold_individually' };
+
+	await window.fetch( `${ ORIGIN }/wp-json/wc/store/v1/batch`, {
+		method: 'POST',
+		body: JSON.stringify( {
+			requests: [
+				{
+					path: '/wc/store/v1/cart/add-item',
+					method: 'POST',
+					body: { id: product.id, quantity: 1 },
+				},
+			],
+		} ),
+	} );
+};
+
 // The item of each add_to_cart event, or null for an event with no item.
 const addToCartItems = () =>
 	sent
 		.filter( ( [ , eventName ] ) => eventName === 'add_to_cart' )
 		.map( ( [ , , data ] ) => data.items[ 0 ] ?? null );
 
-// The event of the click listener, from the product data of the page.
-const fromClick = ( product ) => ( {
+// The event of the interceptor, from the cart line in the server's answer,
+// with the category from the product data of the page.
+const fromStoreApi = ( product ) => ( {
 	item_id: product.id,
 	item_name: product.name,
 	item_category: 'Clothing',
 	quantity: 1,
 	price: 18,
-} );
-
-// The event of the interceptor, from the cart line in the server's answer.
-const fromStoreApi = ( product ) => ( {
-	item_id: product.id,
-	item_name: product.name,
-	quantity: 1,
-	price: 18,
 	item_variant: '',
 } );
+
+// The same event when the page has no data for the product: no category.
+const fromStoreApiWithoutPageData = ( product ) => {
+	const { item_category: itemCategory, ...item } = fromStoreApi( product );
+
+	return item;
+};
 
 const mockTime = ( t ) =>
 	t.mock.timers.enable( { apis: [ 'setTimeout', 'Date' ] } );
@@ -178,66 +209,23 @@ for ( const [ server, responseTime ] of [
 	[ 'fast', 50 ],
 	[ 'slow', 5000 ],
 ] ) {
-	test( `one click on the button sends add_to_cart once, with a ${ server } server`, async ( t ) => {
+	test( `one click on the button sends add_to_cart once, when a ${ server } server answers`, async ( t ) => {
 		mockTime( t );
 		const product = newProduct();
 		const click = showGrid( [ product ] );
 
 		click( product );
-		assert.deepStrictEqual( addToCartItems(), [ fromClick( product ) ] );
+		assert.deepStrictEqual( addToCartItems(), [] );
 
 		wait( t, responseTime );
 		await serverAnswers( product );
 		wait( t, 1000 );
 
-		assert.deepStrictEqual( addToCartItems(), [ fromClick( product ) ] );
+		assert.deepStrictEqual( addToCartItems(), [ fromStoreApi( product ) ] );
 	} );
 }
 
-test( 'two clicks on the button send add_to_cart twice', async ( t ) => {
-	mockTime( t );
-	const product = newProduct();
-	const click = showGrid( [ product ] );
-
-	click( product );
-	click( product );
-	await serverAnswers( product, 1 );
-	await serverAnswers( product, 2 );
-	wait( t, 1000 );
-
-	assert.deepStrictEqual( addToCartItems(), [
-		fromClick( product ),
-		fromClick( product ),
-	] );
-} );
-
-test( 'a click on one button does not hide the add of another product', async ( t ) => {
-	mockTime( t );
-	const [ clicked, other ] = [ newProduct(), newProduct() ];
-	const click = showGrid( [ clicked, other ] );
-
-	click( clicked );
-	await serverAnswers( other );
-	wait( t, 1000 );
-
-	assert.deepStrictEqual( addToCartItems(), [
-		fromClick( clicked ),
-		fromStoreApi( other ),
-	] );
-} );
-
-test( 'an add with no click is sent when the server answers', async ( t ) => {
-	mockTime( t );
-	const product = newProduct();
-	showGrid( [ product ] );
-
-	await serverAnswers( product );
-	wait( t, 1000 );
-
-	assert.deepStrictEqual( addToCartItems(), [ fromStoreApi( product ) ] );
-} );
-
-test( 'a click covers one add: a later add of the product with no click is sent', async ( t ) => {
+test( 'two adds of the same product send add_to_cart twice, each for one unit at the unit price', async ( t ) => {
 	mockTime( t );
 	const product = newProduct();
 	const click = showGrid( [ product ] );
@@ -245,41 +233,55 @@ test( 'a click covers one add: a later add of the product with no click is sent'
 	click( product );
 	await serverAnswers( product, 1 );
 	wait( t, 1000 );
+	click( product );
 	await serverAnswers( product, 2 );
 	wait( t, 1000 );
 
 	assert.deepStrictEqual( addToCartItems(), [
-		fromClick( product ),
+		fromStoreApi( product ),
 		fromStoreApi( product ),
 	] );
 } );
 
-test( 'a click that the server never answered stops covering adds after a minute', async ( t ) => {
+test( 'adds of two products each send their own add_to_cart', async ( t ) => {
+	mockTime( t );
+	const [ first, second ] = [ newProduct(), newProduct() ];
+	const click = showGrid( [ first, second ] );
+
+	click( first );
+	click( second );
+	await serverAnswers( first );
+	await serverAnswers( second );
+	wait( t, 1000 );
+
+	assert.deepStrictEqual( addToCartItems(), [
+		fromStoreApi( first ),
+		fromStoreApi( second ),
+	] );
+} );
+
+test( 'an add the server rejects sends no add_to_cart', async ( t ) => {
 	mockTime( t );
 	const product = newProduct();
 	const click = showGrid( [ product ] );
 
 	click( product );
-	wait( t, 60000 );
-	await serverAnswers( product );
+	await serverRejects( product );
 	wait( t, 1000 );
 
-	assert.deepStrictEqual( addToCartItems(), [
-		fromClick( product ),
-		fromStoreApi( product ),
-	] );
+	assert.deepStrictEqual( addToCartItems(), [] );
 } );
 
-test( 'a click on a product the page has no data for sends add_to_cart once, when the server answers', async ( t ) => {
+test( 'an add of a product the page has no data for is sent with no category', async ( t ) => {
 	mockTime( t );
 	const product = newProduct();
 	const click = showGrid( [ product ], [] );
 
 	click( product );
-	assert.deepStrictEqual( addToCartItems(), [] );
-
 	await serverAnswers( product );
 	wait( t, 1000 );
 
-	assert.deepStrictEqual( addToCartItems(), [ fromStoreApi( product ) ] );
+	assert.deepStrictEqual( addToCartItems(), [
+		fromStoreApiWithoutPageData( product ),
+	] );
 } );

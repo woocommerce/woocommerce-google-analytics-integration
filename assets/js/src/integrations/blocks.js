@@ -3,7 +3,6 @@ import {
 	addUniqueAction,
 	getProductFromID,
 	cacheBlockProducts,
-	forgetClickedAdd,
 	getCurrencySettings,
 	parsePriceFromDOM,
 	parseQuantity,
@@ -263,6 +262,37 @@ const getProductFromDOM = ( cartItem ) => {
 };
 
 /**
+ * Add the product categories known to the page to a Store API cart item.
+ * Store API cart items have no categories, so events built from them would
+ * be sent without item_category. Never throws: unreadable page data leaves
+ * the item unchanged.
+ *
+ * @param {Object} product Store API cart item.
+ * @return {Object} The cart item, with categories when the page has them.
+ */
+const withPageProductCategories = ( product ) => {
+	if ( product?.categories?.length ) {
+		return product;
+	}
+
+	let categories;
+	try {
+		categories = getProductFromID(
+			product?.id,
+			window.ga4w?.data?.products
+		)?.categories;
+	} catch ( error ) {
+		warnTrackingError(
+			'could not read product categories from the page data.',
+			error
+		);
+		return product;
+	}
+
+	return categories?.length ? { ...product, categories } : product;
+};
+
+/**
  * Track successful Store API add item requests.
  *
  * Interactivity API powered add-to-cart blocks do not fire the legacy jQuery
@@ -377,15 +407,6 @@ const trackStoreApiAddToCart = ( getEventHandler ) => {
 						return;
 					}
 
-					// The click listener of a block product grid (classic.js)
-					// sends add_to_cart on the click, before the request. The
-					// response can come any time later, so the window that
-					// matches the hook below cannot match a click: each click
-					// accounts for one add-item of its product.
-					if ( forgetClickedAdd( product.id ) ) {
-						return;
-					}
-
 					setTimeout( () => {
 						if ( wasRecentlyAdded( product ) ) {
 							return;
@@ -393,7 +414,10 @@ const trackStoreApiAddToCart = ( getEventHandler ) => {
 
 						markRecentlyAdded( product );
 						storeApiEventHandler( eventName, {
-							product: { ...product, quantity },
+							product: {
+								...withPageProductCategories( product ),
+								quantity,
+							},
 						} );
 					}, trackDelay );
 				}

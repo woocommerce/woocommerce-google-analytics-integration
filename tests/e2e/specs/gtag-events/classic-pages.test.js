@@ -740,6 +740,7 @@ test.describe( 'GTag events on classic pages', () => {
 				ca: 'Uncategorized',
 				qt: '1',
 				pr: simpleProductPrice.toString(),
+				va: '',
 			} );
 		} );
 	} );
